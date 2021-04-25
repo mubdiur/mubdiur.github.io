@@ -1,6 +1,3 @@
-
-
-
 $(document).ready(function () {
 
     makeGuess()
@@ -19,11 +16,11 @@ $(document).ready(function () {
         makeGuess()
     })
 
-    $('#rangeFrom').on('input', function () {
+    $("#rangeFrom").on('input', function () {
         makeGuess()
     });
 
-    $('#rangeTo').on('input', function () {
+    $("#rangeTo").on('input', function () {
         makeGuess()
     });
 });
