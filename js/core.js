@@ -242,7 +242,7 @@ var App = {
     nav.appendChild(App.el('div', { class: 'site-navbar' },
       App.el('a', { class: 'nav-brand', href: '#/' },
         App.el('span', { class: 'brand-box', text: 'MR' }),
-        App.el('span', { class: 'brand-name', text: 'mubdiur.com' }),
+        App.el('span', { class: 'brand-name', text: 'mubdiur' }),
         App.el('span', { class: 'brand-sub', text: 'dev arsenal' })),
       App.el('nav', { class: 'nav-links-desktop' }, linkEls[0], App.el('span', { class: 'nav-divider' }), linkEls[1], App.el('span', { class: 'nav-divider' }), searchBtn),
       mobile
