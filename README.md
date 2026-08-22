@@ -8,7 +8,7 @@ runs in your browser, with a **WebAssembly core** doing the heavy lifting.
 ## What's inside
 
 - `index.html` — single-page app shell (hash routing: `#/`, `#/tools`, `#/tools/<slug>`)
-- `css/app.css` — the whole design system (gruvbox dark soft + newspaper theme)
+- `css/app.css` — the whole design system (ink-noir palette + newspaper theme)
 - `js/` — vanilla JavaScript: app core, router, 80-tool manifest, pages, and tools
 - `wasm/core.wasm` — WebAssembly core compiled from `wasm/core.rs` (Rust, `no_std`):
   - **Crypto**: MD5, SHA-1, SHA-256, SHA-384, SHA-512, HMAC, CRC32

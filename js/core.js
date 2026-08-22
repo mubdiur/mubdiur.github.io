@@ -7,7 +7,7 @@
 
 var App = {
   icons: {},
-  TOOL_VERSION: '16',
+  TOOL_VERSION: '17',
 
   /* ── DOM helpers ── */
   SVG_TAGS: ['svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'text', 'g', 'defs', 'marker', 'pattern', 'use', 'ellipse', 'tspan'],
@@ -198,9 +198,9 @@ var App = {
     var result = fn(raw, main);
     if (result && typeof result.then === 'function') {
       var loading = App.el('div', { class: 'loading-block', html:
-        '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(142,192,124,0.7);display:inline-block;margin:0 2px"></span>' +
-        '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(142,192,124,0.7);display:inline-block;margin:0 2px"></span>' +
-        '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(142,192,124,0.7);display:inline-block;margin:0 2px"></span>' });
+        '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(163,191,160,0.7);display:inline-block;margin:0 2px"></span>' +
+        '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(163,191,160,0.7);display:inline-block;margin:0 2px"></span>' +
+        '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(163,191,160,0.7);display:inline-block;margin:0 2px"></span>' });
       main.appendChild(loading);
       result.then(function (node) {
         if (main.contains(loading)) { main.removeChild(loading); }
@@ -253,7 +253,7 @@ var App = {
     footer.innerHTML = '';
     footer.appendChild(App.el('footer', { class: 'site-footer' },
       App.el('div', { class: 'footer-inner' },
-        App.el('p', { class: 'footer-line', html: '<span class="prompt">$</span> echo &quot;© ' + new Date().getFullYear() + ' <span style="font-weight:600;color:rgba(235,219,178,0.9)">Mubdiur Rahman</span>&quot;' }),
+        App.el('p', { class: 'footer-line', html: '<span class="prompt">$</span> echo &quot;© ' + new Date().getFullYear() + ' <span style="font-weight:600;color:rgba(202,170,152,0.9)">Mubdiur Rahman</span>&quot;' }),
         App.el('div', { class: 'footer-links' },
           App.el('a', { class: 'footer-link', href: 'mailto:mubdiur@gmail.com' }, App.icon('mail', '', 14), App.el('span', { text: 'Contact' })),
           App.el('a', { class: 'footer-link', href: 'https://github.com/mubdiur', target: '_blank', rel: 'noopener noreferrer' }, App.icon('github', '', 14), App.el('span', { text: 'GitHub' })),
@@ -421,7 +421,7 @@ window.addEventListener('error', function (e) {
   var d = document.getElementById('page-main');
   if (!d) return;
   if (!d.querySelector('.boot-error')) {
-    d.appendChild(App.el('div', { class: 'boot-error', style: 'color:#ff8578;font-family:var(--font-mono);font-size:12px;padding:1rem;white-space:pre-wrap;word-break:break-all',
+    d.appendChild(App.el('div', { class: 'boot-error', style: 'color:#e09880;font-family:var(--font-mono);font-size:12px;padding:1rem;white-space:pre-wrap;word-break:break-all',
       text: 'JS error: ' + (e.message || e) + '\n' + ((e.filename || '') + ':' + (e.lineno || '')) }));
   }
 });

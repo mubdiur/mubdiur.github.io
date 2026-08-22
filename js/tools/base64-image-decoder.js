@@ -9,17 +9,17 @@
 
 App.registerTool('base64-image-decoder', {
   css: '' +
-    '.t-base64-image-decoder .b64-input{width:100%;border:1px solid rgba(80,73,69,0.4);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-size:12px;font-family:var(--font-mono);color:rgba(235,219,178,0.9);resize:vertical;min-height:60px;border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
-    '.t-base64-image-decoder .b64-input::placeholder{color:rgba(189,174,147,0.3);}\n' +
-    '.t-base64-image-decoder .b64-input:focus{border-color:rgba(142,192,124,0.4);box-shadow:0 0 0 1px rgba(142,192,124,0.3);}\n' +
+    '.t-base64-image-decoder .b64-input{width:100%;border:1px solid rgba(75,64,56,0.4);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-size:12px;font-family:var(--font-mono);color:rgba(202,170,152,0.9);resize:vertical;min-height:60px;border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-base64-image-decoder .b64-input::placeholder{color:rgba(154,134,120,0.3);}\n' +
+    '.t-base64-image-decoder .b64-input:focus{border-color:rgba(163,191,160,0.4);box-shadow:0 0 0 1px rgba(163,191,160,0.3);}\n' +
     '.t-base64-image-decoder .space-y-2 > * + *{margin-top:0.5rem;}\n' +
     '.t-base64-image-decoder .max-w-full{max-width:100%;}\n' +
     '.t-base64-image-decoder .max-h-\\[300px\\]{max-height:300px;}\n' +
     '.t-base64-image-decoder .min-h-\\[100px\\]{min-height:100px;}\n' +
     '.t-base64-image-decoder .object-contain{object-fit:contain;}\n' +
-    '.t-base64-image-decoder .border-cyan-glow\\/20{border-color:rgba(142,192,124,0.2);}\n' +
-    '.t-base64-image-decoder .text-cyan-glow\\/80{color:rgba(142,192,124,0.8);}\n' +
-    '.t-base64-image-decoder .hover\\:bg-cyan-glow\\/20:hover{background:rgba(142,192,124,0.2);}\n',
+    '.t-base64-image-decoder .border-cyan-glow\\/20{border-color:rgba(163,191,160,0.2);}\n' +
+    '.t-base64-image-decoder .text-cyan-glow\\/80{color:rgba(163,191,160,0.8);}\n' +
+    '.t-base64-image-decoder .hover\\:bg-cyan-glow\\/20:hover{background:rgba(163,191,160,0.2);}\n',
 
   mount: function (root) {
     var input = '';

@@ -55,7 +55,7 @@ function GeneratorToolUI(tool) {
       control.value = state.opts[p.key] || p.default || '';
       control.addEventListener('input', function () { update(control.value); generate(); });
     } else if (p.type === 'boolean' || p.type === 'checkbox') {
-      control = App.el('input', { type: 'checkbox', class: 't-checkbox', 'aria-label': p.label, style: 'width:16px;height:16px;accent-color:#8ec07c' });
+      control = App.el('input', { type: 'checkbox', class: 't-checkbox', 'aria-label': p.label, style: 'width:16px;height:16px;accent-color:#a3bfa0' });
       control.checked = state.opts[p.key] === 'true';
       control.addEventListener('change', function () { update(control.checked ? 'true' : 'false'); generate(); });
     } else {
@@ -64,7 +64,7 @@ function GeneratorToolUI(tool) {
       control.addEventListener('input', function () { update(control.value); generate(); });
     }
     paramsRow.appendChild(App.el('div', { class: 'flex items-center gap-1.5' },
-      App.el('label', { class: 'text-xs font-mono', style: { color: 'rgba(189,174,147,0.7)', whiteSpace: 'nowrap' }, text: p.label }),
+      App.el('label', { class: 'text-xs font-mono', style: { color: 'rgba(154,134,120,0.7)', whiteSpace: 'nowrap' }, text: p.label }),
       control));
   });
   paramsRow.appendChild(App.el('button', {

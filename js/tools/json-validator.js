@@ -10,11 +10,11 @@
 
 App.registerTool('json-validator', {
   css: '' +
-    '.t-json-validator .seg{display:flex;border:1px solid rgba(80,73,69,0.4);border-radius:6px;overflow:hidden;}\n' +
-    '.t-json-validator .seg button{padding:0.25rem 0.625rem;font-family:var(--font-mono);font-size:10px;background:rgba(0,0,0,0.2);color:rgba(189,174,147,0.6);border:none;cursor:pointer;border-right:1px solid rgba(80,73,69,0.4);transition:all .15s;}\n' +
+    '.t-json-validator .seg{display:flex;border:1px solid rgba(75,64,56,0.4);border-radius:6px;overflow:hidden;}\n' +
+    '.t-json-validator .seg button{padding:0.25rem 0.625rem;font-family:var(--font-mono);font-size:10px;background:rgba(0,0,0,0.2);color:rgba(154,134,120,0.6);border:none;cursor:pointer;border-right:1px solid rgba(75,64,56,0.4);transition:all .15s;}\n' +
     '.t-json-validator .seg button:last-child{border-right:none;}\n' +
-    '.t-json-validator .seg button:hover{color:rgba(235,219,178,0.9);}\n' +
-    '.t-json-validator .seg button.active{background:rgba(142,192,124,0.15);color:var(--cyan-glow);}\n' +
+    '.t-json-validator .seg button:hover{color:rgba(202,170,152,0.9);}\n' +
+    '.t-json-validator .seg button.active{background:rgba(163,191,160,0.15);color:var(--cyan-glow);}\n' +
     '.t-json-validator .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;margin-bottom:0.75rem;}\n',
 
   mount: function (root) {

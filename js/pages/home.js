@@ -81,7 +81,7 @@ function ObservabilityDashboard() {
   var ERROR_CODE_HITS = [0, 0, 2, 1, 0, 0, 3, 1, 0, 0, 1, 0, 0, 0, 12, 4, 0, 0, 1, 0, 0, 0, 0, 0];
   var GPU_UTIL = [22, 18, 24, 31, 38, 45, 52, 58, 64, 70, 74, 78, 76, 80, 58, 79, 83, 85, 84, 80, 74, 66, 52, 38];
   var GUARDRAIL = [2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 5, 7, 9, 8, 7, 6, 5, 4, 3, 3, 2, 2];
-  var AXIS = { colors: ['#bdae93'], fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' };
+  var AXIS = { colors: ['#9a8678'], fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' };
   var _ = AXIS;
 
   return App.el('div', { class: 'w-full' },
@@ -97,7 +97,7 @@ function ObservabilityDashboard() {
       App.el('div', { class: 'span-2' }, Charts.Panel('Throughput & p95 latency', '24h window', Charts.Chart({
         type: 'combo', categories: HOURS, height: '240px',
         series: [{ name: 'req/min', type: 'bar', data: THROUGHPUT }, { name: 'p95 (ms)', type: 'line', data: P95 }],
-        colors: ['#ebdbb2', '#fb4934'],
+        colors: ['#caaa98', '#d96a5e'],
         yFmt: function (v) { return Math.round(v / 1000) + 'k'; },
         legend: true
       }))),
@@ -112,21 +112,21 @@ function ObservabilityDashboard() {
           var ctx = canvas.getContext('2d');
           ctx.scale(dpr, dpr);
           var cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 26;
-          ctx.strokeStyle = '#504945';
+          ctx.strokeStyle = '#4b4038';
           ctx.lineWidth = 14;
           ctx.lineCap = 'round';
           ctx.beginPath();
           ctx.arc(cx, cy, r, 0, Math.PI * 2);
           ctx.stroke();
-          ctx.strokeStyle = '#8ec07c';
+          ctx.strokeStyle = '#a3bfa0';
           ctx.beginPath();
           ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * 0.9995);
           ctx.stroke();
-          ctx.fillStyle = '#bdae93';
+          ctx.fillStyle = '#9a8678';
           ctx.font = '10px JetBrains Mono, monospace';
           ctx.textAlign = 'center';
           ctx.fillText('UPTIME · 30 DAYS', cx, cy + 30);
-          ctx.fillStyle = '#ebdbb2';
+          ctx.fillStyle = '#caaa98';
           ctx.font = '26px JetBrains Mono, monospace';
           ctx.fillText('99.95%', cx, cy + 4);
         });
@@ -135,9 +135,9 @@ function ObservabilityDashboard() {
       Charts.Panel('Error rate', 'incident at 14:02', Charts.Chart({
         type: 'area', categories: HOURS, height: '200px',
         series: [{ name: 'error rate', type: 'area', data: ERROR_RATE }],
-        colors: ['#fb4934'],
+        colors: ['#d96a5e'],
         yFmt: function (v) { return v.toFixed(2) + '%'; },
-        annotations: [{ x: 14, color: '#fabd2f', label: { text: 'INCIDENT · DETECTED 12s', background: '#fabd2f', color: '#1d2021' } }]
+        annotations: [{ x: 14, color: '#d9a05b', label: { text: 'INCIDENT · DETECTED 12s', background: '#d9a05b', color: '#141a2b' } }]
       })),
       Charts.Panel('p99 latency by service', 'now', Charts.Chart({
         type: 'hbar', height: '200px',
@@ -145,56 +145,56 @@ function ObservabilityDashboard() {
           { x: 'auth-svc', y: 212 }, { x: 'payments', y: 186 }, { x: 'ingest', y: 143 },
           { x: 'rag-retriever', y: 98 }, { x: 'mcp-gateway', y: 76 }, { x: 'edge-web', y: 61 }
         ] }],
-        colors: ['#fb4934', '#ebdbb2', '#ebdbb2', '#ebdbb2', '#ebdbb2', '#ebdbb2'],
+        colors: ['#d96a5e', '#caaa98', '#caaa98', '#caaa98', '#caaa98', '#caaa98'],
         labels: ['auth-svc', 'payments', 'ingest', 'rag-retriever', 'mcp-gateway', 'edge-web'],
         yFmt: function (v) { return v + ' ms'; }
       })),
       Charts.Panel('Crawl4ai & extraction pipeline', 'back-to-back', Charts.Chart({
         type: 'combo', categories: HOURS, height: '200px',
         series: [{ name: 'records extracted', type: 'bar', data: EXTRACT }, { name: 'pages crawled', type: 'line', data: CRAWLED }],
-        colors: ['#bdae93', '#8ec07c'],
+        colors: ['#9a8678', '#a3bfa0'],
         yFmt: function (v) { return Math.round(v / 1000) + 'k'; },
         legend: true
       })),
       Charts.Panel('Token cost per request', 'datadog', Charts.Chart({
         type: 'area', categories: HOURS, height: '200px',
         series: [{ name: '$ / 1k req', type: 'area', data: COST }],
-        colors: ['#fabd2f'],
+        colors: ['#d9a05b'],
         yFmt: function (v) { return '$' + v.toFixed(2); },
         annotations: [
-          { x: 12, color: '#fabd2f', label: { text: 'CACHE SHIPPED', background: '#fabd2f', color: '#1d2021' } },
-          { x: 16, color: '#8ec07c', label: { text: 'PROMPT COMPRESSED', background: '#8ec07c', color: '#1d2021' } }
+          { x: 12, color: '#d9a05b', label: { text: 'CACHE SHIPPED', background: '#d9a05b', color: '#141a2b' } },
+          { x: 16, color: '#a3bfa0', label: { text: 'PROMPT COMPRESSED', background: '#a3bfa0', color: '#141a2b' } }
         ]
       })),
       Charts.Panel('Model tuning — eval score by iteration', '10 runs', Charts.Chart({
         type: 'line', height: '200px', markers: true,
         series: [{ name: 'eval score', type: 'line', data: TUNING }],
-        colors: ['#ebdbb2'],
+        colors: ['#caaa98'],
         categories: ['ITER 1', 'ITER 2', 'ITER 3', 'ITER 4', 'ITER 5', 'ITER 6', 'ITER 7', 'ITER 8', 'ITER 9', 'ITER 10'],
         yFmt: function (v) { return v.toFixed(2); },
         yMin: 0.5, yMax: 1,
-        annotations: [{ x: 5, color: '#fabd2f', label: { text: 'RETRIEVAL REWORK', background: '#fabd2f', color: '#1d2021' } }]
+        annotations: [{ x: 5, color: '#d9a05b', label: { text: 'RETRIEVAL REWORK', background: '#d9a05b', color: '#141a2b' } }]
       })),
       Charts.Panel('Guardrails — injection blocked & PII redacted', 'per hour', Charts.Chart({
         type: 'bar', categories: HOURS, height: '200px',
         series: [{ name: 'blocked / redacted', type: 'bar', data: GUARDRAIL }],
-        colors: ['#fb4934'],
+        colors: ['#d96a5e'],
         yFmt: function (v) { return String(Math.round(v)); }
       })),
       Charts.Panel('GPU utilization — vllm serving', 'continuous batching', Charts.Chart({
         type: 'area', categories: HOURS, height: '200px',
         series: [{ name: 'GPU util', type: 'area', data: GPU_UTIL }],
-        colors: ['#ebdbb2'],
+        colors: ['#caaa98'],
         yFmt: function (v) { return Math.round(v) + '%'; },
         yMax: 100, yMin: 0,
-        annotations: [{ x: 16, color: '#8ec07c', label: { text: 'VLLM · BATCHING ON', background: '#8ec07c', color: '#1d2021' } }]
+        annotations: [{ x: 16, color: '#a3bfa0', label: { text: 'VLLM · BATCHING ON', background: '#a3bfa0', color: '#141a2b' } }]
       })),
       App.el('div', { class: 'span-2' }, Charts.Panel('Error-code surveillance — kibana view', 'threshold 5/min', Charts.Chart({
         type: 'bar', categories: HOURS, height: '200px',
         series: [{ name: 'error-code hits', type: 'bar', data: ERROR_CODE_HITS }],
-        colors: ['#fabd2f'],
+        colors: ['#d9a05b'],
         yFmt: function (v) { return String(Math.round(v)); },
-        annotations: [{ y: 5, color: '#fb4934', label: { text: 'ALERT THRESHOLD', background: '#fb4934', color: '#1d2021' } }]
+        annotations: [{ y: 5, color: '#d96a5e', label: { text: 'ALERT THRESHOLD', background: '#d96a5e', color: '#141a2b' } }]
       })))
     ),
     App.el('figure', { class: 'obs-figure' },
@@ -378,7 +378,7 @@ function renderHome() {
     App.el('footer', { class: 'news-colophon' },
       App.el('div', { class: 'inner' },
         App.el('div', { class: 'title', text: 'The Mubdiur Times' }),
-        App.el('p', { class: 'note', text: 'Colophon · Set in Libre Caslon, Libre Franklin & JetBrains Mono' }),
+        App.el('p', { class: 'note', text: 'Colophon · Set in Fraunces, Libre Franklin & JetBrains Mono' }),
         App.el('p', { class: 'byline', text: 'Typeset by hand in HTML & WebAssembly. No trees were harmed; no page was printed.' }),
         App.el('div', { class: 'links' },
           App.el('a', { href: 'https://github.com/mubdiur', target: '_blank', rel: 'noopener noreferrer', text: 'GitHub' }),
