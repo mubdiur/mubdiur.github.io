@@ -2,8 +2,9 @@
    Timeline Taker — incident logbook.
    Ported from src/components/tools/timeline-taker.tsx.
    Date/time/summary entries, CSV import/export, keyboard
-   shortcuts (Ctrl+S save, Esc discard, Enter new row, ↑/↓
-   adjust cells), localStorage auto-save, auto-timestamps.
+   shortcuts (Ctrl+S save, Esc discard, Enter next row,
+   ↑/↓ adjust cells, Ctrl+↑/↓ move in summary column),
+   localStorage auto-save, auto-timestamps.
    ═══════════════════════════════════════════════════════════ */
 (function () {
 'use strict';
@@ -208,6 +209,21 @@ App.registerTool('timeline-taker', {
       if (summary) summary.focus();
     }
 
+    function focusAdjacentSummary(id, dir) {
+      var rows = tbody.querySelectorAll('tr');
+      for (var i = 0; i < rows.length; i++) {
+        if (rows[i].getAttribute('data-id') === String(id)) {
+          var target = rows[i + dir];
+          if (!target) return false;
+          var inputs = target.querySelectorAll('input');
+          var summary = inputs[inputs.length - 1];
+          if (summary) { summary.focus(); return true; }
+          return false;
+        }
+      }
+      return false;
+    }
+
     /* ── CSV import / export ── */
 
     function exportCsv() {
@@ -284,8 +300,16 @@ App.registerTool('timeline-taker', {
       summaryInput.addEventListener('keydown', function (ev) {
         if (ev.key === 'Enter') {
           ev.preventDefault();
-          appendRow();
-          App.timer(function () { focusLastSummary(); }, 0);
+          if (!focusAdjacentSummary(e.id, 1)) {
+            appendRow();
+            App.timer(function () { focusLastSummary(); }, 0);
+          }
+        } else if (ev.ctrlKey && ev.key === 'ArrowDown') {
+          ev.preventDefault();
+          focusAdjacentSummary(e.id, 1);
+        } else if (ev.ctrlKey && ev.key === 'ArrowUp') {
+          ev.preventDefault();
+          focusAdjacentSummary(e.id, -1);
         }
       });
 
@@ -384,7 +408,9 @@ App.registerTool('timeline-taker', {
         App.el('kbd', { text: 'Ctrl+S' }), App.el('span', { text: ' save · ' }),
         App.el('kbd', { text: 'Esc' }), App.el('span', { text: ' discard · ' }),
         App.el('kbd', { text: '↑' }), App.el('span', { text: '/' }),
-        App.el('kbd', { text: '↓' }), App.el('span', { text: ' adjust date/time on cells' })));
+        App.el('kbd', { text: '↓' }), App.el('span', { text: ' adjust date/time · ' }),
+        App.el('kbd', { text: 'Ctrl+↑' }), App.el('span', { text: '/' }),
+        App.el('kbd', { text: 'Ctrl+↓' }), App.el('span', { text: ' move in summary' })));
 
     fileInput = App.el('input', { type: 'file', accept: '.csv', class: 'hidden' });
     fileInput.addEventListener('change', function () { onImportFile(fileInput.files[0]); });
