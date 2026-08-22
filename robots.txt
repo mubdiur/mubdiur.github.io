@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mubdiur.com/sitemap.xml
+Sitemap: https://mubdiur.github.io/sitemap.xml

@@ -19,7 +19,7 @@ var technologies = [
 var systems = [
   { kicker: 'Business Section', title: 'Incident Response & On-Call Discipline', body: 'SLO-based paging, burn-rate alerting, runbooks, and MTTR tracking — the discipline of being paged less while knowing more. Automation handles the noise; humans handle the judgment.', tags: ['SLOs', 'Runbooks', 'MTTR'] },
   { kicker: 'Business Section', title: 'Automation Daemons & Bot Operations', body: 'Long-running Node.js daemons that run unattended — messenger-based operations with self-confirming delivery, structured logging, and recovery built in. Set-and-forget systems that report back.', tags: ['Node.js', 'Daemons', 'Unattended'] },
-  { kicker: 'Business Section', title: 'mubdiur.com — Production Platform', body: 'A static site with a WebAssembly core — every utility runs in your browser, no server required. Deployable to GitHub Pages, edge-cached, zero cold starts.', tags: ['Static', 'WebAssembly', 'GitHub Pages'] },
+  { kicker: 'Business Section', title: 'mubdiur.github.io — Production Platform', body: 'A static site with a WebAssembly core — every utility runs in your browser, no server required. Deployable to GitHub Pages, edge-cached, zero cold starts.', tags: ['Static', 'WebAssembly', 'GitHub Pages'] },
   { kicker: 'Business Section', title: 'CodeAlign VPS — Infrastructure Spine', body: 'A multi-project Docker host operating as the backbone for everything shipped. Containerized isolation, least-privilege access, Let\u2019s Encrypt TLS across the board.', tags: ['Docker', 'VPS'] }
 ];
 
@@ -318,7 +318,7 @@ function renderHome() {
         App.el('article', { class: 'news-panel', style: { border: '1px solid var(--rule-strong)', background: 'var(--paper-warm)' } },
           App.el('div', { class: 'p-5 sm:p-8' },
             Kicker('Business Section · Flagship System'),
-            App.el('h3', { class: 'mt-2', style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem,3.4vw,2.4rem)', lineHeight: '1.04', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: 'mubdiur.com — the production platform behind this page' }),
+            App.el('h3', { class: 'mt-2', style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem,3.4vw,2.4rem)', lineHeight: '1.04', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: 'mubdiur.github.io — the production platform behind this page' }),
             App.el('p', { class: 'mt-3', style: { maxWidth: '48rem', fontFamily: 'var(--font-serif)', fontSize: '1rem', lineHeight: '1.7', color: 'var(--ink-soft)' }, text: 'This newspaper is not a template — it\u2019s a production system. A fully static site with a WebAssembly core: every utility below runs entirely in your browser, no server required. Deployable to GitHub Pages from a public repo, edge-cached, zero cold starts.' }),
             App.el('ul', { class: 'mt-6', style: { display: 'grid', gap: '0.5rem 2rem', gridTemplateColumns: '1fr' } },
               [

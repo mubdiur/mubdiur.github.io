@@ -21,7 +21,7 @@ App.registerTool('qr-code-generator', {
     '.t-qr-code-generator .qr-error{color:var(--ctp-red);font-family:var(--font-mono);font-size:12px;padding:2rem 0;text-align:center;}',
 
   mount: function (root) {
-    var text = 'https://mubdiur.com';
+    var text = 'https://mubdiur.github.io';
     var ecl = 1; // M
     var pxSize = 280;
 

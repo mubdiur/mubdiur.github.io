@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════
-// mubdiur.com — WebAssembly core
+// mubdiur.github.io — WebAssembly core
 // no_std Rust, compiled with rustc --target wasm32-unknown-unknown
 // Engines: MD5, SHA-1, SHA-256, SHA-384, SHA-512, HMAC, CRC32,
 //          QR Code encoder (ISO/IEC 18004, full spec), ASN.1 DER parser

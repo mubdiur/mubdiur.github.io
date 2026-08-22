@@ -1,4 +1,4 @@
-# mubdiur.com
+# mubdiur.github.io
 
 The Mubdiur Times — personal site and 80-utility developer toolshed.
 
