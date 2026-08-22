@@ -1,0 +1,4 @@
+# Static site — nothing to build or ignore except OS cruft.
+.DS_Store
+Thumbs.db
+*.log

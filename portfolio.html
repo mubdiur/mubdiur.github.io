@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mubdiur Rahman — AI Platform &amp; Reliability Engineer</title>
+  <meta name="description" content="Mubdiur Rahman — AI Platform &amp; Reliability Engineer. I build automation that runs itself: production infrastructure on Docker + Traefik, instrumented dashboards, and safe, maintainable AI.">
+  <meta name="theme-color" content="#32302f">
+  <meta property="og:title" content="Mubdiur Rahman — AI Platform &amp; Reliability Engineer">
+  <meta property="og:description" content="Automation that runs itself. Docker + Traefik infrastructure, instrumented dashboards, safe &amp; maintainable AI.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mubdiur.com/portfolio">
+  <meta property="og:site_name" content="mubdiur.com">
+  <meta property="og:image" content="https://mubdiur.com/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mubdiur Rahman — AI Platform &amp; Reliability Engineer">
+  <meta name="twitter:description" content="Automation that runs itself. Docker + Traefik infrastructure, instrumented dashboards, safe &amp; maintainable AI.">
+  <meta name="twitter:image" content="https://mubdiur.com/og.png">
+  <link rel="canonical" href="https://mubdiur.com/portfolio">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #32302f;
+      --fg: #ebdbb2;
+      --dim: #bdae93;
+      --faint: #a89984;
+      --line: #504945;
+      --accent: #8ec07c;
+      --accent-dim: #689d6a;
+      --max: 46rem;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 1rem;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* ---------- a11y ---------- */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+      padding: 0.5rem 1rem;
+      text-decoration: none;
+      z-index: 10;
+    }
+    .skip-link:focus {
+      left: 0;
+      outline: 3px solid var(--fg);
+      outline-offset: 0;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    /* ---------- type ---------- */
+    h1 {
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.15;
+      margin-top: 0.5rem;
+      color: #fff;
+    }
+
+    h2 {
+      font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+      font-weight: 700;
+      color: #fff;
+      border-top: 1px solid var(--line);
+      padding-top: 2rem;
+      margin: 3rem 0 1rem;
+    }
+
+    h3 {
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 1.75rem 0 0.5rem;
+    }
+
+    .tag {
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-dim);
+      margin-bottom: 0.25rem;
+    }
+
+    p { margin-bottom: 1rem; }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+    a:hover { border-bottom-color: var(--accent); }
+    a:visited { color: var(--accent); }
+
+    ul { list-style: none; }
+    li { margin-bottom: 0.5rem; padding-left: 1.1rem; position: relative; }
+    li::before {
+      content: "›";
+      position: absolute;
+      left: 0;
+      color: var(--accent-dim);
+    }
+
+    /* ---------- hero ---------- */
+    .termline {
+      font-size: 0.75rem;
+      color: var(--faint);
+      margin-bottom: 1.5rem;
+    }
+    .termline .cursor {
+      display: inline-block;
+      width: 0.6em;
+      height: 1em;
+      background: var(--accent);
+      vertical-align: text-bottom;
+      margin-left: 0.25rem;
+    }
+
+    .role {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--dim);
+      margin-top: 0.25rem;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+      padding: 0.35rem 0.9rem;
+      border: 1px solid var(--line);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--fg);
+    }
+    .status::before {
+      content: "";
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 1.75rem;
+      margin: 1rem 0 2rem;
+      font-size: 1rem;
+    }
+    .links a { border-bottom: none; }
+    .links a:hover { border-bottom-color: var(--accent); }
+
+    .summary {
+      color: var(--dim);
+      max-width: 42rem;
+    }
+
+    /* ---------- nav ---------- */
+    nav {
+      margin: 2rem 0 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 1.5rem;
+      font-size: 0.875rem;
+    }
+    nav a { color: var(--dim); }
+    nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .metric {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* ---------- work ---------- */
+    .work-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.25rem 1rem;
+      margin-top: 1.75rem;
+    }
+    .work-title { font-weight: 700; color: #fff; }
+    .work-meta {
+      font-size: 0.75rem;
+      color: var(--faint);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ---------- footer ---------- */
+    footer {
+      margin-top: 4rem;
+      border-top: 1px solid var(--line);
+      padding-top: 2rem;
+    }
+    .cta {
+      font-size: 1rem;
+      color: var(--fg);
+      margin-bottom: 1.25rem;
+    }
+    .cta strong { color: var(--accent); }
+    .cta-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 1.75rem;
+      margin-bottom: 2rem;
+    }
+    .copyright {
+      font-size: 0.75rem;
+      color: var(--faint);
+      letter-spacing: 0.05em;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="wrap">
+    <header>
+      <p class="termline" aria-hidden="true">[mubdiur@mubdiur ~]$ cat about.txt<span class="cursor"></span></p>
+
+      <h1>MUBDIUR RAHMAN</h1>
+      <p class="role">AI Platform &amp; Reliability Engineer</p>
+
+      <p class="status">Dhaka, Bangladesh · BST</p>
+
+      <nav aria-label="Page sections">
+        <a href="#competencies">competencies</a>
+        <a href="#capstone">featured system</a>
+        <a href="#experience">work</a>
+        <a href="#contact">contact</a>
+      </nav>
+
+      <div class="links">
+        <a href="https://github.com/mubdiur" target="_blank" rel="noopener noreferrer">github → github.com/mubdiur</a>
+        <a href="mailto:mubdiur@mubdiur.com">email → mubdiur@mubdiur.com</a>
+      </div>
+
+      <p class="summary">I build automation that runs itself — platforms that learn structure once, run near-realtime checks, and alert on what matters. I use AI as a force multiplier in everything I ship, but I engineer for safety, maintainability, and reliability — not demos.</p>
+    </header>
+
+    <main id="main">
+      <!-- ============ CORE COMPETENCIES ============ -->
+      <section aria-labelledby="competencies">
+        <h2 id="competencies"><span class="tag">01 / Core Competencies</span>Everything below is shipped, running, and mine</h2>
+
+        <h3>Browser Automation at Scale</h3>
+        <ul>
+          <li><strong>Playwright</strong>, <strong>Cypress</strong>, and <strong>Appium</strong> E2E automation at scale</li>
+          <li>Structured data extraction from live production UIs</li>
+          <li>Shared browser instances — deterministic resource usage, no leaks</li>
+          <li>CI/CD integration: headless runs, artifacts, reliable retries</li>
+        </ul>
+
+        <h3>Monitoring &amp; Observability</h3>
+        <ul>
+          <li>Instrumented telemetry across <strong>Dynatrace</strong>, <strong>Kibana</strong>, <strong>Datadog</strong>, and the <strong>LGTM</strong> stack (Loki · Grafana · Tempo · Mimir)</li>
+          <li><strong>Near-realtime pipelines</strong>: back-to-back checks with no polling gaps; append-only results</li>
+          <li>Structured logging with <strong>pino</strong> — dual-stream, plus live <strong>Express + WebSocket</strong> log viewers</li>
+          <li>Alerting with intent — page on user impact, silence the noise</li>
+        </ul>
+
+        <h3>Reliability &amp; Infrastructure</h3>
+        <ul>
+          <li><strong>Docker + Traefik</strong> with Let&rsquo;s Encrypt; zero-downtime rebuild &amp; deploy pipelines</li>
+          <li>Next.js standalone production deployments on VPS infrastructure</li>
+          <li>Server backends with rate limiting, timeouts, and SSRF guardrails</li>
+          <li>Linux hardening: least-privilege access, containerized isolation, configuration as code</li>
+        </ul>
+
+        <h3>Safe &amp; Maintainable AI</h3>
+        <ul>
+          <li><strong>Guardrails</strong>: prompt-injection defense, PII redaction, output validation, allow-listed tools</li>
+          <li><strong>Maintainable architecture</strong>: agents as state machines, versioned prompts, typed tool contracts</li>
+          <li><strong>Eval-driven shipping</strong>: regression gates, shadow traffic, canary deploys, automated rollback</li>
+          <li><strong>MCP</strong> tooling in production — AI as a force multiplier, never a demo</li>
+        </ul>
+
+        <h3>Backend &amp; Tooling</h3>
+        <ul>
+          <li><strong>Node.js / TypeScript</strong> — zero-dependency daemons and services</li>
+          <li><strong>Git</strong> / CI-CD workflows, Linux administration, terminal-first operations</li>
+          <li>Rapid prototyping with production discipline — surgical diffs, minimal deps, no magic</li>
+        </ul>
+      </section>
+
+      <!-- ============ CAPSTONE ============ -->
+      <section aria-labelledby="capstone">
+        <h2 id="capstone"><span class="tag">02 / Featured System</span>mubdiur.com — the production platform behind this page</h2>
+
+        <p>This portfolio is not a template — it&rsquo;s a live production system I own end to end. A Next.js 16 standalone application behind Traefik with automatic Let&rsquo;s Encrypt TLS, deployed as a single hardened Docker image with zero-downtime recreates. Eighty-plus developer utilities and an instrumented observability dashboard ship from the same repository.</p>
+
+        <h3>The reliability layer — what actually ships</h3>
+        <ul>
+          <li><strong>Next.js 16 standalone</strong> — static pages, zero cold starts, sub-second TTFB</li>
+          <li><strong>Traefik edge</strong> with automatic Let&rsquo;s Encrypt TLS — no cert rotation chores, ever</li>
+          <li><strong>Server-tool API</strong> guarded by rate limiting, timeouts, and SSRF checks</li>
+          <li><span class="metric">80+ client-side utilities</span>, code-split so first paint stays fast</li>
+          <li><strong>Instrumented dashboard</strong> — ApexCharts telemetry shaped like production: SLOs, error rates, latency percentiles, cost per request, GPU utilization</li>
+          <li>Live dateline and clock — no hydration mismatch, no stale content</li>
+        </ul>
+      </section>
+
+      <!-- ============ WORK ============ -->
+      <section aria-labelledby="experience">
+        <h2 id="experience"><span class="tag">03 / Selected Work &amp; Systems</span>What I actually run</h2>
+
+        <div class="work-head">
+          <span class="work-title">mubdiur.com — Production Platform</span>
+          <span class="work-meta">ongoing</span>
+        </div>
+        <ul>
+          <li>Next.js 16 standalone behind <strong>Traefik</strong> with <strong>Let&rsquo;s Encrypt</strong>; Docker-based rebuild &amp; deploy pipeline</li>
+          <li>Server-side tool backend with rate limiting, timeouts, and network guardrails</li>
+          <li>Newspaper-style front page with a live ApexCharts observability desk — LGTM, Dynatrace, Datadog, ELK/Kibana shapes</li>
+        </ul>
+
+        <div class="work-head">
+          <span class="work-title">CodeAlign VPS — Infrastructure Spine</span>
+          <span class="work-meta">ongoing</span>
+        </div>
+        <ul>
+          <li>Operates a multi-project Docker host — the backbone for everything I build</li>
+          <li>Hardened hosting: least-privilege access, containerized isolation, Let&rsquo;s Encrypt TLS</li>
+        </ul>
+
+        <div class="work-head">
+          <span class="work-title">Automation Daemons — Messenger-Based Ops</span>
+          <span class="work-meta">2026</span>
+        </div>
+        <ul>
+          <li>Long-running Node.js daemons that run unattended — no babysitting required</li>
+          <li>Self-confirming delivery loops, structured logging, and recovery built in</li>
+          <li>Set-and-forget systems that report back instead of silently dying</li>
+        </ul>
+      </section>
+    </main>
+
+    <!-- ============ FOOTER / CTA ============ -->
+    <footer id="contact">
+      <p class="tag">04 / End of page — let&rsquo;s talk</p>
+      <p class="cta">Want someone who ships automation that runs itself — not demos that need a babysitter? I build platforms: infrastructure that deploys itself, AI that&rsquo;s safe and maintainable, and reliability as the default. <strong>Hiring for platform, automation, or reliability engineering? I&rsquo;m your candidate.</strong></p>
+      <div class="cta-links">
+        <a href="mailto:mubdiur@mubdiur.com?subject=Technical%20Screen%20Request">→ schedule a technical screen</a>
+        <a href="mailto:mubdiur@mubdiur.com">→ email me directly</a>
+      </div>
+      <p class="copyright">© 2026 Mubdiur Rahman — hand-written HTML, zero JavaScript, ships fast.</p>
+    </footer>
+  </div>
+</body>
+</html>
