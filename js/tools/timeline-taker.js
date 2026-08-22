@@ -1,11 +1,11 @@
 /* ═══════════════════════════════════════════════════════════
    Timeline Taker — incident logbook.
    Ported from src/components/tools/timeline-taker.tsx.
-   Date/time/summary entries, CSV import/export, keyboard
-   shortcuts (Ctrl+S save, Ctrl+Z/Ctrl+Shift+Z undo/redo,
-   Esc discard, Enter next row + autosave, ↑/↓ adjust cells,
-   Ctrl+↑/↓ move in summary column), localStorage auto-save,
-   auto-timestamps.
+   Date/time/summary entries, CSV import/export, row toolbar
+   (add above/below, duplicate, delete, move), keyboard shortcuts
+   (Ctrl+S save, Ctrl+Z/Ctrl+Shift+Z undo/redo, Esc discard,
+   Enter next row + autosave, ↑/↓ adjust cells, Ctrl+↑/↓ move
+   in summary column), localStorage auto-save, auto-timestamps.
    ═══════════════════════════════════════════════════════════ */
 (function () {
 'use strict';
@@ -84,7 +84,9 @@ App.registerTool('timeline-taker', {
     '.t-timeline-taker .muted-70{color:rgba(170,170,179,0.7);}\n' +
     '.t-timeline-taker .muted-80{color:rgba(170,170,179,0.8);}\n' +
     '.t-timeline-taker .fg-90{color:rgba(233,233,236,0.9);}\n' +
-    '.t-timeline-taker .hover-fg-90:hover{color:rgba(233,233,236,0.9);}\n',
+    '.t-timeline-taker .hover-fg-90:hover{color:rgba(233,233,236,0.9);}\n' +
+    '.t-timeline-taker .row-active{box-shadow:inset 2px 0 0 rgba(194,220,212,0.7);}\n' +
+    '.t-timeline-taker button:disabled{opacity:0.4;cursor:not-allowed;}\n',
 
   mount: function (root) {
     var entries = [];
@@ -97,6 +99,8 @@ App.registerTool('timeline-taker', {
     var undoStack = [];
     var redoStack = [];
     var lastHistoryAt = 0;
+    var activeId = null;
+    var rowAboveBtn, rowBelowBtn, dupBtn, moveUpBtn, moveDownBtn, delBtn;
 
     var btnPrimary =
       'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-mono font-medium bg-ctp-teal/15 border border-ctp-teal/30 text-ctp-teal hover:bg-ctp-teal/25 transition-colors';
@@ -282,6 +286,115 @@ App.registerTool('timeline-taker', {
       return false;
     }
 
+    /* ── row operations (toolbar) ── */
+
+    function rowIndex(id) {
+      var s = String(id);
+      for (var i = 0; i < entries.length; i++) {
+        if (String(entries[i].id) === s) return i;
+      }
+      return -1;
+    }
+
+    function focusRowSummary(id) {
+      var tr = tbody.querySelector('tr[data-id="' + id + '"]');
+      if (!tr) return false;
+      var inputs = tr.querySelectorAll('input');
+      var summary = inputs[inputs.length - 1];
+      if (!summary) return false;
+      summary.focus();
+      return true;
+    }
+
+    function setActiveRow(id) {
+      activeId = id;
+      var rows = tbody.querySelectorAll('tr');
+      for (var i = 0; i < rows.length; i++) {
+        rows[i].classList.toggle('row-active', rows[i].getAttribute('data-id') === String(id));
+      }
+      updateToolbar();
+    }
+
+    function updateToolbar() {
+      var i = activeId === null ? -1 : rowIndex(activeId);
+      var has = i >= 0;
+      rowAboveBtn.disabled = !has;
+      rowBelowBtn.disabled = !has;
+      dupBtn.disabled = !has;
+      delBtn.disabled = !has;
+      moveUpBtn.disabled = !has || i <= 0;
+      moveDownBtn.disabled = !has || i >= entries.length - 1;
+    }
+
+    function newEmptyEntry() {
+      return { id: Date.now() + seq++, date: '', time: '', summary: '', state: 'unsaved' };
+    }
+
+    function addRowAbove() {
+      var i = rowIndex(activeId);
+      if (i < 0) return;
+      pushHistory();
+      lastHistoryAt = 0; // discrete toolbar action: fresh undo step
+      var neu = newEmptyEntry();
+      entries.splice(i, 0, neu);
+      renderTable();
+      ensureTrailing();
+      focusRowSummary(neu.id);
+    }
+
+    function addRowBelow() {
+      var i = rowIndex(activeId);
+      if (i < 0) return;
+      pushHistory();
+      lastHistoryAt = 0; // discrete toolbar action: fresh undo step
+      var neu = newEmptyEntry();
+      entries.splice(i + 1, 0, neu);
+      renderTable();
+      ensureTrailing();
+      focusRowSummary(neu.id);
+    }
+
+    function duplicateRow() {
+      var i = rowIndex(activeId);
+      if (i < 0) return;
+      var src = entries[i];
+      pushHistory();
+      lastHistoryAt = 0; // discrete toolbar action: fresh undo step
+      var neu = { id: Date.now() + seq++, date: src.date, time: src.time, summary: src.summary, state: 'unsaved' };
+      entries.splice(i + 1, 0, neu);
+      renderTable();
+      ensureTrailing();
+      focusRowSummary(neu.id);
+    }
+
+    function deleteRow() {
+      var i = rowIndex(activeId);
+      if (i < 0) return;
+      pushHistory();
+      lastHistoryAt = 0; // discrete toolbar action: fresh undo step
+      entries.splice(i, 1);
+      renderTable();
+      ensureTrailing();
+      var target = entries[Math.min(i, entries.length - 1)];
+      if (target) focusRowSummary(target.id);
+      else focusLastSummary();
+    }
+
+    function moveRow(dir) {
+      var i = rowIndex(activeId);
+      if (i < 0) return;
+      var j = i + dir;
+      if (j < 0 || j >= entries.length) return;
+      pushHistory();
+      lastHistoryAt = 0; // discrete toolbar action: fresh undo step
+      var tmp = entries[i];
+      entries[i] = entries[j];
+      entries[j] = tmp;
+      renderTable();
+      ensureTrailing();
+      focusRowSummary(activeId);
+    }
+
     /* ── CSV import / export ── */
 
     function exportCsv() {
@@ -309,6 +422,7 @@ App.registerTool('timeline-taker', {
 
     function applyImport(mode) {
       pushHistory();
+      lastHistoryAt = 0; // discrete action: fresh undo step
       var imported = pendingImport.map(function (e) { return Object.assign({}, e, { state: 'saved' }); });
       var next = mode === 'append' ? entries.concat(imported) : imported.slice();
       entries = next;
@@ -322,6 +436,7 @@ App.registerTool('timeline-taker', {
 
     function clearAll() {
       pushHistory();
+      lastHistoryAt = 0; // discrete action: fresh undo step
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch (err) {
@@ -551,8 +666,30 @@ App.registerTool('timeline-taker', {
         onclick: function () { importMode = null; pendingImport = []; renderBanners(); }
       }, App.el('span', { text: 'Cancel' })));
 
+    /* row-ops toolbar */
+    rowAboveBtn = App.el('button', { type: 'button', class: btnSecondary, onclick: addRowAbove },
+      App.icon('arrow-up', 'h-3 w-3', 12), App.el('span', { text: 'Add Above' }));
+    rowBelowBtn = App.el('button', { type: 'button', class: btnSecondary, onclick: addRowBelow },
+      App.icon('arrow-down', 'h-3 w-3', 12), App.el('span', { text: 'Add Below' }));
+    dupBtn = App.el('button', { type: 'button', class: btnSecondary, onclick: duplicateRow },
+      App.icon('copy', 'h-3 w-3', 12), App.el('span', { text: 'Duplicate' }));
+    moveUpBtn = App.el('button', { type: 'button', class: btnSecondary, onclick: function () { moveRow(-1); } },
+      App.icon('arrow-up', 'h-3 w-3', 12), App.el('span', { text: 'Move Up' }));
+    moveDownBtn = App.el('button', { type: 'button', class: btnSecondary, onclick: function () { moveRow(1); } },
+      App.icon('arrow-down', 'h-3 w-3', 12), App.el('span', { text: 'Move Down' }));
+    delBtn = App.el('button', { type: 'button', class: btnSecondary + ' hover:text-ctp-red', onclick: deleteRow },
+      App.icon('trash-2', 'h-3 w-3', 12), App.el('span', { text: 'Delete' }));
+
+    var rowToolbar = App.el('div', { class: 'flex flex-wrap items-center gap-1.5' },
+      App.el('span', { class: 'font-mono text-[10px] uppercase tracking-wider muted-70', text: 'Row ops' }),
+      rowAboveBtn, rowBelowBtn, dupBtn, moveUpBtn, moveDownBtn, delBtn);
+
     /* entries table */
     tbody = App.el('tbody');
+    tbody.addEventListener('focusin', function (ev) {
+      var tr = ev.target && ev.target.closest ? ev.target.closest('tr') : null;
+      if (tr) setActiveRow(tr.getAttribute('data-id'));
+    });
     var tableWrap = App.el('div', { class: 'overflow-auto rounded-lg border border-border/60 bg-mantle' },
       App.el('table', { class: 'w-full border-collapse text-left' },
         App.el('thead', { class: 'sticky-head' },
@@ -574,11 +711,13 @@ App.registerTool('timeline-taker', {
     root.appendChild(header);
     root.appendChild(confirmBanner);
     root.appendChild(importBanner);
+    root.appendChild(rowToolbar);
     root.appendChild(tableWrap);
     root.appendChild(legend);
 
     renderTable();
     ensureTrailing();
+    updateToolbar();
   }
 });
 })();
