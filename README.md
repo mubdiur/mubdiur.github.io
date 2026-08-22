@@ -9,11 +9,11 @@ runs in your browser, with a **WebAssembly core** doing the heavy lifting.
 
 - `index.html` — single-page app shell (hash routing: `#/`, `#/tools`, `#/tools/<slug>`)
 - `css/app.css` — the whole design system (tinted monochrome + newspaper theme)
-- `js/` — vanilla JavaScript: app core, router, 80-tool manifest, pages, and tools
+- `js/` — vanilla JavaScript: app core, router, 79-tool manifest, pages, and tools
 - `wasm/core.wasm` — WebAssembly core compiled from `wasm/core.rs` (Rust, `no_std`):
   - **Crypto**: MD5, SHA-1, SHA-256, SHA-384, SHA-512, HMAC, CRC32
   - **QR**: full ISO/IEC 18004 encoder (versions 1–40, all EC levels, scannable)
-  - **ASN.1**: DER parser powering the certificate inspector
+  - **ASN.1**: DER parser (X.509-ready)
 - `portfolio.html` — the dossier page
 - `robots.txt`, `sitemap.xml`, `og.png`, `favicon.ico`, `.nojekyll`
 

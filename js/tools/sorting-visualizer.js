@@ -145,7 +145,7 @@ App.registerTool('sorting-visualizer', {
       playBtn.appendChild(App.icon(running ? 'pause' : done ? 'rotate-ccw' : 'play', '', 12));
       playBtn.appendChild(document.createTextNode(running ? 'Pause' : done ? 'Reset' : 'Start'));
       stepBtn.classList.toggle('hidden', running);
-      stepBtn.disabled = done;
+      stepBtn.disabled = done || !gen;
     }
 
     async function play() {

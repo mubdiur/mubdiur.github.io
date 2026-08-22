@@ -141,6 +141,7 @@ App.registerTool('timeline-taker', {
     }
 
     function discard() {
+      lastHistoryAt = 0; // never coalesce a discrete action into typing history
       pushHistory();
       try {
         var raw = localStorage.getItem(STORAGE_KEY);
@@ -421,8 +422,8 @@ App.registerTool('timeline-taker', {
     }
 
     function applyImport(mode) {
-      pushHistory();
       lastHistoryAt = 0; // discrete action: fresh undo step
+      pushHistory();
       var imported = pendingImport.map(function (e) { return Object.assign({}, e, { state: 'saved' }); });
       var next = mode === 'append' ? entries.concat(imported) : imported.slice();
       entries = next;
@@ -435,8 +436,8 @@ App.registerTool('timeline-taker', {
     }
 
     function clearAll() {
-      pushHistory();
       lastHistoryAt = 0; // discrete action: fresh undo step
+      pushHistory();
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch (err) {
@@ -537,7 +538,7 @@ App.registerTool('timeline-taker', {
       inputs[0].value = entry.date;
       inputs[1].value = entry.time;
       inputs[2].value = entry.summary;
-      tr.className = 'border-t border-border/40 transition-colors ' + stateCls(entry.state);
+      tr.className = 'border-t border-border/40 transition-colors ' + stateCls(entry.state) + (tr.classList.contains('row-active') ? ' row-active' : '');
     }
 
     function syncAllRows() {

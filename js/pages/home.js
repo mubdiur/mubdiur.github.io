@@ -23,7 +23,7 @@ var systems = [
   { kicker: 'Business Section', title: 'CodeAlign VPS — Infrastructure Spine', body: 'A multi-project Docker host operating as the backbone for everything shipped. Containerized isolation, least-privilege access, Let\u2019s Encrypt TLS across the board.', tags: ['Docker', 'VPS'] }
 ];
 
-var featuredSlugs = ['time-copier', 'ssl-cert-checker', 'json-validator', 'qr-code-generator'];
+var featuredSlugs = ['time-copier', 'json-validator', 'qr-code-generator'];
 
 var WORDSEARCH = [
   'S  R  E  L  L  O  G  V  B  X  P  Q',

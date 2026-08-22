@@ -52,16 +52,26 @@ App.registerTool('base64-image-decoder', {
       placeholder: 'Paste Base64 string (with or without data:image prefix)...'
     });
 
+    function sniffMime(bytes) {
+      if (bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) return 'image/png';
+      if (bytes.length >= 3 && bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) return 'image/jpeg';
+      if (bytes.length >= 6 && bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38 && bytes[4] === 0x37 && bytes[5] === 0x61) return 'image/gif';
+      if (bytes.length >= 12 && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return 'image/webp';
+      return null;
+    }
+
     function decode(s) {
       try {
         var trimmed = s.trim();
-        // Strip data URL prefix if present
+        // Use the declared MIME from a data URL prefix, else sniff the magic bytes
+        var prefixMatch = trimmed.match(/^data:(image\/[^;]+);base64,/);
         var b64 = trimmed.replace(/^data:image\/[^;]+;base64,/, '');
-        var dataUrl = 'data:image/png;base64,' + b64;
         var bytes = atob(b64.replace(/\s/g, ''));
+        var detected = prefixMatch ? prefixMatch[1] : sniffMime(bytes);
+        if (!detected) throw new Error('Not a supported image format — PNG, JPEG, GIF or WEBP only');
+        mime = detected;
         size = bytes.length;
-        imgData = dataUrl;
-        mime = 'image/png';
+        imgData = 'data:' + mime + ';base64,' + b64;
         error = null;
       } catch (e) {
         error = e instanceof Error ? e.message : 'Failed to decode Base64';
@@ -92,7 +102,8 @@ App.registerTool('base64-image-decoder', {
 
     textarea.addEventListener('input', function () {
       input = textarea.value;
-      if (input.length > 20) decode(input);
+      if (input.trim()) decode(input);
+      else { imgData = null; error = null; size = 0; render(); }
     });
 
     render();

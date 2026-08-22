@@ -100,16 +100,14 @@ App.registerTool('contrast-checker', {
     fgColor.addEventListener('input', function () { fg = fgColor.value; render(); });
     bgColor.addEventListener('input', function () { bg = bgColor.value; render(); });
 
-    // Controlled-input behavior from the TSX: only accept full 6-digit hex
+    // Apply hex only once it forms a full 6-digit value (typing stays free)
     fgHex.addEventListener('input', function () {
       var v = fgHex.value;
       if (/^#[0-9a-f]{6}$/i.test(v)) { fg = v; render(); }
-      else fgHex.value = fg;
     });
     bgHex.addEventListener('input', function () {
       var v = bgHex.value;
       if (/^#[0-9a-f]{6}$/i.test(v)) { bg = v; render(); }
-      else bgHex.value = bg;
     });
 
     root.appendChild(App.el('div', { class: 'grid grid-cols-2 gap-3' },

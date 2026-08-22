@@ -7,11 +7,22 @@
 (function () {
 'use strict';
 
-/* Verbatim from the TSX — self-contained pure-JS Markdown parser. */
+/* Self-contained pure-JS Markdown parser. Input is HTML-escaped first so
+   raw markup in pasted markdown cannot execute; link/image URLs are
+   restricted to http(s), mailto, anchors and relative paths. */
 function mdToHtml(md) {
-  var html = md
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function safeUrl(u) {
+    u = String(u || '').trim();
+    return /^(https?:|mailto:|#|\/)/i.test(u) ? u : '#';
+  }
+  var html = esc(md)
     // Code blocks
-    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-black/40 rounded p-2 overflow-auto text-xs leading-relaxed"><code>$2</code></pre>')
+    .replace(/```(\w*)\n([\s\S]*?)```/g, function (m, lang, code) {
+      return '<pre class="bg-black/40 rounded p-2 overflow-auto text-xs leading-relaxed"><code>' + code + '</code></pre>';
+    })
     // Inline code
     .replace(/`([^`]+)`/g, '<code class="bg-black/30 px-1 rounded text-cyan-glow/80 text-xs">$1</code>')
     // Headers
@@ -22,10 +33,14 @@ function mdToHtml(md) {
     .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-cyan-glow/80 underline underline-offset-2 hover:text-cyan-glow">$1</a>')
+    // Links (URL scheme is validated after escaping)
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (m, label, url) {
+      return '<a href="' + safeUrl(url) + '" class="text-cyan-glow/80 underline underline-offset-2 hover:text-cyan-glow">' + label + '</a>';
+    })
     // Images
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="max-w-full rounded border border-border/30 my-2" />')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function (m, alt, url) {
+      return '<img src="' + safeUrl(url) + '" alt="' + alt + '" class="max-w-full rounded border border-border/30 my-2" />';
+    })
     // Horizontal rule
     .replace(/^---$/gm, '<hr class="border-border/30 my-3" />')
     // Blockquotes

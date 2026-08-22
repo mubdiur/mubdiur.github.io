@@ -10,7 +10,11 @@ window.TOOLMANIFEST = [
   // ── JSON ────────────────────────────────────────────────
   { slug: 'json-validator', name: 'JSON Validator', desc: 'Validate and format JSON with detailed error messages — line, column, and position', category: 'json', tags: ['validate', 'format', 'lint'], icon: 'braces', template: 'custom' },
   { slug: 'json-formatter', name: 'JSON Formatter', desc: 'Beautify JSON with configurable indentation', category: 'json', tags: ['format', 'beautify', 'pretty-print'], icon: 'braces', template: 'transform',
-    handler: function (s) { return JSON.stringify(JSON.parse(s), null, 2); },
+    handler: function (s, opts) {
+      var n = parseInt((opts && opts.indent) || '2', 10);
+      if (isNaN(n) || n < 1 || n > 8) n = 2;
+      return JSON.stringify(JSON.parse(s), null, n);
+    },
     params: [{ key: 'indent', label: 'Indent', type: 'select', default: '2', options: [{ value: '2', label: '2 spaces' }, { value: '4', label: '4 spaces' }, { value: '1', label: '1 space' }] }] },
   { slug: 'json-minifier', name: 'JSON Minifier', desc: 'Compress JSON by removing all whitespace', category: 'json', tags: ['minify', 'compress'], icon: 'braces', template: 'transform',
     handler: function (s) { return JSON.stringify(JSON.parse(s)); } },
@@ -85,7 +89,20 @@ window.TOOLMANIFEST = [
   { slug: 'json-escape', name: 'JSON Escape', desc: 'Escape special characters for JSON string format', category: 'json', tags: ['escape', 'encode'], icon: 'braces', template: 'transform',
     handler: function (s) { return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t'); } },
   { slug: 'json-unescape', name: 'JSON Unescape', desc: 'Unescape JSON-escaped string back to original', category: 'json', tags: ['unescape', 'decode'], icon: 'braces', template: 'transform',
-    handler: function (s) { return s.replace(/\\t/g, '\t').replace(/\\r/g, '\r').replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\'); } },
+    handler: function (s) {
+      return s.replace(/\\(\\|t|r|n|"|'|\/)/g, function (m, ch) {
+        switch (ch) {
+          case '\\': return '\\';
+          case 't': return '\t';
+          case 'r': return '\r';
+          case 'n': return '\n';
+          case '"': return '"';
+          case "'": return "'";
+          case '/': return '/';
+          default: return m;
+        }
+      });
+    } },
 
   // ── Text Processing ─────────────────────────────────────
   { slug: 'email-extractor', name: 'Email Extractor', desc: 'Extract emails from any text — dedupe, lowercase, filter, sort, delimiters, plus a two-set email diff', category: 'text', tags: ['extract', 'email', 'diff'], icon: 'textsearch', template: 'custom' },
@@ -240,6 +257,7 @@ window.TOOLMANIFEST = [
       if (!opts || opts.digits !== 'false') sets.push('0123456789');
       if (opts && opts.symbols === 'true') sets.push('!@#$%^&*()_+-=[]{}|;:,.<>?~');
       var pool = sets.join('');
+      if (!pool) throw new Error('Select at least one character set');
       var arr = new Uint8Array(len); crypto.getRandomValues(arr);
       return Array.from(arr, function (b) { return pool[b % pool.length]; }).join('');
     },
@@ -270,6 +288,7 @@ window.TOOLMANIFEST = [
     handler: function (s) {
       var h = s.replace(/\s/g, '');
       if (!/^[0-9a-fA-F]*$/.test(h)) throw new Error('Invalid hex');
+      if (h.length % 2 !== 0) throw new Error('Hex must have an even number of digits');
       var b = new Uint8Array(h.length / 2);
       for (var i = 0; i < h.length; i += 2) b[i / 2] = parseInt(h.slice(i, i + 2), 16);
       return new TextDecoder().decode(b);
@@ -375,6 +394,12 @@ window.TOOLMANIFEST = [
   { slug: 'yaml-to-json', name: 'YAML → JSON', desc: 'Convert YAML to JSON', category: 'converters', tags: ['yaml', 'json', 'convert'], icon: 'filetype', template: 'transform',
     handler: function (s) {
       var lines = s.split('\n').filter(function (l) { return l.trim() && !l.trim().startsWith('#'); });
+      var childIndent = function (i) {
+        for (var j = i; j < lines.length; j++) {
+          if (lines[j].trim()) return lines[j].search(/\S/);
+        }
+        return Infinity;
+      };
       var splitKV = function (c) {
         var m = c.match(/^([^:]+):(?:\s*(.*))?$/);
         if (!m) return [null, undefined];
@@ -400,7 +425,7 @@ window.TOOLMANIFEST = [
             isArray = true;
             var kv = splitKV(content.slice(2));
             if (kv[0] === null) arr.push(parseScalar(content.slice(2)));
-            else if (kv[1] === undefined) { var p1 = parse(i, curIndent + 2); arr.push(p1[0]); i = p1[1]; }
+            else if (kv[1] === undefined) { var p1 = parse(i, Math.max(curIndent + 1, childIndent(i))); arr.push(p1[0]); i = p1[1]; }
             else {
               var item = {}; item[kv[0]] = parseScalar(kv[1]);
               while (i < lines.length) {
@@ -409,7 +434,7 @@ window.TOOLMANIFEST = [
                 var c2 = lines[i].trim(); i++;
                 var kv2 = splitKV(c2);
                 if (kv2[0] === null) throw new Error('Expected "key: value" at line ' + i);
-                if (kv2[1] === undefined) { var p2 = parse(i, ci + 2); item[kv2[0]] = p2[0]; i = p2[1]; }
+                if (kv2[1] === undefined) { var p2 = parse(i, Math.max(ci + 1, childIndent(i))); item[kv2[0]] = p2[0]; i = p2[1]; }
                 else item[kv2[0]] = parseScalar(kv2[1]);
               }
               arr.push(item);
@@ -417,7 +442,7 @@ window.TOOLMANIFEST = [
           } else {
             var kv3 = splitKV(content);
             if (kv3[0] === null) throw new Error('Expected "key: value" at line ' + i);
-            if (kv3[1] === undefined) { var p3 = parse(i, curIndent + 2); obj[kv3[0]] = p3[0]; i = p3[1]; }
+            if (kv3[1] === undefined) { var p3 = parse(i, Math.max(curIndent + 1, childIndent(i))); obj[kv3[0]] = p3[0]; i = p3[1]; }
             else obj[kv3[0]] = parseScalar(kv3[1]);
           }
         }
@@ -435,7 +460,11 @@ window.TOOLMANIFEST = [
       var to = parseInt((opts && opts.toBase) || '16', 10);
       var n = parseInt(s.trim(), from);
       if (isNaN(n)) throw new Error('Invalid number for base ' + from);
-      return s.trim() + ' (base ' + from + ')\n' + '─'.repeat(20) + '\nBinary:    ' + n.toString(2) + '\nOctal:     ' + n.toString(8) + '\nDecimal:   ' + n.toString(10) + '\nHex:       ' + n.toString(16).toUpperCase();
+      var BASE_NAMES = { 2: 'Binary', 8: 'Octal', 10: 'Decimal', 16: 'Hex' };
+      var name = BASE_NAMES[to] || 'Base ' + to;
+      var out = n.toString(to);
+      if (to === 16) out = out.toUpperCase();
+      return s.trim() + ' (base ' + from + ' → ' + name + ')\n' + '─'.repeat(20) + '\n' + name + ': ' + out;
     },
     params: [
       { key: 'fromBase', label: 'From Base', type: 'select', default: '10', options: [{ value: '2', label: 'Binary' }, { value: '8', label: 'Octal' }, { value: '10', label: 'Decimal' }, { value: '16', label: 'Hex' }] },
@@ -482,6 +511,8 @@ window.TOOLMANIFEST = [
     handler: function (s) {
       var n = parseFloat(s.replace(/[,$]/g, ''));
       if (isNaN(n)) throw new Error('Invalid number');
+      if (!Number.isInteger(n)) throw new Error('Enter a whole number');
+      if (n < 0) return 'negative ' + numberToWords(-n);
       return numberToWords(n);
     } },
 
@@ -493,6 +524,7 @@ window.TOOLMANIFEST = [
         var c = s[i];
         if (c === '<') {
           var n = s.indexOf('>', i);
+          if (n === -1) { result += s.slice(i); break; }
           var t = s.slice(i, n + 1);
           if (t.startsWith('</')) indent--;
           result += '\n' + '  '.repeat(Math.max(0, indent)) + t;
@@ -554,7 +586,6 @@ window.TOOLMANIFEST = [
     },
     params: [{ key: 'count', label: 'Count', type: 'number', default: '1', min: 1, max: 100 }] },
   { slug: 'http-status-codes', name: 'HTTP Status Codes', desc: 'Browse and search HTTP status codes', category: 'network', tags: ['http', 'status', 'api'], icon: 'globe', template: 'custom' },
-  { slug: 'ssl-cert-checker', name: 'SSL Certificate Inspector', desc: 'Paste a PEM/DER certificate and dissect it fully — validity, fingerprints, SANs, key usage, extensions — WebAssembly ASN.1 core', category: 'network', tags: ['ssl', 'tls', 'certificate', 'x509', 'security'], icon: 'shieldcheck', template: 'custom', wasm: true },
   { slug: 'uuid-v4-validate', name: 'UUID Validator', desc: 'Validate UUID v4 format', category: 'network', tags: ['uuid', 'validate'], icon: 'key', template: 'transform',
     handler: function (s) {
       var uuids = s.trim().split('\n');
