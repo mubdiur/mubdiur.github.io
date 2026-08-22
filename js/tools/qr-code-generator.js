@@ -8,16 +8,16 @@
 
 App.registerTool('qr-code-generator', {
   css: '' +
-    '.t-qr-code-generator .qr-input{width:100%;height:32px;border:1px solid rgba(49,50,68,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 8px;font-family:var(--font-mono);font-size:12px;color:rgba(205,214,244,0.9);outline:none;}\n' +
-    '.t-qr-code-generator .qr-input:focus{border-color:rgba(148,226,213,0.4);box-shadow:0 0 0 1px rgba(148,226,213,0.3);}\n' +
-    '.t-qr-code-generator .qr-input::placeholder{color:rgba(166,173,200,0.3);}\n' +
-    '.t-qr-code-generator .qr-stage{display:flex;align-items:center;justify-content:center;background:#fff;border-radius:8px;padding:16px;border:1px solid rgba(49,50,68,0.3);min-height:220px;}\n' +
+    '.t-qr-code-generator .qr-input{width:100%;height:32px;border:1px solid rgba(30,30,34,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 8px;font-family:var(--font-mono);font-size:12px;color:rgba(232,232,234,0.9);outline:none;}\n' +
+    '.t-qr-code-generator .qr-input:focus{border-color:rgba(194,194,200,0.4);box-shadow:0 0 0 1px rgba(194,194,200,0.3);}\n' +
+    '.t-qr-code-generator .qr-input::placeholder{color:rgba(168,168,176,0.3);}\n' +
+    '.t-qr-code-generator .qr-stage{display:flex;align-items:center;justify-content:center;background:#fff;border-radius:8px;padding:16px;border:1px solid rgba(30,30,34,0.3);min-height:220px;}\n' +
     '.t-qr-code-generator .qr-stage canvas{max-width:100%;height:auto;image-rendering:pixelated;}\n' +
-    '.t-qr-code-generator .qr-meta{display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:10px;color:rgba(166,173,200,0.5);gap:0.5rem;flex-wrap:wrap;}\n' +
-    '.t-qr-code-generator .qr-meta select{height:24px;border:1px solid rgba(49,50,68,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 6px;font-family:var(--font-mono);font-size:10px;color:rgba(205,214,244,0.7);}\n' +
+    '.t-qr-code-generator .qr-meta{display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:10px;color:rgba(168,168,176,0.5);gap:0.5rem;flex-wrap:wrap;}\n' +
+    '.t-qr-code-generator .qr-meta select{height:24px;border:1px solid rgba(30,30,34,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 6px;font-family:var(--font-mono);font-size:10px;color:rgba(232,232,234,0.7);}\n' +
     '.t-qr-code-generator .ecl-row{display:flex;gap:0.375rem;flex-wrap:wrap;}\n' +
-    '.t-qr-code-generator .ecl-row button{padding:0.25rem 0.625rem;border-radius:6px;font-family:var(--font-mono);font-size:10px;background:rgba(148,226,213,0.1);border:1px solid rgba(148,226,213,0.2);color:rgba(148,226,213,0.8);cursor:pointer;}\n' +
-    '.t-qr-code-generator .ecl-row button.active{background:rgba(148,226,213,0.2);border-color:rgba(148,226,213,0.4);color:var(--ctp-teal);}\n' +
+    '.t-qr-code-generator .ecl-row button{padding:0.25rem 0.625rem;border-radius:6px;font-family:var(--font-mono);font-size:10px;background:rgba(194,194,200,0.1);border:1px solid rgba(194,194,200,0.2);color:rgba(194,194,200,0.8);cursor:pointer;}\n' +
+    '.t-qr-code-generator .ecl-row button.active{background:rgba(194,194,200,0.2);border-color:rgba(194,194,200,0.4);color:var(--ctp-teal);}\n' +
     '.t-qr-code-generator .qr-error{color:var(--ctp-red);font-family:var(--font-mono);font-size:12px;padding:2rem 0;text-align:center;}',
 
   mount: function (root) {
@@ -90,7 +90,7 @@ App.registerTool('qr-code-generator', {
     });
 
     root.appendChild(App.el('div', { class: 'flex flex-col', style: { gap: '0.75rem' } },
-      App.el('span', { class: 'text-[10px] font-mono', style: { color: 'rgba(166,173,200,0.6)' }, text: 'Text or URL to encode — WebAssembly core, versions 1-40' }),
+      App.el('span', { class: 'text-[10px] font-mono', style: { color: 'rgba(168,168,176,0.6)' }, text: 'Text or URL to encode — WebAssembly core, versions 1-40' }),
       input,
       eclRow,
       stage,

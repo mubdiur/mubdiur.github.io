@@ -61,28 +61,28 @@ function parseCSV(csvText) {
 
 App.registerTool('timeline-taker', {
   css: '' +
-    '.t-timeline-taker .row-saved{background:rgba(148,226,213,0.1);}\n' +
-    '.t-timeline-taker .row-modified{background:rgba(249,226,175,0.1);}\n' +
-    '.t-timeline-taker .row-unsaved{background:rgba(243,139,168,0.1);}\n' +
-    '.t-timeline-taker .cell-input{width:100%;background:transparent;padding:0.5rem 0.75rem;font-size:14px;font-family:var(--font-mono);color:rgba(205,214,244,0.9);outline:none;border:none;}\n' +
-    '.t-timeline-taker .cell-input::placeholder{color:rgba(166,173,200,0.3);}\n' +
+    '.t-timeline-taker .row-saved{background:rgba(194,194,200,0.1);}\n' +
+    '.t-timeline-taker .row-modified{background:rgba(204,204,210,0.1);}\n' +
+    '.t-timeline-taker .row-unsaved{background:rgba(226,226,230,0.1);}\n' +
+    '.t-timeline-taker .cell-input{width:100%;background:transparent;padding:0.5rem 0.75rem;font-size:14px;font-family:var(--font-mono);color:rgba(232,232,234,0.9);outline:none;border:none;}\n' +
+    '.t-timeline-taker .cell-input::placeholder{color:rgba(168,168,176,0.3);}\n' +
     '.t-timeline-taker .cell-input:focus{background:rgba(0,0,0,0.2);border-radius:0.375rem;}\n' +
-    '.t-timeline-taker .th-cell{background:rgba(49,50,68,0.8);color:rgba(166,173,200,0.9);padding:0.625rem 0.75rem;font-family:var(--font-mono);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;text-align:left;}\n' +
+    '.t-timeline-taker .th-cell{background:rgba(30,30,34,0.8);color:rgba(168,168,176,0.9);padding:0.625rem 0.75rem;font-family:var(--font-mono);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;text-align:left;}\n' +
     '.t-timeline-taker .sticky-head{position:sticky;top:0;z-index:1;}\n' +
     '.t-timeline-taker .dot{width:8px;height:8px;border-radius:2px;display:inline-block;}\n' +
-    '.t-timeline-taker .dot-green{background:rgba(148,226,213,0.5);}\n' +
-    '.t-timeline-taker .dot-yellow{background:rgba(249,226,175,0.6);}\n' +
-    '.t-timeline-taker .dot-red{background:rgba(243,139,168,0.5);}\n' +
-    '.t-timeline-taker .bg-red-10{background:rgba(243,139,168,0.1);}\n' +
-    '.t-timeline-taker .bg-blue-10{background:rgba(137,180,250,0.1);}\n' +
-    '.t-timeline-taker .btn-danger{display:flex;align-items:center;gap:0.375rem;border-radius:0.375rem;background:rgba(243,139,168,0.2);border:1px solid rgba(243,139,168,0.4);padding:0.375rem 0.75rem;font-family:var(--font-mono);font-size:12px;color:var(--ctp-red);cursor:pointer;transition:background-color .2s;}\n' +
-    '.t-timeline-taker .btn-danger:hover{background:rgba(243,139,168,0.3);}\n' +
-    '.t-timeline-taker .btn-replace{display:flex;align-items:center;gap:0.375rem;border-radius:0.375rem;background:rgba(249,226,175,0.1);border:1px solid rgba(249,226,175,0.4);padding:0.375rem 0.75rem;font-family:var(--font-mono);font-size:12px;color:var(--ctp-yellow);cursor:pointer;transition:background-color .2s;}\n' +
-    '.t-timeline-taker .btn-replace:hover{background:rgba(249,226,175,0.2);}\n' +
-    '.t-timeline-taker .muted-70{color:rgba(166,173,200,0.7);}\n' +
-    '.t-timeline-taker .muted-80{color:rgba(166,173,200,0.8);}\n' +
-    '.t-timeline-taker .fg-90{color:rgba(205,214,244,0.9);}\n' +
-    '.t-timeline-taker .hover-fg-90:hover{color:rgba(205,214,244,0.9);}\n',
+    '.t-timeline-taker .dot-green{background:rgba(194,194,200,0.5);}\n' +
+    '.t-timeline-taker .dot-yellow{background:rgba(204,204,210,0.6);}\n' +
+    '.t-timeline-taker .dot-red{background:rgba(226,226,230,0.5);}\n' +
+    '.t-timeline-taker .bg-red-10{background:rgba(226,226,230,0.1);}\n' +
+    '.t-timeline-taker .bg-blue-10{background:rgba(212,212,218,0.1);}\n' +
+    '.t-timeline-taker .btn-danger{display:flex;align-items:center;gap:0.375rem;border-radius:0.375rem;background:rgba(226,226,230,0.2);border:1px solid rgba(226,226,230,0.4);padding:0.375rem 0.75rem;font-family:var(--font-mono);font-size:12px;color:var(--ctp-red);cursor:pointer;transition:background-color .2s;}\n' +
+    '.t-timeline-taker .btn-danger:hover{background:rgba(226,226,230,0.3);}\n' +
+    '.t-timeline-taker .btn-replace{display:flex;align-items:center;gap:0.375rem;border-radius:0.375rem;background:rgba(204,204,210,0.1);border:1px solid rgba(204,204,210,0.4);padding:0.375rem 0.75rem;font-family:var(--font-mono);font-size:12px;color:var(--ctp-yellow);cursor:pointer;transition:background-color .2s;}\n' +
+    '.t-timeline-taker .btn-replace:hover{background:rgba(204,204,210,0.2);}\n' +
+    '.t-timeline-taker .muted-70{color:rgba(168,168,176,0.7);}\n' +
+    '.t-timeline-taker .muted-80{color:rgba(168,168,176,0.8);}\n' +
+    '.t-timeline-taker .fg-90{color:rgba(232,232,234,0.9);}\n' +
+    '.t-timeline-taker .hover-fg-90:hover{color:rgba(232,232,234,0.9);}\n',
 
   mount: function (root) {
     var entries = [];

@@ -81,7 +81,7 @@ function ObservabilityDashboard() {
   var ERROR_CODE_HITS = [0, 0, 2, 1, 0, 0, 3, 1, 0, 0, 1, 0, 0, 0, 12, 4, 0, 0, 1, 0, 0, 0, 0, 0];
   var GPU_UTIL = [22, 18, 24, 31, 38, 45, 52, 58, 64, 70, 74, 78, 76, 80, 58, 79, 83, 85, 84, 80, 74, 66, 52, 38];
   var GUARDRAIL = [2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 5, 7, 9, 8, 7, 6, 5, 4, 3, 3, 2, 2];
-  var AXIS = { colors: ['#a6adc8'], fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' };
+  var AXIS = { colors: ['#a8a8b0'], fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' };
   var _ = AXIS;
 
   return App.el('div', { class: 'w-full' },
@@ -97,7 +97,7 @@ function ObservabilityDashboard() {
       App.el('div', { class: 'span-2' }, Charts.Panel('Throughput & p95 latency', '24h window', Charts.Chart({
         type: 'combo', categories: HOURS, height: '240px',
         series: [{ name: 'req/min', type: 'bar', data: THROUGHPUT }, { name: 'p95 (ms)', type: 'line', data: P95 }],
-        colors: ['#cdd6f4', '#f38ba8'],
+        colors: ['#e8e8ea', '#e2e2e6'],
         yFmt: function (v) { return Math.round(v / 1000) + 'k'; },
         legend: true
       }))),
@@ -112,21 +112,21 @@ function ObservabilityDashboard() {
           var ctx = canvas.getContext('2d');
           ctx.scale(dpr, dpr);
           var cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 26;
-          ctx.strokeStyle = '#313244';
+          ctx.strokeStyle = '#1e1e22';
           ctx.lineWidth = 14;
           ctx.lineCap = 'round';
           ctx.beginPath();
           ctx.arc(cx, cy, r, 0, Math.PI * 2);
           ctx.stroke();
-          ctx.strokeStyle = '#94e2d5';
+          ctx.strokeStyle = '#c2c2c8';
           ctx.beginPath();
           ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * 0.9995);
           ctx.stroke();
-          ctx.fillStyle = '#a6adc8';
+          ctx.fillStyle = '#a8a8b0';
           ctx.font = '10px JetBrains Mono, monospace';
           ctx.textAlign = 'center';
           ctx.fillText('UPTIME · 30 DAYS', cx, cy + 30);
-          ctx.fillStyle = '#cdd6f4';
+          ctx.fillStyle = '#e8e8ea';
           ctx.font = '26px JetBrains Mono, monospace';
           ctx.fillText('99.95%', cx, cy + 4);
         });
@@ -135,9 +135,9 @@ function ObservabilityDashboard() {
       Charts.Panel('Error rate', 'incident at 14:02', Charts.Chart({
         type: 'area', categories: HOURS, height: '200px',
         series: [{ name: 'error rate', type: 'area', data: ERROR_RATE }],
-        colors: ['#f38ba8'],
+        colors: ['#e2e2e6'],
         yFmt: function (v) { return v.toFixed(2) + '%'; },
-        annotations: [{ x: 14, color: '#f9e2af', label: { text: 'INCIDENT · DETECTED 12s', background: '#f9e2af', color: '#11111b' } }]
+        annotations: [{ x: 14, color: '#ccccd2', label: { text: 'INCIDENT · DETECTED 12s', background: '#ccccd2', color: '#08080a' } }]
       })),
       Charts.Panel('p99 latency by service', 'now', Charts.Chart({
         type: 'hbar', height: '200px',
@@ -145,56 +145,56 @@ function ObservabilityDashboard() {
           { x: 'auth-svc', y: 212 }, { x: 'payments', y: 186 }, { x: 'ingest', y: 143 },
           { x: 'rag-retriever', y: 98 }, { x: 'mcp-gateway', y: 76 }, { x: 'edge-web', y: 61 }
         ] }],
-        colors: ['#f38ba8', '#cdd6f4', '#cdd6f4', '#cdd6f4', '#cdd6f4', '#cdd6f4'],
+        colors: ['#e2e2e6', '#e8e8ea', '#e8e8ea', '#e8e8ea', '#e8e8ea', '#e8e8ea'],
         labels: ['auth-svc', 'payments', 'ingest', 'rag-retriever', 'mcp-gateway', 'edge-web'],
         yFmt: function (v) { return v + ' ms'; }
       })),
       Charts.Panel('Crawl4ai & extraction pipeline', 'back-to-back', Charts.Chart({
         type: 'combo', categories: HOURS, height: '200px',
         series: [{ name: 'records extracted', type: 'bar', data: EXTRACT }, { name: 'pages crawled', type: 'line', data: CRAWLED }],
-        colors: ['#a6adc8', '#94e2d5'],
+        colors: ['#a8a8b0', '#c2c2c8'],
         yFmt: function (v) { return Math.round(v / 1000) + 'k'; },
         legend: true
       })),
       Charts.Panel('Token cost per request', 'datadog', Charts.Chart({
         type: 'area', categories: HOURS, height: '200px',
         series: [{ name: '$ / 1k req', type: 'area', data: COST }],
-        colors: ['#f9e2af'],
+        colors: ['#ccccd2'],
         yFmt: function (v) { return '$' + v.toFixed(2); },
         annotations: [
-          { x: 12, color: '#f9e2af', label: { text: 'CACHE SHIPPED', background: '#f9e2af', color: '#11111b' } },
-          { x: 16, color: '#94e2d5', label: { text: 'PROMPT COMPRESSED', background: '#94e2d5', color: '#11111b' } }
+          { x: 12, color: '#ccccd2', label: { text: 'CACHE SHIPPED', background: '#ccccd2', color: '#08080a' } },
+          { x: 16, color: '#c2c2c8', label: { text: 'PROMPT COMPRESSED', background: '#c2c2c8', color: '#08080a' } }
         ]
       })),
       Charts.Panel('Model tuning — eval score by iteration', '10 runs', Charts.Chart({
         type: 'line', height: '200px', markers: true,
         series: [{ name: 'eval score', type: 'line', data: TUNING }],
-        colors: ['#cdd6f4'],
+        colors: ['#e8e8ea'],
         categories: ['ITER 1', 'ITER 2', 'ITER 3', 'ITER 4', 'ITER 5', 'ITER 6', 'ITER 7', 'ITER 8', 'ITER 9', 'ITER 10'],
         yFmt: function (v) { return v.toFixed(2); },
         yMin: 0.5, yMax: 1,
-        annotations: [{ x: 5, color: '#f9e2af', label: { text: 'RETRIEVAL REWORK', background: '#f9e2af', color: '#11111b' } }]
+        annotations: [{ x: 5, color: '#ccccd2', label: { text: 'RETRIEVAL REWORK', background: '#ccccd2', color: '#08080a' } }]
       })),
       Charts.Panel('Guardrails — injection blocked & PII redacted', 'per hour', Charts.Chart({
         type: 'bar', categories: HOURS, height: '200px',
         series: [{ name: 'blocked / redacted', type: 'bar', data: GUARDRAIL }],
-        colors: ['#f38ba8'],
+        colors: ['#e2e2e6'],
         yFmt: function (v) { return String(Math.round(v)); }
       })),
       Charts.Panel('GPU utilization — vllm serving', 'continuous batching', Charts.Chart({
         type: 'area', categories: HOURS, height: '200px',
         series: [{ name: 'GPU util', type: 'area', data: GPU_UTIL }],
-        colors: ['#cdd6f4'],
+        colors: ['#e8e8ea'],
         yFmt: function (v) { return Math.round(v) + '%'; },
         yMax: 100, yMin: 0,
-        annotations: [{ x: 16, color: '#94e2d5', label: { text: 'VLLM · BATCHING ON', background: '#94e2d5', color: '#11111b' } }]
+        annotations: [{ x: 16, color: '#c2c2c8', label: { text: 'VLLM · BATCHING ON', background: '#c2c2c8', color: '#08080a' } }]
       })),
       App.el('div', { class: 'span-2' }, Charts.Panel('Error-code surveillance — kibana view', 'threshold 5/min', Charts.Chart({
         type: 'bar', categories: HOURS, height: '200px',
         series: [{ name: 'error-code hits', type: 'bar', data: ERROR_CODE_HITS }],
-        colors: ['#f9e2af'],
+        colors: ['#ccccd2'],
         yFmt: function (v) { return String(Math.round(v)); },
-        annotations: [{ y: 5, color: '#f38ba8', label: { text: 'ALERT THRESHOLD', background: '#f38ba8', color: '#11111b' } }]
+        annotations: [{ y: 5, color: '#e2e2e6', label: { text: 'ALERT THRESHOLD', background: '#e2e2e6', color: '#08080a' } }]
       })))
     ),
     App.el('figure', { class: 'obs-figure' },

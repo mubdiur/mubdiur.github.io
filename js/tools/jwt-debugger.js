@@ -10,13 +10,13 @@ App.registerTool('jwt-debugger', {
     '.t-jwt-debugger .jwt-sec{margin-top:0.75rem;}\n' +
     '.t-jwt-debugger .jwt-label{display:flex;align-items:center;gap:0.375rem;font-family:var(--font-mono);font-size:10px;margin-bottom:0.25rem;}\n' +
     '.t-jwt-debugger .jwt-label .btn-copy{margin-left:auto;padding:0.125rem 0.375rem;font-size:10px;}\n' +
-    '.t-jwt-debugger .lbl-header{color:rgba(148,226,213,0.7);}\n' +
-    '.t-jwt-debugger .lbl-payload{color:rgba(148,226,213,0.7);}\n' +
+    '.t-jwt-debugger .lbl-header{color:rgba(194,194,200,0.7);}\n' +
+    '.t-jwt-debugger .lbl-payload{color:rgba(194,194,200,0.7);}\n' +
     '.t-jwt-debugger .lbl-signature{color:rgba(251,146,60,0.7);}\n' +
-    '.t-jwt-debugger .jwt-pre{border:1px solid rgba(49,50,68,0.4);background:rgba(0,0,0,0.3);padding:0.5rem;font-family:var(--font-mono);font-size:10px;color:rgba(205,214,244,0.8);border-radius:6px;overflow:auto;white-space:pre-wrap;word-break:break-all;}\n' +
+    '.t-jwt-debugger .jwt-pre{border:1px solid rgba(30,30,34,0.4);background:rgba(0,0,0,0.3);padding:0.5rem;font-family:var(--font-mono);font-size:10px;color:rgba(232,232,234,0.8);border-radius:6px;overflow:auto;white-space:pre-wrap;word-break:break-all;}\n' +
     '.t-jwt-debugger .jwt-hdr{max-height:128px;}\n' +
     '.t-jwt-debugger .jwt-pay{max-height:192px;}\n' +
-    '.t-jwt-debugger .jwt-sig{color:rgba(205,214,244,0.6);}\n',
+    '.t-jwt-debugger .jwt-sig{color:rgba(232,232,234,0.6);}\n',
 
   mount: function (root) {
     var token = '';

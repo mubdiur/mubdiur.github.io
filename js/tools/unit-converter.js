@@ -47,14 +47,14 @@ var conversions = {
 App.registerTool('unit-converter', {
   css: '' +
     '.t-unit-converter .uc-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:0.5rem;align-items:center;}\n' +
-    '.t-unit-converter .uc-sel{height:28px;border:1px solid rgba(49,50,68,0.4);background:rgba(0,0,0,0.3);font-family:var(--font-mono);font-size:12px;color:rgba(205,214,244,0.8);outline:none;}\n' +
-    '.t-unit-converter .uc-sel:focus{border-color:rgba(148,226,213,0.4);box-shadow:0 0 0 1px rgba(148,226,213,0.3);}\n' +
-    '.t-unit-converter .uc-sel-sm{font-size:10px;color:rgba(205,214,244,0.7);}\n' +
-    '.t-unit-converter .uc-input{width:100%;height:32px;border:1px solid rgba(49,50,68,0.4);background:rgba(0,0,0,0.3);padding:0 0.5rem;font-family:var(--font-mono);font-size:12px;color:rgba(205,214,244,0.9);outline:none;}\n' +
-    '.t-unit-converter .uc-input:focus{border-color:rgba(148,226,213,0.4);box-shadow:0 0 0 1px rgba(148,226,213,0.3);}\n' +
-    '.t-unit-converter .uc-result{width:100%;height:32px;border:1px solid rgba(49,50,68,0.4);background:rgba(0,0,0,0.4);padding:0 0.5rem;font-family:var(--font-mono);font-size:12px;color:rgba(148,226,213,0.8);display:flex;align-items:center;white-space:nowrap;overflow:hidden;}\n' +
-    '.t-unit-converter .uc-swap{margin-top:1.5rem;padding:0.25rem 0.5rem;font-family:var(--font-mono);font-size:10px;color:rgba(148,226,213,0.7);background:none;border:none;cursor:pointer;transition:color .2s,background-color .2s;}\n' +
-    '.t-unit-converter .uc-swap:hover{background:rgba(148,226,213,0.1);}\n',
+    '.t-unit-converter .uc-sel{height:28px;border:1px solid rgba(30,30,34,0.4);background:rgba(0,0,0,0.3);font-family:var(--font-mono);font-size:12px;color:rgba(232,232,234,0.8);outline:none;}\n' +
+    '.t-unit-converter .uc-sel:focus{border-color:rgba(194,194,200,0.4);box-shadow:0 0 0 1px rgba(194,194,200,0.3);}\n' +
+    '.t-unit-converter .uc-sel-sm{font-size:10px;color:rgba(232,232,234,0.7);}\n' +
+    '.t-unit-converter .uc-input{width:100%;height:32px;border:1px solid rgba(30,30,34,0.4);background:rgba(0,0,0,0.3);padding:0 0.5rem;font-family:var(--font-mono);font-size:12px;color:rgba(232,232,234,0.9);outline:none;}\n' +
+    '.t-unit-converter .uc-input:focus{border-color:rgba(194,194,200,0.4);box-shadow:0 0 0 1px rgba(194,194,200,0.3);}\n' +
+    '.t-unit-converter .uc-result{width:100%;height:32px;border:1px solid rgba(30,30,34,0.4);background:rgba(0,0,0,0.4);padding:0 0.5rem;font-family:var(--font-mono);font-size:12px;color:rgba(194,194,200,0.8);display:flex;align-items:center;white-space:nowrap;overflow:hidden;}\n' +
+    '.t-unit-converter .uc-swap{margin-top:1.5rem;padding:0.25rem 0.5rem;font-family:var(--font-mono);font-size:10px;color:rgba(194,194,200,0.7);background:none;border:none;cursor:pointer;transition:color .2s,background-color .2s;}\n' +
+    '.t-unit-converter .uc-swap:hover{background:rgba(194,194,200,0.1);}\n',
 
   mount: function (root) {
     var type = 'length';
