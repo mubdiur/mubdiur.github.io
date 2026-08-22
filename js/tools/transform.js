@@ -80,7 +80,7 @@ function TransformToolUI(tool) {
       control.value = state.opts[p.key] || p.default || '';
       control.addEventListener('input', function () { update(control.value); });
     } else if (p.type === 'boolean' || p.type === 'checkbox') {
-      control = App.el('input', { type: 'checkbox', class: 't-checkbox', 'aria-label': p.label, style: 'width:16px;height:16px;accent-color:#c2c2c8' });
+      control = App.el('input', { type: 'checkbox', class: 't-checkbox', 'aria-label': p.label, style: 'width:16px;height:16px;accent-color:#c2dcd4' });
       control.checked = state.opts[p.key] === 'true';
       control.addEventListener('change', function () { update(control.checked ? 'true' : 'false'); });
     } else {
@@ -89,14 +89,14 @@ function TransformToolUI(tool) {
       control.addEventListener('input', function () { update(control.value); });
     }
     paramsRow.appendChild(App.el('div', { class: 'flex items-center gap-1.5' },
-      App.el('label', { class: 'text-xs font-mono', style: { color: 'rgba(168,168,176,0.7)', whiteSpace: 'nowrap' }, text: p.label }),
+      App.el('label', { class: 'text-xs font-mono', style: { color: 'rgba(170,170,179,0.7)', whiteSpace: 'nowrap' }, text: p.label }),
       control));
   });
 
   var root = App.el('div', { class: 'flex flex-col', style: { gap: '1rem' } },
     paramsRow,
     App.el('div', {},
-      App.el('div', { class: 'text-xs font-mono mb-1', style: { color: 'rgba(168,168,176,0.7)' }, text: 'Input' }),
+      App.el('div', { class: 'text-xs font-mono mb-1', style: { color: 'rgba(170,170,179,0.7)' }, text: 'Input' }),
       inputTa),
     outputArea);
 

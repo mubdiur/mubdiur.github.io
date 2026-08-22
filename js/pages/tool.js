@@ -53,9 +53,9 @@ function renderTool(path) {
   } else if (tool.template === 'custom') {
     body.innerHTML = '';
     var loading = App.el('div', { class: 'loading-block' },
-      App.el('span', { class: 'loading-dot', style: 'width:10px;height:10px;border-radius:50%;background:rgba(194,194,200,0.7);display:inline-block;margin:0 2px' }),
-      App.el('span', { class: 'loading-dot', style: 'width:10px;height:10px;border-radius:50%;background:rgba(194,194,200,0.7);display:inline-block;margin:0 2px' }),
-      App.el('span', { class: 'loading-dot', style: 'width:10px;height:10px;border-radius:50%;background:rgba(194,194,200,0.7);display:inline-block;margin:0 2px' }));
+      App.el('span', { class: 'loading-dot', style: 'width:10px;height:10px;border-radius:50%;background:rgba(194,220,212,0.7);display:inline-block;margin:0 2px' }),
+      App.el('span', { class: 'loading-dot', style: 'width:10px;height:10px;border-radius:50%;background:rgba(194,220,212,0.7);display:inline-block;margin:0 2px' }),
+      App.el('span', { class: 'loading-dot', style: 'width:10px;height:10px;border-radius:50%;background:rgba(194,220,212,0.7);display:inline-block;margin:0 2px' }));
     body.appendChild(loading);
     var t = App.tools[slug];
     if (t) {

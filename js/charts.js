@@ -64,14 +64,14 @@ function drawChart(canvas, opts) {
   for (var gi = 0; gi <= gridLines; gi++) {
     var gv = yMin + (yRange * gi) / gridLines;
     var gy = padT + plotH - ((gv - yMin) / yRange) * plotH;
-    ctx.strokeStyle = '#1e1e22';
+    ctx.strokeStyle = '#1e2029';
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
     ctx.moveTo(padL, gy);
     ctx.lineTo(W - padR, gy);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = '#a8a8b0';
+    ctx.fillStyle = '#aaaab3';
     ctx.fillText(yFmt(gv), padL - 6, gy);
   }
 
@@ -83,7 +83,7 @@ function drawChart(canvas, opts) {
   // ── annotations (vertical lines) ──
   (opts.annotations || []).forEach(function (a) {
     var ax = xPos(a.x);
-    ctx.strokeStyle = a.color || '#ccccd2';
+    ctx.strokeStyle = a.color || '#dcd3bd';
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
     ctx.moveTo(ax, padT);
@@ -94,9 +94,9 @@ function drawChart(canvas, opts) {
       ctx.font = '10px ' + MONO;
       var tw = ctx.measureText(a.label.text).width;
       var lx = Math.min(Math.max(ax - tw / 2, padL), W - padR - tw);
-      ctx.fillStyle = a.label.background || '#ccccd2';
+      ctx.fillStyle = a.label.background || '#dcd3bd';
       ctx.fillRect(lx - 4, padT - 1, tw + 8, 15);
-      ctx.fillStyle = a.label.color || '#08080a';
+      ctx.fillStyle = a.label.color || '#09090d';
       ctx.textAlign = 'left';
       ctx.fillText(a.label.text, lx, padT + 6.5);
       ctx.textAlign = 'right';
@@ -104,7 +104,7 @@ function drawChart(canvas, opts) {
   });
 
   (opts.series || []).forEach(function (s, si) {
-    var color = (opts.colors && opts.colors[si]) || '#e8e8ea';
+    var color = (opts.colors && opts.colors[si]) || '#e9e9ec';
     var data = s.data.map(function (d) { return typeof d === 'object' ? d.y : d; });
 
     if (s.type === 'bar' && s.horizontal) {
@@ -119,13 +119,13 @@ function drawChart(canvas, opts) {
         var r = Math.min(2, barH / 2);
         ctx.roundRect(bx, by, Math.max(bw, 0), barH, r);
         ctx.fill();
-        ctx.fillStyle = '#08080a';
+        ctx.fillStyle = '#09090d';
         ctx.font = '10px ' + MONO;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillText(yFmt(v), bx + Math.max(bw, 0) + 6, by + barH / 2);
         ctx.textAlign = 'right';
-        ctx.fillStyle = '#a8a8b0';
+        ctx.fillStyle = '#aaaab3';
         ctx.fillText(s.labels && s.labels[i] !== undefined ? s.labels[i] : (cats[i] || ''), bx - 6, by + barH / 2);
       });
     } else if (s.type === 'bar') {
@@ -177,7 +177,7 @@ function drawChart(canvas, opts) {
   });
 
   // ── x labels ──
-  ctx.fillStyle = '#a8a8b0';
+  ctx.fillStyle = '#aaaab3';
   ctx.font = '10px ' + MONO;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
@@ -193,12 +193,12 @@ function drawChart(canvas, opts) {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     (opts.series || []).forEach(function (s, si) {
-      var color = (opts.colors && opts.colors[si]) || '#e8e8ea';
+      var color = (opts.colors && opts.colors[si]) || '#e9e9ec';
       var label = s.name || '';
       if (!label) return;
       ctx.fillStyle = color;
       ctx.fillRect(lx, 8, 8, 2);
-      ctx.fillStyle = '#a8a8b0';
+      ctx.fillStyle = '#aaaab3';
       ctx.fillText(label, lx + 12, 9);
       lx += ctx.measureText(label).width + 28;
     });
@@ -216,7 +216,7 @@ function Panel(title, badge, bodyNode) {
   var fig = App.el('figure', { class: 'news-panel flex flex-col' },
     App.el('div', { class: 'panel-head' },
       App.el('span', { class: 'panel-dots', 'aria-hidden': 'true', html:
-        '<span style="background:rgba(251,73,52,0.8)"></span><span style="background:rgba(204,204,210,0.8)"></span><span style="background:rgba(194,194,200,0.8)"></span>' }),
+        '<span style="background:rgba(251,73,52,0.8)"></span><span style="background:rgba(220,211,189,0.8)"></span><span style="background:rgba(194,220,212,0.8)"></span>' }),
       App.el('figcaption', { text: title }),
       badge ? App.el('span', { class: 'panel-badge', html: '<span class="dot"></span>' + App.esc(badge) }) : null),
     App.el('div', { class: 'panel-body' }, bodyNode));

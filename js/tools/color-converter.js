@@ -10,9 +10,9 @@ App.registerTool('color-converter', {
   css: '' +
     '.t-color-converter .cc-swatch{width:64px;height:64px;}\n' +
     '.t-color-converter .cc-grid{display:grid;grid-template-columns:repeat(2,1fr);column-gap:1rem;row-gap:0.25rem;}\n' +
-    '.t-color-converter .cc-field{background:transparent;border:none;border-bottom:1px solid rgba(30,30,34,0.3);color:rgba(232,232,234,0.8);padding:0 0.25rem;outline:none;font-family:var(--font-mono);font-size:10px;}\n' +
-    '.t-color-converter .cc-field:focus{border-color:rgba(194,194,200,0.5);}\n' +
-    '.t-color-converter .cc-field.cc-dim{color:rgba(232,232,234,0.6);}\n' +
+    '.t-color-converter .cc-field{background:transparent;border:none;border-bottom:1px solid rgba(30,32,41,0.3);color:rgba(233,233,236,0.8);padding:0 0.25rem;outline:none;font-family:var(--font-mono);font-size:10px;}\n' +
+    '.t-color-converter .cc-field:focus{border-color:rgba(194,220,212,0.5);}\n' +
+    '.t-color-converter .cc-field.cc-dim{color:rgba(233,233,236,0.6);}\n' +
     '.t-color-converter .cc-picker{height:32px;width:100%;background:transparent;cursor:pointer;}\n',
 
   mount: function (root) {
