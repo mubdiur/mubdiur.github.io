@@ -8,14 +8,14 @@
 
 App.registerTool('binary-tree-visualizer', {
   css: '' +
-    '.t-binary-tree-visualizer .t-input{width:5rem;height:1.75rem;padding:0 0.5rem;border:1px solid rgba(75,64,56,0.4);background:rgba(0,0,0,0.3);color:rgba(202,170,152,0.8);font-family:var(--font-mono);font-size:12px;border-radius:6px;outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
-    '.t-binary-tree-visualizer .t-input:focus{border-color:rgba(163,191,160,0.4);box-shadow:0 0 0 1px rgba(163,191,160,0.3);}\n' +
-    '.t-binary-tree-visualizer .t-input::placeholder{color:rgba(154,134,120,0.3);}\n' +
-    '.t-binary-tree-visualizer .t-btn-primary{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.625rem;border-radius:6px;background:rgba(163,191,160,0.1);border:1px solid rgba(163,191,160,0.2);color:rgba(163,191,160,0.8);font-family:var(--font-mono);font-size:10px;cursor:pointer;transition:background-color .2s,border-color .2s;}\n' +
-    '.t-binary-tree-visualizer .t-btn-primary:hover{background:rgba(163,191,160,0.2);}\n' +
-    '.t-binary-tree-visualizer .t-btn-ghost{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:6px;background:rgba(75,64,56,0.3);border:1px solid rgba(75,64,56,0.3);color:rgba(154,134,120,0.6);font-family:var(--font-mono);font-size:10px;cursor:pointer;transition:color .2s,background-color .2s;}\n' +
-    '.t-binary-tree-visualizer .t-btn-ghost:hover{color:rgba(202,170,152,0.8);}\n' +
-    '.t-binary-tree-visualizer .t-nodes{font-family:var(--font-mono);font-size:10px;color:rgba(154,134,120,0.5);margin-left:auto;}\n',
+    '.t-binary-tree-visualizer .t-input{width:5rem;height:1.75rem;padding:0 0.5rem;border:1px solid rgba(49,50,68,0.4);background:rgba(0,0,0,0.3);color:rgba(205,214,244,0.8);font-family:var(--font-mono);font-size:12px;border-radius:6px;outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-binary-tree-visualizer .t-input:focus{border-color:rgba(148,226,213,0.4);box-shadow:0 0 0 1px rgba(148,226,213,0.3);}\n' +
+    '.t-binary-tree-visualizer .t-input::placeholder{color:rgba(166,173,200,0.3);}\n' +
+    '.t-binary-tree-visualizer .t-btn-primary{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.625rem;border-radius:6px;background:rgba(148,226,213,0.1);border:1px solid rgba(148,226,213,0.2);color:rgba(148,226,213,0.8);font-family:var(--font-mono);font-size:10px;cursor:pointer;transition:background-color .2s,border-color .2s;}\n' +
+    '.t-binary-tree-visualizer .t-btn-primary:hover{background:rgba(148,226,213,0.2);}\n' +
+    '.t-binary-tree-visualizer .t-btn-ghost{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:6px;background:rgba(49,50,68,0.3);border:1px solid rgba(49,50,68,0.3);color:rgba(166,173,200,0.6);font-family:var(--font-mono);font-size:10px;cursor:pointer;transition:color .2s,background-color .2s;}\n' +
+    '.t-binary-tree-visualizer .t-btn-ghost:hover{color:rgba(205,214,244,0.8);}\n' +
+    '.t-binary-tree-visualizer .t-nodes{font-family:var(--font-mono);font-size:10px;color:rgba(166,173,200,0.5);margin-left:auto;}\n',
 
   mount: function (root) {
     var SVG_NS = 'http://www.w3.org/2000/svg';

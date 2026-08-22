@@ -33,18 +33,18 @@ function buildHtml(items) {
 
 App.registerTool('post-maker', {
   css: '' +
-    '.t-post-maker .pm-drop{border-radius:0.75rem;border:2px dashed rgba(75,64,56,0.6);background:rgba(28,35,54,0.5);padding:1rem;transition:background-color .2s,border-color .2s;}\n' +
-    '.t-post-maker .pm-drop.dragover{border-color:rgba(163,191,160,0.6);background:rgba(163,191,160,0.08);}\n' +
-    '.t-post-maker .pm-btn2{color:rgba(154,134,120,0.8);}\n' +
-    '.t-post-maker .pm-btn2:hover{color:rgba(202,170,152,0.9);}\n' +
-    '.t-post-maker .pm-cell{height:28px;width:28px;color:rgba(154,134,120,0.8);}\n' +
-    '.t-post-maker .pm-cell:hover{color:rgba(202,170,152,0.9);}\n' +
+    '.t-post-maker .pm-drop{border-radius:0.75rem;border:2px dashed rgba(49,50,68,0.6);background:rgba(24,24,37,0.5);padding:1rem;transition:background-color .2s,border-color .2s;}\n' +
+    '.t-post-maker .pm-drop.dragover{border-color:rgba(148,226,213,0.6);background:rgba(148,226,213,0.08);}\n' +
+    '.t-post-maker .pm-btn2{color:rgba(166,173,200,0.8);}\n' +
+    '.t-post-maker .pm-btn2:hover{color:rgba(205,214,244,0.9);}\n' +
+    '.t-post-maker .pm-cell{height:28px;width:28px;color:rgba(166,173,200,0.8);}\n' +
+    '.t-post-maker .pm-cell:hover{color:rgba(205,214,244,0.9);}\n' +
     '.t-post-maker .pm-cell.danger:hover{color:var(--ctp-red);}\n' +
-    '.t-post-maker .pm-ta{width:100%;resize:vertical;border-radius:calc(var(--radius)*0.8);border:1px solid rgba(75,64,56,0.5);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-family:var(--font-mono);font-size:14px;color:rgba(202,170,152,0.9);outline:none;}\n' +
-    '.t-post-maker .pm-ta::placeholder{color:rgba(154,134,120,0.3);}\n' +
-    '.t-post-maker .pm-ta:focus{box-shadow:0 0 0 1px rgba(163,191,160,0.4);}\n' +
+    '.t-post-maker .pm-ta{width:100%;resize:vertical;border-radius:calc(var(--radius)*0.8);border:1px solid rgba(49,50,68,0.5);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-family:var(--font-mono);font-size:14px;color:rgba(205,214,244,0.9);outline:none;}\n' +
+    '.t-post-maker .pm-ta::placeholder{color:rgba(166,173,200,0.3);}\n' +
+    '.t-post-maker .pm-ta:focus{box-shadow:0 0 0 1px rgba(148,226,213,0.4);}\n' +
     '.t-post-maker .pm-img{max-height:16rem;width:auto;}\n' +
-    '.t-post-maker .pm-pre{max-height:16rem;overflow:auto;white-space:pre-wrap;word-break:break-all;font-family:var(--font-mono);font-size:12px;color:rgba(202,170,152,0.85);}\n',
+    '.t-post-maker .pm-pre{max-height:16rem;overflow:auto;white-space:pre-wrap;word-break:break-all;font-family:var(--font-mono);font-size:12px;color:rgba(205,214,244,0.85);}\n',
 
   mount: function (root) {
     var items = [{ id: nextId++, type: 'text', text: '', src: '' }];

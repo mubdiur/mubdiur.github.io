@@ -98,26 +98,26 @@ var CUSTOM_TZ_OPTIONS = [
 App.registerTool('time-copier', {
   css: '' +
     '.t-time-copier{display:flex;flex-direction:column;gap:1rem;}\n' +
-    '.t-time-copier .tc-input{width:100%;border-radius:8px;border:1px solid rgba(75,64,56,0.5);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-family:var(--font-mono);font-size:14px;color:rgba(202,170,152,0.9);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
-    '.t-time-copier .tc-input::placeholder{color:rgba(154,134,120,0.3);}\n' +
-    '.t-time-copier .tc-input:focus{border-color:rgba(163,191,160,0.4);box-shadow:0 0 0 1px rgba(163,191,160,0.3);}\n' +
-    '.t-time-copier .tc-active{background:rgba(163,191,160,0.15);border:1px solid rgba(163,191,160,0.3);color:var(--ctp-teal);}\n' +
-    '.t-time-copier .tc-inactive{background:rgba(75,64,56,0.5);border:1px solid rgba(75,64,56,0.5);color:rgba(154,134,120,0.8);}\n' +
-    '.t-time-copier .tc-inactive:hover{color:rgba(202,170,152,0.9);}\n' +
-    '.t-time-copier .tc-muted50{color:rgba(154,134,120,0.5);}\n' +
-    '.t-time-copier .tc-muted60{color:rgba(154,134,120,0.6);}\n' +
-    '.t-time-copier .tc-muted70{color:rgba(154,134,120,0.7);}\n' +
-    '.t-time-copier .tc-muted80{color:rgba(154,134,120,0.8);}\n' +
-    '.t-time-copier .tc-hover-fg:hover{color:rgba(202,170,152,0.9);}\n' +
-    '.t-time-copier .tc-fg90{color:rgba(202,170,152,0.9);}\n' +
-    '.t-time-copier .tc-fg80{color:rgba(202,170,152,0.8);}\n' +
-    '.t-time-copier .tc-teal90{color:rgba(163,191,160,0.9);}\n' +
-    '.t-time-copier .tc-copyall{border-color:rgba(163,191,160,0.25);}\n' +
-    '.t-time-copier .tc-copyall:hover{border-color:rgba(163,191,160,0.35);}\n' +
+    '.t-time-copier .tc-input{width:100%;border-radius:8px;border:1px solid rgba(49,50,68,0.5);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-family:var(--font-mono);font-size:14px;color:rgba(205,214,244,0.9);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-time-copier .tc-input::placeholder{color:rgba(166,173,200,0.3);}\n' +
+    '.t-time-copier .tc-input:focus{border-color:rgba(148,226,213,0.4);box-shadow:0 0 0 1px rgba(148,226,213,0.3);}\n' +
+    '.t-time-copier .tc-active{background:rgba(148,226,213,0.15);border:1px solid rgba(148,226,213,0.3);color:var(--ctp-teal);}\n' +
+    '.t-time-copier .tc-inactive{background:rgba(49,50,68,0.5);border:1px solid rgba(49,50,68,0.5);color:rgba(166,173,200,0.8);}\n' +
+    '.t-time-copier .tc-inactive:hover{color:rgba(205,214,244,0.9);}\n' +
+    '.t-time-copier .tc-muted50{color:rgba(166,173,200,0.5);}\n' +
+    '.t-time-copier .tc-muted60{color:rgba(166,173,200,0.6);}\n' +
+    '.t-time-copier .tc-muted70{color:rgba(166,173,200,0.7);}\n' +
+    '.t-time-copier .tc-muted80{color:rgba(166,173,200,0.8);}\n' +
+    '.t-time-copier .tc-hover-fg:hover{color:rgba(205,214,244,0.9);}\n' +
+    '.t-time-copier .tc-fg90{color:rgba(205,214,244,0.9);}\n' +
+    '.t-time-copier .tc-fg80{color:rgba(205,214,244,0.8);}\n' +
+    '.t-time-copier .tc-teal90{color:rgba(148,226,213,0.9);}\n' +
+    '.t-time-copier .tc-copyall{border-color:rgba(148,226,213,0.25);}\n' +
+    '.t-time-copier .tc-copyall:hover{border-color:rgba(148,226,213,0.35);}\n' +
     '.t-time-copier .tc-label{width:2.25rem;}\n' +
     '.t-time-copier .tc-maxw180{max-width:180px;}\n' +
     '.t-time-copier .tc-row{background:rgba(0,0,0,0.25);}\n' +
-    '.t-time-copier .tc-bg40{background:rgba(75,64,56,0.4);}\n' +
+    '.t-time-copier .tc-bg40{background:rgba(49,50,68,0.4);}\n' +
     '@media(min-width:640px){.t-time-copier .tc-custom-row{flex-direction:row;align-items:center;}.t-time-copier .tc-custom-row .tc-input{width:auto;}}\n',
 
   mount: function (root) {

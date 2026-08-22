@@ -52,24 +52,24 @@ function classLabel(code) {
 App.registerTool('http-status-codes', {
   css: '' +
     '.t-http-status-codes .search-wrap{position:relative;}\n' +
-    '.t-http-status-codes .search-wrap svg{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:rgba(154,134,120,0.5);pointer-events:none;}\n' +
-    '.t-http-status-codes .search{width:100%;height:32px;padding:0 8px 0 28px;border:1px solid rgba(75,64,56,0.4);background:rgba(0,0,0,0.3);color:rgba(202,170,152,0.8);font-family:var(--font-mono);font-size:12px;border-radius:6px;outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
-    '.t-http-status-codes .search:focus{border-color:rgba(163,191,160,0.4);box-shadow:0 0 0 1px rgba(163,191,160,0.3);}\n' +
-    '.t-http-status-codes .search::placeholder{color:rgba(154,134,120,0.3);}\n' +
+    '.t-http-status-codes .search-wrap svg{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:rgba(166,173,200,0.5);pointer-events:none;}\n' +
+    '.t-http-status-codes .search{width:100%;height:32px;padding:0 8px 0 28px;border:1px solid rgba(49,50,68,0.4);background:rgba(0,0,0,0.3);color:rgba(205,214,244,0.8);font-family:var(--font-mono);font-size:12px;border-radius:6px;outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-http-status-codes .search:focus{border-color:rgba(148,226,213,0.4);box-shadow:0 0 0 1px rgba(148,226,213,0.3);}\n' +
+    '.t-http-status-codes .search::placeholder{color:rgba(166,173,200,0.3);}\n' +
     '.t-http-status-codes .status-list{display:flex;flex-direction:column;gap:0.25rem;max-height:400px;overflow:auto;margin-top:0.75rem;}\n' +
-    '.t-http-status-codes .row{display:flex;align-items:flex-start;gap:0.75rem;padding:0.5rem;border-radius:8px;border:1px solid rgba(75,64,56,0.2);background:rgba(0,0,0,0.1);cursor:pointer;transition:background-color .2s;}\n' +
+    '.t-http-status-codes .row{display:flex;align-items:flex-start;gap:0.75rem;padding:0.5rem;border-radius:8px;border:1px solid rgba(49,50,68,0.2);background:rgba(0,0,0,0.1);cursor:pointer;transition:background-color .2s;}\n' +
     '.t-http-status-codes .row:hover{background:rgba(0,0,0,0.2);}\n' +
     '.t-http-status-codes .code-col{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:56px;}\n' +
     '.t-http-status-codes .code{font-size:14px;font-weight:700;font-family:var(--font-mono);}\n' +
-    '.t-http-status-codes .c-1{color:rgba(163,191,160,0.8);}\n' +
-    '.t-http-status-codes .c-2{color:rgba(163,191,160,0.8);}\n' +
+    '.t-http-status-codes .c-1{color:rgba(148,226,213,0.8);}\n' +
+    '.t-http-status-codes .c-2{color:rgba(148,226,213,0.8);}\n' +
     '.t-http-status-codes .c-3{color:rgba(251,146,60,0.8);}\n' +
     '.t-http-status-codes .c-4{color:rgba(248,113,113,0.8);}\n' +
     '.t-http-status-codes .c-5{color:rgba(239,68,68,0.9);}\n' +
-    '.t-http-status-codes .lbl{font-size:10px;font-family:var(--font-mono);color:rgba(154,134,120,0.4);}\n' +
-    '.t-http-status-codes .name{font-size:12px;font-weight:500;font-family:var(--font-mono);color:rgba(202,170,152,0.8);}\n' +
-    '.t-http-status-codes .desc{font-size:10px;font-family:var(--font-mono);color:rgba(154,134,120,0.6);margin-top:2px;}\n' +
-    '.t-http-status-codes .none{text-align:center;padding:1rem 0;font-family:var(--font-mono);font-size:12px;color:rgba(154,134,120,0.5);}\n',
+    '.t-http-status-codes .lbl{font-size:10px;font-family:var(--font-mono);color:rgba(166,173,200,0.4);}\n' +
+    '.t-http-status-codes .name{font-size:12px;font-weight:500;font-family:var(--font-mono);color:rgba(205,214,244,0.8);}\n' +
+    '.t-http-status-codes .desc{font-size:10px;font-family:var(--font-mono);color:rgba(166,173,200,0.6);margin-top:2px;}\n' +
+    '.t-http-status-codes .none{text-align:center;padding:1rem 0;font-family:var(--font-mono);font-size:12px;color:rgba(166,173,200,0.5);}\n',
 
   mount: function (root) {
     var search = '';

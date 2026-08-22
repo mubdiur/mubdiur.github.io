@@ -11,42 +11,42 @@
 
 App.registerTool('ssl-cert-checker', {
   css: '' +
-    '.t-ssl-cert-checker .cert-input{width:100%;min-height:140px;border:1px solid rgba(75,64,56,0.4);background:rgba(0,0,0,0.3);border-radius:8px;padding:10px 12px;font-family:var(--font-mono);font-size:12px;color:rgba(202,170,152,0.9);resize:vertical;outline:none;}\n' +
-    '.t-ssl-cert-checker .cert-input:focus{border-color:rgba(163,191,160,0.4);box-shadow:0 0 0 1px rgba(163,191,160,0.3);}\n' +
-    '.t-ssl-cert-checker .cert-input::placeholder{color:rgba(154,134,120,0.3);}\n' +
-    '.t-ssl-cert-checker .cert-status{display:flex;flex-direction:column;gap:0.75rem;border-radius:8px;border:1px solid rgba(75,64,56,0.4);padding:0.875rem;}\n' +
-    '.t-ssl-cert-checker .cert-status.valid{border-color:rgba(163,191,160,0.3);background:rgba(163,191,160,0.08);}\n' +
-    '.t-ssl-cert-checker .cert-status.expired{border-color:rgba(217,106,94,0.3);background:rgba(217,106,94,0.08);}\n' +
-    '.t-ssl-cert-checker .cert-status.pending{border-color:rgba(217,160,91,0.3);background:rgba(217,160,91,0.08);}\n' +
+    '.t-ssl-cert-checker .cert-input{width:100%;min-height:140px;border:1px solid rgba(49,50,68,0.4);background:rgba(0,0,0,0.3);border-radius:8px;padding:10px 12px;font-family:var(--font-mono);font-size:12px;color:rgba(205,214,244,0.9);resize:vertical;outline:none;}\n' +
+    '.t-ssl-cert-checker .cert-input:focus{border-color:rgba(148,226,213,0.4);box-shadow:0 0 0 1px rgba(148,226,213,0.3);}\n' +
+    '.t-ssl-cert-checker .cert-input::placeholder{color:rgba(166,173,200,0.3);}\n' +
+    '.t-ssl-cert-checker .cert-status{display:flex;flex-direction:column;gap:0.75rem;border-radius:8px;border:1px solid rgba(49,50,68,0.4);padding:0.875rem;}\n' +
+    '.t-ssl-cert-checker .cert-status.valid{border-color:rgba(148,226,213,0.3);background:rgba(148,226,213,0.08);}\n' +
+    '.t-ssl-cert-checker .cert-status.expired{border-color:rgba(243,139,168,0.3);background:rgba(243,139,168,0.08);}\n' +
+    '.t-ssl-cert-checker .cert-status.pending{border-color:rgba(249,226,175,0.3);background:rgba(249,226,175,0.08);}\n' +
     '.t-ssl-cert-checker .status-badge{font-family:var(--font-mono);font-size:16px;font-weight:700;}\n' +
     '.t-ssl-cert-checker .valid .status-badge{color:var(--ctp-green);}\n' +
     '.t-ssl-cert-checker .expired .status-badge{color:var(--ctp-red);}\n' +
     '.t-ssl-cert-checker .pending .status-badge{color:var(--ctp-yellow);}\n' +
-    '.t-ssl-cert-checker .cert-section{border:1px solid rgba(75,64,56,0.4);border-radius:8px;overflow:hidden;}\n' +
-    '.t-ssl-cert-checker .cert-section > h4{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(154,134,120,0.8);border-bottom:1px solid rgba(75,64,56,0.4);padding:0.5rem 0.75rem;background:rgba(75,64,56,0.4);display:flex;align-items:center;justify-content:space-between;gap:0.5rem;}\n' +
+    '.t-ssl-cert-checker .cert-section{border:1px solid rgba(49,50,68,0.4);border-radius:8px;overflow:hidden;}\n' +
+    '.t-ssl-cert-checker .cert-section > h4{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(166,173,200,0.8);border-bottom:1px solid rgba(49,50,68,0.4);padding:0.5rem 0.75rem;background:rgba(49,50,68,0.4);display:flex;align-items:center;justify-content:space-between;gap:0.5rem;}\n' +
     '.t-ssl-cert-checker .cert-section .body{padding:0.75rem;display:flex;flex-direction:column;gap:0.375rem;}\n' +
-    '.t-ssl-cert-checker .kv{display:flex;flex-wrap:wrap;gap:0.25rem 0.75rem;font-family:var(--font-mono);font-size:12px;color:rgba(202,170,152,0.9);}\n' +
-    '.t-ssl-cert-checker .kv .k{color:rgba(154,134,120,0.6);font-size:10px;min-width:7.5rem;text-transform:uppercase;letter-spacing:0.08em;padding-top:1px;}\n' +
+    '.t-ssl-cert-checker .kv{display:flex;flex-wrap:wrap;gap:0.25rem 0.75rem;font-family:var(--font-mono);font-size:12px;color:rgba(205,214,244,0.9);}\n' +
+    '.t-ssl-cert-checker .kv .k{color:rgba(166,173,200,0.6);font-size:10px;min-width:7.5rem;text-transform:uppercase;letter-spacing:0.08em;padding-top:1px;}\n' +
     '.t-ssl-cert-checker .kv .v{word-break:break-all;}\n' +
     '.t-ssl-cert-checker .ext-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:11px;}\n' +
-    '.t-ssl-cert-checker .ext-table td{border-bottom:1px solid rgba(75,64,56,0.3);padding:0.375rem 0.5rem;vertical-align:top;}\n' +
-    '.t-ssl-cert-checker .ext-table td:first-child{color:rgba(163,191,160,0.9);white-space:nowrap;}\n' +
-    '.t-ssl-cert-checker .ext-table td:last-child{color:rgba(154,134,120,0.8);word-break:break-all;}\n' +
+    '.t-ssl-cert-checker .ext-table td{border-bottom:1px solid rgba(49,50,68,0.3);padding:0.375rem 0.5rem;vertical-align:top;}\n' +
+    '.t-ssl-cert-checker .ext-table td:first-child{color:rgba(148,226,213,0.9);white-space:nowrap;}\n' +
+    '.t-ssl-cert-checker .ext-table td:last-child{color:rgba(166,173,200,0.8);word-break:break-all;}\n' +
     '.t-ssl-cert-checker .progress{height:6px;border-radius:999px;background:rgba(0,0,0,0.4);overflow:hidden;}\n' +
     '.t-ssl-cert-checker .progress > div{height:100%;border-radius:999px;}\n' +
-    '.t-ssl-cert-checker .valid .progress > div{background:rgba(163,191,160,0.8);}\n' +
-    '.t-ssl-cert-checker .expired .progress > div{background:rgba(217,106,94,0.8);}\n' +
-    '.t-ssl-cert-checker .pending .progress > div{background:rgba(217,160,91,0.8);}\n' +
-    '.t-ssl-cert-checker .chip{display:inline-block;padding:0.125rem 0.375rem;border-radius:4px;font-family:var(--font-mono);font-size:10px;border:1px solid rgba(217,106,94,0.3);color:var(--ctp-red);}\n' +
-    '.t-ssl-cert-checker .pill{display:inline-block;padding:0.125rem 0.5rem;border-radius:999px;border:1px solid rgba(163,191,160,0.25);color:rgba(163,191,160,0.9);font-family:var(--font-mono);font-size:10px;}\n' +
+    '.t-ssl-cert-checker .valid .progress > div{background:rgba(148,226,213,0.8);}\n' +
+    '.t-ssl-cert-checker .expired .progress > div{background:rgba(243,139,168,0.8);}\n' +
+    '.t-ssl-cert-checker .pending .progress > div{background:rgba(249,226,175,0.8);}\n' +
+    '.t-ssl-cert-checker .chip{display:inline-block;padding:0.125rem 0.375rem;border-radius:4px;font-family:var(--font-mono);font-size:10px;border:1px solid rgba(243,139,168,0.3);color:var(--ctp-red);}\n' +
+    '.t-ssl-cert-checker .pill{display:inline-block;padding:0.125rem 0.5rem;border-radius:999px;border:1px solid rgba(148,226,213,0.25);color:rgba(148,226,213,0.9);font-family:var(--font-mono);font-size:10px;}\n' +
     '.t-ssl-cert-checker .cert-err{color:var(--ctp-red);font-family:var(--font-mono);font-size:12px;padding:1.5rem 0;}\n' +
     '.t-ssl-cert-checker .timegrid{display:grid;grid-template-columns:1fr;gap:0.375rem;}\n' +
     '@media(min-width:640px){.t-ssl-cert-checker .timegrid{grid-template-columns:1fr 1fr;}}\n' +
-    '.t-ssl-cert-checker .timeblock{border:1px solid rgba(75,64,56,0.4);border-radius:6px;padding:0.5rem 0.75rem;}\n' +
+    '.t-ssl-cert-checker .timeblock{border:1px solid rgba(49,50,68,0.4);border-radius:6px;padding:0.5rem 0.75rem;}\n' +
     '.t-ssl-cert-checker .timeblock .lbl{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--ctp-green);}\n' +
-    '.t-ssl-cert-checker .timeblock .big{font-family:var(--font-mono);font-size:12px;color:rgba(202,170,152,0.9);margin-top:0.25rem;}\n' +
-    '.t-ssl-cert-checker .timeblock .sub{font-family:var(--font-mono);font-size:10px;color:rgba(154,134,120,0.5);margin-top:0.125rem;}\n' +
-    '.t-ssl-cert-checker .note{font-family:var(--font-mono);font-size:10px;color:rgba(154,134,120,0.5);line-height:1.6;}\n',
+    '.t-ssl-cert-checker .timeblock .big{font-family:var(--font-mono);font-size:12px;color:rgba(205,214,244,0.9);margin-top:0.25rem;}\n' +
+    '.t-ssl-cert-checker .timeblock .sub{font-family:var(--font-mono);font-size:10px;color:rgba(166,173,200,0.5);margin-top:0.125rem;}\n' +
+    '.t-ssl-cert-checker .note{font-family:var(--font-mono);font-size:10px;color:rgba(166,173,200,0.5);line-height:1.6;}\n',
 
   mount: function (root) {
     var output = App.el('div', { class: 'flex flex-col', style: { gap: '0.75rem' } });
@@ -463,7 +463,7 @@ App.registerTool('ssl-cert-checker', {
 
     root.appendChild(App.el('div', { class: 'flex flex-col', style: { gap: '0.75rem' } },
       App.el('div', { class: 'flex items-center gap-2 flex-wrap' },
-        App.el('span', { class: 'text-[10px] font-mono', style: { color: 'rgba(154,134,120,0.6)' }, text: 'PEM or DER certificate — parsed entirely in-browser (WebAssembly ASN.1 + SHA). Nothing is sent anywhere.' }),
+        App.el('span', { class: 'text-[10px] font-mono', style: { color: 'rgba(166,173,200,0.6)' }, text: 'PEM or DER certificate — parsed entirely in-browser (WebAssembly ASN.1 + SHA). Nothing is sent anywhere.' }),
         App.el('div', { class: 'flex', style: { marginLeft: 'auto', gap: '0.5rem' } }, sampleBtn, clearBtn)),
       textarea,
       output));
