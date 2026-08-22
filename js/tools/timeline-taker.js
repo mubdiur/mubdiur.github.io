@@ -2,9 +2,10 @@
    Timeline Taker — incident logbook.
    Ported from src/components/tools/timeline-taker.tsx.
    Date/time/summary entries, CSV import/export, keyboard
-   shortcuts (Ctrl+S save, Esc discard, Enter next row,
-   ↑/↓ adjust cells, Ctrl+↑/↓ move in summary column),
-   localStorage auto-save, auto-timestamps.
+   shortcuts (Ctrl+S save, Ctrl+Z/Ctrl+Shift+Z undo/redo,
+   Esc discard, Enter next row + autosave, ↑/↓ adjust cells,
+   Ctrl+↑/↓ move in summary column), localStorage auto-save,
+   auto-timestamps.
    ═══════════════════════════════════════════════════════════ */
 (function () {
 'use strict';
@@ -93,6 +94,9 @@ App.registerTool('timeline-taker', {
     var confirmClear = false;
     var fileInput = null;
     var tbody = null;
+    var undoStack = [];
+    var redoStack = [];
+    var lastHistoryAt = 0;
 
     var btnPrimary =
       'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-mono font-medium bg-ctp-teal/15 border border-ctp-teal/30 text-ctp-teal hover:bg-ctp-teal/25 transition-colors';
@@ -133,6 +137,7 @@ App.registerTool('timeline-taker', {
     }
 
     function discard() {
+      pushHistory();
       try {
         var raw = localStorage.getItem(STORAGE_KEY);
         if (raw) entries = JSON.parse(raw).map(function (e) { return Object.assign({}, e, { state: 'saved' }); });
@@ -144,11 +149,64 @@ App.registerTool('timeline-taker', {
       ensureTrailing();
     }
 
+    /* ── history (undo / redo) ── */
+
+    var HISTORY_MAX = 100;
+    var HISTORY_COALESCE_MS = 800;
+
+    function snapshotEntries() {
+      return entries.map(function (e) { return Object.assign({}, e); });
+    }
+
+    function pushHistory() {
+      var now = Date.now();
+      // coalesce rapid edits (typing bursts) into a single undo step
+      if (now - lastHistoryAt < HISTORY_COALESCE_MS && undoStack.length) return;
+      undoStack.push(snapshotEntries());
+      if (undoStack.length > HISTORY_MAX) undoStack.shift();
+      redoStack = [];
+      lastHistoryAt = now;
+    }
+
+    function undo() {
+      if (!undoStack.length) return;
+      redoStack.push(snapshotEntries());
+      entries = undoStack.pop();
+      lastHistoryAt = 0;
+      renderTable();
+      ensureTrailing();
+      restoreFocusAfterHistory();
+    }
+
+    function redo() {
+      if (!redoStack.length) return;
+      undoStack.push(snapshotEntries());
+      entries = redoStack.pop();
+      lastHistoryAt = 0;
+      renderTable();
+      ensureTrailing();
+      restoreFocusAfterHistory();
+    }
+
+    function restoreFocusAfterHistory() {
+      // the focused row may have been removed by the restore; fall back to the first row
+      var active = document.activeElement;
+      if (active && active.tagName === 'INPUT') return;
+      var rows = tbody.querySelectorAll('tr');
+      if (!rows.length) return;
+      var inputs = rows[0].querySelectorAll('input');
+      var summary = inputs[inputs.length - 1];
+      if (summary) summary.focus();
+    }
+
     /* ── entry mutations ── */
 
     function updateField(id, kind, value) {
       var entry = findEntry(id);
       if (!entry) return;
+      var old = kind === 'date' ? entry.date : kind === 'time' ? entry.time : entry.summary;
+      if (old === value) return;
+      pushHistory();
       var hadDate = entry.date;
       var hadTime = entry.time;
       if (kind === 'date') entry.date = value;
@@ -250,6 +308,7 @@ App.registerTool('timeline-taker', {
     }
 
     function applyImport(mode) {
+      pushHistory();
       var imported = pendingImport.map(function (e) { return Object.assign({}, e, { state: 'saved' }); });
       var next = mode === 'append' ? entries.concat(imported) : imported.slice();
       entries = next;
@@ -262,6 +321,7 @@ App.registerTool('timeline-taker', {
     }
 
     function clearAll() {
+      pushHistory();
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch (err) {
@@ -300,6 +360,9 @@ App.registerTool('timeline-taker', {
       summaryInput.addEventListener('keydown', function (ev) {
         if (ev.key === 'Enter') {
           ev.preventDefault();
+          var entry = findEntry(e.id);
+          if (entry && entry.summary.trim()) save();
+          lastHistoryAt = 0; // Enter commits the row: next row starts a fresh undo step
           if (!focusAdjacentSummary(e.id, 1)) {
             appendRow();
             App.timer(function () { focusLastSummary(); }, 0);
@@ -392,6 +455,12 @@ App.registerTool('timeline-taker', {
       if (ev.ctrlKey && ev.key.toLowerCase() === 's') {
         ev.preventDefault();
         save();
+      } else if (ev.ctrlKey && ev.key.toLowerCase() === 'z') {
+        ev.preventDefault();
+        if (ev.shiftKey) redo(); else undo();
+      } else if (ev.ctrlKey && ev.key.toLowerCase() === 'y') {
+        ev.preventDefault();
+        redo();
       } else if (ev.key === 'Escape') {
         ev.preventDefault();
         discard();
@@ -406,7 +475,9 @@ App.registerTool('timeline-taker', {
     var header = App.el('div', { class: 'flex flex-wrap items-center justify-between gap-3' },
       App.el('div', { class: 'flex flex-wrap items-center gap-1.5 font-mono text-xs muted-70' },
         App.el('kbd', { text: 'Ctrl+S' }), App.el('span', { text: ' save · ' }),
-        App.el('kbd', { text: 'Esc' }), App.el('span', { text: ' discard · ' }),
+        App.el('kbd', { text: 'Ctrl+Z' }), App.el('span', { text: ' undo · ' }),
+        App.el('kbd', { text: 'Ctrl+Shift+Z' }), App.el('span', { text: ' redo · ' }),
+        App.el('kbd', { text: 'Enter' }), App.el('span', { text: ' autosaves row · ' }),
         App.el('kbd', { text: '↑' }), App.el('span', { text: '/' }),
         App.el('kbd', { text: '↓' }), App.el('span', { text: ' adjust date/time · ' }),
         App.el('kbd', { text: 'Ctrl+↑' }), App.el('span', { text: '/' }),
