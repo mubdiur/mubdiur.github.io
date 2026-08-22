@@ -70,6 +70,26 @@ function tzOffsetMinutes(d, zone) {
   return sign * (parseInt(m[2], 10) * 60 + parseInt(m[3], 10));
 }
 
+/** Wall clock (YYYY-MM-DDTHH:mm) in a zone at a given instant. */
+function wallInZone(d, zone) {
+  var dtf = new Intl.DateTimeFormat('en-CA', {
+    timeZone: zone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  });
+  var parts = {};
+  var i, p;
+  for (i = 0; i < dtf.formatToParts(d).length; i++) {
+    p = dtf.formatToParts(d)[i];
+    parts[p.type] = p.value;
+  }
+  return parts.year + '-' + parts.month + '-' + parts.day + 'T' + parts.hour + ':' + parts.minute;
+}
+
 /** Interpret "YYYY-MM-DDTHH:mm" as wall time in an IANA zone → absolute Date (DST-aware). */
 function parseZonedWallTime(value, zone) {
   var m = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
@@ -77,9 +97,26 @@ function parseZonedWallTime(value, zone) {
   var nums = m.map(Number);
   var Y = nums[1], Mo = nums[2], D = nums[3], H = nums[4], Mi = nums[5];
   if (Mo < 1 || Mo > 12 || D < 1 || D > 31 || H > 23 || Mi > 59) return null;
-  var guess = new Date(Date.UTC(Y, Mo - 1, D, H, Mi));
-  if (Number.isNaN(guess.getTime())) return null;
-  return new Date(guess.getTime() - tzOffsetMinutes(guess, zone) * 60000);
+  var wallUTC = new Date(Date.UTC(Y, Mo - 1, D, H, Mi));
+  if (Number.isNaN(wallUTC.getTime())) return null;
+  // Reject dates the calendar normalizes away (e.g. Feb 30 → Mar 2).
+  if (wallUTC.getUTCFullYear() !== Y || wallUTC.getUTCMonth() !== Mo - 1 || wallUTC.getUTCDate() !== D) return null;
+  // Iterate until the wall time round-trips: on DST transition days the offset
+  // at the naive instant differs from the offset at the real instant, so a
+  // single pass is off by an hour for wall times entered around the jump.
+  var inst = wallUTC;
+  var seen = {};
+  var first = null;
+  for (var pass = 0; pass < 4; pass++) {
+    var cand = new Date(wallUTC.getTime() - tzOffsetMinutes(inst, zone) * 60000);
+    if (first === null) first = cand;
+    if (wallInZone(cand, zone) === value) return cand;
+    var key = String(cand.getTime());
+    if (seen[key]) break; // nonexistent wall time (spring-forward): nothing round-trips
+    seen[key] = true;
+    inst = cand;
+  }
+  return first; // nonexistent wall time resolves forward to the post-transition instant
 }
 
 var CUSTOM_TZ_OPTIONS = [
