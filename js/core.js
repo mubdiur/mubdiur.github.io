@@ -186,6 +186,9 @@ var App = {
     if (!match) match = '*';
     var fn = App.pages[match] || App.pages['*'];
     main.innerHTML = '';
+    /* the IDE is a full-height app page — drop the marketing footer there */
+    var footerEl = document.getElementById('site-footer');
+    if (footerEl) footerEl.style.display = (path === '/ide' || path.indexOf('/ide') === 0) ? 'none' : '';
     if (!fn) {
       main.appendChild(App.el('div', { class: 'not-found' },
         App.el('span', { class: 'nf-title', text: 'Page not found' }),
@@ -246,7 +249,7 @@ var App = {
         App.el('span', { class: 'brand-box', text: 'MR' }),
         App.el('span', { class: 'brand-name', text: 'mubdiur' }),
         App.el('span', { class: 'brand-sub', text: 'dev arsenal' })),
-      App.el('nav', { class: 'nav-links-desktop' }, linkEls[0], App.el('span', { class: 'nav-divider' }), linkEls[1], App.el('span', { class: 'nav-divider' }), searchBtn),
+      App.el('nav', { class: 'nav-links-desktop' }, linkEls[0], App.el('span', { class: 'nav-divider' }), linkEls[1], App.el('span', { class: 'nav-divider' }), linkEls[2], App.el('span', { class: 'nav-divider' }), searchBtn),
       mobile
     ));
   },

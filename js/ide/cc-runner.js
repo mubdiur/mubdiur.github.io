@@ -34,7 +34,7 @@ function ensureToolchain() {
   return toolchainPromise;
 }
 
-function runWasi(module, args, preopens, onOut) {
+function runWasi(module, args, preopens, stdinText, onOut) {
   return import('./vendor/wasi/index.js').then(function (wasiMod) {
     var WASI = wasiMod.WASI;
     var File = wasiMod.File;
@@ -44,22 +44,30 @@ function runWasi(module, args, preopens, onOut) {
 
     var outLines = [];
     var errLines = [];
+    var outDec = new TextDecoder('utf-8');
+    var errDec = new TextDecoder('utf-8');
     var fds = [
-      new OpenFile(new File([])), // stdin
-      ConsoleStdout.lineBuffered(function (msg) { outLines.push(msg); }),
-      ConsoleStdout.lineBuffered(function (msg) { errLines.push(msg); }),
+      // stdin is a plain byte buffer (type-ahead; empty buffer reads EOF).
+      // Must NOT be lineBuffered: wasi-libc buffers internally, so direct
+      // writes flush on newline AND on exit — output without a trailing
+      // newline (e.g. `printf("Hello world")`) is never lost.
+      new OpenFile(new File(new TextEncoder().encode(stdinText || ''))),
+      new ConsoleStdout(function (msg) { outLines.push(outDec.decode(msg)); }),
+      new ConsoleStdout(function (msg) { errLines.push(errDec.decode(msg)); }),
       new PreopenDirectory('.', preopens || [])
     ];
     var wasi = new WASI(args, ['PATH=/usr/bin', 'HOME=/'], fds);
     return WebAssembly.instantiate(module, { wasi_snapshot_preview1: wasi.wasiImport }).then(function (inst) {
+      var code = 0;
       try {
         wasi.start(inst);
       } catch (e) {
-        // WASIProcExit is normal program termination
-        if (!(e instanceof wasiMod.WASIProcExit)) throw e;
+        // WASIProcExit is normal program termination — carry its exit code
+        if (e instanceof wasiMod.WASIProcExit) code = e.code;
+        else throw e;
       }
       return {
-        code: 0,
+        code: code,
         out: outLines.join('\n'),
         err: errLines.join('\n')
       };
@@ -67,18 +75,28 @@ function runWasi(module, args, preopens, onOut) {
   });
 }
 
+/* clang-style diagnostics: main.c:7:2: error: message */
+function parseDiagnostics(text) {
+  var diags = [];
+  var re = /^([^:\n]+):(\d+):(\d+):\s+(error|warning):\s*(.*)$/gm;
+  var m;
+  while ((m = re.exec(String(text || '')))) {
+    diags.push({ line: +m[2], col: +m[3], message: m[5], severity: m[4] });
+  }
+  return diags;
+}
+
+function postDiags(diags) {
+  if (diags && diags.length) self.postMessage({ type: 'diag', diags: diags });
+}
+
 self.addEventListener('message', function (e) {
   if (running) return;
   var code = (e.data && e.data.code) || '';
   var lang = (e.data && e.data.lang) || 'c';
+  var stdinText = (e.data && e.data.stdin) || '';
   running = true;
   compileWarnings = '';
-
-  function finish() {
-    if (!running) return;
-    running = false;
-    post('exit', '', { code: 0 });
-  }
 
   var timer = setTimeout(function () {
     if (!running) return;
@@ -107,18 +125,20 @@ self.addEventListener('message', function (e) {
       clearTimeout(compileTimer);
       if (!res.module) {
         running = false;
-        post('err', 'Compilation failed:\n' + (res.compileOutput || 'unknown error'));
+        var failText = 'Compilation failed:\n' + (res.compileOutput || 'unknown error');
+        post('err', failText);
+        postDiags(parseDiagnostics(res.compileOutput));
         post('exit', '', { code: 1 });
         return null;
       }
       var stderr = res.compileOutput || '';
       if (stderr && /warning/i.test(stderr)) compileWarnings = stderr;
       post('status', 'Running…');
-      return runWasi(res.module, [fileName], [['main.c', new TextEncoder().encode(code)]], null);
+      return runWasi(res.module, [fileName], [['main.c', new TextEncoder().encode(code)]], stdinText);
     }).then(function (out) {
       if (!out) return;
       clearTimeout(timer);
-      if (compileWarnings) post('err', compileWarnings);
+      if (compileWarnings) { post('err', compileWarnings); postDiags(parseDiagnostics(compileWarnings)); }
       if (out.out) post('out', out.out);
       if (out.err) post('err', out.err);
       running = false;

@@ -1,10 +1,14 @@
 /* ═══════════════════════════════════════════════════════════
    Python runner — real CPython 3.14 (Pyodide) in a Web Worker.
-   First run downloads ~12 MB from the jsDelivr CDN (immutable,
-   browser-cached); afterwards it starts instantly.
+   First run downloads ~12 MB (vendored, immutable, browser-cached);
+   afterwards it starts instantly.
    Persistent worker: kept alive between runs; only self-closes
    when a run is terminated by the timeout.
-   Protocol: { code } in → { type:'status'|'out'|'err'|'exit' } out.
+   stdin: Pyodide's stdin callback is synchronous, so input is a
+   type-ahead buffer — the content of the IDE's stdin box is sent
+   with the run payload and served line-by-line to input(); an
+   empty buffer reads EOF.
+   Protocol: { code, lang, stdin } in → { type:'status'|'out'|'err'|'exit' } out.
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -16,10 +20,30 @@ var pyodidePromise = null;
 var running = false;
 var stdoutBuf = '';
 var stderrBuf = '';
+var stdinQueue = [];
 
 function post(type, text) {
   self.postMessage({ type: type, text: text || '' });
 }
+
+/* Line-buffered streaming: complete lines go out immediately, partial
+   lines wait for the next write (or are flushed at the end of the run). */
+function onStdout(s) {
+  if (!running) return;
+  stdoutBuf += s;
+  var lines = stdoutBuf.split('\n');
+  stdoutBuf = lines.pop();
+  if (lines.length) post('out', lines.join('\n'));
+}
+function onStderr(s) {
+  if (!running) return;
+  stderrBuf += s;
+  var lines = stderrBuf.split('\n');
+  stderrBuf = lines.pop();
+  if (lines.length) post('err', lines.join('\n'));
+}
+function flushStdout() { if (stdoutBuf) { post('out', stdoutBuf); stdoutBuf = ''; } }
+function flushStderr() { if (stderrBuf) { post('err', stderrBuf); stderrBuf = ''; } }
 
 function ensurePyodide() {
   if (!pyodidePromise) {
@@ -32,8 +56,13 @@ function ensurePyodide() {
         // extra packages like numpy are not bundled, so loadPackage errors
         // cleanly instead of reaching a CDN)
         packageBaseUrl: localBase,
-        stdout: function (s) { if (running) stdoutBuf += s + '\n'; },
-        stderr: function (s) { if (running) stderrBuf += s + '\n'; }
+        stdout: onStdout,
+        stderr: onStderr,
+        stdin: function () {
+          // synchronous queue — Pyodide's stdin callback cannot be async
+          // in a worker, so the queue is filled from the run payload
+          return stdinQueue.length ? stdinQueue.shift() : undefined;
+        }
       });
     }).then(function (py) {
       post('status', 'Python ' + py.version + ' ready');
@@ -44,20 +73,38 @@ function ensurePyodide() {
   return pyodidePromise;
 }
 
+/* Traceback diagnostics: File "<exec>", line N … and a final error line. */
+function parseDiagnostics(errText) {
+  var diags = [];
+  var lines = String(errText || '').split('\n');
+  var lineNo = null;
+  var m;
+  for (var i = 0; i < lines.length; i++) {
+    m = /File "<exec>", line (\d+)/.exec(lines[i]);
+    if (m) lineNo = +m[1];
+  }
+  if (lineNo === null) {
+    for (i = 0; i < lines.length; i++) {
+      m = /line (\d+)\)?\s*$/.exec(lines[i].trim());
+      if (m) { lineNo = +m[1]; break; }
+    }
+  }
+  var msg = '';
+  for (var j = lines.length - 1; j >= 0; j--) {
+    if (lines[j].trim()) { msg = lines[j].trim(); break; }
+  }
+  if (lineNo) diags.push({ line: lineNo, col: 1, message: msg, severity: 'error' });
+  return diags;
+}
+
 self.addEventListener('message', function (e) {
   if (running) return;
   var code = (e.data && e.data.code) || '';
+  var rawStdin = (e.data && e.data.stdin) || '';
   running = true;
   stdoutBuf = '';
   stderrBuf = '';
-
-  function finish() {
-    if (!running) return;
-    running = false;
-    if (stdoutBuf) post('out', stdoutBuf);
-    if (stderrBuf) post('err', stderrBuf);
-    post('exit', '', { code: 0 });
-  }
+  stdinQueue = rawStdin === '' ? [] : rawStdin.replace(/\n$/, '').split('\n');
 
   var timer = setTimeout(function () {
     if (!running) return;
@@ -71,15 +118,24 @@ self.addEventListener('message', function (e) {
     post('status', 'Running…');
     try {
       var err = pyodide.runPython(code);
-      if (err !== undefined && stdoutBuf.indexOf(String(err)) < 0) stdoutBuf += String(err);
+      if (err !== undefined) onStdout(String(err) + '\n');
     } catch (ex) {
-      stderrBuf += String(ex.message || ex);
+      var errText = String(ex.message || ex);
+      onStderr(errText + '\n');
+      var diags = parseDiagnostics(errText);
+      if (diags.length) self.postMessage({ type: 'diag', diags: diags });
     }
     clearTimeout(timer);
-    finish();
+    flushStdout();
+    flushStderr();
+    running = false;
+    post('exit', '', { code: 0 });
   }).catch(function (err) {
     clearTimeout(timer);
-    stderrBuf += String((err && err.message) || err);
-    finish();
+    onStderr(String((err && err.message) || err) + '\n');
+    flushStdout();
+    flushStderr();
+    running = false;
+    post('exit', '', { code: 1 });
   });
 });

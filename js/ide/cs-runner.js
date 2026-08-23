@@ -18,6 +18,17 @@ function post(type, text) {
   self.postMessage({ type: type, text: text || '' });
 }
 
+/* Roslyn diagnostics: main.cs(5,2): error CS1002: ; expected */
+function parseDiagnostics(text) {
+  var diags = [];
+  var re = /\((\d+),(\d+)\):\s*(error|warning)\s+[A-Z]+\d+:\s*(.*)$/gm;
+  var m;
+  while ((m = re.exec(String(text || '')))) {
+    diags.push({ line: +m[1], col: +m[2], message: m[4], severity: m[3] });
+  }
+  return diags;
+}
+
 /* Forward mono/dotnet console chatter so failures are visible. */
 ['log', 'info', 'warn', 'error', 'debug'].forEach(function (level) {
   var orig = console[level] ? console[level].bind(console) : null;
@@ -78,7 +89,11 @@ self.addEventListener('message', function (e) {
     var res;
     try { res = JSON.parse(json); } catch (ex) { res = { out: '', err: json }; }
     if (res.out) post('out', res.out);
-    if (res.err) post('err', res.err);
+    if (res.err) {
+      post('err', res.err);
+      var diags = parseDiagnostics(res.err);
+      if (diags.length) self.postMessage({ type: 'diag', diags: diags });
+    }
     running = false;
     post('exit', '', { code: res.err ? 1 : 0 });
   }).catch(function (err) {

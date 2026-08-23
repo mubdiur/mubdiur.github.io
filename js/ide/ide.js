@@ -4,17 +4,20 @@
    panel, running 8 languages entirely in the tab. Every compiler
    is vendored same-origin (no CDN); editor state persists to
    localStorage and engine payloads are cached via the Cache API.
+   stdin: the input box below the output pipes input to the
+   program — live for JavaScript (readline / process.stdin), and
+   type-ahead (sent when you press Run) for Python, C, C++, Rust.
    ═══════════════════════════════════════════════════════════ */
 (function () {
 'use strict';
 
 var LANGUAGES = [
   { id: 'js',   name: 'JavaScript', runner: 'js-sandbox.js', module: false, timeout: 25, sample:
-'// Node-lite sandbox — console, timers, process, Buffer,\n// require() with a small builtin set, in-memory fs.\n\nconst items = [1, 2, 3, 4, 5];\nconst doubled = items.map(n => n * 2);\nconsole.log("doubled:", doubled);\n\nsetTimeout(() => {\n  console.log("async works too");\n}, 100);\n\nconsole.log("sum:", items.reduce((a, b) => a + b, 0));' },
+'// Node-lite sandbox — console, timers, process, Buffer,\n// require() with a small builtin set, in-memory fs.\n// readline() is interactive: type in the stdin box below\n// while the program runs.\n\nconst name = await readline("What\'s your name? ");\nconsole.log("Hello, " + name + "!");\n\nconst items = [1, 2, 3, 4, 5];\nconsole.log("sum:", items.reduce((a, b) => a + b, 0));\n\nsetTimeout(() => {\n  console.log("async works too");\n}, 100);' },
   { id: 'py',   name: 'Python',    runner: 'py-runner.js',   module: true,  timeout: 45, sample:
-'# Real CPython 3.14 (Pyodide, vendored)\n\ndef fib(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n\nprint("fib(20) =", fib(20))\n\nimport math\nprint("pi =", round(math.pi, 6))\n\nwords = "the quick brown fox".split()\nprint(" ".join(w.upper() for w in reversed(words)))' },
+'# Real CPython 3.14 (Pyodide, vendored). input() reads from\n# the stdin box below — type your answer there before Run.\n\ntry:\n    name = input("What\'s your name? ")\nexcept EOFError:\n    name = "stranger"\nprint(f"Hello, {name}!")\n\ndef fib(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n\nprint("fib(20) =", fib(20))' },
   { id: 'c',    name: 'C',         runner: 'cc-runner.js',   module: true,  timeout: 150, sample:
-'#include <stdio.h>\n\nint main(void) {\n    printf("Hello from C!\\n");\n    for (int i = 1; i <= 5; i++) {\n        printf("%d ", i * i);\n    }\n    printf("\\n");\n    return 0;\n}' },
+'#include <stdio.h>\n\nint main(void) {\n    printf("Hello from C!\\n");\n    for (int i = 1; i <= 5; i++) {\n        printf("%d ", i * i);\n    }\n    printf("\\n");\n\n    // Type two numbers into the stdin box below, then press Run.\n    int a = 0, b = 0;\n    if (scanf("%d %d", &a, &b) == 2)\n        printf("%d + %d = %d\\n", a, b, a + b);\n    else\n        printf("(no stdin — type numbers in the input box, then Run)\\n");\n    return 0;\n}' },
   { id: 'cpp',  name: 'C++',       runner: 'cc-runner.js',   module: true,  timeout: 150, sample:
 '#include <iostream>\n#include <vector>\n#include <algorithm>\n\nint main() {\n    std::vector<int> v = {5, 2, 8, 1, 9};\n    std::sort(v.begin(), v.end());\n    std::cout << "sorted:";\n    for (int n : v) std::cout << " " << n;\n    std::cout << "\\n";\n    return 0;\n}' },
   { id: 'cs',   name: 'C#',        runner: 'cs-runner.js',   module: true,  timeout: 90, sample:
@@ -24,11 +27,15 @@ var LANGUAGES = [
   { id: 'go',   name: 'Go',        runner: 'go-runner.js',   module: true,  timeout: 90, sample:
 'package main\n\nimport (\n\t"fmt"\n\t"strings"\n)\n\nfunc main() {\n\twords := []string{"go", "in", "the", "browser"}\n\tfmt.Println("joined:", strings.Join(words, " "))\n\tfmt.Println("upper:", strings.ToUpper(strings.Join(words, "-")))\n}' },
   { id: 'rs',   name: 'Rust',      runner: 'rust-runner.js', module: true,  timeout: 90, sample:
-'fn main() {\n    let v = vec![1, 2, 3, 4, 5];\n    let doubled: Vec<i32> = v.iter().map(|x| x * 2).collect();\n    println!("doubled: {:?}", doubled);\n    println!("sum: {}", doubled.iter().sum::<i32>());\n}' }
+'use std::io::{self, BufRead};\n\nfn main() {\n    let v = vec![1, 2, 3, 4, 5];\n    let doubled: Vec<i32> = v.iter().map(|x| x * 2).collect();\n    println!("doubled: {:?}", doubled);\n\n    // Type a line into the stdin box below, then press Run.\n    let line = io::stdin().lock().lines().next();\n    match line {\n        Some(Ok(l)) => println!("you typed: {}", l.trim()),\n        _ => println!("(no stdin — type something in the input box, then Run)"),\n    }\n}' }
 ];
+
+/* Languages whose engines can read stdin at all (Go/C#/Java expose none). */
+var STDIN_LANGS = ['js', 'py', 'c', 'cpp', 'rs'];
 
 var STORE_KEY = 'mub.ide.v1';
 var RUNNER_DIR = 'js/ide/';
+var STDIN_WAIT_MS = 120000; // how long a run may wait for typed input
 
 var state = { lang: 'js', code: {} };
 var workers = {};
@@ -37,6 +44,11 @@ var editor = null;
 var outputEl = null;
 var statusEl = null;
 var runBtn = null;
+var stdinRow = null;
+var stdinInput = null;
+var stdinSend = null;
+var stdinWaiting = false;
+var stdinSupported = true;
 var runningLang = null;
 var runStart = 0;
 
@@ -72,7 +84,7 @@ function getWorker(lang) {
   var def = langDef(lang);
   var entry = workers[lang];
   if (entry && entry.alive) return entry.w;
-  var w = new Worker(RUNNER_DIR + def.runner + '?v=3', { type: def.module ? 'module' : 'classic' });
+  var w = new Worker(RUNNER_DIR + def.runner + '?v=5', { type: def.module ? 'module' : 'classic' });
   w.__lang = lang;
   w.addEventListener('message', function (e) { onWorkerMessage(lang, w, e.data || {}); });
   w.addEventListener('error', function (e) {
@@ -95,24 +107,29 @@ function onWorkerMessage(lang, w, m) {
   if (m.type === 'status') setStatus(m.text);
   else if (m.type === 'out') appendOutput(String(m.text || ''), false);
   else if (m.type === 'err') appendOutput(String(m.text || ''), true);
+  else if (m.type === 'diag') { if (editor && editor.setDiagnostics) editor.setDiagnostics(m.diags || []); }
+  else if (m.type === 'stdin') onStdinRequest();
   else if (m.type === 'exit') {
     if (m.terminated) markDead(lang);
     finishRun(m.code === null || m.code === undefined ? null : m.code, !!m.terminated);
   }
 }
 
-function kickWatchdog(lang) {
-  var def = langDef(lang);
+function armWatchdog(ms) {
   clearTimeout(watchdog);
   watchdog = setTimeout(function () {
-    var entry = workers[lang];
-    if (entry && entry.alive && runningLang === lang) {
-      appendOutput('\n[terminated: no response for ' + def.timeout + 's — check for infinite loops]\n', true);
+    var entry = workers[runningLang];
+    if (entry && entry.alive && runningLang) {
+      appendOutput('\n[terminated: no response for ' + Math.round(ms / 1000) + 's — check for infinite loops]\n', true);
       try { entry.w.terminate(); } catch (e) {}
-      markDead(lang);
+      markDead(runningLang);
       finishRun(null, true);
     }
-  }, def.timeout * 1000);
+  }, ms);
+}
+
+function kickWatchdog(lang) {
+  armWatchdog(langDef(lang).timeout * 1000);
 }
 
 function setStatus(text) {
@@ -133,23 +150,44 @@ function appendOutput(text, isErr) {
 
 function clearOutput() {
   if (outputEl) outputEl.innerHTML = '';
+  if (stdinRow) stdinRow.classList.remove('waiting');
+  stdinWaiting = false;
 }
 
 function finishRun(code, terminated) {
   runningLang = null;
   clearTimeout(watchdog);
+  if (stdinRow) stdinRow.classList.remove('waiting');
+  stdinWaiting = false;
   if (runBtn) {
     runBtn.disabled = false;
     runBtn.innerHTML = '<span class="ide-run-glyph">▶</span> Run';
   }
+  setTabsEnabled(true);
   var secs = ((Date.now() - runStart) / 1000).toFixed(1);
   if (terminated) setStatus('terminated after ' + secs + 's');
   else if (code) setStatus('exited with code ' + code + ' in ' + secs + 's');
   else setStatus('finished in ' + secs + 's');
 }
 
+function setTabsEnabled(enabled) {
+  var tabs = document.querySelectorAll('.ide-tab');
+  tabs.forEach(function (t) { t.disabled = !enabled; });
+}
+
+function stopRun() {
+  if (!runningLang) return;
+  var lang = runningLang;
+  var entry = workers[lang];
+  clearTimeout(watchdog);
+  if (entry && entry.alive) { try { entry.w.terminate(); } catch (e) {} }
+  markDead(lang);
+  finishRun(null, true);
+  setStatus('stopped');
+}
+
 function runCode() {
-  if (runningLang) return;
+  if (runningLang || !editor) return;
   var lang = state.lang;
   var code = editor.getValue();
   state.code[lang] = code;
@@ -157,12 +195,41 @@ function runCode() {
   runningLang = lang;
   runStart = Date.now();
   runBtn.disabled = true;
-  runBtn.innerHTML = '<span class="ide-run-glyph spin">◌</span> Running…';
+  runBtn.innerHTML = '<span class="ide-run-glyph">■</span> Stop';
+  runBtn.title = 'Stop the run';
+  setTabsEnabled(false);
   clearOutput();
+  if (editor && editor.clearDiagnostics) editor.clearDiagnostics();
   setStatus('Starting ' + langDef(lang).name + '…');
   var w = getWorker(lang);
   kickWatchdog(lang);
-  w.postMessage({ code: code, lang: lang });
+  var payload = { code: code, lang: lang };
+  if (STDIN_LANGS.indexOf(lang) >= 0) payload.stdin = stdinInput ? stdinInput.value : '';
+  w.postMessage(payload);
+}
+
+/* ── stdin box (bottom of the output panel) ── */
+
+function onStdinRequest() {
+  stdinWaiting = true;
+  stdinRow.classList.add('waiting');
+  setStatus('awaiting input — type in the box below');
+  armWatchdog(STDIN_WAIT_MS); // a human is typing: extend the watchdog
+  stdinInput.focus();
+}
+
+function deliverStdin() {
+  var line = stdinInput.value;
+  stdinInput.value = '';
+  stdinWaiting = false;
+  stdinRow.classList.remove('waiting');
+  var entry = workers[state.lang];
+  if (entry && entry.alive && !runningLang) return; // run already over
+  if (entry && entry.alive) {
+    entry.w.postMessage({ type: 'stdin', line: line });
+    setStatus('input sent — program continues');
+  }
+  kickWatchdog(state.lang);
 }
 
 /* ── page ── */
@@ -174,47 +241,54 @@ function renderIde() {
   var css = document.createElement('style');
   css.id = 'ide-css';
   css.textContent =
-    '.ide-page{height:calc(100vh - 220px);min-height:520px;display:flex;flex-direction:column;gap:0.6rem;padding:0.5rem 1rem 1rem;}' +
-    '.ide-head{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}' +
+    '.ide-page{height:calc(100vh - 120px);height:calc(100dvh - 120px);min-height:460px;display:flex;flex-direction:column;gap:0.5rem;padding:0.5rem 1rem 0.75rem;}' +
+    '.ide-head{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;}' +
+    '.ide-head-left{display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;min-width:0;}' +
+    '.ide-head-right{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;}' +
     '.ide-title{font-family:var(--font-mono);font-size:15px;font-weight:600;color:rgba(233,233,236,0.92);}' +
-    '.ide-sub{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);}' +
+    '.ide-sub{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);display:none;}' +
+    '@media(min-width:1400px){.ide-sub{display:inline;}}' +
     '.ide-badge{font-family:var(--font-mono);font-size:10px;padding:2px 8px;border-radius:999px;border:1px solid rgba(194,220,212,0.25);color:var(--ctp-teal);background:rgba(194,220,212,0.06);white-space:nowrap;}' +
-    '.ide-tabs{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}' +
-    '.ide-tab{font-family:var(--font-mono);font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--mantle);color:var(--ink-soft);cursor:pointer;transition:all .15s;}' +
-    '.ide-tab:hover{color:var(--foreground);border-color:var(--rule-strong);}' +
+    '.ide-tabs{display:flex;gap:3px;flex-wrap:wrap;align-items:center;}' +
+    '.ide-tab{font-family:var(--font-mono);font-size:10.5px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--mantle);color:var(--ink-soft);cursor:pointer;transition:all .15s;}' +
+    '.ide-tab:hover:not(:disabled){color:var(--foreground);border-color:var(--rule-strong);}' +
     '.ide-tab.active{background:rgba(194,220,212,0.12);color:var(--ctp-teal);border-color:rgba(194,220,212,0.35);}' +
-    '.ide-tab .ide-tabdot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:6px;background:var(--rule-strong);vertical-align:middle;}' +
+    '.ide-tab:disabled{opacity:0.5;cursor:not-allowed;}' +
+    '.ide-tab .ide-tabdot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:5px;background:var(--rule-strong);vertical-align:middle;}' +
     '.ide-tab.active .ide-tabdot{background:var(--ctp-teal);}' +
-    '.ide-runbar{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}' +
-    '.ide-run-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:12px;font-weight:600;padding:7px 18px;border-radius:7px;border:1px solid rgba(194,220,212,0.4);background:rgba(194,220,212,0.12);color:var(--ctp-teal);cursor:pointer;transition:all .15s;}' +
+    '.ide-run-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:12px;font-weight:600;padding:6px 16px;border-radius:7px;border:1px solid rgba(194,220,212,0.4);background:rgba(194,220,212,0.12);color:var(--ctp-teal);cursor:pointer;transition:all .15s;}' +
     '.ide-run-btn:hover:not(:disabled){background:rgba(194,220,212,0.2);}' +
     '.ide-run-btn:disabled{opacity:0.55;cursor:wait;}' +
     '.ide-run-glyph{font-size:10px;}' +
-    '.ide-run-glyph.spin{display:inline-block;animation:spin 1s linear infinite;}' +
-    '@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}' +
-    '.ide-status{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);flex:1;text-align:right;}' +
     '.ide-main{display:flex;flex:1;min-height:0;gap:0.6rem;}' +
     '.ide-editor-wrap{flex:1;min-width:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#0a0b10;}' +
     '.ide-panel{width:380px;flex:none;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:8px;background:#0a0b10;min-height:0;}' +
-    '.ide-outhead{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-bottom:1px solid rgba(30,32,41,0.8);}' +
-    '.ide-outlabel{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);}' +
-    '.ide-clear{font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);background:none;border:none;cursor:pointer;}' +
+    '.ide-outhead{display:flex;align-items:center;gap:0.75rem;padding:6px 12px;border-bottom:1px solid rgba(30,32,41,0.8);}' +
+    '.ide-outlabel{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);flex:none;}' +
+    '.ide-status{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-faint);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}' +
+    '.ide-clear{font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);background:none;border:none;cursor:pointer;flex:none;}' +
     '.ide-clear:hover{color:var(--foreground);}' +
     '.ide-output{flex:1;min-height:0;overflow-y:auto;padding:10px 12px;font-family:var(--font-mono);font-size:12px;line-height:1.5;}' +
     '.ide-line{white-space:pre-wrap;word-break:break-all;color:#c8d4e4;}' +
     '.ide-line.err{color:rgba(228,205,212,0.95);}' +
-    '.ide-foot{font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);display:flex;gap:14px;flex-wrap:wrap;}' +
-    '@media(max-width:900px){.ide-main{flex-direction:column;}.ide-panel{width:auto;height:240px;}}' +
-    '@media(max-width:640px){.ide-page{height:calc(100vh - 300px);}}';
+    '.ide-stdin{display:flex;align-items:center;gap:0.5rem;padding:6px 12px;border-top:1px solid rgba(30,32,41,0.8);}' +
+    '.ide-stdin.waiting{background:rgba(194,220,212,0.08);box-shadow:inset 0 1px 0 rgba(194,220,212,0.25);}' +
+    '.ide-stdin-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);flex:none;}' +
+    '.ide-stdin.waiting .ide-stdin-label{color:var(--ctp-teal);}' +
+    '.ide-stdin-input{flex:1;min-width:0;background:#0a0b10;border:1px solid var(--border);border-radius:6px;color:var(--foreground);font-family:var(--font-mono);font-size:12px;padding:5px 10px;outline:none;}' +
+    '.ide-stdin-input:focus{border-color:rgba(194,220,212,0.45);}' +
+    '.ide-stdin-send{font-family:var(--font-mono);font-size:11px;font-weight:600;padding:4px 12px;border-radius:6px;border:1px solid rgba(194,220,212,0.35);background:rgba(194,220,212,0.1);color:var(--ctp-teal);cursor:pointer;flex:none;}' +
+    '.ide-stdin-send:hover{background:rgba(194,220,212,0.18);}' +
+    '@media(max-width:900px){.ide-main{flex-direction:column;}.ide-panel{width:auto;height:220px;}}' +
+    '@media(max-width:640px){.ide-page{height:calc(100dvh - 150px);min-height:480px;}}';
   document.head.appendChild(css);
 
-  /* header */
-  root.appendChild(App.el('div', { class: 'ide-head' },
+  /* header: title left, language tabs + run controls right */
+  var headLeft = App.el('div', { class: 'ide-head-left' },
     App.el('span', { class: 'ide-title', text: 'In-Browser IDE' }),
     App.el('span', { class: 'ide-badge', text: '8 languages · zero servers · zero CDN' }),
-    App.el('span', { class: 'ide-sub', text: 'every compiler runs as WebAssembly in this tab' })));
+    App.el('span', { class: 'ide-sub', text: 'every compiler runs as WebAssembly in this tab' }));
 
-  /* language tabs */
   var tabs = App.el('div', { class: 'ide-tabs' });
   LANGUAGES.forEach(function (l) {
     var dot = App.el('span', { class: 'ide-tabdot' });
@@ -223,7 +297,7 @@ function renderIde() {
       type: 'button',
       title: l.name,
       onclick: function () {
-        if (runningLang) return;
+        if (runningLang || !editor) return;
         state.code[state.lang] = editor.getValue();
         state.lang = l.id;
         saveState();
@@ -231,59 +305,86 @@ function renderIde() {
         tab.classList.add('active');
         editor.setLanguage(l.id);
         editor.setValue(state.code[l.id] || l.sample);
+        if (editor.clearDiagnostics) editor.clearDiagnostics();
         clearOutput();
+        syncStdin();
         setStatus(l.name + ' — press Run (Ctrl+Enter)');
+        editor.focus();
       }
     }, dot, l.name);
     tabs.appendChild(tab);
   });
-  root.appendChild(tabs);
 
-  /* run bar */
-  runBtn = App.el('button', { class: 'ide-run-btn', type: 'button' },
+  runBtn = App.el('button', { class: 'ide-run-btn', type: 'button', title: 'Run (Ctrl+Enter)' },
     App.el('span', { class: 'ide-run-glyph', text: '▶' }), App.el('span', { text: 'Run' }));
-  runBtn.addEventListener('click', runCode);
-  statusEl = App.el('span', { class: 'ide-status', text: 'Ready' });
-  root.appendChild(App.el('div', { class: 'ide-runbar' }, runBtn,
-    App.el('kbd', { style: { fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--ink-faint)' }, text: 'Ctrl+Enter' }),
-    statusEl));
+  runBtn.addEventListener('click', function () { if (runningLang) stopRun(); else runCode(); });
+  var headRight = App.el('div', { class: 'ide-head-right' }, tabs, runBtn,
+    App.el('kbd', { style: { fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--ink-faint)' }, text: 'Ctrl+Enter' }));
+  root.appendChild(App.el('div', { class: 'ide-head' }, headLeft, headRight));
 
-  /* editor + output side by side */
+  /* editor + output panel side by side */
   var editorWrap = App.el('div', { class: 'ide-editor-wrap' });
+  statusEl = App.el('span', { class: 'ide-status', text: 'Loading editor…' });
   var outHead = App.el('div', { class: 'ide-outhead' },
     App.el('span', { class: 'ide-outlabel', text: 'Output' }),
+    statusEl,
     App.el('button', { class: 'ide-clear', type: 'button', text: 'clear', onclick: function () { clearOutput(); } }));
   outputEl = App.el('div', { class: 'ide-output' });
-  var panel = App.el('div', { class: 'ide-panel' }, outHead, outputEl);
+
+  /* stdin row: pipes input to the program */
+  stdinInput = App.el('input', {
+    class: 'ide-stdin-input', type: 'text', autocomplete: 'off', spellcheck: 'false',
+    placeholder: 'type input — it goes to the program',
+    'aria-label': 'stdin input'
+  });
+  stdinInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); deliverStdin(); }
+  });
+  stdinSend = App.el('button', { class: 'ide-stdin-send', type: 'button', text: 'Send ↵' });
+  stdinSend.addEventListener('click', deliverStdin);
+  stdinRow = App.el('div', { class: 'ide-stdin' },
+    App.el('span', { class: 'ide-stdin-label', text: 'stdin' }), stdinInput, stdinSend);
+
+  var panel = App.el('div', { class: 'ide-panel' }, outHead, outputEl, stdinRow);
   root.appendChild(App.el('div', { class: 'ide-main' }, editorWrap, panel));
 
-  /* footer */
-  root.appendChild(App.el('div', { class: 'ide-foot' },
-    App.el('span', { text: 'compilers: Pyodide · clang · .NET+Roslyn · 199xVM · GopherJS · rustc — all vendored, lazy-loaded once, cached in your browser' }),
-    App.el('span', { text: 'Kotlin: no in-browser compiler exists (kotlinc needs a JVM; the old kotlin-compiler-js was removed from npm)' })));
-
   /* CodeMirror editor (vendored bundle) */
-  var editorReady = false;
-  import('/js/ide/vendor/editor.js?v=3').then(function (mod) {    editor = mod.createIdeEditor(editorWrap, {
+  import('/js/ide/vendor/editor.js?v=6').then(function (mod) {
+    editor = mod.createIdeEditor(editorWrap, {
       value: state.code[state.lang] || langDef(state.lang).sample,
       language: state.lang,
       onRun: runCode
     });
-    editorReady = true;
     editor.view.dom.addEventListener('input', function () {
       state.code[state.lang] = editor.getValue();
       saveState();
+      if (editor.clearDiagnostics) editor.clearDiagnostics();
     });
     setStatus(langDef(state.lang).name + ' — press Run (Ctrl+Enter)');
-    if (window.__ideFocus) editor.focus();
+    editor.focus();
   }).catch(function (err) {
     editorWrap.appendChild(App.el('div', { class: 'not-found', html: '<span class="nf-sub">Editor failed to load: ' + App.esc(err.message || err) + '</span>' }));
   });
 
-  setStatus('Loading editor…');
+  function syncStdin() {
+    stdinSupported = STDIN_LANGS.indexOf(state.lang) >= 0;
+    stdinRow.classList.toggle('hidden', !stdinSupported);
+    var live = state.lang === 'js';
+    stdinInput.placeholder = live
+      ? 'type input — delivered live to the running program'
+      : (stdinSupported ? 'stdin — sent to the program when you press Run' : '');
+  }
+  syncStdin();
+
+  /* run from anywhere: Ctrl+Enter even when focus is in the output panel */
+  var onGlobalKey = function (e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); runCode(); }
+  };
+  document.addEventListener('keydown', onGlobalKey);
 
   /* persistence + cleanup */
   App.onUnmount(function () {
+    document.removeEventListener('keydown', onGlobalKey);
     clearTimeout(saveTimer);
     clearTimeout(watchdog);
     Object.keys(workers).forEach(function (k) { try { workers[k].w.terminate(); } catch (e) {} });
@@ -291,6 +392,7 @@ function renderIde() {
     if (editor && editor.destroy) { try { editor.destroy(); } catch (e) {} }
     editor = null;
     runningLang = null;
+    stdinWaiting = false;
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
   });
   window.addEventListener('beforeunload', function () {

@@ -17,6 +17,18 @@ function post(type, text) {
   self.postMessage({ type: type, text: text || '' });
 }
 
+/* 199xVM javac errors: Unexpected token: ; (";") at line 1:59 */
+function parseDiagnostics(text) {
+  var diags = [];
+  var textStr = String(text || '');
+  var re = /at line (\d+):(\d+)/g;
+  var m;
+  while ((m = re.exec(textStr))) {
+    diags.push({ line: +m[1], col: +m[2], message: textStr.split('\n')[0].slice(0, 200), severity: 'error' });
+  }
+  return diags;
+}
+
 var enginePromise = null;
 
 function ensureEngine() {
@@ -135,14 +147,21 @@ self.addEventListener('message', function (e) {
     if (printed) post('out', printed);
     if (errs) post('err', errs);
     if (result && result !== 'void' && result.indexOf('ERROR:') !== 0) post('out', result + '\n');
-    if (result.indexOf('ERROR:') === 0) post('err', result + '\n');
+    if (result.indexOf('ERROR:') === 0) {
+      post('err', result + '\n');
+      var diags = parseDiagnostics(result);
+      if (diags.length) self.postMessage({ type: 'diag', diags: diags });
+    }
     clearTimeout(timer);
     running = false;
     post('exit', '', { code: 0 });
   }).catch(function (err) {
     clearTimeout(timer);
     running = false;
-    post('err', String((err && err.message) || err));
+    var errText = String((err && err.message) || err);
+    post('err', errText);
+    var diags = parseDiagnostics(errText);
+    if (diags.length) self.postMessage({ type: 'diag', diags: diags });
     post('exit', '', { code: 1 });
   });
 });

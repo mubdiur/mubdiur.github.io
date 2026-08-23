@@ -9,7 +9,7 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-import { Directory, Fd, File, PreopenDirectory, WASI } from './vendor/wasi/index.js';
+import { Directory, Fd, File, OpenFile, PreopenDirectory, WASI } from './vendor/wasi/index.js';
 import { cachedGunzip } from './cache.js';
 
 var RUN_TIMEOUT = 30000;
@@ -95,10 +95,24 @@ function parseDiagnostics(log) {
       message: d.message,
       code: d.code && d.code.code ? d.code.code : null,
       rendered: ansi.replace(ANSI_RE, ''),
-      ansi
+      ansi,
+      line: sp ? sp.line_start : 1,
+      col: sp ? sp.column_start : 1,
+      endLine: sp ? sp.line_end : undefined,
+      endCol: sp ? sp.column_end : undefined
     });
   }
   return out;
+}
+
+/* rustc diagnostics carry 1-based spans — map them to IDE diagnostics */
+function toDiags(diagnostics) {
+  return (diagnostics || []).map((d) => ({
+    line: d.line, col: d.col,
+    endLine: d.endLine, endCol: d.endCol,
+    message: d.message,
+    severity: d.level === 'warning' ? 'warning' : 'error'
+  }));
 }
 
 /* compile + link (one rustc.wasm invocation) then execute */
@@ -148,7 +162,11 @@ async function runJob(msg, status) {
   const CapErrStream = class extends Fd {
     fd_write(data) { progErr += dec2.decode(data, { stream: true }); return { ret: 0, nwritten: data.byteLength }; }
   };
-  const pfds = [new CapOut(), new CapOut(), new CapErrStream(), new PreopenDirectory('/sandbox', [])];
+  // fd 0 = stdin: a plain byte buffer (type-ahead; empty buffer reads EOF)
+  const pfds = [
+    new OpenFile(new File(new TextEncoder().encode(msg.stdin || ''))),
+    new CapOut(), new CapErrStream(), new PreopenDirectory('/sandbox', [])
+  ];
   const pw = new WASI(['prog'], [], pfds, { debug: false });
   try {
     const { instance } = await WebAssembly.instantiate(bin.data.slice().buffer, {
@@ -193,7 +211,7 @@ self.onmessage = async (e) => {
     let result;
     try {
       await ensureEngine();
-      result = await runJob({ source: source }, status);
+      result = await runJob({ source: source, stdin: msg.stdin }, status);
     } catch (err) {
       result = { ok: false, stdout: '', stderr: 'engine error: ' + String((err && err.message) || err), exit: 1 };
     }
@@ -203,10 +221,13 @@ self.onmessage = async (e) => {
     if (result.ok) {
       if (result.stdout) self.postMessage({ type: 'out', text: result.stdout });
       if (result.stderr) self.postMessage({ type: 'err', text: result.stderr });
+      const warnings = (result.diagnostics || []).filter((d) => d.level === 'warning');
+      if (warnings.length) self.postMessage({ type: 'diag', diags: toDiags(warnings) });
     } else {
       // render diagnostics as readable text
       var diag = (result.diagnostics || []).map(function (d) { return d.rendered; }).join('\n');
       self.postMessage({ type: 'err', text: diag || result.stderr || 'compilation failed (exit ' + result.exit + ')' });
+      self.postMessage({ type: 'diag', diags: toDiags(result.diagnostics || []) });
     }
     self.postMessage({ type: 'exit', text: '', code: result.ok ? 0 : 1 });
   }

@@ -24,6 +24,17 @@ function post(type, text) {
   self.postMessage({ type: type, text: text || '' });
 }
 
+/* GopherJS compiler errors: main.go:5:2: undefined: foo */
+function parseDiagnostics(text) {
+  var diags = [];
+  var re = /^main\.go:(\d+):(\d+):\s*(.*)$/gm;
+  var m;
+  while ((m = re.exec(String(text || '')))) {
+    diags.push({ line: +m[1], col: +m[2], message: m[3], severity: 'error' });
+  }
+  return diags;
+}
+
 /* The compiler worker fetches precompiled stdlib packages via
    xhr.NewRequest("GET", "pkg/" + importPath + ".zip") — after gunzip it runs
    from a blob URL, so patch the base to an absolute same-origin path. */
@@ -79,9 +90,28 @@ function compileGo(worker, code) {
 function runGo(js, onOut, onErr, onDone) {
   var wrap =
     'var $global = self;\n' +
+    // The runtime picks its fs shim from $global.fs; without it, environments
+    // with a real `require` (Node) fall back to native fs writes that bypass
+    // us entirely. Providing writeSync/write here guarantees every program
+    // write reaches the IDE panel in any environment.
+    'self.fs = {\n' +
+    '  constants: { O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1 },\n' +
+    '  writeSync: function(fd, buf) { postMessage({type: fd == 1 ? "out" : "err", content: new TextDecoder("utf-8").decode(buf)}); return buf.length; },\n' +
+    '  write: function(fd, buf, off, len, pos, cb) { try { cb(null, this.writeSync(fd, buf)); } catch (e) { cb(e); } }\n' +
+    '};\n' +
     'self.gopherjsWriteSyncHook = function(fd, text) { postMessage({type: fd == 1 ? "out" : "err", content: text}); };\n' +
     'self.gopherjsPanicHandler = function(msg) { postMessage({type: "panic", content: msg}); };\n' +
-    'self.process = { exit: function(code) { postMessage({type: "exit", content: code == null ? 0 : code}); try { self.close(); } catch (e) {} } };\n' +
+    'self.process = {\n' +
+    '  argv: ["go", "/main.go"],\n' +
+    '  env: {},\n' +
+    '  pid: 1,\n' +
+    '  platform: "browser",\n' +
+    '  browser: true,\n' +
+    '  versions: { node: "20.0.0" },\n' +
+    '  stdout: { isTTY: true, write: function(s) { postMessage({type: "out", content: String(s)}); } },\n' +
+    '  stderr: { isTTY: true, write: function(s) { postMessage({type: "err", content: String(s)}); } },\n' +
+    '  exit: function(code) { postMessage({type: "exit", content: code == null ? 0 : code}); try { self.close(); } catch (e) {} }\n' +
+    '};\n' +
     'self.$checkForDeadlock = true;\n' +
     'try {\n' + js + '\n' +
     '} catch (err) { self.gopherjsPanicHandler(err.message); }\n';
@@ -136,6 +166,8 @@ self.addEventListener('message', function (e) {
         clearTimeout(timer);
         running = false;
         post('err', 'Compilation failed:\n' + res.error);
+        var diags = parseDiagnostics(res.error);
+        if (diags.length) self.postMessage({ type: 'diag', diags: diags });
         post('exit', '', { code: 1 });
         return null;
       }

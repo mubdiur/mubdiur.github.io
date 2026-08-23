@@ -38,6 +38,18 @@ Engine payloads lazy-load on first use per language and are persisted in the
 browser's Cache Storage API — after the first run of a language there is no
 redownload, and the editor state (code + active tab) is saved to localStorage.
 
+**stdin** — the input box below the output panel pipes input to the program:
+JavaScript reads it **live** while the program runs (`readline(prompt)` /
+`process.stdin`), and Python, C, C++ and Rust take it as a type-ahead buffer
+(input typed before pressing Run). Go, C# and Java expose no stdin in their
+in-browser engines.
+
+**In-editor diagnostics** — compile and runtime errors are marked in the
+editor like a real IDE: a `✕`/`⚠` gutter marker, a line tint, and a wavy
+underline on the offending span for C/C++, C++, Rust, Python, JavaScript, Go
+and Java. C# is the exception: its vendored .NET host formats Roslyn errors
+as `CS####: message` without source positions.
+
 **Kotlin — recorded decision: omitted.** No browser-runnable Kotlin compiler
 exists, verified exhaustively (2026-08): the only client-side Kotlin compiler
 ever shipped (`kotlin-compiler-js`) was removed from npm/unpkg/jsDelivr and is
