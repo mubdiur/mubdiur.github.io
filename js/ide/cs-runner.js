@@ -1,0 +1,90 @@
+/* ═══════════════════════════════════════════════════════════
+   C# runner — .NET 10 Mono WebAssembly runtime (the runtime Blazor
+   uses) + the Roslyn C# compiler, all vendored same-origin.
+   A tiny host assembly (IdeHost) loads Roslyn from the runtime VFS,
+   compiles the user's source and executes it, returning captured
+   stdout/errors as JSON. First run downloads ~40 MB (gzipped); the
+   worker then stays alive for instant subsequent runs.
+   Protocol: { code } in → { type:'status'|'out'|'err'|'exit' } out.
+   ═══════════════════════════════════════════════════════════ */
+'use strict';
+
+import { cachedBytes } from './cache.js';
+
+var RUN_TIMEOUT = 30000;
+var running = false;
+
+function post(type, text) {
+  self.postMessage({ type: type, text: text || '' });
+}
+
+/* Forward mono/dotnet console chatter so failures are visible. */
+['log', 'info', 'warn', 'error', 'debug'].forEach(function (level) {
+  var orig = console[level] ? console[level].bind(console) : null;
+  console[level] = function () {
+    var text = Array.prototype.map.call(arguments, function (a) {
+      return typeof a === 'string' ? a : ((a && a.stack) || String(a));
+    }).join(' ');
+    if (level === 'error') post('err', text);
+    else post('status', text);
+    if (orig) orig.apply(null, arguments);
+  };
+});
+
+var runtimePromise = null;
+
+function ensureRuntime() {
+  if (!runtimePromise) {
+    runtimePromise = (async function () {
+      post('status', 'Starting .NET runtime…');
+      var dotnetMod = await import('./vendor/dotnet/dotnet.js');
+
+      post('status', 'Loading framework assemblies (first run only)…');
+      var api = await dotnetMod.dotnet
+        .withModuleConfig({
+          locateFile: function (path) {
+            if (String(path).indexOf('.dll') > 0) return 'vendor/dotnet/dll/' + path;
+            return path;
+          }
+        })
+        .withConfigSrc('dotnet.boot.json')
+        .create();
+      var exports = await api.getAssemblyExports('IdeHost.dll');
+      post('status', '.NET + Roslyn ready');
+      return exports.IdeHost;
+    })();
+    runtimePromise.catch(function (err) { runtimePromise = null; });
+  }
+  return runtimePromise;
+}
+
+self.addEventListener('message', function (e) {
+  if (running) return;
+  var code = (e.data && e.data.code) || '';
+  running = true;
+
+  var timer = setTimeout(function () {
+    if (!running) return;
+    running = false;
+    post('err', '\n[terminated: execution exceeded ' + Math.round(RUN_TIMEOUT / 1000) + 's — check for infinite loops]\n');
+    post('exit', '', { code: null, terminated: true });
+    try { self.close(); } catch (ex) {}
+  }, RUN_TIMEOUT);
+
+  ensureRuntime().then(function (host) {
+    post('status', 'Compiling…');
+    var json = host.CompileAndRun(code);
+    clearTimeout(timer);
+    var res;
+    try { res = JSON.parse(json); } catch (ex) { res = { out: '', err: json }; }
+    if (res.out) post('out', res.out);
+    if (res.err) post('err', res.err);
+    running = false;
+    post('exit', '', { code: res.err ? 1 : 0 });
+  }).catch(function (err) {
+    clearTimeout(timer);
+    running = false;
+    post('err', String((err && err.message) || err));
+    post('exit', '', { code: 1 });
+  });
+});

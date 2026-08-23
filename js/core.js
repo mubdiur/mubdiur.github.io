@@ -222,9 +222,11 @@ var App = {
     var nav = document.getElementById('site-nav');
     var path = App.route();
     var isTools = path === '/tools' || path.indexOf('/tools') === 0;
+    var isIde = path === '/ide' || path.indexOf('/ide') === 0;
     var isHome = path === '/' || path === '';
     var links = [
       { href: '#/', label: 'Home', active: isHome },
+      { href: '#/ide', label: 'IDE', active: isIde },
       { href: '#/tools', label: 'Tools', active: isTools }
     ];
     var linkEls = links.map(function (l) {
@@ -266,6 +268,7 @@ var App = {
     var backdrop = App.el('div', { class: 'drawer-backdrop', onclick: function () { close(); } });
     var drawer = App.el('div', { class: 'mobile-drawer' },
       App.el('a', { class: 'drawer-link' + (App.route() === '/' ? ' active' : ''), href: '#/', text: 'Home' }),
+      App.el('a', { class: 'drawer-link' + (App.route().indexOf('/ide') === 0 ? ' active' : ''), href: '#/ide', text: 'IDE' }),
       App.el('a', { class: 'drawer-link' + (App.route().indexOf('/tools') === 0 ? ' active' : ''), href: '#/tools', text: 'Tools' }),
       App.el('div', { class: 'drawer-footer', text: 'Press ⌘K to search' }));
     function close() { backdrop.remove(); drawer.remove(); }

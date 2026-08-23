@@ -1,21 +1,68 @@
 # mubdiur.github.io
 
-The Mubdiur Times — personal site and 80-utility developer toolshed.
+The Mubdiur Times — personal site, developer toolshed, and an in-browser IDE.
 
 **Fully static.** No server, no build step, no dependencies, no Node.js. Everything
 runs in your browser, with a **WebAssembly core** doing the heavy lifting.
 
 ## What's inside
 
-- `index.html` — single-page app shell (hash routing: `#/`, `#/tools`, `#/tools/<slug>`)
+- `index.html` — single-page app shell (hash routing: `#/`, `#/ide`, `#/tools`, `#/tools/<slug>`)
 - `css/app.css` — the whole design system (tinted monochrome + newspaper theme)
-- `js/` — vanilla JavaScript: app core, router, 79-tool manifest, pages, and tools
+- `js/` — vanilla JavaScript: app core, router, tool manifest, pages, and tools
+- `js/ide/` — the in-browser IDE (`#/ide`): single-file editor + Run for 8 languages
 - `wasm/core.wasm` — WebAssembly core compiled from `wasm/core.rs` (Rust, `no_std`):
   - **Crypto**: MD5, SHA-1, SHA-256, SHA-384, SHA-512, HMAC, CRC32
   - **QR**: full ISO/IEC 18004 encoder (versions 1–40, all EC levels, scannable)
   - **ASN.1**: DER parser (X.509-ready)
 - `portfolio.html` — the dossier page
 - `robots.txt`, `sitemap.xml`, `og.png`, `favicon.ico`, `.nojekyll`
+
+## The in-browser IDE
+
+`#/ide` compiles and runs **JavaScript, Python, C, C++, C#, Java, Go and Rust**
+entirely in the tab — every compiler/runtime is a WebAssembly build **vendored in
+this repo** (nothing is fetched from a CDN):
+
+| Language | Engine (vendored) | License |
+|---|---|---|
+| JavaScript/Node-lite | sandboxed worker + builtin shim (0 downloads) | — |
+| Python | Pyodide (CPython 3.14 → WASM) | MPL-2.0 |
+| C / C++ | browsercc (Clang + wasm-ld → WASM) | MIT |
+| C# | .NET 10 Mono WASM runtime + Roslyn | MIT |
+| Java | 199xVM (TS javac + Rust JVM interpreter → WASM) | GPL-2.0 |
+| Go | GopherJS 1.20 (Go compiler → JS) | BSD-3-Clause |
+| Rust | rustc → WASM (Cranelift backend, from the Weblings project) | MIT |
+
+Engine payloads lazy-load on first use per language and are persisted in the
+browser's Cache Storage API — after the first run of a language there is no
+redownload, and the editor state (code + active tab) is saved to localStorage.
+
+**Kotlin — recorded decision: omitted.** No browser-runnable Kotlin compiler
+exists, verified exhaustively (2026-08): the only client-side Kotlin compiler
+ever shipped (`kotlin-compiler-js`) was removed from npm/unpkg/jsDelivr and is
+unarchived; `kotlinc` is a JVM application and JVM-in-WASM runtimes (CheerpJ)
+require a paid license to self-host, which this site's all-local constraint
+forbids; the one C-based Kotlin→WASM compiler (MiniKotlin) had its repository
+removed. The IDE page and this README document the omission; the user approved
+dropping Kotlin ("we can probably just ommit kotlin if they are so eager to not
+provide a wasm for kotlin").
+
+Vendored third-party sources live under `js/ide/vendor/*` with their licenses.
+
+### Rebuilding the editor bundle
+
+The CodeMirror editor is bundled once from `build/editor-entry.js` (npm
+packages, dev-only) into `js/ide/vendor/editor.js`:
+
+```sh
+npm install codemirror @codemirror/* @lezer/* esbuild   # in a scratch dir
+esbuild build/editor-entry.js --bundle --format=esm --minify \
+  --outfile=js/ide/vendor/editor.js --target=es2020
+```
+
+`test-ide.js` is a Node harness that runs every runner worker end-to-end
+(`node test-ide.js js`, `node test-ide.js go`, …).
 
 ## Deploy to GitHub Pages
 

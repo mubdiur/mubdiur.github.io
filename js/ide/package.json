@@ -1,0 +1,6 @@
+{
+  "name": "mubdiur-ide",
+  "private": true,
+  "type": "module",
+  "description": "In-browser IDE runner workers (module scripts). Browsers ignore this file; it exists so the workers can be loaded as ES modules in Node-based tooling."
+}

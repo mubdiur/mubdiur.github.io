@@ -1,0 +1,1778 @@
+{
+ "mainAssemblyName": "IdeHost.dll",
+ "debugLevel": 0,
+ "linkerEnabled": false,
+ "globalizationMode": "invariant",
+ "cacheBootResources": false,
+ "resources": {
+  "assembly": [
+   {
+    "name": "System.Private.CoreLib.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Private.CoreLib.dll"
+   },
+   {
+    "name": "IdeHost.dll",
+    "resolvedUrl": "vendor/dotnet/dll/IdeHost.dll"
+   },
+   {
+    "name": "Microsoft.CSharp.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.CSharp.dll"
+   },
+   {
+    "name": "Microsoft.CodeAnalysis.CSharp.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.CodeAnalysis.CSharp.dll"
+   },
+   {
+    "name": "Microsoft.CodeAnalysis.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.CodeAnalysis.dll"
+   },
+   {
+    "name": "Microsoft.VisualBasic.Core.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.VisualBasic.Core.dll"
+   },
+   {
+    "name": "Microsoft.VisualBasic.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.VisualBasic.dll"
+   },
+   {
+    "name": "Microsoft.Win32.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.Win32.Primitives.dll"
+   },
+   {
+    "name": "Microsoft.Win32.Registry.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.Win32.Registry.dll"
+   },
+   {
+    "name": "System.AppContext.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.AppContext.dll"
+   },
+   {
+    "name": "System.Buffers.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Buffers.dll"
+   },
+   {
+    "name": "System.Collections.Concurrent.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Collections.Concurrent.dll"
+   },
+   {
+    "name": "System.Collections.Immutable.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Collections.Immutable.dll"
+   },
+   {
+    "name": "System.Collections.NonGeneric.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Collections.NonGeneric.dll"
+   },
+   {
+    "name": "System.Collections.Specialized.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Collections.Specialized.dll"
+   },
+   {
+    "name": "System.Collections.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Collections.dll"
+   },
+   {
+    "name": "System.ComponentModel.Annotations.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ComponentModel.Annotations.dll"
+   },
+   {
+    "name": "System.ComponentModel.DataAnnotations.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ComponentModel.DataAnnotations.dll"
+   },
+   {
+    "name": "System.ComponentModel.EventBasedAsync.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ComponentModel.EventBasedAsync.dll"
+   },
+   {
+    "name": "System.ComponentModel.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ComponentModel.Primitives.dll"
+   },
+   {
+    "name": "System.ComponentModel.TypeConverter.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ComponentModel.TypeConverter.dll"
+   },
+   {
+    "name": "System.ComponentModel.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ComponentModel.dll"
+   },
+   {
+    "name": "System.Configuration.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Configuration.dll"
+   },
+   {
+    "name": "System.Console.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Console.dll"
+   },
+   {
+    "name": "System.Core.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Core.dll"
+   },
+   {
+    "name": "System.Data.Common.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Data.Common.dll"
+   },
+   {
+    "name": "System.Data.DataSetExtensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Data.DataSetExtensions.dll"
+   },
+   {
+    "name": "System.Data.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Data.dll"
+   },
+   {
+    "name": "System.Diagnostics.Contracts.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.Contracts.dll"
+   },
+   {
+    "name": "System.Diagnostics.Debug.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.Debug.dll"
+   },
+   {
+    "name": "System.Diagnostics.DiagnosticSource.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.DiagnosticSource.dll"
+   },
+   {
+    "name": "System.Diagnostics.FileVersionInfo.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.FileVersionInfo.dll"
+   },
+   {
+    "name": "System.Diagnostics.Process.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.Process.dll"
+   },
+   {
+    "name": "System.Diagnostics.StackTrace.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.StackTrace.dll"
+   },
+   {
+    "name": "System.Diagnostics.TextWriterTraceListener.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.TextWriterTraceListener.dll"
+   },
+   {
+    "name": "System.Diagnostics.Tools.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.Tools.dll"
+   },
+   {
+    "name": "System.Diagnostics.TraceSource.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.TraceSource.dll"
+   },
+   {
+    "name": "System.Diagnostics.Tracing.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.Tracing.dll"
+   },
+   {
+    "name": "System.Drawing.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Drawing.Primitives.dll"
+   },
+   {
+    "name": "System.Drawing.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Drawing.dll"
+   },
+   {
+    "name": "System.Dynamic.Runtime.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Dynamic.Runtime.dll"
+   },
+   {
+    "name": "System.Formats.Asn1.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Formats.Asn1.dll"
+   },
+   {
+    "name": "System.Formats.Tar.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Formats.Tar.dll"
+   },
+   {
+    "name": "System.Globalization.Calendars.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Globalization.Calendars.dll"
+   },
+   {
+    "name": "System.Globalization.Extensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Globalization.Extensions.dll"
+   },
+   {
+    "name": "System.Globalization.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Globalization.dll"
+   },
+   {
+    "name": "System.IO.Compression.Brotli.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Compression.Brotli.dll"
+   },
+   {
+    "name": "System.IO.Compression.FileSystem.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Compression.FileSystem.dll"
+   },
+   {
+    "name": "System.IO.Compression.ZipFile.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Compression.ZipFile.dll"
+   },
+   {
+    "name": "System.IO.Compression.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Compression.dll"
+   },
+   {
+    "name": "System.IO.FileSystem.AccessControl.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.FileSystem.AccessControl.dll"
+   },
+   {
+    "name": "System.IO.FileSystem.DriveInfo.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.FileSystem.DriveInfo.dll"
+   },
+   {
+    "name": "System.IO.FileSystem.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.FileSystem.Primitives.dll"
+   },
+   {
+    "name": "System.IO.FileSystem.Watcher.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.FileSystem.Watcher.dll"
+   },
+   {
+    "name": "System.IO.FileSystem.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.FileSystem.dll"
+   },
+   {
+    "name": "System.IO.IsolatedStorage.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.IsolatedStorage.dll"
+   },
+   {
+    "name": "System.IO.MemoryMappedFiles.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.MemoryMappedFiles.dll"
+   },
+   {
+    "name": "System.IO.Pipelines.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Pipelines.dll"
+   },
+   {
+    "name": "System.IO.Pipes.AccessControl.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Pipes.AccessControl.dll"
+   },
+   {
+    "name": "System.IO.Pipes.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Pipes.dll"
+   },
+   {
+    "name": "System.IO.UnmanagedMemoryStream.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.UnmanagedMemoryStream.dll"
+   },
+   {
+    "name": "System.IO.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.dll"
+   },
+   {
+    "name": "System.Linq.AsyncEnumerable.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Linq.AsyncEnumerable.dll"
+   },
+   {
+    "name": "System.Linq.Expressions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Linq.Expressions.dll"
+   },
+   {
+    "name": "System.Linq.Parallel.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Linq.Parallel.dll"
+   },
+   {
+    "name": "System.Linq.Queryable.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Linq.Queryable.dll"
+   },
+   {
+    "name": "System.Linq.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Linq.dll"
+   },
+   {
+    "name": "System.Memory.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Memory.dll"
+   },
+   {
+    "name": "System.Net.Http.Json.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Http.Json.dll"
+   },
+   {
+    "name": "System.Net.Http.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Http.dll"
+   },
+   {
+    "name": "System.Net.HttpListener.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.HttpListener.dll"
+   },
+   {
+    "name": "System.Net.Mail.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Mail.dll"
+   },
+   {
+    "name": "System.Net.NameResolution.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.NameResolution.dll"
+   },
+   {
+    "name": "System.Net.NetworkInformation.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.NetworkInformation.dll"
+   },
+   {
+    "name": "System.Net.Ping.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Ping.dll"
+   },
+   {
+    "name": "System.Net.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Primitives.dll"
+   },
+   {
+    "name": "System.Net.Quic.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Quic.dll"
+   },
+   {
+    "name": "System.Net.Requests.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Requests.dll"
+   },
+   {
+    "name": "System.Net.Security.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Security.dll"
+   },
+   {
+    "name": "System.Net.ServerSentEvents.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.ServerSentEvents.dll"
+   },
+   {
+    "name": "System.Net.ServicePoint.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.ServicePoint.dll"
+   },
+   {
+    "name": "System.Net.Sockets.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Sockets.dll"
+   },
+   {
+    "name": "System.Net.WebClient.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.WebClient.dll"
+   },
+   {
+    "name": "System.Net.WebHeaderCollection.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.WebHeaderCollection.dll"
+   },
+   {
+    "name": "System.Net.WebProxy.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.WebProxy.dll"
+   },
+   {
+    "name": "System.Net.WebSockets.Client.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.WebSockets.Client.dll"
+   },
+   {
+    "name": "System.Net.WebSockets.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.WebSockets.dll"
+   },
+   {
+    "name": "System.Net.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.dll"
+   },
+   {
+    "name": "System.Numerics.Vectors.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Numerics.Vectors.dll"
+   },
+   {
+    "name": "System.Numerics.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Numerics.dll"
+   },
+   {
+    "name": "System.ObjectModel.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ObjectModel.dll"
+   },
+   {
+    "name": "System.Private.DataContractSerialization.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Private.DataContractSerialization.dll"
+   },
+   {
+    "name": "System.Private.Uri.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Private.Uri.dll"
+   },
+   {
+    "name": "System.Private.Xml.Linq.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Private.Xml.Linq.dll"
+   },
+   {
+    "name": "System.Private.Xml.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Private.Xml.dll"
+   },
+   {
+    "name": "System.Reflection.DispatchProxy.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.DispatchProxy.dll"
+   },
+   {
+    "name": "System.Reflection.Emit.ILGeneration.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.Emit.ILGeneration.dll"
+   },
+   {
+    "name": "System.Reflection.Emit.Lightweight.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.Emit.Lightweight.dll"
+   },
+   {
+    "name": "System.Reflection.Emit.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.Emit.dll"
+   },
+   {
+    "name": "System.Reflection.Extensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.Extensions.dll"
+   },
+   {
+    "name": "System.Reflection.Metadata.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.Metadata.dll"
+   },
+   {
+    "name": "System.Reflection.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.Primitives.dll"
+   },
+   {
+    "name": "System.Reflection.TypeExtensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.TypeExtensions.dll"
+   },
+   {
+    "name": "System.Reflection.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.dll"
+   },
+   {
+    "name": "System.Resources.Reader.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Resources.Reader.dll"
+   },
+   {
+    "name": "System.Resources.ResourceManager.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Resources.ResourceManager.dll"
+   },
+   {
+    "name": "System.Resources.Writer.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Resources.Writer.dll"
+   },
+   {
+    "name": "System.Runtime.CompilerServices.Unsafe.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.CompilerServices.Unsafe.dll"
+   },
+   {
+    "name": "System.Runtime.CompilerServices.VisualC.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.CompilerServices.VisualC.dll"
+   },
+   {
+    "name": "System.Runtime.Extensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Extensions.dll"
+   },
+   {
+    "name": "System.Runtime.Handles.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Handles.dll"
+   },
+   {
+    "name": "System.Runtime.InteropServices.JavaScript.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.InteropServices.JavaScript.dll"
+   },
+   {
+    "name": "System.Runtime.InteropServices.RuntimeInformation.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.InteropServices.RuntimeInformation.dll"
+   },
+   {
+    "name": "System.Runtime.InteropServices.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.InteropServices.dll"
+   },
+   {
+    "name": "System.Runtime.Intrinsics.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Intrinsics.dll"
+   },
+   {
+    "name": "System.Runtime.Loader.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Loader.dll"
+   },
+   {
+    "name": "System.Runtime.Numerics.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Numerics.dll"
+   },
+   {
+    "name": "System.Runtime.Serialization.Formatters.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Serialization.Formatters.dll"
+   },
+   {
+    "name": "System.Runtime.Serialization.Json.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Serialization.Json.dll"
+   },
+   {
+    "name": "System.Runtime.Serialization.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Serialization.Primitives.dll"
+   },
+   {
+    "name": "System.Runtime.Serialization.Xml.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Serialization.Xml.dll"
+   },
+   {
+    "name": "System.Runtime.Serialization.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Serialization.dll"
+   },
+   {
+    "name": "System.Runtime.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.dll"
+   },
+   {
+    "name": "System.Security.AccessControl.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.AccessControl.dll"
+   },
+   {
+    "name": "System.Security.Claims.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Claims.dll"
+   },
+   {
+    "name": "System.Security.Cryptography.Algorithms.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.Algorithms.dll"
+   },
+   {
+    "name": "System.Security.Cryptography.Cng.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.Cng.dll"
+   },
+   {
+    "name": "System.Security.Cryptography.Csp.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.Csp.dll"
+   },
+   {
+    "name": "System.Security.Cryptography.Encoding.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.Encoding.dll"
+   },
+   {
+    "name": "System.Security.Cryptography.OpenSsl.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.OpenSsl.dll"
+   },
+   {
+    "name": "System.Security.Cryptography.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.Primitives.dll"
+   },
+   {
+    "name": "System.Security.Cryptography.X509Certificates.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.X509Certificates.dll"
+   },
+   {
+    "name": "System.Security.Cryptography.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.dll"
+   },
+   {
+    "name": "System.Security.Principal.Windows.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Principal.Windows.dll"
+   },
+   {
+    "name": "System.Security.Principal.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Principal.dll"
+   },
+   {
+    "name": "System.Security.SecureString.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.SecureString.dll"
+   },
+   {
+    "name": "System.Security.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.dll"
+   },
+   {
+    "name": "System.ServiceModel.Web.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ServiceModel.Web.dll"
+   },
+   {
+    "name": "System.ServiceProcess.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ServiceProcess.dll"
+   },
+   {
+    "name": "System.Text.Encoding.CodePages.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Text.Encoding.CodePages.dll"
+   },
+   {
+    "name": "System.Text.Encoding.Extensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Text.Encoding.Extensions.dll"
+   },
+   {
+    "name": "System.Text.Encoding.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Text.Encoding.dll"
+   },
+   {
+    "name": "System.Text.Encodings.Web.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Text.Encodings.Web.dll"
+   },
+   {
+    "name": "System.Text.Json.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Text.Json.dll"
+   },
+   {
+    "name": "System.Text.RegularExpressions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Text.RegularExpressions.dll"
+   },
+   {
+    "name": "System.Threading.AccessControl.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.AccessControl.dll"
+   },
+   {
+    "name": "System.Threading.Channels.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Channels.dll"
+   },
+   {
+    "name": "System.Threading.Overlapped.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Overlapped.dll"
+   },
+   {
+    "name": "System.Threading.Tasks.Dataflow.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Tasks.Dataflow.dll"
+   },
+   {
+    "name": "System.Threading.Tasks.Extensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Tasks.Extensions.dll"
+   },
+   {
+    "name": "System.Threading.Tasks.Parallel.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Tasks.Parallel.dll"
+   },
+   {
+    "name": "System.Threading.Tasks.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Tasks.dll"
+   },
+   {
+    "name": "System.Threading.Thread.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Thread.dll"
+   },
+   {
+    "name": "System.Threading.ThreadPool.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.ThreadPool.dll"
+   },
+   {
+    "name": "System.Threading.Timer.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Timer.dll"
+   },
+   {
+    "name": "System.Threading.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.dll"
+   },
+   {
+    "name": "System.Transactions.Local.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Transactions.Local.dll"
+   },
+   {
+    "name": "System.Transactions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Transactions.dll"
+   },
+   {
+    "name": "System.ValueTuple.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ValueTuple.dll"
+   },
+   {
+    "name": "System.Web.HttpUtility.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Web.HttpUtility.dll"
+   },
+   {
+    "name": "System.Web.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Web.dll"
+   },
+   {
+    "name": "System.Windows.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Windows.dll"
+   },
+   {
+    "name": "System.Xml.Linq.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.Linq.dll"
+   },
+   {
+    "name": "System.Xml.ReaderWriter.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.ReaderWriter.dll"
+   },
+   {
+    "name": "System.Xml.Serialization.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.Serialization.dll"
+   },
+   {
+    "name": "System.Xml.XDocument.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.XDocument.dll"
+   },
+   {
+    "name": "System.Xml.XPath.XDocument.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.XPath.XDocument.dll"
+   },
+   {
+    "name": "System.Xml.XPath.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.XPath.dll"
+   },
+   {
+    "name": "System.Xml.XmlDocument.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.XmlDocument.dll"
+   },
+   {
+    "name": "System.Xml.XmlSerializer.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.XmlSerializer.dll"
+   },
+   {
+    "name": "System.Xml.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.dll"
+   },
+   {
+    "name": "System.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.dll"
+   },
+   {
+    "name": "WindowsBase.dll",
+    "resolvedUrl": "vendor/dotnet/dll/WindowsBase.dll"
+   },
+   {
+    "name": "mscorlib.dll",
+    "resolvedUrl": "vendor/dotnet/dll/mscorlib.dll"
+   },
+   {
+    "name": "netstandard.dll",
+    "resolvedUrl": "vendor/dotnet/dll/netstandard.dll"
+   }
+  ],
+  "wasmNative": [
+   {
+    "name": "dotnet.native.wasm"
+   }
+  ],
+  "jsModuleNative": [
+   {
+    "name": "dotnet.native.js"
+   }
+  ],
+  "jsModuleRuntime": [
+   {
+    "name": "dotnet.runtime.js"
+   }
+  ],
+  "vfs": [
+   {
+    "name": "vfs-System.Private.CoreLib.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Private.CoreLib.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Private.CoreLib.dll"
+   },
+   {
+    "name": "vfs-IdeHost.dll",
+    "behavior": "vfs",
+    "virtualPath": "IdeHost.dll",
+    "resolvedUrl": "vendor/dotnet/dll/IdeHost.dll"
+   },
+   {
+    "name": "vfs-Microsoft.CSharp.dll",
+    "behavior": "vfs",
+    "virtualPath": "Microsoft.CSharp.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.CSharp.dll"
+   },
+   {
+    "name": "vfs-Microsoft.CodeAnalysis.CSharp.dll",
+    "behavior": "vfs",
+    "virtualPath": "Microsoft.CodeAnalysis.CSharp.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.CodeAnalysis.CSharp.dll"
+   },
+   {
+    "name": "vfs-Microsoft.CodeAnalysis.dll",
+    "behavior": "vfs",
+    "virtualPath": "Microsoft.CodeAnalysis.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.CodeAnalysis.dll"
+   },
+   {
+    "name": "vfs-Microsoft.VisualBasic.Core.dll",
+    "behavior": "vfs",
+    "virtualPath": "Microsoft.VisualBasic.Core.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.VisualBasic.Core.dll"
+   },
+   {
+    "name": "vfs-Microsoft.VisualBasic.dll",
+    "behavior": "vfs",
+    "virtualPath": "Microsoft.VisualBasic.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.VisualBasic.dll"
+   },
+   {
+    "name": "vfs-Microsoft.Win32.Primitives.dll",
+    "behavior": "vfs",
+    "virtualPath": "Microsoft.Win32.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.Win32.Primitives.dll"
+   },
+   {
+    "name": "vfs-Microsoft.Win32.Registry.dll",
+    "behavior": "vfs",
+    "virtualPath": "Microsoft.Win32.Registry.dll",
+    "resolvedUrl": "vendor/dotnet/dll/Microsoft.Win32.Registry.dll"
+   },
+   {
+    "name": "vfs-System.AppContext.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.AppContext.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.AppContext.dll"
+   },
+   {
+    "name": "vfs-System.Buffers.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Buffers.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Buffers.dll"
+   },
+   {
+    "name": "vfs-System.Collections.Concurrent.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Collections.Concurrent.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Collections.Concurrent.dll"
+   },
+   {
+    "name": "vfs-System.Collections.Immutable.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Collections.Immutable.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Collections.Immutable.dll"
+   },
+   {
+    "name": "vfs-System.Collections.NonGeneric.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Collections.NonGeneric.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Collections.NonGeneric.dll"
+   },
+   {
+    "name": "vfs-System.Collections.Specialized.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Collections.Specialized.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Collections.Specialized.dll"
+   },
+   {
+    "name": "vfs-System.Collections.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Collections.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Collections.dll"
+   },
+   {
+    "name": "vfs-System.ComponentModel.Annotations.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.ComponentModel.Annotations.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ComponentModel.Annotations.dll"
+   },
+   {
+    "name": "vfs-System.ComponentModel.DataAnnotations.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.ComponentModel.DataAnnotations.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ComponentModel.DataAnnotations.dll"
+   },
+   {
+    "name": "vfs-System.ComponentModel.EventBasedAsync.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.ComponentModel.EventBasedAsync.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ComponentModel.EventBasedAsync.dll"
+   },
+   {
+    "name": "vfs-System.ComponentModel.Primitives.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.ComponentModel.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ComponentModel.Primitives.dll"
+   },
+   {
+    "name": "vfs-System.ComponentModel.TypeConverter.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.ComponentModel.TypeConverter.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ComponentModel.TypeConverter.dll"
+   },
+   {
+    "name": "vfs-System.ComponentModel.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.ComponentModel.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ComponentModel.dll"
+   },
+   {
+    "name": "vfs-System.Configuration.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Configuration.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Configuration.dll"
+   },
+   {
+    "name": "vfs-System.Console.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Console.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Console.dll"
+   },
+   {
+    "name": "vfs-System.Core.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Core.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Core.dll"
+   },
+   {
+    "name": "vfs-System.Data.Common.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Data.Common.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Data.Common.dll"
+   },
+   {
+    "name": "vfs-System.Data.DataSetExtensions.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Data.DataSetExtensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Data.DataSetExtensions.dll"
+   },
+   {
+    "name": "vfs-System.Data.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Data.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Data.dll"
+   },
+   {
+    "name": "vfs-System.Diagnostics.Contracts.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Diagnostics.Contracts.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.Contracts.dll"
+   },
+   {
+    "name": "vfs-System.Diagnostics.Debug.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Diagnostics.Debug.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.Debug.dll"
+   },
+   {
+    "name": "vfs-System.Diagnostics.DiagnosticSource.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Diagnostics.DiagnosticSource.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.DiagnosticSource.dll"
+   },
+   {
+    "name": "vfs-System.Diagnostics.FileVersionInfo.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Diagnostics.FileVersionInfo.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.FileVersionInfo.dll"
+   },
+   {
+    "name": "vfs-System.Diagnostics.Process.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Diagnostics.Process.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.Process.dll"
+   },
+   {
+    "name": "vfs-System.Diagnostics.StackTrace.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Diagnostics.StackTrace.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.StackTrace.dll"
+   },
+   {
+    "name": "vfs-System.Diagnostics.TextWriterTraceListener.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Diagnostics.TextWriterTraceListener.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.TextWriterTraceListener.dll"
+   },
+   {
+    "name": "vfs-System.Diagnostics.Tools.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Diagnostics.Tools.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.Tools.dll"
+   },
+   {
+    "name": "vfs-System.Diagnostics.TraceSource.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Diagnostics.TraceSource.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.TraceSource.dll"
+   },
+   {
+    "name": "vfs-System.Diagnostics.Tracing.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Diagnostics.Tracing.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Diagnostics.Tracing.dll"
+   },
+   {
+    "name": "vfs-System.Drawing.Primitives.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Drawing.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Drawing.Primitives.dll"
+   },
+   {
+    "name": "vfs-System.Drawing.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Drawing.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Drawing.dll"
+   },
+   {
+    "name": "vfs-System.Dynamic.Runtime.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Dynamic.Runtime.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Dynamic.Runtime.dll"
+   },
+   {
+    "name": "vfs-System.Formats.Asn1.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Formats.Asn1.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Formats.Asn1.dll"
+   },
+   {
+    "name": "vfs-System.Formats.Tar.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Formats.Tar.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Formats.Tar.dll"
+   },
+   {
+    "name": "vfs-System.Globalization.Calendars.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Globalization.Calendars.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Globalization.Calendars.dll"
+   },
+   {
+    "name": "vfs-System.Globalization.Extensions.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Globalization.Extensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Globalization.Extensions.dll"
+   },
+   {
+    "name": "vfs-System.Globalization.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Globalization.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Globalization.dll"
+   },
+   {
+    "name": "vfs-System.IO.Compression.Brotli.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.Compression.Brotli.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Compression.Brotli.dll"
+   },
+   {
+    "name": "vfs-System.IO.Compression.FileSystem.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.Compression.FileSystem.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Compression.FileSystem.dll"
+   },
+   {
+    "name": "vfs-System.IO.Compression.ZipFile.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.Compression.ZipFile.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Compression.ZipFile.dll"
+   },
+   {
+    "name": "vfs-System.IO.Compression.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.Compression.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Compression.dll"
+   },
+   {
+    "name": "vfs-System.IO.FileSystem.AccessControl.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.FileSystem.AccessControl.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.FileSystem.AccessControl.dll"
+   },
+   {
+    "name": "vfs-System.IO.FileSystem.DriveInfo.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.FileSystem.DriveInfo.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.FileSystem.DriveInfo.dll"
+   },
+   {
+    "name": "vfs-System.IO.FileSystem.Primitives.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.FileSystem.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.FileSystem.Primitives.dll"
+   },
+   {
+    "name": "vfs-System.IO.FileSystem.Watcher.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.FileSystem.Watcher.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.FileSystem.Watcher.dll"
+   },
+   {
+    "name": "vfs-System.IO.FileSystem.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.FileSystem.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.FileSystem.dll"
+   },
+   {
+    "name": "vfs-System.IO.IsolatedStorage.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.IsolatedStorage.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.IsolatedStorage.dll"
+   },
+   {
+    "name": "vfs-System.IO.MemoryMappedFiles.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.MemoryMappedFiles.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.MemoryMappedFiles.dll"
+   },
+   {
+    "name": "vfs-System.IO.Pipelines.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.Pipelines.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Pipelines.dll"
+   },
+   {
+    "name": "vfs-System.IO.Pipes.AccessControl.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.Pipes.AccessControl.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Pipes.AccessControl.dll"
+   },
+   {
+    "name": "vfs-System.IO.Pipes.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.Pipes.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.Pipes.dll"
+   },
+   {
+    "name": "vfs-System.IO.UnmanagedMemoryStream.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.UnmanagedMemoryStream.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.UnmanagedMemoryStream.dll"
+   },
+   {
+    "name": "vfs-System.IO.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.IO.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.IO.dll"
+   },
+   {
+    "name": "vfs-System.Linq.AsyncEnumerable.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Linq.AsyncEnumerable.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Linq.AsyncEnumerable.dll"
+   },
+   {
+    "name": "vfs-System.Linq.Expressions.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Linq.Expressions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Linq.Expressions.dll"
+   },
+   {
+    "name": "vfs-System.Linq.Parallel.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Linq.Parallel.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Linq.Parallel.dll"
+   },
+   {
+    "name": "vfs-System.Linq.Queryable.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Linq.Queryable.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Linq.Queryable.dll"
+   },
+   {
+    "name": "vfs-System.Linq.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Linq.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Linq.dll"
+   },
+   {
+    "name": "vfs-System.Memory.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Memory.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Memory.dll"
+   },
+   {
+    "name": "vfs-System.Net.Http.Json.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.Http.Json.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Http.Json.dll"
+   },
+   {
+    "name": "vfs-System.Net.Http.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.Http.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Http.dll"
+   },
+   {
+    "name": "vfs-System.Net.HttpListener.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.HttpListener.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.HttpListener.dll"
+   },
+   {
+    "name": "vfs-System.Net.Mail.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.Mail.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Mail.dll"
+   },
+   {
+    "name": "vfs-System.Net.NameResolution.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.NameResolution.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.NameResolution.dll"
+   },
+   {
+    "name": "vfs-System.Net.NetworkInformation.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.NetworkInformation.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.NetworkInformation.dll"
+   },
+   {
+    "name": "vfs-System.Net.Ping.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.Ping.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Ping.dll"
+   },
+   {
+    "name": "vfs-System.Net.Primitives.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Primitives.dll"
+   },
+   {
+    "name": "vfs-System.Net.Quic.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.Quic.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Quic.dll"
+   },
+   {
+    "name": "vfs-System.Net.Requests.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.Requests.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Requests.dll"
+   },
+   {
+    "name": "vfs-System.Net.Security.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.Security.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Security.dll"
+   },
+   {
+    "name": "vfs-System.Net.ServerSentEvents.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.ServerSentEvents.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.ServerSentEvents.dll"
+   },
+   {
+    "name": "vfs-System.Net.ServicePoint.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.ServicePoint.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.ServicePoint.dll"
+   },
+   {
+    "name": "vfs-System.Net.Sockets.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.Sockets.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.Sockets.dll"
+   },
+   {
+    "name": "vfs-System.Net.WebClient.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.WebClient.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.WebClient.dll"
+   },
+   {
+    "name": "vfs-System.Net.WebHeaderCollection.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.WebHeaderCollection.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.WebHeaderCollection.dll"
+   },
+   {
+    "name": "vfs-System.Net.WebProxy.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.WebProxy.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.WebProxy.dll"
+   },
+   {
+    "name": "vfs-System.Net.WebSockets.Client.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.WebSockets.Client.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.WebSockets.Client.dll"
+   },
+   {
+    "name": "vfs-System.Net.WebSockets.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.WebSockets.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.WebSockets.dll"
+   },
+   {
+    "name": "vfs-System.Net.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Net.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Net.dll"
+   },
+   {
+    "name": "vfs-System.Numerics.Vectors.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Numerics.Vectors.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Numerics.Vectors.dll"
+   },
+   {
+    "name": "vfs-System.Numerics.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Numerics.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Numerics.dll"
+   },
+   {
+    "name": "vfs-System.ObjectModel.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.ObjectModel.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ObjectModel.dll"
+   },
+   {
+    "name": "vfs-System.Private.DataContractSerialization.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Private.DataContractSerialization.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Private.DataContractSerialization.dll"
+   },
+   {
+    "name": "vfs-System.Private.Uri.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Private.Uri.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Private.Uri.dll"
+   },
+   {
+    "name": "vfs-System.Private.Xml.Linq.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Private.Xml.Linq.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Private.Xml.Linq.dll"
+   },
+   {
+    "name": "vfs-System.Private.Xml.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Private.Xml.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Private.Xml.dll"
+   },
+   {
+    "name": "vfs-System.Reflection.DispatchProxy.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Reflection.DispatchProxy.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.DispatchProxy.dll"
+   },
+   {
+    "name": "vfs-System.Reflection.Emit.ILGeneration.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Reflection.Emit.ILGeneration.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.Emit.ILGeneration.dll"
+   },
+   {
+    "name": "vfs-System.Reflection.Emit.Lightweight.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Reflection.Emit.Lightweight.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.Emit.Lightweight.dll"
+   },
+   {
+    "name": "vfs-System.Reflection.Emit.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Reflection.Emit.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.Emit.dll"
+   },
+   {
+    "name": "vfs-System.Reflection.Extensions.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Reflection.Extensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.Extensions.dll"
+   },
+   {
+    "name": "vfs-System.Reflection.Metadata.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Reflection.Metadata.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.Metadata.dll"
+   },
+   {
+    "name": "vfs-System.Reflection.Primitives.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Reflection.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.Primitives.dll"
+   },
+   {
+    "name": "vfs-System.Reflection.TypeExtensions.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Reflection.TypeExtensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.TypeExtensions.dll"
+   },
+   {
+    "name": "vfs-System.Reflection.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Reflection.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Reflection.dll"
+   },
+   {
+    "name": "vfs-System.Resources.Reader.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Resources.Reader.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Resources.Reader.dll"
+   },
+   {
+    "name": "vfs-System.Resources.ResourceManager.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Resources.ResourceManager.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Resources.ResourceManager.dll"
+   },
+   {
+    "name": "vfs-System.Resources.Writer.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Resources.Writer.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Resources.Writer.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.CompilerServices.Unsafe.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.CompilerServices.Unsafe.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.CompilerServices.Unsafe.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.CompilerServices.VisualC.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.CompilerServices.VisualC.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.CompilerServices.VisualC.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.Extensions.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.Extensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Extensions.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.Handles.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.Handles.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Handles.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.InteropServices.JavaScript.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.InteropServices.JavaScript.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.InteropServices.JavaScript.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.InteropServices.RuntimeInformation.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.InteropServices.RuntimeInformation.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.InteropServices.RuntimeInformation.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.InteropServices.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.InteropServices.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.InteropServices.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.Intrinsics.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.Intrinsics.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Intrinsics.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.Loader.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.Loader.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Loader.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.Numerics.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.Numerics.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Numerics.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.Serialization.Formatters.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.Serialization.Formatters.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Serialization.Formatters.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.Serialization.Json.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.Serialization.Json.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Serialization.Json.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.Serialization.Primitives.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.Serialization.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Serialization.Primitives.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.Serialization.Xml.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.Serialization.Xml.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Serialization.Xml.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.Serialization.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.Serialization.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.Serialization.dll"
+   },
+   {
+    "name": "vfs-System.Runtime.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Runtime.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Runtime.dll"
+   },
+   {
+    "name": "vfs-System.Security.AccessControl.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.AccessControl.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.AccessControl.dll"
+   },
+   {
+    "name": "vfs-System.Security.Claims.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.Claims.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Claims.dll"
+   },
+   {
+    "name": "vfs-System.Security.Cryptography.Algorithms.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.Cryptography.Algorithms.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.Algorithms.dll"
+   },
+   {
+    "name": "vfs-System.Security.Cryptography.Cng.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.Cryptography.Cng.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.Cng.dll"
+   },
+   {
+    "name": "vfs-System.Security.Cryptography.Csp.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.Cryptography.Csp.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.Csp.dll"
+   },
+   {
+    "name": "vfs-System.Security.Cryptography.Encoding.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.Cryptography.Encoding.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.Encoding.dll"
+   },
+   {
+    "name": "vfs-System.Security.Cryptography.OpenSsl.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.Cryptography.OpenSsl.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.OpenSsl.dll"
+   },
+   {
+    "name": "vfs-System.Security.Cryptography.Primitives.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.Cryptography.Primitives.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.Primitives.dll"
+   },
+   {
+    "name": "vfs-System.Security.Cryptography.X509Certificates.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.Cryptography.X509Certificates.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.X509Certificates.dll"
+   },
+   {
+    "name": "vfs-System.Security.Cryptography.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.Cryptography.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Cryptography.dll"
+   },
+   {
+    "name": "vfs-System.Security.Principal.Windows.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.Principal.Windows.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Principal.Windows.dll"
+   },
+   {
+    "name": "vfs-System.Security.Principal.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.Principal.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.Principal.dll"
+   },
+   {
+    "name": "vfs-System.Security.SecureString.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.SecureString.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.SecureString.dll"
+   },
+   {
+    "name": "vfs-System.Security.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Security.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Security.dll"
+   },
+   {
+    "name": "vfs-System.ServiceModel.Web.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.ServiceModel.Web.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ServiceModel.Web.dll"
+   },
+   {
+    "name": "vfs-System.ServiceProcess.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.ServiceProcess.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ServiceProcess.dll"
+   },
+   {
+    "name": "vfs-System.Text.Encoding.CodePages.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Text.Encoding.CodePages.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Text.Encoding.CodePages.dll"
+   },
+   {
+    "name": "vfs-System.Text.Encoding.Extensions.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Text.Encoding.Extensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Text.Encoding.Extensions.dll"
+   },
+   {
+    "name": "vfs-System.Text.Encoding.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Text.Encoding.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Text.Encoding.dll"
+   },
+   {
+    "name": "vfs-System.Text.Encodings.Web.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Text.Encodings.Web.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Text.Encodings.Web.dll"
+   },
+   {
+    "name": "vfs-System.Text.Json.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Text.Json.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Text.Json.dll"
+   },
+   {
+    "name": "vfs-System.Text.RegularExpressions.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Text.RegularExpressions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Text.RegularExpressions.dll"
+   },
+   {
+    "name": "vfs-System.Threading.AccessControl.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Threading.AccessControl.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.AccessControl.dll"
+   },
+   {
+    "name": "vfs-System.Threading.Channels.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Threading.Channels.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Channels.dll"
+   },
+   {
+    "name": "vfs-System.Threading.Overlapped.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Threading.Overlapped.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Overlapped.dll"
+   },
+   {
+    "name": "vfs-System.Threading.Tasks.Dataflow.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Threading.Tasks.Dataflow.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Tasks.Dataflow.dll"
+   },
+   {
+    "name": "vfs-System.Threading.Tasks.Extensions.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Threading.Tasks.Extensions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Tasks.Extensions.dll"
+   },
+   {
+    "name": "vfs-System.Threading.Tasks.Parallel.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Threading.Tasks.Parallel.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Tasks.Parallel.dll"
+   },
+   {
+    "name": "vfs-System.Threading.Tasks.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Threading.Tasks.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Tasks.dll"
+   },
+   {
+    "name": "vfs-System.Threading.Thread.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Threading.Thread.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Thread.dll"
+   },
+   {
+    "name": "vfs-System.Threading.ThreadPool.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Threading.ThreadPool.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.ThreadPool.dll"
+   },
+   {
+    "name": "vfs-System.Threading.Timer.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Threading.Timer.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.Timer.dll"
+   },
+   {
+    "name": "vfs-System.Threading.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Threading.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Threading.dll"
+   },
+   {
+    "name": "vfs-System.Transactions.Local.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Transactions.Local.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Transactions.Local.dll"
+   },
+   {
+    "name": "vfs-System.Transactions.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Transactions.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Transactions.dll"
+   },
+   {
+    "name": "vfs-System.ValueTuple.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.ValueTuple.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.ValueTuple.dll"
+   },
+   {
+    "name": "vfs-System.Web.HttpUtility.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Web.HttpUtility.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Web.HttpUtility.dll"
+   },
+   {
+    "name": "vfs-System.Web.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Web.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Web.dll"
+   },
+   {
+    "name": "vfs-System.Windows.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Windows.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Windows.dll"
+   },
+   {
+    "name": "vfs-System.Xml.Linq.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Xml.Linq.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.Linq.dll"
+   },
+   {
+    "name": "vfs-System.Xml.ReaderWriter.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Xml.ReaderWriter.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.ReaderWriter.dll"
+   },
+   {
+    "name": "vfs-System.Xml.Serialization.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Xml.Serialization.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.Serialization.dll"
+   },
+   {
+    "name": "vfs-System.Xml.XDocument.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Xml.XDocument.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.XDocument.dll"
+   },
+   {
+    "name": "vfs-System.Xml.XPath.XDocument.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Xml.XPath.XDocument.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.XPath.XDocument.dll"
+   },
+   {
+    "name": "vfs-System.Xml.XPath.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Xml.XPath.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.XPath.dll"
+   },
+   {
+    "name": "vfs-System.Xml.XmlDocument.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Xml.XmlDocument.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.XmlDocument.dll"
+   },
+   {
+    "name": "vfs-System.Xml.XmlSerializer.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Xml.XmlSerializer.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.XmlSerializer.dll"
+   },
+   {
+    "name": "vfs-System.Xml.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.Xml.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.Xml.dll"
+   },
+   {
+    "name": "vfs-System.dll",
+    "behavior": "vfs",
+    "virtualPath": "System.dll",
+    "resolvedUrl": "vendor/dotnet/dll/System.dll"
+   },
+   {
+    "name": "vfs-WindowsBase.dll",
+    "behavior": "vfs",
+    "virtualPath": "WindowsBase.dll",
+    "resolvedUrl": "vendor/dotnet/dll/WindowsBase.dll"
+   },
+   {
+    "name": "vfs-mscorlib.dll",
+    "behavior": "vfs",
+    "virtualPath": "mscorlib.dll",
+    "resolvedUrl": "vendor/dotnet/dll/mscorlib.dll"
+   },
+   {
+    "name": "vfs-netstandard.dll",
+    "behavior": "vfs",
+    "virtualPath": "netstandard.dll",
+    "resolvedUrl": "vendor/dotnet/dll/netstandard.dll"
+   }
+  ]
+ }
+}
