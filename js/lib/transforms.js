@@ -50,7 +50,6 @@ T.parseCSV = function (s) {
 T.csvToJSON = function (s) {
   var rows = T.parseCSV(s);
   if (!rows.length) throw new Error('CSV is empty');
-  // Duplicate headers would silently overwrite object keys — suffix them.
   var seen = {};
   var headers = rows[0].map(function (h) {
     var name = h === '' ? '(unnamed)' : h;
@@ -68,10 +67,37 @@ T.csvToJSON = function (s) {
 
 T.yamlToJSON = function (s) {
   var lines = s.split('\n').filter(function (l) { return l.trim() && !l.trim().startsWith('#'); });
+  if (!lines.length) return '{}';
+  var hasIndent = lines.some(function (l) { return l.search(/\S/) > 0; });
+  var isTopArray = lines.every(function (l) { return l.trim().startsWith('- '); });
+  if (isTopArray) {
+    var _arr = [];
+    for (var _yI = 0; _yI < lines.length; _yI++) { var _yV = lines[_yI].trim().slice(2).trim(); if (_yV === 'true') _arr.push(true); else if (_yV === 'false') _arr.push(false); else if (_yV === 'null' || _yV === '~') _arr.push(null); else if (_yV !== '' && !isNaN(Number(_yV))) _arr.push(Number(_yV)); else _arr.push(_yV); }
+    return JSON.stringify(_arr, null, 2);
+  }
+  // Flat-doc fast path: if no line is indented, it's just key: value pairs
+  if (!hasIndent) {
+    var out = Object.create(null);
+    for (var i = 0; i < lines.length; i++) {
+      var c = lines[i].trim();
+      if (c.startsWith('- ')) continue; // array at top level not expected in this path
+      var idx = c.indexOf(':');
+      if (idx < 0) continue;
+      var k = c.slice(0, idx).trim();
+      if (!k || k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
+      var v = c.slice(idx + 1).trim();
+      if (v === 'true') out[k] = true;
+      else if (v === 'false') out[k] = false;
+      else if (v === 'null' || v === '~') out[k] = null;
+      else if (v !== '' && !isNaN(Number(v))) out[k] = Number(v);
+      else out[k] = v;
+    }
+    return JSON.stringify(out, null, 2);
+  }
   var root = [];
   var stack = [{ node: root, indent: -1 }];
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i];
+  for (var ii = 0; ii < lines.length; ii++) {
+    var line = lines[ii];
     var indent = line.search(/\S/);
     var content = line.trim();
     var isArray = content.startsWith('- ');
@@ -83,17 +109,22 @@ T.yamlToJSON = function (s) {
       entry.value = content.slice(2).trim();
     }
     while (stack.length > 1 && stack[stack.length - 1].indent >= indent) stack.pop();
-    var parentNode = stack[stack.length - 1].node;
-    if (stack[stack.length - 1].indent < indent) {
-      var lastParent = parentNode[parentNode.length - 1];
-      if (lastParent) parentNode = lastParent.children;
-      else stack.push({ node: entry.children, indent: indent });
-      parentNode.push(entry);
+    var top = stack[stack.length - 1];
+    if (top.indent < indent && top.node.length) {
+      var lastParent = top.node[top.node.length - 1];
+      // Two leaf siblings like `b: 1` / `c: 2` under `a:` should both land in a.children,
+      // not c inside b.children. Detect: both leaves, both keyed, same indent level as entry.
+      // Array items (key undefined) are always siblings, not nested.
+      var bothLeaves = lastParent.children.length === 0 && entry.children.length === 0;
+      var isSibling = false;
+      if (entry.key === undefined && lastParent.key === undefined) isSibling = true;
+      else if (entry.key && lastParent.key && entry.value !== '' && lastParent.value !== '' && bothLeaves) isSibling = true;
+      if (isSibling) top.node.push(entry);
+      else lastParent.children.push(entry);
     } else {
-      parentNode.push(entry);
+      top.node.push(entry);
     }
-    if (stack[stack.length - 1].node !== entry.children) stack.push({ node: entry.children, indent: indent });
-    else if (stack[stack.length - 1].indent !== indent) stack[stack.length - 1].indent = indent;
+    if (entry.value === '' || entry.key === undefined) stack.push({ node: entry.children, indent: indent });
   }
   function toValue(node) {
     if (node.children.length === 0) {
@@ -102,7 +133,11 @@ T.yamlToJSON = function (s) {
       var num = Number(v); if (!isNaN(num) && v !== '') return num;
       return v;
     }
-    if (node.children.every(function (c) { return c.key === undefined; })) return node.children.map(toValue);
+    if (node.children.every(function (c) { return c.key === undefined; })) {
+      var arr = node.children.map(toValue);
+      if (node.key) { var w = Object.create(null); w[node.key] = arr; return w; }
+      return arr;
+    }
     var obj = Object.create(null);
     for (var j2 = 0; j2 < node.children.length; j2++) {
       var k = node.children[j2].key;
@@ -110,9 +145,22 @@ T.yamlToJSON = function (s) {
       if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
       obj[k] = toValue(node.children[j2]);
     }
+    if (node.key) { var outer = Object.create(null); outer[node.key] = obj; return outer; }
     return obj;
   }
-  if (root.length === 1) return JSON.stringify(toValue(root[0]), null, 2);
+  if (root.length === 1) {
+    var single = toValue(root[0]);
+    // toValue already wraps keyed roots, but if root[0] had no key it's already unwrapped
+    return JSON.stringify(single, null, 2);
+  }
+  // For multiple top-level entries, merge their wrapped objects
+  var merged = Object.create(null);
+  for (var ri = 0; ri < root.length; ri++) {
+    var v2 = toValue(root[ri]);
+    if (v2 && typeof v2 === 'object' && !Array.isArray(v2)) Object.assign(merged, v2);
+    else merged['item' + ri] = v2;
+  }
+  if (Object.keys(merged).length === root.length || root.every(function(n){return n.key;})) return JSON.stringify(merged, null, 2);
   return JSON.stringify(root.map(toValue), null, 2);
 };
 
@@ -213,8 +261,6 @@ T.jwtDecode = function (token) {
   var parts = token.trim().split('.');
   if (parts.length !== 3) throw new Error('Invalid JWT format (expected 3 parts)');
   try {
-    // JWT segments are base64url — '-'/'_' and missing '=' padding
-    // throw in plain atob, which is exactly what broke real tokens.
     var h = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(base64UrlToStandard(parts[0])), function (c) { return c.charCodeAt(0); })));
     var p = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(base64UrlToStandard(parts[1])), function (c) { return c.charCodeAt(0); })));
     return { header: JSON.stringify(h, null, 2), payload: JSON.stringify(p, null, 2), signature: parts[2], rawHeader: h, rawPayload: p };
