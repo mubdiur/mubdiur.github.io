@@ -93,96 +93,118 @@ function buildDiagDecos(view, diags) {
   return Decoration.set(decos, true);
 }
 
+/* ── Monokai Pro – lifted verbatim from the vsix (Monokai Pro.json) ──
+   editor.* → editor chrome, terminal.* → selection/fallback,
+   charts.* → status hints. No approximation: every hex below
+   comes from the .vsix colors table. */
 const baseTheme = EditorView.theme({
   '&': {
     height: '100%',
-    backgroundColor: '#161618',
-    color: '#e3e3e3',
+    backgroundColor: '#2d2a2e',
+    color: '#fcfcfa',
     fontSize: '12.5px',
   },
   '.cm-scroller': {
-    fontFamily: "'Google Sans Code', monospace",
+    fontFamily: "'IBM Plex Mono', monospace",
     lineHeight: '1.55',
     overflow: 'auto',
   },
   '.cm-content': {
-    caretColor: '#53a3f9',
+    caretColor: '#fcfcfa',
     padding: '10px 0',
   },
   '.cm-line': {
     padding: '0 12px',
   },
   '&.cm-focused': { outline: 'none' },
-  '.cm-cursor, .cm-dropCursor': { borderLeftColor: '#53a3f9' },
+  '.cm-cursor, .cm-dropCursor': { borderLeftColor: '#fcfcfa' },
   '.cm-gutters': {
-    backgroundColor: 'rgba(0,0,0,0.25)',
-    color: '#8d949e',
+    backgroundColor: '#2d2a2e',
+    color: '#5b595c',
     border: 'none',
-    borderRight: '1px solid rgba(51,53,56,0.6)',
+    borderRight: '1px solid #403e41',
   },
-  '.cm-activeLine': { backgroundColor: 'rgba(83,163,249,0.04)' },
-  '.cm-activeLineGutter': { backgroundColor: 'rgba(83,163,249,0.06)', color: '#bec3c9' },
+  '.cm-activeLine': { backgroundColor: '#fcfcfa0c' },
+  '.cm-activeLineGutter': { backgroundColor: '#fcfcfa0c', color: '#c1c0c0' },
   '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
-    backgroundColor: 'rgba(115,180,250,0.18)',
+    backgroundColor: '#fcfcfa26',
   },
   '.cm-matchingBracket': {
-    backgroundColor: 'rgba(83,163,249,0.18)',
-    outline: '1px solid rgba(83,163,249,0.4)',
+    backgroundColor: '#fcfcfa26',
+    outline: '1px solid #727072',
   },
   '.cm-tooltip': {
-    backgroundColor: '#333538',
-    border: '1px solid #444950',
-    color: '#e3e3e3',
-    fontFamily: "'Google Sans Code', monospace",
+    backgroundColor: '#403e41',
+    border: '1px solid #221f22',
+    color: '#c1c0c0',
+    fontFamily: "'IBM Plex Mono', monospace",
     fontSize: '11.5px',
   },
   '.cm-tooltip-autocomplete ul li[aria-selected]': {
-    backgroundColor: 'rgba(83,163,249,0.15)',
-    color: '#53a3f9',
+    backgroundColor: '#5b595c',
+    color: '#fcfcfa',
   },
   '.cm-tooltip.cm-tooltip-autocomplete ul': { maxHeight: '240px' },
-  '.cm-panels': { backgroundColor: '#202123', color: '#bec3c9' },
-  '.cm-searchMatch': { backgroundColor: 'rgba(230,167,0,0.2)', outline: '1px solid rgba(230,167,0,0.35)' },
-  '.cm-searchMatch-selected': { backgroundColor: 'rgba(230,167,0,0.4)' },
-  '&.cm-focused .cm-selectionMatch': { backgroundColor: 'rgba(83,163,249,0.12)' },
+  '.cm-panels': { backgroundColor: '#221f22', color: '#939293' },
+  '.cm-searchMatch': { backgroundColor: '#fcfcfa26', outline: '1px solid #ffd866' },
+  '.cm-searchMatch-selected': { backgroundColor: '#ffd866', color: '#2d2a2e' },
+  '&.cm-focused .cm-selectionMatch': { backgroundColor: '#fcfcfa26' },
   '.cm-foldPlaceholder': {
-    backgroundColor: 'rgba(51,53,56,0.9)',
-    border: '1px solid #444950',
-    color: '#bec3c9',
-    fontFamily: "'Google Sans Code', monospace",
+    backgroundColor: '#403e41',
+    border: '1px solid #5b595c',
+    color: '#c1c0c0',
+    fontFamily: "'IBM Plex Mono', monospace",
   },
-  /* error/warning diagnostics */
-  '.cm-diag-line.error': { backgroundColor: 'rgba(251,86,91,0.08)' },
-  '.cm-diag-line.warn': { backgroundColor: 'rgba(230,167,0,0.07)' },
-  '.cm-diag-mark.error': { textDecoration: 'underline wavy rgba(251,86,91,0.7)', textDecorationSkipInk: 'none' },
-  '.cm-diag-mark.warn': { textDecoration: 'underline wavy rgba(230,167,0,0.7)', textDecorationSkipInk: 'none' },
+  /* error/warning diagnostics – Monokai Pro error #ff6188 / warning #fc9867 */
+  '.cm-diag-line.error': { backgroundColor: 'rgba(255,97,136,0.10)' },
+  '.cm-diag-line.warn': { backgroundColor: 'rgba(252,152,103,0.12)' },
+  '.cm-diag-mark.error': { textDecoration: 'underline wavy #ff6188', textDecorationSkipInk: 'none' },
+  '.cm-diag-mark.warn': { textDecoration: 'underline wavy #fc9867', textDecorationSkipInk: 'none' },
   '.cm-diag-marker': {
-    fontFamily: "'Google Sans Code', monospace",
+    fontFamily: "'IBM Plex Mono', monospace",
     fontSize: '10px',
     lineHeight: '1.5',
-    color: 'rgba(251,86,91,0.95)',
+    color: '#ff6188',
     cursor: 'default',
   },
-  '.cm-diag-marker.warn': { color: 'rgba(230,167,0,0.95)' },
+  '.cm-diag-marker.warn': { color: '#fc9867' },
 });
 
+/* ── syntax — Lezer tags mapped from Monokai Pro tokenColors ──
+   Each color is taken verbatim from the vsix:
+     pink #ff6188 · orange #fc9867 · yellow #ffd866
+     green #a9dc76 · cyan #78dce8 · purple #ab9df2
+     grey-light #fcfcfa · grey-mid #939293 / #c1c0c0 · dim #727072 */
 const syntax = HighlightStyle.define([
-  { tag: tags.keyword, color: '#e2cfda' },
-  { tag: [tags.name, tags.deleted, tags.character, tags.propertyName, tags.macroName], color: '#73b4fa' },
-  { tag: [tags.function(tags.variableName), tags.labelName], color: '#73b4fa' },
-  { tag: [tags.color, tags.constant(tags.name), tags.standard(tags.name)], color: '#e6a700' },
-  { tag: [tags.definition(tags.name), tags.separator], color: '#e3e3e3' },
-  { tag: [tags.typeName, tags.className, tags.number, tags.changed, tags.annotation, tags.modifier, tags.self, tags.namespace], color: '#cfcbe0' },
-  { tag: [tags.operator, tags.operatorKeyword, tags.url, tags.escape, tags.regexp, tags.link, tags.special(tags.string)], color: '#c5dae2' },
-  { tag: [tags.meta, tags.comment], color: '#8d949e' },
+  // keyword / storage / modifier → #ff6188  (keyword, storage, control)
+  { tag: [tags.keyword, tags.modifier, tags.controlKeyword, tags.operatorKeyword, tags.definitionKeyword], color: '#ff6188' },
+  // storage.type (italic in vsix) → #78dce8 italic
+  { tag: [tags.typeName, tags.namespace, tags.self], color: '#78dce8', fontStyle: 'italic' },
+  // class/type → #78dce8
+  { tag: [tags.className, tags.annotation, tags.attributeName], color: '#78dce8' },
+  // function name / call → #a9dc76
+  { tag: [tags.function(tags.variableName), tags.function(tags.definition(tags.variableName)), tags.labelName, tags.macroName], color: '#a9dc76' },
+  // variable / property → #fcfcfa
+  { tag: [tags.variableName, tags.propertyName, tags.definition(tags.variableName), tags.definition(tags.propertyName)], color: '#fcfcfa' },
+  // param (italic orange) → #fc9867 italic
+  { tag: tags.param, color: '#fc9867', fontStyle: 'italic' },
+  // special variable (this/self) → #c1c0c0 italic
+  { tag: tags.special(tags.variableName), color: '#c1c0c0', fontStyle: 'italic' },
+  // number / bool / atom → #ab9df2
+  { tag: [tags.number, tags.bool, tags.atom, tags.constant(tags.variableName)], color: '#ab9df2' },
+  // string / literal → #ffd866
+  { tag: [tags.string, tags.special(tags.string), tags.url, tags.escape, tags.regexp, tags.inserted, tags.contentSeparator], color: '#ffd866' },
+  // comment → #727072 italic
+  { tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment, tags.meta], color: '#727072', fontStyle: 'italic' },
+  // operator / punctuation / bracket → #939293
+  { tag: [tags.operator, tags.punctuation, tags.bracket, tags.brace, tags.separator, tags.derefOperator, tags.logicOperator, tags.compareOperator, tags.arithmeticOperator], color: '#939293' },
+  // property-ref / attribute value often string-ish
+  { tag: tags.heading, color: '#ffd866', fontWeight: '700' },
   { tag: tags.strong, fontWeight: 'bold' },
   { tag: tags.emphasis, fontStyle: 'italic' },
   { tag: tags.strikethrough, textDecoration: 'line-through' },
-  { tag: tags.link, textDecoration: 'underline' },
-  { tag: tags.heading, fontWeight: 'bold', color: '#e2cfda' },
-  { tag: [tags.atom, tags.bool, tags.url, tags.contentSeparator, tags.labelName], color: '#e6a700' },
-  { tag: [tags.processingInstruction, tags.string, tags.inserted], color: '#26b226' },
-  { tag: tags.invalid, color: '#fb565b' },
+  { tag: tags.link, color: '#a9dc76', textDecoration: 'underline' },
+  { tag: tags.invalid, color: '#ff6188', fontStyle: 'italic', textDecoration: 'underline' },
 ]);
 
 function langFor(id) {
