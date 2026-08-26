@@ -266,60 +266,33 @@ window.TOOLMANIFEST = [
     ] },
 
   // ── Encoding / Decoding ─────────────────────────────────
+  // Single-source: all handlers delegate to Transforms (js/lib/transforms.js).
+  // This eliminates the divergent second copies that previously lived here
+  // with deprecated patterns (unescape/escape + lone-surrogate throw).
   { slug: 'base64-encode', name: 'Base64 Encode', desc: 'Encode text to Base64', category: 'encoding', tags: ['base64', 'encode'], icon: 'binary', template: 'transform',
-    handler: function (s) { return btoa(unescape(encodeURIComponent(s))); } },
+    handler: function (s) { return Transforms.base64Encode(s); } },
   { slug: 'base64-decode', name: 'Base64 Decode', desc: 'Decode Base64 back to text', category: 'encoding', tags: ['base64', 'decode'], icon: 'binary', template: 'transform',
-    handler: function (s) { return decodeURIComponent(escape(atob(s.replace(/\s/g, '')))); } },
+    handler: function (s) { return Transforms.base64Decode(s); } },
   { slug: 'url-encode', name: 'URL Encode', desc: 'Percent-encode a URL string', category: 'encoding', tags: ['url', 'encode'], icon: 'globe', template: 'transform',
-    handler: function (s) { return encodeURIComponent(s); } },
+    handler: function (s) { return Transforms.urlEncode(s); } },
   { slug: 'url-decode', name: 'URL Decode', desc: 'Decode percent-encoded URL', category: 'encoding', tags: ['url', 'decode'], icon: 'globe', template: 'transform',
-    handler: function (s) { return decodeURIComponent(s); } },
+    handler: function (s) { return Transforms.urlDecode(s); } },
   { slug: 'html-encode', name: 'HTML Encode', desc: 'Escape HTML entities', category: 'encoding', tags: ['html', 'encode'], icon: 'code2', template: 'transform',
-    handler: function (s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); } },
+    handler: function (s) { return Transforms.htmlEncode(s); } },
   { slug: 'html-decode', name: 'HTML Decode', desc: 'Unescape HTML entities back to characters', category: 'encoding', tags: ['html', 'decode'], icon: 'code2', template: 'transform',
-    handler: function (s) { return s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#x27;/g, "'"); } },
+    handler: function (s) { return Transforms.htmlDecode(s); } },
   { slug: 'hex-encode', name: 'Hex Encode', desc: 'Encode text to hexadecimal', category: 'encoding', tags: ['hex', 'encode'], icon: 'binary', template: 'transform',
-    handler: function (s) { return Array.from(new TextEncoder().encode(s)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); } },
+    handler: function (s) { return Transforms.hexEncode(s); } },
   { slug: 'hex-decode', name: 'Hex Decode', desc: 'Decode hexadecimal back to text', category: 'encoding', tags: ['hex', 'decode'], icon: 'binary', template: 'transform',
-    handler: function (s) {
-      var h = s.replace(/\s/g, '');
-      if (!/^[0-9a-fA-F]*$/.test(h)) throw new Error('Invalid hex');
-      if (h.length % 2 !== 0) throw new Error('Hex must have an even number of digits');
-      var b = new Uint8Array(h.length / 2);
-      for (var i = 0; i < h.length; i += 2) b[i / 2] = parseInt(h.slice(i, i + 2), 16);
-      return new TextDecoder().decode(b);
-    } },
+    handler: function (s) { return Transforms.hexDecode(s); } },
   { slug: 'binary-encode', name: 'Binary Encode', desc: 'Encode text to binary (8-bit)', category: 'encoding', tags: ['binary', 'encode'], icon: 'binary', template: 'transform',
-    handler: function (s) { return Array.from(new TextEncoder().encode(s)).map(function (b) { return b.toString(2).padStart(8, '0'); }).join(' '); } },
+    handler: function (s) { return Transforms.binaryEncode(s); } },
   { slug: 'binary-decode', name: 'Binary Decode', desc: 'Decode binary back to text', category: 'encoding', tags: ['binary', 'decode'], icon: 'binary', template: 'transform',
-    handler: function (s) {
-      var bits = s.replace(/\s/g, '');
-      if (!/^[01]*$/.test(bits) || bits.length % 8 !== 0) throw new Error('Invalid binary (must be multiple of 8 bits)');
-      var b = new Uint8Array(bits.length / 8);
-      for (var i = 0; i < bits.length; i += 8) b[i / 8] = parseInt(bits.slice(i, i + 8), 2);
-      return new TextDecoder().decode(b);
-    } },
+    handler: function (s) { return Transforms.binaryDecode(s); } },
   { slug: 'base32-encode', name: 'Base32 Encode', desc: 'Encode text to Base32 (RFC 4648)', category: 'encoding', tags: ['base32', 'encode'], icon: 'binary', template: 'transform',
-    handler: function (s) {
-      var a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-      var b = new TextEncoder().encode(s);
-      var bits = '', r = '';
-      for (var i = 0; i < b.length; i++) bits += b[i].toString(2).padStart(8, '0');
-      while (bits.length % 5 !== 0) bits += '0';
-      for (var j = 0; j < bits.length; j += 5) r += a[parseInt(bits.slice(j, j + 5), 2)];
-      return r;
-    } },
+    handler: function (s) { return Transforms.base32Encode(s); } },
   { slug: 'base32-decode', name: 'Base32 Decode', desc: 'Decode Base32 back to text', category: 'encoding', tags: ['base32', 'decode'], icon: 'binary', template: 'transform',
-    handler: function (s) {
-      var a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-      var clean = s.toUpperCase().replace(/[^A-Z2-7]/g, '');
-      if (!clean) throw new Error('Invalid Base32');
-      var bits = '';
-      for (var i = 0; i < clean.length; i++) { var idx = a.indexOf(clean[i]); if (idx === -1) throw new Error('Invalid Base32'); bits += idx.toString(2).padStart(5, '0'); }
-      var bytes = [];
-      for (var j = 0; j + 8 <= bits.length; j += 8) bytes.push(parseInt(bits.slice(j, j + 8), 2));
-      return new TextDecoder().decode(new Uint8Array(bytes));
-    } },
+    handler: function (s) { return Transforms.base32Decode(s); } },
   { slug: 'rot13', name: 'ROT13', desc: 'Rotate letters by 13 positions (Caesar cipher)', category: 'encoding', tags: ['rot13', 'cipher'], icon: 'shuffle', template: 'transform',
     handler: function (s) { return s.replace(/[a-zA-Z]/g, function (c) { var b = c >= 'a' ? 97 : 65; return String.fromCharCode(((c.charCodeAt(0) - b + 13) % 26) + b); }); } },
   { slug: 'rot47', name: 'ROT47', desc: 'Rotate all printable ASCII by 47 positions', category: 'encoding', tags: ['rot47', 'cipher'], icon: 'shuffle', template: 'transform',
@@ -375,92 +348,15 @@ window.TOOLMANIFEST = [
   { slug: 'csv-to-json', name: 'CSV → JSON', desc: 'RFC 4180-exact CSV parsing: quoted commas, escaped quotes ("") and newlines inside quotes, CRLF, BOM', category: 'converters', tags: ['csv', 'json', 'convert'], icon: 'filespreadsheet', template: 'transform',
     handler: function (s) { return Transforms.csvToJSON(s); } },
   { slug: 'yaml-to-json', name: 'YAML → JSON', desc: 'Convert YAML to JSON', category: 'converters', tags: ['yaml', 'json', 'convert'], icon: 'filetype', template: 'transform',
-    handler: function (s) {
-      var lines = s.split('\n').filter(function (l) { return l.trim() && !l.trim().startsWith('#'); });
-      var childIndent = function (i) {
-        for (var j = i; j < lines.length; j++) {
-          if (lines[j].trim()) return lines[j].search(/\S/);
-        }
-        return Infinity;
-      };
-      var splitKV = function (c) {
-        var m = c.match(/^([^:]+):(?:\s*(.*))?$/);
-        if (!m) return [null, undefined];
-        return [m[1].trim(), m[2] === undefined ? undefined : m[2].trim()];
-      };
-      var parseScalar = function (v) {
-        if (v === 'null' || v === '~') return null;
-        if (v === 'true') return true;
-        if (v === 'false') return false;
-        if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) return v.slice(1, -1);
-        var n = Number(v);
-        if (!isNaN(n) && v !== '') return n;
-        return v;
-      };
-      var parse = function (idx, indent) {
-        var obj = {}; var arr = []; var isArray = false; var i = idx;
-        while (i < lines.length) {
-          var curIndent = lines[i].search(/\S/);
-          if (curIndent < indent) break;
-          if (curIndent > indent) throw new Error('Bad indentation at line ' + (i + 1));
-          var content = lines[i].trim(); i++;
-          if (content.startsWith('- ')) {
-            isArray = true;
-            var kv = splitKV(content.slice(2));
-            if (kv[0] === null) arr.push(parseScalar(content.slice(2)));
-            else if (kv[1] === undefined) { var p1 = parse(i, Math.max(curIndent + 1, childIndent(i))); arr.push(p1[0]); i = p1[1]; }
-            else {
-              var item = {}; item[kv[0]] = parseScalar(kv[1]);
-              while (i < lines.length) {
-                var ci = lines[i].search(/\S/);
-                if (ci <= curIndent) break;
-                var c2 = lines[i].trim(); i++;
-                var kv2 = splitKV(c2);
-                if (kv2[0] === null) throw new Error('Expected "key: value" at line ' + i);
-                if (kv2[1] === undefined) { var p2 = parse(i, Math.max(ci + 1, childIndent(i))); item[kv2[0]] = p2[0]; i = p2[1]; }
-                else item[kv2[0]] = parseScalar(kv2[1]);
-              }
-              arr.push(item);
-            }
-          } else {
-            var kv3 = splitKV(content);
-            if (kv3[0] === null) throw new Error('Expected "key: value" at line ' + i);
-            if (kv3[1] === undefined) { var p3 = parse(i, Math.max(curIndent + 1, childIndent(i))); obj[kv3[0]] = p3[0]; i = p3[1]; }
-            else obj[kv3[0]] = parseScalar(kv3[1]);
-          }
-        }
-        return [isArray ? arr : obj, i];
-      };
-      var root = parse(0, 0);
-      return JSON.stringify(root[0], null, 2);
-    } },
+    handler: function (s) { return Transforms.yamlToJSON(s); } },
   { slug: 'table2xl', name: 'Table2xl — Table Converter', desc: 'Paste dirty HTML tables or ELK/Kibana grids — strip the noise, export as clean HTML or ASCII table', category: 'converters', tags: ['table', 'elk', 'kibana', 'ascii'], icon: 'filespreadsheet', template: 'custom' },
   { slug: 'markdown-preview', name: 'Markdown Preview', desc: 'Preview rendered Markdown in real-time', category: 'converters', tags: ['markdown', 'preview'], icon: 'eye', template: 'custom' },
   { slug: 'time-copier', name: 'Time Copier', desc: 'Copy time in mm/dd/yyyy hh:mm AM/PM across UTC, PT (PDT/PST), and ET (EDT/EST) — DST-aware, for now or any custom moment', category: 'formatters', tags: ['time', 'timezone', 'dst', 'copy', 'convert'], icon: 'clock', template: 'custom' },
-  { slug: 'number-base-converter', name: 'Number Base Converter', desc: 'Convert numbers between binary, octal, decimal, hexadecimal — BigInt-exact at any width, strict digit validation (parseInt silently truncates past 2⁵³)', category: 'math', tags: ['base', 'convert', 'binary', 'hex'], icon: 'calculator', template: 'transform',
+  { slug: 'number-base-converter', name: 'Number Base Converter', desc: 'Convert numbers between binary, octal, decimal, hexadecimal — BigInt-exact at any width, strict digit validation', category: 'math', tags: ['base', 'convert', 'binary', 'hex'], icon: 'calculator', template: 'transform',
     handler: function (s, opts) {
       var from = parseInt((opts && opts.fromBase) || '10', 10);
       var to = parseInt((opts && opts.toBase) || '16', 10);
-      var raw = s.trim().replace(/[_\s]/g, '');
-      if (!raw) throw new Error('Enter a number');
-      var neg = raw.charAt(0) === '-';
-      var digits = neg ? raw.slice(1).toLowerCase() : raw.toLowerCase();
-      if (!digits) throw new Error('Enter a number');
-      // Strict per-digit validation — parseInt("0x1f", 16)-style surprises
-      // and silent float truncation are exactly what this replaces.
-      for (var i = 0; i < digits.length; i++) {
-        var v = parseInt(digits.charAt(i), 36);
-        if (!(v >= 0 && v < from)) throw new Error('Invalid digit "' + digits.charAt(i) + '" for base ' + from);
-      }
-      var n = 0n;
-      var base = BigInt(from);
-      for (var j = 0; j < digits.length; j++) n = n * base + BigInt(parseInt(digits.charAt(j), 36));
-      var out = (neg ? '-' : '') + n.toString(to);
-      if (to === 16) out = out.toUpperCase();
-      var BASE_NAMES = { 2: 'Binary', 8: 'Octal', 10: 'Decimal', 16: 'Hex' };
-      var name = BASE_NAMES[to] || 'Base ' + to;
-      return s.trim() + ' (base ' + from + ' → ' + name + ')\n' + '─'.repeat(20) + '\n' + name + ': ' + out +
-        (from !== 10 ? '\nDecimal: ' + (neg ? '-' : '') + n.toString(10) : '');
+      return Transforms.baseConvertDetailed(s, from, to);
     },
     params: [
       { key: 'fromBase', label: 'From Base', type: 'select', default: '10', options: [{ value: '2', label: 'Binary' }, { value: '8', label: 'Octal' }, { value: '10', label: 'Decimal' }, { value: '16', label: 'Hex' }] },

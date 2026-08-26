@@ -1,0 +1,16 @@
+{
+  "name": "mubdiur.github.io",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "lint": "eslint js --ext .js",
+    "lint:all": "eslint js --ext .js && node --check js/wasm.js && node --check js/core.js && node --check js/manifest.js",
+    "test": "node build/smoke-libs.js && node build/smoke-tools.js && node build/smoke-error-paths.js",
+    "verify": "npm run lint:all && npm test && echo \"verify: lint + node --check + smoke suites passed\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^15.15.0"
+  }
+}

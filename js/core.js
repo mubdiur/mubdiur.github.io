@@ -469,7 +469,7 @@ var ICON_ALIASES = {
   imageplus: 'image-plus', fileplus2: 'file-plus-2', gitcomparearrows: 'git-compare-arrows',
   wand2: 'wand-2', mousepointerclick: 'mouse-pointer-click', rotateccw: 'rotate-ccw',
   arrowup: 'arrow-up', arrowdown: 'arrow-down', fastforward: 'fast-forward', externallink: 'external-link',
-  shieldalert: 'shield-alert', caseSensitive: 'case-sensitive', filespreadsheet: 'file-spreadsheet'
+  shieldalert: 'shield-alert'
 };
 
 function fallbackCopy(text) {

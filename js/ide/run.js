@@ -1,112 +1,60 @@
 /* ═══════════════════════════════════════════════════════════
-   IDE shared runner helpers.
-   - IDECache.fetch: cache-first fetch backed by the Cache Storage
-     API, so every compiler/runtime payload downloads at most once.
-   - Worker spawning + the {id, type, text} message protocol used by
-     every in-worker runner (js, python, c/c++, c#).
+   IDE runner shim — backwards-compat wrapper around cache.js.
+
+   History: this file duplicated the Cache helpers with a divergent
+   `cachedBytes` (progress streaming) and a `Worker` spawn helper
+   `IDERun.worker`.  The duplication caused silent drift (different
+   CACHE_NAME handling, dead handlers, protocol mismatch).  We now
+   single-source through cache.js so only one implementation ever
+   exists.
+
+   This file is kept as a thin re-export so existing checkout state
+   and any external references don't break.  All actual work is in
+   ./cache.js.
    ═══════════════════════════════════════════════════════════ */
-(function () {
-'use strict';
+import { CACHE_NAME, cachedFetch, cachedBytes, gunzip, cachedGunzip } from './cache.js';
 
-var CACHE_NAME = 'mub-ide-v1';
-var cachePromise = null;
+export { CACHE_NAME, cachedFetch, cachedBytes, gunzip, cachedGunzip };
 
-function openCache() {
-  if (!cachePromise) {
-    cachePromise = (typeof caches !== 'undefined' && caches.open)
-      ? caches.open(CACHE_NAME)
-      : Promise.reject(new Error('Cache API not available'));
-    cachePromise.catch(function () { cachePromise = null; });
+/* Legacy globals for any non-ESM script still doing `window.IDECache`. */
+try {
+  if (typeof self !== 'undefined') {
+    self.IDECache = { fetch: cachedFetch, bytes: cachedBytes, gunzip, CACHE_NAME };
   }
-  return cachePromise;
-}
+} catch (e) {}
 
-/**
- * Cache-first fetch. Returns a Response; if the URL was fetched before it
- * comes from the Cache Storage API with zero network traffic.
- */
-function cachedFetch(url, opts) {
-  return openCache().then(function (cache) {
-    return cache.match(url).then(function (hit) {
-      if (hit) return hit;
-      return fetch(url, opts).then(function (res) {
-        if (res && res.ok) {
-          try { cache.put(url, res.clone()); } catch (e) {}
-        }
-        return res;
-      });
-    });
-  }).catch(function () {
-    // Cache API unavailable — plain fetch still works (browser HTTP cache).
-    return fetch(url, opts);
+/* ── legacy worker helper (deprecated) ──
+   Kept only for external URLs that may still import it; the IDE's
+   js/ide/ide.js no longer uses this path (it spawns Workers directly). */
+export function runWorker(workerUrl, payload) {
+  const w = new Worker(workerUrl, { type: 'module' });
+  const handlers = {};
+  let done = false;
+  w.addEventListener('message', (e) => {
+    const m = e.data || {};
+    const h = handlers[m.type];
+    if (h) { try { h(m); } catch (err) { console.error(err); } }
   });
-}
-
-/** Fetch bytes (Uint8Array) cache-first. */
-function cachedBytes(url, onProgress) {
-  return cachedFetch(url).then(function (res) {
-    if (!res.ok) throw new Error('HTTP ' + res.status + ' — ' + url);
-    var total = parseInt(res.headers.get('Content-Length') || '0', 10);
-    if (!res.body || !total || !onProgress) return res.arrayBuffer();
-    var reader = res.body.getReader();
-    var received = 0;
-    var chunks = [];
-    function pump() {
-      return reader.read().then(function (r) {
-        if (r.done) {
-          var out = new Uint8Array(received);
-          var off = 0;
-          chunks.forEach(function (c) { out.set(c, off); off += c.length; });
-          return out.buffer;
-        }
-        chunks.push(r.value);
-        received += r.value.length;
-        onProgress(received, total);
-        return pump();
-      });
-    }
-    return pump();
-  });
-}
-
-function fmtBytes(n) {
-  if (n >= 1048576) return (n / 1048576).toFixed(1) + ' MB';
-  if (n >= 1024) return Math.round(n / 1024) + ' KB';
-  return n + ' B';
-}
-
-/**
- * Spawn a runner worker and run {code} in it.
- * workerUrl must be same-origin. Returns a controller:
- *   controller.on(event, fn) — 'status' | 'out' | 'err' | 'exit'
- *   controller.terminate()
- */
-function runWorker(workerUrl, payload) {
-  var w = new Worker(workerUrl, { type: 'module' });
-  var handlers = {};
-  var done = false;
-  w.addEventListener('message', function (e) {
-    var m = e.data || {};
-    var h = handlers[m.type];
-    if (h) h(m);
-  });
-  w.addEventListener('error', function (e) {
-    if (!handlers.err) return;
-    handlers.err({ text: String(e.message || e) });
+  w.addEventListener('error', (e) => {
+    const h = handlers.err || handlers.error;
+    if (h) { try { h({ text: String(e.message || e) }); } catch (err) {} }
   });
   w.postMessage(payload);
   return {
-    on: function (type, fn) { handlers[type] = fn; },
-    post: function (m) { w.postMessage(m); },
-    terminate: function () {
+    on(type, fn) { handlers[type] = fn; },
+    post(m) { try { w.postMessage(m); } catch (e) {} },
+    terminate() {
       if (done) return;
       done = true;
       try { w.terminate(); } catch (e) {}
-      if (handlers.exit) handlers.exit({ text: '', code: null, terminated: true });
+      const h = handlers.exit;
+      if (h) { try { h({ text: '', code: null, terminated: true }); } catch (err) {} }
     }
   };
 }
 
-window.IDECache = { fetch: cachedFetch, bytes: cachedBytes, fmtBytes: fmtBytes, CACHE_NAME: CACHE_NAME };
-window.IDERun = { worker: runWorker };
-})();
+try {
+  if (typeof self !== 'undefined' && !self.IDERun) {
+    self.IDERun = { worker: runWorker };
+  }
+} catch (e) {}

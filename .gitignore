@@ -1,4 +1,6 @@
-# Static site — nothing to build or ignore except OS cruft.
+# OS
 .DS_Store
 Thumbs.db
 *.log
+# Node (lint + tests only — site is zero-build)
+node_modules/

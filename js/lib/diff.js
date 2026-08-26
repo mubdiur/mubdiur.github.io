@@ -65,28 +65,26 @@ function middle(a, b, al, ah, bl, bh, eq) {
 
   for (var d = 0; d <= Math.min(max, MAX_D * 2); d++) {
     trace.push(Int32Array.from(v));
-    for (var k = -d; k <= d; k += 2) {
-      var kk = k + offset;
-      var x;
-      if (k === -d || (k !== d && v[kk - 1] < v[kk + 1])) x = v[kk + 1];
-      else x = v[kk - 1] + 1;
-      var y = x - k;
-      while (x < n && y < m && eq(a[al + x], b[bl + y])) { x++; y++; }
-      v[kk] = x;
-      if (x >= n && y >= m) { foundD = d; break; }
+    for (var k2 = -d; k2 <= d; k2 += 2) {
+      var kk2 = k2 + offset;
+      var x2;
+      if (k2 === -d || (k2 !== d && v[kk2 - 1] < v[kk2 + 1])) x2 = v[kk2 + 1];
+      else x2 = v[kk2 - 1] + 1;
+      var y2 = x2 - k2;
+      while (x2 < n && y2 < m && eq(a[al + x2], b[bl + y2])) { x2++; y2++; }
+      v[kk2] = x2;
+      if (x2 >= n && y2 >= m) { foundD = d; break; }
     }
     if (foundD >= 0) break;
   }
 
   if (foundD < 0) {
-    // Exceeded the edit-distance budget — emit one honest replace block.
     var out = [];
     for (var xa = al; xa < ah; xa++) out.push({ t: 'del', ai: xa, bi: -1 });
     for (var xb = bl; xb < bh; xb++) out.push({ t: 'add', ai: -1, bi: xb });
     return out;
   }
 
-  // Backtrack through the V snapshots to recover the edit path.
   var steps = [];
   var px = n, py = m;
   for (var dd = foundD; dd > 0; dd--) {

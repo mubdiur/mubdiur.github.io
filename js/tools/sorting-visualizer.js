@@ -35,10 +35,10 @@ var ALGOS = {
       if (lo >= hi) return;
       var p = a[hi]; var i = lo;
       for (var j = lo; j < hi; j++) {
-        if (a[j] < p) { var t = a[i]; a[i] = a[j]; a[j] = t; i++; }
+        if (a[j] < p) { var tmp = a[i]; a[i] = a[j]; a[j] = tmp; i++; }
         yield [a, [i - 1, j]];
       }
-      var t = a[i]; a[i] = a[hi]; a[hi] = t;
+      var tmp2 = a[i]; a[i] = a[hi]; a[hi] = tmp2;
       yield [a, [i, hi]];
       yield* qs(lo, i - 1);
       yield* qs(i + 1, hi);

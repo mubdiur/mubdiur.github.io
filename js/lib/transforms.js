@@ -116,6 +116,21 @@ T.yamlToJSON = function (s) {
   return JSON.stringify(root.map(toValue), null, 2);
 };
 
+T.baseConvertDetailed = function (raw, fromBase, toBase) {
+  var s = String(raw).trim();
+  if (!s) throw new Error('Enter a number');
+  var neg = s.charAt(0) === '-';
+  var digits = (neg ? s.slice(1) : s).toLowerCase().replace(/[_\s]/g, '');
+  if (!digits) throw new Error('Enter a number');
+  for (var i = 0; i < digits.length; i++) { var v = parseInt(digits.charAt(i), 36); if (!(v >= 0 && v < fromBase)) throw new Error('Invalid digit "' + digits.charAt(i) + '" for base ' + fromBase); }
+  var n = 0n; var base = BigInt(fromBase);
+  for (var j = 0; j < digits.length; j++) n = n * base + BigInt(parseInt(digits.charAt(j), 36));
+  var out = (neg ? '-' : '') + n.toString(toBase);
+  if (toBase === 16) out = out.toUpperCase();
+  var BASE_NAMES = { 2: 'Binary', 8: 'Octal', 10: 'Decimal', 16: 'Hex' };
+  var name = BASE_NAMES[toBase] || 'Base ' + toBase;
+  return s.trim() + ' (base ' + fromBase + ' \u2192 ' + name + ')\n' + '\u2500'.repeat(20) + '\n' + name + ': ' + out + (fromBase !== 10 ? '\nDecimal: ' + (neg ? '-' : '') + n.toString(10) : '');
+};
 T.baseConvert = function (num, fromBase, toBase) {
   var raw = String(num).trim();
   if (!raw) throw new Error('Empty number');

@@ -29,6 +29,12 @@ function parseDiagnostics(text) {
 }
 
 var enginePromise = null;
+var vmLines = [];
+var VM_LINES_CAP = 5000;
+function pushVmLine(s) {
+  if (vmLines.length < VM_LINES_CAP) vmLines.push(s);
+  else if (vmLines.length === VM_LINES_CAP) vmLines.push('\u2026 (output truncated)');
+}
 
 function ensureEngine() {
   if (!enginePromise) {
@@ -38,20 +44,26 @@ function ensureEngine() {
       var shim = await cachedBytes('./vendor/199xvm/bundle.bin');
 
       var wasmBytes = await cachedBytes('./vendor/199xvm/jvm_core.wasm');
+      var instRef = { current: null };
       var imports = {
         env: {
           js_console_log: function (p, len) {
-            pushVmLine(new TextDecoder().decode(new Uint8Array(inst.exports.memory.buffer, p, len)));
+            var buf = instRef.current ? instRef.current.exports.memory.buffer : null;
+            if (!buf) return;
+            pushVmLine(new TextDecoder().decode(new Uint8Array(buf, p, len)));
           },
           js_console_error: function (p, len) {
-            pushVmLine('[err] ' + new TextDecoder().decode(new Uint8Array(inst.exports.memory.buffer, p, len)));
+            var buf = instRef.current ? instRef.current.exports.memory.buffer : null;
+            if (!buf) return;
+            pushVmLine('[err] ' + new TextDecoder().decode(new Uint8Array(buf, p, len)));
           },
           js_date_now: function () { return Date.now(); }
         }
       };
-      var inst = (await WebAssembly.instantiate(wasmBytes, imports)).instance;
+      var inst_ = (await WebAssembly.instantiate(wasmBytes, imports)).instance;
+      instRef.current = inst_;
       post('status', 'Java VM ready');
-      return { javac: javac, shim: shim, inst: inst };
+      return { javac: javac, shim: shim, inst: inst_ };
     })();
     enginePromise.catch(function () { enginePromise = null; });
   }
@@ -90,13 +102,6 @@ self.addEventListener('message', function (e) {
   var code = (e.data && e.data.code) || '';
   running = true;
   vmLines = [];
-
-  var vmLines = [];
-  var VM_LINES_CAP = 5000;
-  function pushVmLine(s) {
-    if (vmLines.length < VM_LINES_CAP) vmLines.push(s);
-    else if (vmLines.length === VM_LINES_CAP) { vmLines.push('… (output truncated)'); }
-  }
 
   var timer = setTimeout(function () {
     if (!running) return;

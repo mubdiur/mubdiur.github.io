@@ -29,7 +29,6 @@ App.registerTool('image-to-base64', {
     var b64 = '';
     var preview = '';
     var fileName = '';
-    var dragging = false;
 
     var outputBox = App.el('div');
     var imgEl = App.el('img', { alt: 'Preview', class: 'max-w-full max-h-[180px] object-contain rounded' });
@@ -63,11 +62,10 @@ App.registerTool('image-to-base64', {
       App.el('p', { class: 'text-[10px] font-mono text-muted-foreground/40 mt-1', text: 'PNG, JPG, GIF, WebP, SVG' }));
 
     // Drag & drop
-    App.on(zone, 'dragover', function (e) { e.preventDefault(); dragging = true; zone.classList.add('dragging'); });
-    App.on(zone, 'dragleave', function () { dragging = false; zone.classList.remove('dragging'); });
+    App.on(zone, 'dragover', function (e) { e.preventDefault(); zone.classList.add('dragging'); });
+    App.on(zone, 'dragleave', function () { zone.classList.remove('dragging'); });
     App.on(zone, 'drop', function (e) {
       e.preventDefault();
-      dragging = false;
       zone.classList.remove('dragging');
       var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
       if (file) handleFile(file);
