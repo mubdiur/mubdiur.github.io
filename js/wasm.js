@@ -39,8 +39,7 @@ function ensureReady() {
 function allocBytes(bytes) {
   ensureReady();
   var p = exp.alloc(bytes.length);
-  if (p === 0) throw new Error('WASM allocation failed (OOM)');
-  if (p < 0) throw new Error('WASM allocation failed');
+  if (p < 0) throw new Error('WASM allocation failed (OOM)');
   if (p + bytes.length > exp.memory.buffer.byteLength) throw new Error('WASM allocation out of bounds');
   mem().set(bytes, p);
   return p;
@@ -49,7 +48,7 @@ function allocBytes(bytes) {
 function allocSlot() {
   ensureReady();
   var p = exp.alloc(4);
-  if (p === 0) throw new Error('WASM allocation failed (OOM)');
+  if (p < 0) throw new Error('WASM allocation failed (OOM)');
   if (p + 4 > exp.memory.buffer.byteLength) throw new Error('WASM allocation out of bounds');
   return p;
 }
@@ -76,7 +75,7 @@ function digestBytes(name, bytes, outLen) {
   ensureReady();
   var p = allocBytes(bytes);
   var out = exp.alloc(outLen);
-  if (out === 0 || out < 0) throw new Error('WASM allocation failed (OOM)');
+  if (out < 0) throw new Error('WASM allocation failed (OOM)');
   var rc;
   try { rc = exp[name](p, bytes.length, out); } catch (e) { exp.reset(); throw e; }
   if (rc !== 0) { exp.reset(); throw new Error('WASM ' + name + ' failed'); }
@@ -106,7 +105,7 @@ var Core = {
     var p, out, rc, hex;
     p = allocBytes(bytes);
     out = exp.alloc(4);
-    if (out === 0) throw new Error('WASM allocation failed (OOM)');
+    if (out < 0) throw new Error('WASM allocation failed (OOM)');
     try { rc = exp.crc32(p, bytes.length, out); } finally { if (rc !== 0) { exp.reset(); throw new Error('WASM crc32 failed'); } }
     try { hex = hexOf(out, 4); } finally { exp.reset(); }
     return hex;
@@ -120,7 +119,7 @@ var Core = {
     mp = allocBytes(mb);
     outLen = alg === 0 ? 20 : 32;
     out = exp.alloc(outLen);
-    if (out === 0) throw new Error('WASM allocation failed (OOM)');
+    if (out < 0) throw new Error('WASM allocation failed (OOM)');
     try { rc = exp.hmac(mp, mb.length, kp, kb.length, alg, out); } finally { if (rc !== 0) { exp.reset(); throw new Error('WASM hmac failed'); } }
     try { hex = hexOf(out, outLen); } finally { exp.reset(); }
     return hex;

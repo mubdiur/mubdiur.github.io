@@ -4,3 +4,7 @@ Thumbs.db
 *.log
 # Node (lint + tests only — site is zero-build)
 node_modules/
+# e2e private workshop — never ships
+/e2e/
+test-results/
+playwright-report/

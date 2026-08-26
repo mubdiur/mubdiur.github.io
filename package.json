@@ -6,11 +6,18 @@
     "lint": "eslint js --ext .js",
     "lint:all": "eslint js --ext .js && node --check js/wasm.js && node --check js/core.js && node --check js/manifest.js",
     "test": "node build/smoke-libs.js && node build/smoke-tools.js && node build/smoke-error-paths.js",
-    "verify": "npm run lint:all && npm test && echo \"verify: lint + node --check + smoke suites passed\""
+    "verify": "npm run lint:all && npm test && echo \"verify: lint + node --check + smoke suites passed\"",
+    "test:e2e": "playwright test --config=e2e/playwright.config.ts",
+    "test:e2e:ui": "playwright test --config=e2e/playwright.config.ts --ui",
+    "verify:full": "npm run verify && npm run test:e2e"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^9.39.5",
+    "@playwright/test": "1.62",
+    "axe-core": "^4.13.0",
     "eslint": "^9.39.5",
-    "globals": "^15.15.0"
+    "globals": "^15.15.0",
+    "http-server": "^14.1.1"
   }
 }

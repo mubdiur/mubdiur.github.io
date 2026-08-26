@@ -74,7 +74,7 @@ function renderTool(path) {
       var inner = App.el('div', { class: 't-' + slug + ' fade-in' });
       body.appendChild(inner);
       var def = App.tools[slug];
-      if (def.css) {
+      if (def.css && !document.getElementById('toolcss-' + slug)) {
         var st = document.createElement('style');
         st.id = 'toolcss-' + slug;
         st.textContent = def.css;
