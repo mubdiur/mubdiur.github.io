@@ -95,8 +95,11 @@ function buildDiagDecos(view, diags) {
 
 /* ── Monokai Pro – lifted verbatim from the vsix (Monokai Pro.json) ──
    editor.* → editor chrome, terminal.* → selection/fallback,
-   charts.* → status hints. No approximation: every hex below
-   comes from the .vsix colors table. */
+   charts.* → status hints. Every hex below comes from the .vsix.
+   This "Ultra" edition goes beyond stock Monokai: every Lezer tag
+   gets a deliberate color so nothing falls through to default,
+   operators pop pink, stdlib glows cyan italic, properties stay
+   crisp white, and the whole thing hits like a premium editor. */
 const baseTheme = EditorView.theme({
   '&': {
     height: '100%',
@@ -106,7 +109,7 @@ const baseTheme = EditorView.theme({
   },
   '.cm-scroller': {
     fontFamily: "'IBM Plex Mono', monospace",
-    lineHeight: '1.55',
+    lineHeight: '1.6',
     overflow: 'auto',
   },
   '.cm-content': {
@@ -117,21 +120,26 @@ const baseTheme = EditorView.theme({
     padding: '0 12px',
   },
   '&.cm-focused': { outline: 'none' },
-  '.cm-cursor, .cm-dropCursor': { borderLeftColor: '#fcfcfa' },
+  '.cm-cursor, .cm-dropCursor': { borderLeftColor: '#fcfcfa', borderLeftWidth: '2px' },
   '.cm-gutters': {
     backgroundColor: '#2d2a2e',
     color: '#5b595c',
     border: 'none',
     borderRight: '1px solid #403e41',
   },
-  '.cm-activeLine': { backgroundColor: '#fcfcfa0c' },
-  '.cm-activeLineGutter': { backgroundColor: '#fcfcfa0c', color: '#c1c0c0' },
+  '.cm-activeLine': { backgroundColor: '#403e41' },
+  '.cm-activeLineGutter': { backgroundColor: '#403e41', color: '#fcfcfa' },
   '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
     backgroundColor: '#fcfcfa26',
   },
   '.cm-matchingBracket': {
-    backgroundColor: '#fcfcfa26',
-    outline: '1px solid #727072',
+    backgroundColor: 'rgba(255,216,102,0.22)',
+    outline: '1px solid #ffd866',
+    borderRadius: '3px',
+  },
+  '.cm-nonmatchingBracket': {
+    backgroundColor: 'rgba(255,97,136,0.18)',
+    outline: '1px solid #ff6188',
   },
   '.cm-tooltip': {
     backgroundColor: '#403e41',
@@ -139,27 +147,31 @@ const baseTheme = EditorView.theme({
     color: '#c1c0c0',
     fontFamily: "'IBM Plex Mono', monospace",
     fontSize: '11.5px',
+    borderRadius: '6px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.45)',
   },
   '.cm-tooltip-autocomplete ul li[aria-selected]': {
-    backgroundColor: '#5b595c',
-    color: '#fcfcfa',
+    backgroundColor: '#ffd866',
+    color: '#2d2a2e',
   },
-  '.cm-tooltip.cm-tooltip-autocomplete ul': { maxHeight: '240px' },
+  '.cm-tooltip.cm-tooltip-autocomplete ul': { maxHeight: '260px' },
   '.cm-panels': { backgroundColor: '#221f22', color: '#939293' },
-  '.cm-searchMatch': { backgroundColor: '#fcfcfa26', outline: '1px solid #ffd866' },
+  '.cm-searchMatch': { backgroundColor: 'rgba(255,216,102,0.28)', outline: '1px solid #ffd866', borderRadius: '2px' },
   '.cm-searchMatch-selected': { backgroundColor: '#ffd866', color: '#2d2a2e' },
-  '&.cm-focused .cm-selectionMatch': { backgroundColor: '#fcfcfa26' },
+  '&.cm-focused .cm-selectionMatch': { backgroundColor: 'rgba(255,216,102,0.14)', outline: '1px solid rgba(255,216,102,0.35)' },
   '.cm-foldPlaceholder': {
     backgroundColor: '#403e41',
     border: '1px solid #5b595c',
     color: '#c1c0c0',
     fontFamily: "'IBM Plex Mono', monospace",
+    padding: '0 6px',
+    borderRadius: '4px',
   },
   /* error/warning diagnostics – Monokai Pro error #ff6188 / warning #fc9867 */
-  '.cm-diag-line.error': { backgroundColor: 'rgba(255,97,136,0.10)' },
-  '.cm-diag-line.warn': { backgroundColor: 'rgba(252,152,103,0.12)' },
-  '.cm-diag-mark.error': { textDecoration: 'underline wavy #ff6188', textDecorationSkipInk: 'none' },
-  '.cm-diag-mark.warn': { textDecoration: 'underline wavy #fc9867', textDecorationSkipInk: 'none' },
+  '.cm-diag-line.error': { backgroundColor: 'rgba(255,97,136,0.11)' },
+  '.cm-diag-line.warn': { backgroundColor: 'rgba(252,152,103,0.14)' },
+  '.cm-diag-mark.error': { textDecoration: 'underline wavy #ff6188 1.2px', textDecorationSkipInk: 'none' },
+  '.cm-diag-mark.warn': { textDecoration: 'underline wavy #fc9867 1.2px', textDecorationSkipInk: 'none' },
   '.cm-diag-marker': {
     fontFamily: "'IBM Plex Mono', monospace",
     fontSize: '10px',
@@ -171,40 +183,69 @@ const baseTheme = EditorView.theme({
 });
 
 /* ── syntax — Lezer tags mapped from Monokai Pro tokenColors ──
-   Each color is taken verbatim from the vsix:
-     pink #ff6188 · orange #fc9867 · yellow #ffd866
-     green #a9dc76 · cyan #78dce8 · purple #ab9df2
-     grey-light #fcfcfa · grey-mid #939293 / #c1c0c0 · dim #727072 */
+   Every color is taken verbatim from the vsix, but with "Ultra"
+   separation so no two semantic groups share a color by accident:
+     pink   #ff6188  keywords / operators / tags
+     orange #fc9867  params / modifiers params
+     yellow #ffd866  strings / headings
+     green  #a9dc76  functions / methods / calls
+     cyan   #78dce8  types / classes / stdlib
+     purple #ab9df2  numbers / booleans / constants
+     white  #fcfcfa  identifiers / properties
+     grey   #727072  comments (italic)
+            #939293  punctuation / brackets
+            #c1c0c0  this/super + attribute values
+   Order matters: most specific first, catch-alls last. */
 const syntax = HighlightStyle.define([
-  // keyword / storage / modifier → #ff6188  (keyword, storage, control)
-  { tag: [tags.keyword, tags.modifier, tags.controlKeyword, tags.operatorKeyword, tags.definitionKeyword], color: '#ff6188' },
-  // storage.type (italic in vsix) → #78dce8 italic
-  { tag: [tags.typeName, tags.namespace, tags.self], color: '#78dce8', fontStyle: 'italic' },
-  // class/type → #78dce8
+  // keywords & control — hot pink, bold for command
+  { tag: [tags.keyword, tags.controlKeyword, tags.operatorKeyword, tags.definitionKeyword, tags.moduleKeyword], color: '#ff6188', fontWeight: '700' },
+  // modifiers (async, mut, const, let) — pink italic per storage.modifier
+  { tag: tags.modifier, color: '#ff6188', fontStyle: 'italic' },
+  // HTML / JSX tags — pink (entity.name.tag #ff6188)
+  { tag: tags.tagName, color: '#ff6188' },
+  // types, namespaces, self — cyan italic (storage.type)
+  { tag: [tags.typeName, tags.namespace, tags.self, tags.typeOperator], color: '#78dce8', fontStyle: 'italic' },
+  // classes, interfaces, enums, annotations, attributes — cyan
   { tag: [tags.className, tags.annotation, tags.attributeName], color: '#78dce8' },
-  // function name / call → #a9dc76
-  { tag: [tags.function(tags.variableName), tags.function(tags.definition(tags.variableName)), tags.labelName, tags.macroName], color: '#a9dc76' },
-  // variable / property → #fcfcfa
-  { tag: [tags.variableName, tags.propertyName, tags.definition(tags.variableName), tags.definition(tags.propertyName)], color: '#fcfcfa' },
-  // param (italic orange) → #fc9867 italic
-  { tag: tags.param, color: '#fc9867', fontStyle: 'italic' },
-  // special variable (this/self) → #c1c0c0 italic
+  // standard library types & globals (console, Math, Promise, Array) — cyan italic glow
+  { tag: [tags.standard(tags.typeName), tags.standard(tags.className), tags.standard(tags.variableName), tags.standard(tags.tagName), tags.standard(tags.propertyName)], color: '#78dce8', fontStyle: 'italic' },
+  // functions, methods, labels, macros — neon green (entity.name.function / support.function)
+  { tag: [tags.function(tags.variableName), tags.function(tags.definition(tags.variableName)), tags.macroName, tags.labelName], color: '#a9dc76' },
+  // calls to standard lib functions (parseInt, require) — also green
+  { tag: tags.standard(tags.function(tags.variableName)), color: '#a9dc76' },
+  // properties after dot — crisp white (variable.other.member)
+  { tag: [tags.propertyName, tags.definition(tags.propertyName)], color: '#fcfcfa' },
+  // variables & definitions — white
+  { tag: [tags.variableName, tags.definition(tags.variableName), tags.local(tags.variableName), tags.name], color: '#fcfcfa' },
+  // this / super / self — muted grey italic
   { tag: tags.special(tags.variableName), color: '#c1c0c0', fontStyle: 'italic' },
-  // number / bool / atom → #ab9df2
-  { tag: [tags.number, tags.bool, tags.atom, tags.constant(tags.variableName)], color: '#ab9df2' },
-  // string / literal → #ffd866
-  { tag: [tags.string, tags.special(tags.string), tags.url, tags.escape, tags.regexp, tags.inserted, tags.contentSeparator], color: '#ffd866' },
-  // comment → #727072 italic
-  { tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment, tags.meta], color: '#727072', fontStyle: 'italic' },
-  // operator / punctuation / bracket → #939293
-  { tag: [tags.operator, tags.punctuation, tags.bracket, tags.brace, tags.separator, tags.derefOperator, tags.logicOperator, tags.compareOperator, tags.arithmeticOperator], color: '#939293' },
-  // property-ref / attribute value often string-ish
+  // params — tangerine orange italic (variable.parameter)
+  { tag: [tags.param, tags.definition(tags.param)], color: '#fc9867', fontStyle: 'italic' },
+  // numbers, booleans, atoms — electric purple
+  { tag: [tags.number, tags.integer, tags.float, tags.bool, tags.atom, tags.unit, tags.color, tags.constant(tags.variableName), tags.standard(tags.atom)], color: '#ab9df2' },
+  // strings — sunshine yellow
+  { tag: [tags.string, tags.special(tags.string), tags.attributeValue, tags.literal, tags.inserted, tags.quote, tags.character, tags.docString, tags.contentSeparator], color: '#ffd866' },
+  // regexp & escapes — also yellow
+  { tag: [tags.regexp, tags.escape, tags.special(tags.string)], color: '#ffd866' },
+  // comments — graphite italic
+  { tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment, tags.meta, tags.documentMeta], color: '#727072', fontStyle: 'italic' },
+  // operators — hot pink (keyword.operator #ff6188) — makes a+b pop
+  { tag: [tags.operator, tags.derefOperator, tags.arithmeticOperator, tags.logicOperator, tags.bitwiseOperator, tags.compareOperator, tags.updateOperator, tags.definitionOperator, tags.typeOperator, tags.controlOperator], color: '#ff6188' },
+  // punctuation & brackets — soft grey, brackets get extra pop via matchingBracket
+  { tag: [tags.punctuation, tags.bracket, tags.brace, tags.paren, tags.squareBracket, tags.angleBracket, tags.separator], color: '#939293' },
+  // headings & strong/emphasis
   { tag: tags.heading, color: '#ffd866', fontWeight: '700' },
-  { tag: tags.strong, fontWeight: 'bold' },
-  { tag: tags.emphasis, fontStyle: 'italic' },
-  { tag: tags.strikethrough, textDecoration: 'line-through' },
+  { tag: tags.strong, fontWeight: '700', color: '#fcfcfa' },
+  { tag: tags.emphasis, fontStyle: 'italic', color: '#fcfcfa' },
+  { tag: tags.strikethrough, textDecoration: 'line-through', color: '#939293' },
   { tag: tags.link, color: '#a9dc76', textDecoration: 'underline' },
-  { tag: tags.invalid, color: '#ff6188', fontStyle: 'italic', textDecoration: 'underline' },
+  // URLs — cyan (like support.type)
+  { tag: tags.url, color: '#78dce8', textDecoration: 'underline' },
+  // invalid / illegal — pink italic underline wavy
+  { tag: tags.invalid, color: '#ff6188', fontStyle: 'italic', textDecoration: 'underline wavy #ff6188' },
+  // deleted / inserted diff markers
+  { tag: tags.deleted, color: '#ff6188', backgroundColor: 'rgba(255,97,136,0.12)' },
+  { tag: tags.changed, color: '#ffd866' },
 ]);
 
 function langFor(id) {
