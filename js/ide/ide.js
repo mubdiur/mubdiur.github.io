@@ -7,6 +7,11 @@
    stdin: the input box below the output pipes input to the
    program — live for JavaScript (readline / process.stdin), and
    type-ahead (sent when you press Run) for Python, C, C++, Rust.
+
+   Bulletproofing: per-run watchdog token, stdin routed to
+   runningLang (not selected tab), worker 'error' event calls
+   finishRun, payload size capped, state.code strings validated,
+   localStorage quota guarded.
    ═══════════════════════════════════════════════════════════ */
 (function () {
 'use strict';
@@ -30,16 +35,17 @@ var LANGUAGES = [
 'use std::io::{self, BufRead};\n\nfn main() {\n    let v = vec![1, 2, 3, 4, 5];\n    let doubled: Vec<i32> = v.iter().map(|x| x * 2).collect();\n    println!("doubled: {:?}", doubled);\n\n    // Type a line into the stdin box below, then press Run.\n    let line = io::stdin().lock().lines().next();\n    match line {\n        Some(Ok(l)) => println!("you typed: {}", l.trim()),\n        _ => println!("(no stdin — type something in the input box, then Run)"),\n    }\n}' }
 ];
 
-/* Languages whose engines can read stdin at all (Go/C#/Java expose none). */
 var STDIN_LANGS = ['js', 'py', 'c', 'cpp', 'rs'];
+var STDIN_MAX_BYTES = 64 * 1024;
 
 var STORE_KEY = 'mub.ide.v1';
 var RUNNER_DIR = 'js/ide/';
-var STDIN_WAIT_MS = 120000; // how long a run may wait for typed input
+var STDIN_WAIT_MS = 120000;
 
 var state = { lang: 'js', code: {} };
 var workers = {};
 var watchdog = null;
+var watchdogGen = 0;
 var editor = null;
 var outputEl = null;
 var statusEl = null;
@@ -58,11 +64,15 @@ function loadState() {
     if (raw) {
       var s = JSON.parse(raw);
       if (s && s.lang && LANGUAGES.some(function (l) { return l.id === s.lang; })) state.lang = s.lang;
-      if (s && s.code) state.code = s.code;
+      if (s && s.code && typeof s.code === 'object') {
+        Object.keys(s.code).forEach(function (k) {
+          if (typeof s.code[k] === 'string') state.code[k] = s.code[k].slice(0, 256 * 1024);
+        });
+      }
     }
   } catch (e) {}
   LANGUAGES.forEach(function (l) {
-    if (!state.code[l.id]) state.code[l.id] = l.sample;
+    if (typeof state.code[l.id] !== 'string') state.code[l.id] = l.sample;
   });
 }
 
@@ -70,7 +80,9 @@ var saveTimer = null;
 function saveState() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function () {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {
+      if (e && e.name === 'QuotaExceededError') { try { localStorage.removeItem(STORE_KEY); } catch (_) {} }
+    }
   }, 300);
 }
 
@@ -82,8 +94,10 @@ function langDef(id) {
 
 function getWorker(lang) {
   var def = langDef(lang);
+  if (!def) throw new Error('Unknown language: ' + lang);
   var entry = workers[lang];
   if (entry && entry.alive) return entry.w;
+  if (entry && entry.w) { try { entry.w.terminate(); } catch (e) {} }
   var w = new Worker(RUNNER_DIR + def.runner + '?v=5', { type: def.module ? 'module' : 'classic' });
   w.__lang = lang;
   w.addEventListener('message', function (e) { onWorkerMessage(lang, w, e.data || {}); });
@@ -91,6 +105,8 @@ function getWorker(lang) {
     if (workers[lang] && workers[lang].w === w && workers[lang].alive) {
       appendOutput('Runner error: ' + (e.message || 'unknown'), true);
       markDead(lang);
+      finishRun(null, true);
+      setStatus('worker error — press Run again');
     }
   });
   workers[lang] = { w: w, alive: true };
@@ -103,7 +119,7 @@ function markDead(lang) {
 
 function onWorkerMessage(lang, w, m) {
   if (workers[lang] && workers[lang].w !== w) return;
-  kickWatchdog(lang);
+  if (runningLang) kickWatchdog(lang);
   if (m.type === 'status') setStatus(m.text);
   else if (m.type === 'out') appendOutput(String(m.text || ''), false);
   else if (m.type === 'err') appendOutput(String(m.text || ''), true);
@@ -116,10 +132,13 @@ function onWorkerMessage(lang, w, m) {
 }
 
 function armWatchdog(ms) {
+  var gen = ++watchdogGen;
   clearTimeout(watchdog);
   watchdog = setTimeout(function () {
+    if (gen !== watchdogGen) return;
+    if (!runningLang) return;
     var entry = workers[runningLang];
-    if (entry && entry.alive && runningLang) {
+    if (entry && entry.alive) {
       appendOutput('\n[terminated: no response for ' + Math.round(ms / 1000) + 's — check for infinite loops]\n', true);
       try { entry.w.terminate(); } catch (e) {}
       markDead(runningLang);
@@ -129,7 +148,9 @@ function armWatchdog(ms) {
 }
 
 function kickWatchdog(lang) {
-  armWatchdog(langDef(lang).timeout * 1000);
+  var def = langDef(lang);
+  if (!def) return;
+  armWatchdog(def.timeout * 1000);
 }
 
 function setStatus(text) {
@@ -155,7 +176,9 @@ function clearOutput() {
 }
 
 function finishRun(code, terminated) {
+  var was = runningLang;
   runningLang = null;
+  watchdogGen++;
   clearTimeout(watchdog);
   if (stdinRow) stdinRow.classList.remove('waiting');
   stdinWaiting = false;
@@ -179,6 +202,7 @@ function stopRun() {
   if (!runningLang) return;
   var lang = runningLang;
   var entry = workers[lang];
+  watchdogGen++;
   clearTimeout(watchdog);
   if (entry && entry.alive) { try { entry.w.terminate(); } catch (e) {} }
   markDead(lang);
@@ -187,9 +211,12 @@ function stopRun() {
 }
 
 function runCode() {
-  if (runningLang || !editor) return;
+  if (runningLang) return;
+  if (!editor) return;
   var lang = state.lang;
   var code = editor.getValue();
+  if (typeof code !== 'string') code = String(code);
+  if (code.length > 512 * 1024) { setStatus('Code too large (max 512 KB)'); return; }
   state.code[lang] = code;
   saveState();
   runningLang = lang;
@@ -204,32 +231,36 @@ function runCode() {
   var w = getWorker(lang);
   kickWatchdog(lang);
   var payload = { code: code, lang: lang };
-  if (STDIN_LANGS.indexOf(lang) >= 0) payload.stdin = stdinInput ? stdinInput.value : '';
+  if (STDIN_LANGS.indexOf(lang) >= 0) {
+    var stdinVal = stdinInput ? String(stdinInput.value) : '';
+    if (stdinVal.length > STDIN_MAX_BYTES) stdinVal = stdinVal.slice(0, STDIN_MAX_BYTES);
+    payload.stdin = stdinVal;
+  }
   w.postMessage(payload);
 }
 
 /* ── stdin box (bottom of the output panel) ── */
 
 function onStdinRequest() {
+  if (!runningLang) return;
   stdinWaiting = true;
   stdinRow.classList.add('waiting');
   setStatus('awaiting input — type in the box below');
-  armWatchdog(STDIN_WAIT_MS); // a human is typing: extend the watchdog
+  armWatchdog(STDIN_WAIT_MS);
   stdinInput.focus();
 }
 
 function deliverStdin() {
-  var line = stdinInput.value;
+  if (!runningLang) return;
+  var line = String(stdinInput.value);
   stdinInput.value = '';
   stdinWaiting = false;
   stdinRow.classList.remove('waiting');
-  var entry = workers[state.lang];
-  if (entry && entry.alive && !runningLang) return; // run already over
-  if (entry && entry.alive) {
-    entry.w.postMessage({ type: 'stdin', line: line });
-    setStatus('input sent — program continues');
-  }
-  kickWatchdog(state.lang);
+  var entry = workers[runningLang];
+  if (!entry || !entry.alive) return;
+  entry.w.postMessage({ type: 'stdin', line: line });
+  setStatus('input sent — program continues');
+  kickWatchdog(runningLang);
 }
 
 /* ── page ── */
@@ -284,7 +315,6 @@ function renderIde() {
     '@media(max-width:640px){.ide-page{height:calc(100dvh - 48px);}}';
   document.head.appendChild(css);
 
-  /* header: title left, language tabs + run controls right */
   var headLeft = App.el('div', { class: 'ide-head-left' },
     App.el('span', { class: 'ide-title', text: 'In-Browser IDE' }),
     App.el('span', { class: 'ide-badge', text: '8 languages · zero servers · zero CDN' }),
@@ -323,7 +353,6 @@ function renderIde() {
     App.el('kbd', { style: { fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--ink-faint)' }, text: 'Ctrl+Enter' }));
   root.appendChild(App.el('div', { class: 'ide-head' }, headLeft, headRight));
 
-  /* editor + output panel side by side */
   var editorWrap = App.el('div', { class: 'ide-editor-wrap' });
   statusEl = App.el('span', { class: 'ide-status', text: 'Loading editor…' });
   var outHead = App.el('div', { class: 'ide-outhead' },
@@ -332,7 +361,6 @@ function renderIde() {
     App.el('button', { class: 'ide-clear', type: 'button', text: 'clear', onclick: function () { clearOutput(); } }));
   outputEl = App.el('div', { class: 'ide-output' });
 
-  /* stdin row: pipes input to the program */
   stdinInput = App.el('input', {
     class: 'ide-stdin-input', type: 'text', autocomplete: 'off', spellcheck: 'false',
     placeholder: 'type input — it goes to the program',
@@ -349,7 +377,6 @@ function renderIde() {
   var panel = App.el('div', { class: 'ide-panel' }, outHead, outputEl, stdinRow);
   root.appendChild(App.el('div', { class: 'ide-main' }, editorWrap, panel));
 
-  /* CodeMirror editor (vendored bundle) */
   import('/js/ide/vendor/editor.js?v=11').then(function (mod) {
     editor = mod.createIdeEditor(editorWrap, {
       value: state.code[state.lang] || langDef(state.lang).sample,
@@ -377,16 +404,15 @@ function renderIde() {
   }
   syncStdin();
 
-  /* run from anywhere: Ctrl+Enter even when focus is in the output panel */
   var onGlobalKey = function (e) {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); runCode(); }
   };
   document.addEventListener('keydown', onGlobalKey);
 
-  /* persistence + cleanup */
   App.onUnmount(function () {
     document.removeEventListener('keydown', onGlobalKey);
     clearTimeout(saveTimer);
+    watchdogGen++;
     clearTimeout(watchdog);
     Object.keys(workers).forEach(function (k) { try { workers[k].w.terminate(); } catch (e) {} });
     workers = {};

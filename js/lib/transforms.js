@@ -32,7 +32,11 @@ T.parseCSV = function (s) {
     }
     if (ch === '"' && cur === '') { inQuotes = true; sawAny = true; i++; continue; }
     if (ch === ',') { row.push(cur); cur = ''; sawAny = true; i++; continue; }
-    if (ch === '\r') { i++; continue; } // CRLF and bare CR both end records
+    if (ch === '\r') {
+      if (text.charAt(i + 1) === '\n') i++;
+      row.push(cur); rows.push(row);
+      row = []; cur = ''; sawAny = false; i++; continue;
+    }
     if (ch === '\n') {
       row.push(cur); rows.push(row);
       row = []; cur = ''; sawAny = false; i++; continue;
@@ -79,14 +83,17 @@ T.yamlToJSON = function (s) {
       entry.value = content.slice(2).trim();
     }
     while (stack.length > 1 && stack[stack.length - 1].indent >= indent) stack.pop();
+    var parentNode = stack[stack.length - 1].node;
     if (stack[stack.length - 1].indent < indent) {
-      var parent = stack[stack.length - 1].node;
-      var lastParent = parent[parent.length - 1];
-      if (lastParent) lastParent.children.push(entry);
+      var lastParent = parentNode[parentNode.length - 1];
+      if (lastParent) parentNode = lastParent.children;
+      else stack.push({ node: entry.children, indent: indent });
+      parentNode.push(entry);
     } else {
-      stack[stack.length - 1].node.push(entry);
+      parentNode.push(entry);
     }
-    stack.push({ node: entry.children, indent: indent });
+    if (stack[stack.length - 1].node !== entry.children) stack.push({ node: entry.children, indent: indent });
+    else if (stack[stack.length - 1].indent !== indent) stack[stack.length - 1].indent = indent;
   }
   function toValue(node) {
     if (node.children.length === 0) {
@@ -96,8 +103,13 @@ T.yamlToJSON = function (s) {
       return v;
     }
     if (node.children.every(function (c) { return c.key === undefined; })) return node.children.map(toValue);
-    var obj = {};
-    for (var i = 0; i < node.children.length; i++) if (node.children[i].key) obj[node.children[i].key] = toValue(node.children[i]);
+    var obj = Object.create(null);
+    for (var j2 = 0; j2 < node.children.length; j2++) {
+      var k = node.children[j2].key;
+      if (!k) continue;
+      if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
+      obj[k] = toValue(node.children[j2]);
+    }
     return obj;
   }
   if (root.length === 1) return JSON.stringify(toValue(root[0]), null, 2);
@@ -105,9 +117,16 @@ T.yamlToJSON = function (s) {
 };
 
 T.baseConvert = function (num, fromBase, toBase) {
-  var n = parseInt(num, fromBase);
-  if (isNaN(n)) throw new Error('Invalid number for base ' + fromBase);
-  return n.toString(toBase).toUpperCase();
+  var raw = String(num).trim();
+  if (!raw) throw new Error('Empty number');
+  var neg = raw.charAt(0) === '-';
+  var digits = (neg ? raw.slice(1) : raw).toLowerCase().replace(/[_\s]/g, '');
+  if (!digits) throw new Error('Invalid number');
+  for (var i = 0; i < digits.length; i++) { var v = parseInt(digits.charAt(i), 36); if (!(v >= 0 && v < fromBase)) throw new Error('Invalid digit "' + digits.charAt(i) + '" for base ' + fromBase); }
+  var n = 0n; var base = BigInt(fromBase);
+  for (var j = 0; j < digits.length; j++) n = n * base + BigInt(parseInt(digits.charAt(j), 36));
+  var out = (neg ? '-' : '') + n.toString(toBase);
+  return toBase === 16 ? out.toUpperCase() : out;
 };
 T.timestampToDate = function (ts) { return new Date(ts * 1000).toISOString().replace('T', ' ').slice(0, 19); };
 T.dateToTimestamp = function (s) { var d = new Date(s); if (isNaN(d.getTime())) throw new Error('Invalid date'); return Math.floor(d.getTime() / 1000); };
@@ -239,6 +258,7 @@ T.hexEncode = function (s) { return Array.from(new TextEncoder().encode(s)).map(
 T.hexDecode = function (s) {
   var hex = s.replace(/\s/g, '');
   if (!/^[0-9a-fA-F]*$/.test(hex)) throw new Error('Invalid hex string');
+  if (hex.length % 2 !== 0) throw new Error('Hex must have even length');
   var bytes = new Uint8Array(hex.length / 2);
   for (var i = 0; i < hex.length; i += 2) bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16);
   return new TextDecoder().decode(bytes);
@@ -375,10 +395,11 @@ T.jsonDiff = function (a, b) {
 T.jsonToXML = function (s) {
   var obj = JSON.parse(s);
   function toXml(val, name) {
-    if (val === null || val === undefined) return '<' + name + '/>';
-    if (typeof val !== 'object') return '<' + name + '>' + String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</' + name + '>';
-    if (Array.isArray(val)) return val.map(function (v) { return toXml(v, name); }).join('\n');
-    return '<' + name + '>\n' + Object.entries(val).map(function (e) { return '  ' + toXml(e[1], e[0]).replace(/\n/g, '\n  '); }).join('\n') + '\n</' + name + '>';
+    var safe = String(name).replace(/[^a-zA-Z0-9_\-.:]/g, '_').replace(/^[^a-zA-Z_]/, '_$&') || 'item';
+    if (val === null || val === undefined) return '<' + safe + '/>';
+    if (typeof val !== 'object') return '<' + safe + '>' + String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</' + safe + '>';
+    if (Array.isArray(val)) return val.map(function (v) { return toXml(v, safe); }).join('\n');
+    return '<' + safe + '>\n' + Object.entries(val).map(function (e) { return '  ' + toXml(e[1], e[0]).replace(/\n/g, '\n  '); }).join('\n') + '\n</' + safe + '>';
   }
   return '<?xml version="1.0" encoding="UTF-8"?>\n' + toXml(obj, 'root');
 };

@@ -53,22 +53,28 @@ App.registerTool('base64-image-decoder', {
     });
 
     function sniffMime(bytes) {
-      if (bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) return 'image/png';
-      if (bytes.length >= 3 && bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) return 'image/jpeg';
-      if (bytes.length >= 6 && bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38 && bytes[4] === 0x37 && bytes[5] === 0x61) return 'image/gif';
-      if (bytes.length >= 12 && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return 'image/webp';
+      var len = bytes.length;
+      function b(i) { return bytes.charCodeAt(i) & 0xFF; }
+      if (len >= 8 && b(0) === 0x89 && b(1) === 0x50 && b(2) === 0x4E && b(3) === 0x47) return 'image/png';
+      if (len >= 3 && b(0) === 0xFF && b(1) === 0xD8 && b(2) === 0xFF) return 'image/jpeg';
+      if (len >= 6 && b(0) === 0x47 && b(1) === 0x49 && b(2) === 0x46 && b(3) === 0x38 && b(4) === 0x37 && b(5) === 0x61) return 'image/gif';
+      if (len >= 12 && b(0) === 0x52 && b(1) === 0x49 && b(2) === 0x46 && b(3) === 0x46 && b(8) === 0x57 && b(9) === 0x45 && b(10) === 0x42 && b(11) === 0x50) return 'image/webp';
+      if (len >= 1 && bytes.charCodeAt(0) === 60 && bytes.indexOf('<svg') >= 0) return 'image/svg+xml';
       return null;
     }
 
     function decode(s) {
       try {
         var trimmed = s.trim();
-        // Use the declared MIME from a data URL prefix, else sniff the magic bytes
-        var prefixMatch = trimmed.match(/^data:(image\/[^;]+);base64,/);
-        var b64 = trimmed.replace(/^data:image\/[^;]+;base64,/, '');
-        var bytes = atob(b64.replace(/\s/g, ''));
-        var detected = prefixMatch ? prefixMatch[1] : sniffMime(bytes);
-        if (!detected) throw new Error('Not a supported image format — PNG, JPEG, GIF or WEBP only');
+        var prefixMatch = trimmed.match(/^data:([^;,]+)(?:;charset=[^;,]+)?;base64,/i);
+        var b64 = prefixMatch ? trimmed.slice(prefixMatch[0].length) : trimmed;
+        b64 = b64.replace(/\s/g, '');
+        if (!b64) throw new Error('Empty Base64 input');
+        while (b64.length % 4 !== 0) b64 += '=';
+        var bytes = atob(b64);
+        var declared = prefixMatch ? prefixMatch[1].toLowerCase() : '';
+        var detected = declared && declared.indexOf('image/') === 0 ? declared : sniffMime(bytes);
+        if (!detected || detected.indexOf('image/') !== 0) throw new Error('Not a supported image format — PNG, JPEG, GIF, WEBP or SVG');
         mime = detected;
         size = bytes.length;
         imgData = 'data:' + mime + ';base64,' + b64;
@@ -76,6 +82,8 @@ App.registerTool('base64-image-decoder', {
       } catch (e) {
         error = e instanceof Error ? e.message : 'Failed to decode Base64';
         imgData = null;
+        size = 0;
+        mime = '';
       }
       render();
     }

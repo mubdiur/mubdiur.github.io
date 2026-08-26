@@ -170,14 +170,19 @@ var App = {
     } else { fallbackCopy(text); done(); }
   },
   download: function (filename, content, mime) {
-    var blob = content instanceof Blob ? content : new Blob([content], { type: mime || 'text/plain' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 500);
+    try {
+      var blob = content instanceof Blob ? content : new Blob([content], { type: mime || 'text/plain' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      App.timer(function () { try { URL.revokeObjectURL(url); a.remove(); } catch (e) {} }, 700);
+    } catch (e) {
+      var msg = (e && e.message) || String(e);
+      try { console.error('download failed:', msg); } catch (_) {}
+    }
   },
   sleep: function (ms) { return new Promise(function (r) { App.timer(r, ms); }); },
 
@@ -194,10 +199,19 @@ var App = {
   },
   loadToolScript: function (slug) {
     return new Promise(function (resolve, reject) {
+      if (App.tools[slug] && App.tools[slug]._loaded) { resolve(); return; }
+      // dedupe: if a script tag for this slug is already pending, reuse its load
+      var existing = document.querySelector('script[data-tool="' + slug + '"]');
+      if (existing) {
+        existing.addEventListener('load', function () { resolve(); }, { once: true });
+        existing.addEventListener('error', function () { reject(new Error('Failed to load tool: ' + slug)); }, { once: true });
+        return;
+      }
       var s = document.createElement('script');
+      s.setAttribute('data-tool', slug);
       s.src = 'js/tools/' + slug + '.js?v=' + App.TOOL_VERSION;
-      s.onload = function () { resolve(); };
-      s.onerror = function () { reject(new Error('Failed to load tool: ' + slug)); };
+      s.onload = function () { if (App.tools[slug]) App.tools[slug]._loaded = true; resolve(); };
+      s.onerror = function () { try { s.remove(); } catch (e) {} reject(new Error('Failed to load tool: ' + slug)); };
       document.head.appendChild(s);
     });
   },
@@ -214,21 +228,25 @@ var App = {
   pages: {},
   registerPage: function (pattern, renderFn) { App.pages[pattern] = renderFn; },
 
+  _renderGen: 0,
   render: function () {
+    App._renderGen++;
+    var myGen = App._renderGen;
     App.cleanup();
     var main = document.getElementById('page-main');
+    if (!main) return;
     var raw = App.route();
     var path = raw.split('?')[0];
     var match = null;
     for (var p in App.pages) {
       if (p === '*') continue;
-      var re = new RegExp('^' + p.replace(/:[^/]+/g, '[^/]+') + '$');
+      var esc = p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/:[^/]+/g, '[^/]+');
+      var re = new RegExp('^' + esc + '$');
       if (re.test(path)) { match = p; break; }
     }
     if (!match) match = '*';
     var fn = App.pages[match] || App.pages['*'];
     main.innerHTML = '';
-    /* the IDE is a full-height app page — drop the marketing footer there */
     var footerEl = document.getElementById('site-footer');
     if (footerEl) footerEl.style.display = (path === '/ide' || path.indexOf('/ide') === 0) ? 'none' : '';
     if (!fn) {
@@ -240,7 +258,14 @@ var App = {
       window.scrollTo(0, 0);
       return;
     }
-    var result = fn(raw, main);
+    var result;
+    try { result = fn(raw, main); } catch (e) {
+      main.appendChild(App.el('div', { class: 'not-found', html:
+        '<span class="nf-title">Something broke</span><span class="nf-sub">' + App.esc(e && e.message || e) + '</span>' }));
+      App.renderNav();
+      window.scrollTo(0, 0);
+      return;
+    }
     if (result && typeof result.then === 'function') {
       var loading = App.el('div', { class: 'loading-block', html:
         '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(83,163,249,0.7);display:inline-block;margin:0 2px"></span>' +
@@ -248,9 +273,11 @@ var App = {
         '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(83,163,249,0.7);display:inline-block;margin:0 2px"></span>' });
       main.appendChild(loading);
       result.then(function (node) {
+        if (myGen !== App._renderGen) return;
         if (main.contains(loading)) { main.removeChild(loading); }
-        main.appendChild(node);
+        if (node && node.nodeType) main.appendChild(node);
       }).catch(function (err) {
+        if (myGen !== App._renderGen) return;
         main.innerHTML = '';
         main.appendChild(App.el('div', { class: 'not-found', html:
           '<span class="nf-title">Something broke</span><span class="nf-sub">' + App.esc(err && err.message || err) + '</span>' }));

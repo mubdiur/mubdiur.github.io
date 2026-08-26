@@ -8,11 +8,11 @@
 (function () {
 'use strict';
 
-/* Verbatim from the TSX — WCAG relative-luminance math. */
 function hexToRgb(hex) {
-  var h = hex.replace('#', '');
-  var full = h.length === 3 ? h.split('').map(function (c) { return c + c; }).join('') : h;
-  return [parseInt(full.slice(0, 2), 16), parseInt(full.slice(2, 4), 16), parseInt(full.slice(4, 6), 16)];
+  var h = String(hex).trim().replace(/^#/, '');
+  if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) throw new Error('Invalid hex');
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
 }
 
 function luminance(r, g, b) {
@@ -100,15 +100,13 @@ App.registerTool('contrast-checker', {
     fgColor.addEventListener('input', function () { fg = fgColor.value; render(); });
     bgColor.addEventListener('input', function () { bg = bgColor.value; render(); });
 
-    // Apply hex only once it forms a full 6-digit value (typing stays free)
-    fgHex.addEventListener('input', function () {
-      var v = fgHex.value;
-      if (/^#[0-9a-f]{6}$/i.test(v)) { fg = v; render(); }
-    });
-    bgHex.addEventListener('input', function () {
-      var v = bgHex.value;
-      if (/^#[0-9a-f]{6}$/i.test(v)) { bg = v; render(); }
-    });
+    function normalizeHex(v) {
+      var h = String(v).trim();
+      if (/^#[0-9a-f]{3}$/i.test(h)) h = '#' + h[1]+h[1]+h[2]+h[2]+h[3]+h[3];
+      return /^#[0-9a-f]{6}$/i.test(h) ? h.toLowerCase() : null;
+    }
+    fgHex.addEventListener('input', function () { var n = normalizeHex(fgHex.value); if (n) { fg = n; render(); } });
+    bgHex.addEventListener('input', function () { var n = normalizeHex(bgHex.value); if (n) { bg = n; render(); } });
 
     root.appendChild(App.el('div', { class: 'grid grid-cols-2 gap-3' },
       App.el('div', {},

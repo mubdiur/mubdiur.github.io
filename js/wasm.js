@@ -1,15 +1,33 @@
 /* ═══════════════════════════════════════════════════════════
-   WebAssembly core loader + high-level API.
-   Loads wasm/core.wasm (compiled from wasm/core.rs) and exposes
-   synchronous hash/HMAC/CRC/QR/ASN.1 functions to the site.
-   Works over HTTP (instantiateStreaming) and file:// (fallback).
+   WebAssembly core — hash / HMAC / CRC / QR / ASN.1
+
+   wasm/core.wasm  ←  wasm/core.rs   (Rust → wasm, ~45 KB)
+   All functions are synchronous and share a single bump allocator
+   (exp.alloc / exp.reset) inside the module's linear memory.
+
+   Architecture
+   ────────────
+   • The module's memory can grow at any `alloc` call.  A cached
+     Uint8Array view would go stale (detached buffer), so every
+     read/write goes through a fresh view — `mem()` always returns a
+     view of the *current* buffer.
+   • `readyPromise` is resettable: on rejection it is nulled so a
+     subsequent `load()` can retry.  No silent swallowing.
+   • Every path that allocates calls `reset()` in a `finally` so
+     failed calls cannot leak allocator state into the next call.
+   • ASN.1 JSON size is bounded (2 MB) to avoid OOM on adversarial DER.
    ═══════════════════════════════════════════════════════════ */
 (function () {
 'use strict';
 
 var exp = null;
-var mem = null;
 var readyPromise = null;
+
+/* Fresh view of the current linear memory — never cached. */
+function mem() {
+  if (!exp || !exp.memory) throw new Error('WASM memory not ready');
+  return new Uint8Array(exp.memory.buffer);
+}
 
 function ensureReady() {
   if (!exp) {
@@ -21,21 +39,31 @@ function ensureReady() {
 function allocBytes(bytes) {
   ensureReady();
   var p = exp.alloc(bytes.length);
+  if (p === 0) throw new Error('WASM allocation failed (OOM)');
   if (p < 0) throw new Error('WASM allocation failed');
-  mem.set(bytes, p);
+  if (p + bytes.length > exp.memory.buffer.byteLength) throw new Error('WASM allocation out of bounds');
+  mem().set(bytes, p);
   return p;
 }
 
-function allocSlot() { return exp.alloc(4); }
+function allocSlot() {
+  ensureReady();
+  var p = exp.alloc(4);
+  if (p === 0) throw new Error('WASM allocation failed (OOM)');
+  if (p + 4 > exp.memory.buffer.byteLength) throw new Error('WASM allocation out of bounds');
+  return p;
+}
 
 function readU32(p) {
-  var b = new Uint8Array(mem.buffer, p, 4);
+  var b = new Uint8Array(mem().buffer, p, 4);
   return (b[0] | (b[1] << 8) | (b[2] << 16) | (b[3] << 24)) >>> 0;
 }
 
 function hexOf(p, n) {
+  var m = mem();
+  if (p + n > m.byteLength) throw new Error('WASM read out of bounds');
   var out = '';
-  var b = new Uint8Array(mem.buffer, p, n);
+  var b = new Uint8Array(m.buffer, p, n);
   for (var i = 0; i < n; i++) out += b[i].toString(16).padStart(2, '0');
   return out;
 }
@@ -45,12 +73,15 @@ function digest(name, text, outLen) {
 }
 
 function digestBytes(name, bytes, outLen) {
+  ensureReady();
   var p = allocBytes(bytes);
   var out = exp.alloc(outLen);
-  var rc = exp[name](p, bytes.length, out);
+  if (out === 0 || out < 0) throw new Error('WASM allocation failed (OOM)');
+  var rc;
+  try { rc = exp[name](p, bytes.length, out); } catch (e) { exp.reset(); throw e; }
   if (rc !== 0) { exp.reset(); throw new Error('WASM ' + name + ' failed'); }
-  var hex = hexOf(out, outLen);
-  exp.reset();
+  var hex;
+  try { hex = hexOf(out, outLen); } finally { exp.reset(); }
   return hex;
 }
 
@@ -64,7 +95,6 @@ var Core = {
   sha384Hex: function (s) { return digest('sha384', s, 48); },
   sha512Hex: function (s) { return digest('sha512', s, 64); },
 
-  /** binary-input digests (for certificates etc.) */
   md5Bytes: function (b) { return digestBytes('md5', b, 16); },
   sha1Bytes: function (b) { return digestBytes('sha1', b, 20); },
   sha256Bytes: function (b) { return digestBytes('sha256', b, 32); },
@@ -73,67 +103,62 @@ var Core = {
 
   crc32Hex: function (s) {
     var bytes = new TextEncoder().encode(s);
-    var p = allocBytes(bytes);
-    var out = exp.alloc(4);
-    var rc = exp.crc32(p, bytes.length, out);
-    if (rc !== 0) { exp.reset(); throw new Error('WASM crc32 failed'); }
-    var hex = hexOf(out, 4);
-    exp.reset();
+    var p, out, rc, hex;
+    p = allocBytes(bytes);
+    out = exp.alloc(4);
+    if (out === 0) throw new Error('WASM allocation failed (OOM)');
+    try { rc = exp.crc32(p, bytes.length, out); } finally { if (rc !== 0) { exp.reset(); throw new Error('WASM crc32 failed'); } }
+    try { hex = hexOf(out, 4); } finally { exp.reset(); }
     return hex;
   },
 
-  /** alg: 0 = SHA-1, 1 = SHA-256 */
   hmacHex: function (key, message, alg) {
     var kb = new TextEncoder().encode(key);
     var mb = new TextEncoder().encode(message);
-    var kp = allocBytes(kb);
-    var mp = allocBytes(mb);
-    var outLen = alg === 0 ? 20 : 32;
-    var out = exp.alloc(outLen);
-    var rc = exp.hmac(mp, mb.length, kp, kb.length, alg, out);
-    if (rc !== 0) { exp.reset(); throw new Error('WASM hmac failed'); }
-    var hex = hexOf(out, outLen);
-    exp.reset();
+    var kp, mp, out, outLen, rc, hex;
+    kp = allocBytes(kb);
+    mp = allocBytes(mb);
+    outLen = alg === 0 ? 20 : 32;
+    out = exp.alloc(outLen);
+    if (out === 0) throw new Error('WASM allocation failed (OOM)');
+    try { rc = exp.hmac(mp, mb.length, kp, kb.length, alg, out); } finally { if (rc !== 0) { exp.reset(); throw new Error('WASM hmac failed'); } }
+    try { hex = hexOf(out, outLen); } finally { exp.reset(); }
     return hex;
   },
 
-  /**
-   * Encode text as a QR code.
-   * ecl: 0=L, 1=M, 2=Q, 3=H
-   * Returns { size, matrix: Uint8Array (size*size, 0/1) } or throws.
-   */
   qrEncode: function (text, ecl) {
     ensureReady();
     var bytes = new TextEncoder().encode(text);
     if (!bytes.length) throw new Error('Enter text to encode');
-    var p = allocBytes(bytes);
-    var mSlot = allocSlot();
-    var sSlot = allocSlot();
-    var rc = exp.qr_encode(p, bytes.length, ecl || 1, mSlot, sSlot);
-    if (rc !== 0) { exp.reset(); throw new Error('Text too long for a QR code (' + bytes.length + ' bytes)'); }
-    var mPtr = readU32(mSlot);
-    var size = readU32(sSlot);
-    var matrix = new Uint8Array(mem.buffer.slice(mPtr, mPtr + size * size));
+    var p, mSlot, sSlot, rc, mPtr, size, matrix;
+    p = allocBytes(bytes);
+    mSlot = allocSlot();
+    sSlot = allocSlot();
+    try { rc = exp.qr_encode(p, bytes.length, ecl || 1, mSlot, sSlot); } finally { if (rc !== 0) { exp.reset(); throw new Error('Text too long for a QR code (' + bytes.length + ' bytes)'); } }
+    mPtr = readU32(mSlot);
+    size = readU32(sSlot);
+    if (size <= 0 || size > 177) { exp.reset(); throw new Error('Invalid QR size'); }
+    if (mPtr + size * size > mem().byteLength) { exp.reset(); throw new Error('WASM QR read out of bounds'); }
+    matrix = new Uint8Array(mem().buffer.slice(mPtr, mPtr + size * size));
     exp.reset();
     return { size: size, matrix: matrix };
   },
 
-  /**
-   * Parse DER bytes into a JSON tree of TLV nodes.
-   * Node: { t: tagName, cls, c, n?: oidName, v?: value|children, u?: unusedBits }
-   */
   asn1Parse: function (derBytes) {
     ensureReady();
-    var p = allocBytes(derBytes);
-    var o1 = allocSlot();
-    var o2 = allocSlot();
-    var rc = exp.asn1_parse(p, derBytes.length, o1, o2);
-    if (rc !== 0) { exp.reset(); throw new Error('Could not parse DER data'); }
-    var ptr = readU32(o1);
-    var len = readU32(o2);
-    var jsonStr = new TextDecoder().decode(new Uint8Array(mem.buffer, ptr, len));
+    if (!derBytes || derBytes.length > 2 * 1024 * 1024) throw new Error('DER input too large (max 2 MB)');
+    var p, o1, o2, rc, ptr, len, jsonStr;
+    p = allocBytes(derBytes);
+    o1 = allocSlot();
+    o2 = allocSlot();
+    try { rc = exp.asn1_parse(p, derBytes.length, o1, o2); } finally { if (rc !== 0) { exp.reset(); throw new Error('Could not parse DER data'); } }
+    ptr = readU32(o1);
+    len = readU32(o2);
+    if (len > 2 * 1024 * 1024) { exp.reset(); throw new Error('ASN.1 output too large'); }
+    if (ptr + len > mem().byteLength) { exp.reset(); throw new Error('WASM ASN.1 read out of bounds'); }
+    jsonStr = new TextDecoder().decode(new Uint8Array(mem().buffer, ptr, len));
     exp.reset();
-    return JSON.parse(jsonStr);
+    try { return JSON.parse(jsonStr); } catch (e) { throw new Error('ASN.1 output was not valid JSON: ' + (e && e.message || e)); }
   }
 };
 
@@ -147,7 +172,6 @@ function load() {
     function instantiate(buf) {
       return WebAssembly.instantiate(buf, {}).then(function (res) {
         exp = res.instance.exports;
-        mem = new Uint8Array(exp.memory.buffer);
         window.__wasmError = null;
       });
     }
@@ -163,17 +187,15 @@ function load() {
     }
     return WebAssembly.instantiateStreaming(fetch(url), {}).then(function (res) {
       exp = res.instance.exports;
-      mem = new Uint8Array(exp.memory.buffer);
       window.__wasmError = null;
     }).catch(function (err) {
-      // streaming failed (MIME or cache edge case) — fall back to bytes
       return fetch(url, { cache: 'no-cache' }).then(function (r) {
         if (!r.ok) throw new Error('WASM fetch failed: HTTP ' + r.status);
         return r.arrayBuffer();
       }).then(instantiate).catch(fail);
     });
   })();
-  readyPromise.catch(function () { exp = null; });
+  readyPromise.catch(function () { exp = null; readyPromise = null; });
   return readyPromise;
 }
 

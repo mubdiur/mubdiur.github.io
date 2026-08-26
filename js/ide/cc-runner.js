@@ -98,18 +98,21 @@ self.addEventListener('message', function (e) {
   running = true;
   compileWarnings = '';
 
+  var compileTimer = null;
   var timer = setTimeout(function () {
     if (!running) return;
     running = false;
+    clearTimeout(compileTimer);
     post('err', '\n[terminated: execution exceeded ' + Math.round(RUN_TIMEOUT / 1000) + 's — check for infinite loops]\n');
     post('exit', '', { code: null, terminated: true });
     try { self.close(); } catch (e) {}
-  }, RUN_TIMEOUT);
+  }, RUN_TIMEOUT + COMPILE_TIMEOUT);
 
-  var compileTimer = setTimeout(function () {
+  compileTimer = setTimeout(function () {
     if (!running) return;
-    post('err', '\n[compile timed out after 120s]\n');
+    post('err', '\n[compile timed out after ' + Math.round(COMPILE_TIMEOUT/1000) + 's]\n');
     running = false;
+    clearTimeout(timer);
     post('exit', '', { code: null, terminated: true });
     try { self.close(); } catch (e) {}
   }, COMPILE_TIMEOUT);
@@ -123,6 +126,7 @@ self.addEventListener('message', function (e) {
     post('status', 'Compiling…');
     return browsercc.compile({ source: code, fileName: fileName, flags: flags }).then(function (res) {
       clearTimeout(compileTimer);
+      clearTimeout(timer);
       if (!res.module) {
         running = false;
         var failText = 'Compilation failed:\n' + (res.compileOutput || 'unknown error');
@@ -132,12 +136,25 @@ self.addEventListener('message', function (e) {
         return null;
       }
       var stderr = res.compileOutput || '';
-      if (stderr && /warning/i.test(stderr)) compileWarnings = stderr;
+      if (stderr && /warning/i.test(stderr)) {
+        var w = String(stderr).slice(0, 8000);
+        compileWarnings = w;
+      }
       post('status', 'Running…');
+      // re-arm run timer for execution phase
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        if (!running) return;
+        running = false;
+        post('err', '\n[terminated: execution exceeded ' + Math.round(RUN_TIMEOUT/1000) + 's — check for infinite loops]\n');
+        post('exit','',{code:null, terminated:true});
+        try { self.close(); } catch (e) {}
+      }, RUN_TIMEOUT);
       return runWasi(res.module, [fileName], [['main.c', new TextEncoder().encode(code)]], stdinText);
     }).then(function (out) {
       if (!out) return;
       clearTimeout(timer);
+      clearTimeout(compileTimer);
       if (compileWarnings) { post('err', compileWarnings); postDiags(parseDiagnostics(compileWarnings)); }
       if (out.out) post('out', out.out);
       if (out.err) post('err', out.err);

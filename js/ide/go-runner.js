@@ -14,7 +14,7 @@ import { cachedGunzip, cachedBytes } from './cache.js';
 
 var RUN_TIMEOUT = 60000;
 var COMPILE_TIMEOUT = 180000;
-var QUIET_MS = 400;
+var QUIET_MS = 1500;
 
 var running = false;
 var compileWorkerPromise = null;
@@ -53,6 +53,7 @@ function ensureCompilerWorker() {
       var blob = new Blob([src], { type: 'application/javascript' });
       var url = URL.createObjectURL(blob);
       var w = new Worker(url);
+      w.addEventListener('message', function () {});
       post('status', 'Go compiler ready');
       return w;
     })();
@@ -119,12 +120,14 @@ function runGo(js, onOut, onErr, onDone) {
   var blob = new Blob([wrap], { type: 'application/javascript' });
   var url = URL.createObjectURL(blob);
   var w = new Worker(url);
+  function revokeUrl() { try { URL.revokeObjectURL(url); } catch (e) {} }
   var done = false;
   var quietTimer = null;
   function finish(code) {
     if (done) return;
     done = true;
     clearTimeout(quietTimer);
+    revokeUrl();
     onDone(code);
   }
   function poke() {

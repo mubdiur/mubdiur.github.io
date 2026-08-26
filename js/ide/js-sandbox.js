@@ -227,9 +227,14 @@ Buffer.concat = function (list, total) {
 };
 Buffer.prototype = Object.create(Uint8Array.prototype);
 Buffer.prototype.toString = function (enc) {
-  return enc === 'base64' ? btoa(String.fromCharCode.apply(null, this))
-    : enc === 'hex' ? Array.prototype.map.call(this, function (b) { return b.toString(16).padStart(2, '0'); }).join('')
-    : new TextDecoder().decode(this);
+  if (enc === 'base64') {
+    var CHUNK = 0x8000;
+    var out = '';
+    for (var i = 0; i < this.length; i += CHUNK) out += String.fromCharCode.apply(null, this.subarray(i, i + CHUNK));
+    return btoa(out);
+  }
+  if (enc === 'hex') return Array.prototype.map.call(this, function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+  return new TextDecoder().decode(this);
 };
 Buffer.prototype.equals = function (o) {
   if (this.length !== o.length) return false;
@@ -239,8 +244,21 @@ Buffer.prototype.equals = function (o) {
 
 /* ── in-memory fs ── */
 var vfs = { '/': { type: 'dir' } };
+function vfsNormalize(p) {
+  var raw = String(p).replace(/\\/g, '/');
+  if (raw.charAt(0) !== '/') raw = '/' + raw;
+  var parts = [];
+  raw.split('/').forEach(function (seg) {
+    if (!seg || seg === '.') return;
+    if (seg === '..') { if (parts.length) parts.pop(); return; }
+    parts.push(seg);
+  });
+  return '/' + parts.join('/');
+}
 function vfsResolve(p) {
-  var parts = String(p).split('/').filter(Boolean);
+  var norm = vfsNormalize(p);
+  if (norm === '/') return vfs['/'];
+  var parts = norm.split('/').filter(Boolean);
   var node = vfs['/'];
   for (var i = 0; i < parts.length; i++) {
     if (node.type !== 'dir') return null;
@@ -250,7 +268,8 @@ function vfsResolve(p) {
   return node;
 }
 function vfsParentDir(p) {
-  var parts = String(p).split('/').filter(Boolean);
+  var norm = vfsNormalize(p);
+  var parts = norm.split('/').filter(Boolean);
   var node = vfs['/'];
   for (var i = 0; i < parts.length - 1; i++) {
     if (!node.children) node.children = {};
@@ -401,9 +420,15 @@ self.addEventListener('message', function (e) {
   }
   if (running) return;
 
-  var code = msg.code || '';
+  var code = String(msg.code || '');
+  if (code.length > 512 * 1024) { post('err', 'Code too large (max 512 KB)\n'); post('exit','',{code:1}); return; }
+  var rawStdin = String(msg.stdin || '');
+  if (rawStdin.length > 64 * 1024) rawStdin = rawStdin.slice(0, 64*1024);
   running = true;
-  stdinQueue = msg.stdin === '' || msg.stdin === undefined ? [] : String(msg.stdin).replace(/\n$/, '').split('\n');
+  // preserve empty trailing lines (don't strip last \n — empty line is data)
+  stdinQueue = !rawStdin ? [] : rawStdin.split('\n');
+  // but if input ended with \n, split left a trailing '' that represents the final newline — keep it as empty line only if stdin ends with \n; else drop trailing ''
+  if (stdinQueue.length && rawStdin.charAt(rawStdin.length-1) !== '\n' && stdinQueue[stdinQueue.length-1] === '' && rawStdin !== '') { /* mixed: last '' is artifact — keep only if user typed trailing newline */ }
   stdinWaiters = [];
   stdinDataHandler = null;
   stdinRequested = false;
@@ -411,25 +436,9 @@ self.addEventListener('message', function (e) {
   exitRequested = null;
 
   var timers = new Set();
+  var timeoutMap = new Map();
   var pending = 0;
-  function track(fn) {
-    return function () {
-      var args = arguments;
-      var id = { active: true };
-      timers.add(id);
-      pending++;
-      setTimeout(function () {
-        timers.delete(id);
-        pending--;
-        try { fn.apply(null, args); } catch (err) {
-          if (err instanceof ExitSignal) return;
-          post('err', fmtError(err) + '\n');
-        }
-        if (pending === 0 && stdinHold === 0) finish();
-      }, 0);
-      return id;
-    };
-  }
+
   var sandbox = {
     module: { exports: {} },
     exports: null,
@@ -442,23 +451,33 @@ self.addEventListener('message', function (e) {
     globalThis: self,
     global: self,
     setTimeout: function (fn, ms) {
-      var id = { active: true };
-      timers.add(id); pending++;
-      setTimeout(function () {
-        timers.delete(id); pending--;
+      var dummy = { _type: 'timeout' };
+      var native = setTimeout(function () {
+        timers.delete(dummy);
+        timeoutMap.delete(dummy);
+        pending = Math.max(0, pending - 1);
         try { fn(); } catch (err) { if (!(err instanceof ExitSignal)) post('err', fmtError(err) + '\n'); }
         if (pending === 0 && stdinHold === 0) finish();
       }, Math.max(ms || 0, 0));
-      return id;
+      dummy._native = native;
+      timers.add(dummy);
+      timeoutMap.set(dummy, native);
+      pending++;
+      return dummy;
     },
     setInterval: function (fn, ms) {
-      var id = setInterval(function () {
+      var native = setInterval(function () {
         try { fn(); } catch (err) { if (!(err instanceof ExitSignal)) post('err', fmtError(err) + '\n'); }
       }, Math.max(ms || 0, 0));
-      timers.add(id);
-      return id;
+      timers.add(native);
+      return native;
     },
-    clearTimeout: function (id) { if (id && id.active !== undefined) id.active = false; try { clearTimeout(id); } catch (e) {} },
+    clearTimeout: function (id) {
+      if (!id) return;
+      var native = timeoutMap.get(id);
+      if (native !== undefined) { try { clearTimeout(native); } catch (e) {} timeoutMap.delete(id); timers.delete(id); pending = Math.max(0, pending - 1); return; }
+      try { clearTimeout(id); } catch (e) {}
+    },
     clearInterval: function (id) { timers.delete(id); try { clearInterval(id); } catch (e) {} },
     queueMicrotask: function (fn) { queueMicrotask(fn); },
     readline: readline,

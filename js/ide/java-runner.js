@@ -11,7 +11,6 @@ import { cachedBytes } from './cache.js';
 
 var RUN_TIMEOUT = 20000;
 var running = false;
-var vmLines = [];
 
 function post(type, text) {
   self.postMessage({ type: type, text: text || '' });
@@ -42,10 +41,10 @@ function ensureEngine() {
       var imports = {
         env: {
           js_console_log: function (p, len) {
-            vmLines.push(new TextDecoder().decode(new Uint8Array(inst.exports.memory.buffer, p, len)));
+            pushVmLine(new TextDecoder().decode(new Uint8Array(inst.exports.memory.buffer, p, len)));
           },
           js_console_error: function (p, len) {
-            vmLines.push('[err] ' + new TextDecoder().decode(new Uint8Array(inst.exports.memory.buffer, p, len)));
+            pushVmLine('[err] ' + new TextDecoder().decode(new Uint8Array(inst.exports.memory.buffer, p, len)));
           },
           js_date_now: function () { return Date.now(); }
         }
@@ -67,10 +66,20 @@ function isMultiBundle(bytes) {
 /* Find the runnable class: "public static String run()" in a class, else
    a compact-source "void main()" (implicit class). Mirrors the upstream UI. */
 function extractRunClassName(source) {
-  var runMatch = source.match(/public\s+class\s+(\w+)[^}]*public\s+static\s+String\s+run\s*\(\s*\)/s);
+  var runMatch = source.match(/public\s+class\s+(\w+)[\s\S]*?public\s+static\s+String\s+run\s*\(\s*\)/);
   if (runMatch) return runMatch[1];
-  var all = source.matchAll ? Array.from(source.matchAll(/public\s+class\s+(\w+)/g)) : (source.match(/public\s+class\s+(\w+)/g) || []);
-  if (all.length > 0) return all[all.length - 1][1];
+  var all;
+  if (source.matchAll) {
+    all = Array.from(source.matchAll(/public\s+class\s+(\w+)/g), function (m) { return m[1]; });
+    if (all.length) return all[all.length - 1];
+  } else {
+    var m2 = source.match(/public\s+class\s+(\w+)/g);
+    if (m2 && m2.length) {
+      var last = m2[m2.length - 1];
+      var cap = /public\s+class\s+(\w+)/.exec(last);
+      return cap ? cap[1] : null;
+    }
+  }
   if (!source.match(/\bclass\s+\w+/) && !source.match(/\binterface\s+\w+/) && source.match(/void\s+main\s*\(\s*\)/))
     return '__implicit__';
   return null;
@@ -82,11 +91,19 @@ self.addEventListener('message', function (e) {
   running = true;
   vmLines = [];
 
+  var vmLines = [];
+  var VM_LINES_CAP = 5000;
+  function pushVmLine(s) {
+    if (vmLines.length < VM_LINES_CAP) vmLines.push(s);
+    else if (vmLines.length === VM_LINES_CAP) { vmLines.push('… (output truncated)'); }
+  }
+
   var timer = setTimeout(function () {
     if (!running) return;
     running = false;
     post('err', '\n[terminated: execution exceeded ' + Math.round(RUN_TIMEOUT / 1000) + 's — check for infinite loops]\n');
     post('exit', '', { code: null, terminated: true });
+    try { self.close(); } catch (e) {}
   }, RUN_TIMEOUT);
 
   ensureEngine().then(function (eng) {
@@ -152,9 +169,10 @@ self.addEventListener('message', function (e) {
       var diags = parseDiagnostics(result);
       if (diags.length) self.postMessage({ type: 'diag', diags: diags });
     }
+    var isErr = result.indexOf('ERROR:') === 0;
     clearTimeout(timer);
     running = false;
-    post('exit', '', { code: 0 });
+    post('exit', '', { code: isErr ? 1 : 0 });
   }).catch(function (err) {
     clearTimeout(timer);
     running = false;

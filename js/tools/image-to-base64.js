@@ -73,10 +73,13 @@ App.registerTool('image-to-base64', {
       if (file) handleFile(file);
     });
 
+    var MAX_BYTES = 8 * 1024 * 1024;
     function handleFile(file) {
-      if (!file.type.startsWith('image/')) return;
+      if (!file.type.startsWith('image/')) { App.outputBox('', 'Unsupported file type — images only', 'Output'); return; }
+      if (file.size > MAX_BYTES) { App.outputBox('', 'File too large (max 8 MB)', 'Output'); outputBox.appendChild(App.el('div',{class:'output-box error',text:'File too large — max 8 MB'})); return; }
       fileName = file.name;
       var reader = new FileReader();
+      reader.onerror = function () { outputBox.appendChild(App.el('div',{class:'output-box error',text:'Failed to read file'})); };
       reader.onload = function () {
         var result = reader.result;
         b64 = result;

@@ -16,6 +16,7 @@ function mdToHtml(md) {
   }
   function safeUrl(u) {
     u = String(u || '').trim();
+    if (/^\/\//.test(u)) return '#';
     return /^(https?:|mailto:|#|\/)/i.test(u) ? u : '#';
   }
   var html = esc(md)

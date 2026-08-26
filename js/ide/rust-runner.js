@@ -26,13 +26,18 @@ function post(type, text) {
 /* RIWB1 sysroot bundle: "RIWB1\n" + u32le index length + JSON index
    {files:[{p,o,l}], total} + concatenated bytes. */
 function parseBundle(bytes) {
+  if (bytes.length < 10) throw new Error('sysroot bundle too small');
   const magic = new TextDecoder().decode(bytes.subarray(0, 6));
   if (magic !== 'RIWB1\n') throw new Error('bad sysroot bundle magic');
   const ilen = new DataView(bytes.buffer, bytes.byteOffset + 6, 4).getUint32(0, true);
+  if (bytes.length < 10 + ilen) throw new Error('sysroot bundle truncated (index)');
   const index = JSON.parse(new TextDecoder().decode(bytes.subarray(10, 10 + ilen)));
   const base = 10 + ilen;
+  if (!index.files || !Array.isArray(index.files)) throw new Error('bad sysroot index');
   const files = new Map();
   for (const f of index.files) {
+    if (!f.p || f.o === undefined || f.l === undefined) continue;
+    if (f.o + f.l > bytes.length - base) throw new Error('sysroot bundle slice out of bounds: ' + f.p);
     if (f.p === 'manifest.json') continue;
     files.set(f.p, new File(bytes.slice(base + f.o, base + f.o + f.l)));
   }
