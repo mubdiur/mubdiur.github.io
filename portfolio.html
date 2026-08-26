@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mubdiur Rahman — AI Platform &amp; Reliability Engineer</title>
   <meta name="description" content="Mubdiur Rahman — AI Platform &amp; Reliability Engineer. I build automation that runs itself: production infrastructure on Docker + Traefik, instrumented dashboards, and safe, maintainable AI.">
-  <meta name="theme-color" content="#1b1b1d">
+  <meta name="theme-color" content="#131010">
+  <link rel="preload" href="fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ibm-plex-mono-latin-700.woff2" as="font" type="font/woff2" crossorigin>
   <meta property="og:title" content="Mubdiur Rahman — AI Platform &amp; Reliability Engineer">
   <meta property="og:description" content="Automation that runs itself. Docker + Traefik infrastructure, instrumented dashboards, safe &amp; maintainable AI.">
   <meta property="og:type" content="website">
@@ -20,32 +22,51 @@
   <meta name="twitter:image" content="https://mubdiur.github.io/og.png">
   <link rel="canonical" href="https://mubdiur.github.io/portfolio.html">
   <style>
-    /* Self-hosted Google Sans Code (variable 300-800) — no CDN. */
     @font-face {
-      font-family: 'Google Sans Code';
-      font-style: normal;
-      font-weight: 300 800;
-      font-display: swap;
-      src: url('fonts/google-sans-code-latin.woff2') format('woff2');
-      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      font-family:'IBM Plex Mono';
+      font-style:normal;
+      font-weight:400;
+      font-display:swap;
+      src:url('fonts/ibm-plex-mono-latin-400.woff2') format('woff2');
+      unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+      size-adjust:100%; ascent-override:102%; descent-override:24%;
     }
     @font-face {
-      font-family: 'Google Sans Code';
-      font-style: normal;
-      font-weight: 300 800;
-      font-display: swap;
-      src: url('fonts/google-sans-code-latin-ext.woff2') format('woff2');
-      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+      font-family:'IBM Plex Mono';
+      font-style:normal;
+      font-weight:400;
+      font-display:swap;
+      src:url('fonts/ibm-plex-mono-latin-ext-400.woff2') format('woff2');
+      unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+      size-adjust:100%; ascent-override:102%; descent-override:24%;
+    }
+    @font-face {
+      font-family:'IBM Plex Mono';
+      font-style:normal;
+      font-weight:700;
+      font-display:swap;
+      src:url('fonts/ibm-plex-mono-latin-700.woff2') format('woff2');
+      unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+      size-adjust:100%; ascent-override:102%; descent-override:24%;
+    }
+    @font-face {
+      font-family:'IBM Plex Mono';
+      font-style:normal;
+      font-weight:700;
+      font-display:swap;
+      src:url('fonts/ibm-plex-mono-latin-ext-700.woff2') format('woff2');
+      unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+      size-adjust:100%; ascent-override:102%; descent-override:24%;
     }
 
     :root {
-      --bg: #1b1b1d;
-      --fg: #e3e3e3;
-      --dim: #bec3c9;
-      --faint: #8d949e;
-      --line: #333538;
-      --accent: #53a3f9;
-      --accent-dim: #73b4fa;
+      --bg: #131010;
+      --fg: #f2eded;
+      --dim: #b8b2b2;
+      --faint: #7f7a7a;
+      --line: #3d3838;
+      --accent: #fdffcc;
+      --accent-dim: #e8e6a8;
       --max: 46rem;
     }
 
@@ -56,7 +77,7 @@
     body {
       background: var(--bg);
       color: var(--fg);
-      font-family: "Google Sans Code", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
       font-size: 0.875rem;
       line-height: 1.65;
       -webkit-font-smoothing: antialiased;
