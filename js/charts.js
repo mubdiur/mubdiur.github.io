@@ -1,12 +1,12 @@
 /* ═══════════════════════════════════════════════════════════
    Canvas chart engine — replaces ApexCharts for the
    Observability Desk. Bar, line, area, radial, horizontal bar.
-   Gruvbox palette, Spline Sans Mono labels.
+   Gruvbox palette, Google Sans Code labels.
    ═══════════════════════════════════════════════════════════ */
 (function () {
 'use strict';
 
-var MONO = 'Spline Sans Mono, monospace';
+var MONO = 'Google Sans Code, monospace';
 
 // roundRect fallback for older browsers
 if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {

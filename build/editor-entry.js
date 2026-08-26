@@ -101,7 +101,7 @@ const baseTheme = EditorView.theme({
     fontSize: '12.5px',
   },
   '.cm-scroller': {
-    fontFamily: "'JetBrains Mono', monospace",
+    fontFamily: "'Google Sans Code', monospace",
     lineHeight: '1.55',
     overflow: 'auto',
   },
@@ -133,7 +133,7 @@ const baseTheme = EditorView.theme({
     backgroundColor: '#333538',
     border: '1px solid #444950',
     color: '#e3e3e3',
-    fontFamily: "'JetBrains Mono', monospace",
+    fontFamily: "'Google Sans Code', monospace",
     fontSize: '11.5px',
   },
   '.cm-tooltip-autocomplete ul li[aria-selected]': {
@@ -149,7 +149,7 @@ const baseTheme = EditorView.theme({
     backgroundColor: 'rgba(51,53,56,0.9)',
     border: '1px solid #444950',
     color: '#bec3c9',
-    fontFamily: "'JetBrains Mono', monospace",
+    fontFamily: "'Google Sans Code', monospace",
   },
   /* error/warning diagnostics */
   '.cm-diag-line.error': { backgroundColor: 'rgba(251,86,91,0.08)' },
@@ -157,7 +157,7 @@ const baseTheme = EditorView.theme({
   '.cm-diag-mark.error': { textDecoration: 'underline wavy rgba(251,86,91,0.7)', textDecorationSkipInk: 'none' },
   '.cm-diag-mark.warn': { textDecoration: 'underline wavy rgba(230,167,0,0.7)', textDecorationSkipInk: 'none' },
   '.cm-diag-marker': {
-    fontFamily: "'JetBrains Mono', monospace",
+    fontFamily: "'Google Sans Code', monospace",
     fontSize: '10px',
     lineHeight: '1.5',
     color: 'rgba(251,86,91,0.95)',

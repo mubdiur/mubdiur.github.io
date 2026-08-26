@@ -81,14 +81,14 @@ function ObservabilityDashboard() {
   var ERROR_CODE_HITS = [0, 0, 2, 1, 0, 0, 3, 1, 0, 0, 1, 0, 0, 0, 12, 4, 0, 0, 1, 0, 0, 0, 0, 0];
   var GPU_UTIL = [22, 18, 24, 31, 38, 45, 52, 58, 64, 70, 74, 78, 76, 80, 58, 79, 83, 85, 84, 80, 74, 66, 52, 38];
   var GUARDRAIL = [2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 5, 7, 9, 8, 7, 6, 5, 4, 3, 3, 2, 2];
-  var AXIS = { colors: ['#bec3c9'], fontSize: '10px', fontFamily: 'Spline Sans Mono, monospace' };
+  var AXIS = { colors: ['#bec3c9'], fontSize: '10px', fontFamily: 'Google Sans Code, monospace' };
   var _ = AXIS;
 
   return App.el('div', { class: 'w-full' },
     App.el('div', { class: 'obs-desk-head' },
       App.el('div', {},
         App.el('div', { class: 'kicker', text: 'Observability Desk · The Glass' }),
-        App.el('h2', { class: 'mt-2', style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.7rem,4vw,2.6rem)', lineHeight: '1.02', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: 'Production, through the instruments' })),
+        App.el('h2', { class: 'mt-2', style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.2rem,2.2vw,1.5rem)', lineHeight: '1.02', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: 'Production, through the instruments' })),
       App.el('div', { class: 'hidden sm:block', style: { width: '5rem', flexShrink: '0' }, html: NewsSvg.TensorChip() })),
     App.el('div', { class: 'mt-4 news-rule' }),
     App.el('p', { class: 'mt-5', style: { maxWidth: '48rem', fontFamily: 'var(--font-serif)', fontSize: '1rem', lineHeight: '1.7', color: 'var(--ink-soft)' },
@@ -123,11 +123,11 @@ function ObservabilityDashboard() {
           ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * 0.9995);
           ctx.stroke();
           ctx.fillStyle = '#bec3c9';
-          ctx.font = '10px Spline Sans Mono, monospace';
+          ctx.font = '10px Google Sans Code, monospace';
           ctx.textAlign = 'center';
           ctx.fillText('UPTIME · 30 DAYS', cx, cy + 30);
           ctx.fillStyle = '#e3e3e3';
-          ctx.font = '26px Spline Sans Mono, monospace';
+          ctx.font = '20px Google Sans Code, monospace';
           ctx.fillText('99.95%', cx, cy + 4);
         });
         return wrap;
@@ -208,13 +208,13 @@ function ObservabilityDashboard() {
 function SundaySupplement() {
   return App.el('div', { class: 'w-full' },
     App.el('div', { class: 'kicker', text: 'Sunday Supplement · The Funnies & More' }),
-    App.el('h2', { class: 'mt-2', style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.7rem,4vw,2.6rem)', lineHeight: '1.02', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: 'Back-page entertainment for on-call readers' }),
+    App.el('h2', { class: 'mt-2', style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.2rem,2.2vw,1.5rem)', lineHeight: '1.02', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: 'Back-page entertainment for on-call readers' }),
     App.el('div', { class: 'mt-4 news-rule' }),
     App.el('div', { class: 'news-grid-3 mt-6' },
       App.el('figure', { class: 'news-panel', style: { gridColumn: 'span 2' } },
         App.el('figcaption', { class: 'panel-head', text: 'Op-Ed · From the Desk of the Operator' }),
         App.el('div', { class: 'p-5 sm:p-6' },
-          App.el('h3', { style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.25rem,2.4vw,1.6rem)', lineHeight: '1.1', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: 'Your AI platform is expensive, fragile, and scarier than it needs to be. Fix all three.' }),
+          App.el('h3', { style: { fontFamily: 'var(--font-display)', fontSize: '1.1rem', lineHeight: '1.1', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: 'Your AI platform is expensive, fragile, and scarier than it needs to be. Fix all three.' }),
           App.el('div', { class: 'mt-4', style: { fontFamily: 'var(--font-serif)', fontSize: '0.98rem', lineHeight: '1.7', color: 'var(--ink-soft)' }, html:
             '<p style="margin-bottom:0.75rem">Engineering managers don&rsquo;t fear AI. They fear the bill, the 3 a.m. page from something nobody understands, and the prompt that silently changed behavior in production. All three are engineering problems — not magic problems.</p>' +
             '<p>Cache the tokens, compress the prompt, gate every change behind a regression suite, shadow-test the next candidate against live traffic, and put guardrails between the model and your data. Safe, maintainable, affordable — in that order. That&rsquo;s the whole platform.</p>' }),
@@ -318,7 +318,7 @@ function renderHome() {
         App.el('article', { class: 'news-panel', style: { border: '1px solid var(--rule-strong)', background: 'var(--paper-warm)' } },
           App.el('div', { class: 'p-5 sm:p-8' },
             Kicker('Business Section · Flagship System'),
-            App.el('h3', { class: 'mt-2', style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem,3.4vw,2.4rem)', lineHeight: '1.04', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: 'mubdiur.github.io — the production platform behind this page' }),
+            App.el('h3', { class: 'mt-2', style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.25rem,2vw,1.55rem)', lineHeight: '1.04', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: 'mubdiur.github.io — the production platform behind this page' }),
             App.el('p', { class: 'mt-3', style: { maxWidth: '48rem', fontFamily: 'var(--font-serif)', fontSize: '1rem', lineHeight: '1.7', color: 'var(--ink-soft)' }, text: 'This newspaper is not a template — it\u2019s a production system. A fully static site with a WebAssembly core: every utility below runs entirely in your browser, no server required. Deployable to GitHub Pages from a public repo, edge-cached, zero cold starts.' }),
             App.el('ul', { class: 'mt-6', style: { display: 'grid', gap: '0.5rem 2rem', gridTemplateColumns: '1fr' } },
               [
@@ -339,7 +339,7 @@ function renderHome() {
         App.el('div', { class: 'flex flex-wrap items-end justify-between gap-4 mb-7' },
           App.el('div', {},
             Kicker('Tools Desk · From the Archive'),
-            App.el('h2', { class: 'mt-2', style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.7rem,4vw,2.6rem)', lineHeight: '1.02', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: TOOLMANIFEST.length + ' utilities, typeset by hand' })),
+            App.el('h2', { class: 'mt-2', style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.2rem,2.2vw,1.5rem)', lineHeight: '1.02', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: TOOLMANIFEST.length + ' utilities, typeset by hand' })),
           App.el('a', { href: '#/tools', class: 'kicker', style: { textDecoration: 'none' }, text: 'Visit the full archive →' })),
         App.el('div', { class: 'hairline-grid lg-cols-3' },
           featured.map(function (t) {
@@ -378,7 +378,7 @@ function renderHome() {
     App.el('footer', { class: 'news-colophon' },
       App.el('div', { class: 'inner' },
         App.el('div', { class: 'title', text: 'The Mubdiur Times' }),
-        App.el('p', { class: 'note', text: 'Colophon · Set entirely in self-hosted Spline Sans Mono — no CDN, no tracking' }),
+        App.el('p', { class: 'note', text: 'Colophon · Set entirely in self-hosted Google Sans Code — no CDN, no tracking' }),
         App.el('p', { class: 'byline', text: 'Typeset by hand in HTML & WebAssembly. No trees were harmed; no page was printed.' }),
         App.el('div', { class: 'links' },
           App.el('a', { href: 'https://github.com/mubdiur', target: '_blank', rel: 'noopener noreferrer', text: 'GitHub' }),

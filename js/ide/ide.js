@@ -349,7 +349,7 @@ function renderIde() {
   root.appendChild(App.el('div', { class: 'ide-main' }, editorWrap, panel));
 
   /* CodeMirror editor (vendored bundle) */
-  import('/js/ide/vendor/editor.js?v=7').then(function (mod) {
+  import('/js/ide/vendor/editor.js?v=8').then(function (mod) {
     editor = mod.createIdeEditor(editorWrap, {
       value: state.code[state.lang] || langDef(state.lang).sample,
       language: state.lang,

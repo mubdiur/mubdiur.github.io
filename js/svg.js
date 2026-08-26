@@ -42,7 +42,7 @@ window.NewsSvg = {
       '<g stroke="#444950" stroke-width="1">' + grid + '</g>' +
       '<rect x="68" y="68" width="16" height="16" fill="#53a3f9"/>' +
       '<circle cx="76" cy="76" r="14" fill="none" stroke="#53a3f9" stroke-width="0.8" opacity="0.6"/>' +
-      '<text x="34" y="105" font-family="Spline Sans Mono, monospace" font-size="6" letter-spacing="0.14em" fill="#bec3c9">MUBDIUR//TC-1</text></svg>';
+      '<text x="34" y="105" font-family="Google Sans Code, monospace" font-size="6" letter-spacing="0.14em" fill="#bec3c9">MUBDIUR//TC-1</text></svg>';
   },
 
   OnCallComic: function () {
@@ -51,35 +51,35 @@ window.NewsSvg = {
       '<rect x="15" y="16" width="200" height="200" rx="8" fill="#101011" stroke="#333538" stroke-width="1.5"/>' +
       '<rect x="230" y="16" width="200" height="200" rx="8" fill="#101011" stroke="#333538" stroke-width="1.5"/>' +
       '<rect x="445" y="16" width="200" height="200" rx="8" fill="#101011" stroke="#333538" stroke-width="1.5"/>' +
-      '<text x="27" y="38" font-family="Spline Sans Mono, monospace" font-size="10" font-weight="700" fill="#fb565b">01:47</text>' +
-      '<text x="242" y="38" font-family="Spline Sans Mono, monospace" font-size="10" font-weight="700" fill="#fb565b">01:47</text>' +
-      '<text x="457" y="38" font-family="Spline Sans Mono, monospace" font-size="10" font-weight="700" fill="#fb565b">01:49</text>' +
+      '<text x="27" y="38" font-family="Google Sans Code, monospace" font-size="10" font-weight="700" fill="#fb565b">01:47</text>' +
+      '<text x="242" y="38" font-family="Google Sans Code, monospace" font-size="10" font-weight="700" fill="#fb565b">01:47</text>' +
+      '<text x="457" y="38" font-family="Google Sans Code, monospace" font-size="10" font-weight="700" fill="#fb565b">01:49</text>' +
       '<g stroke="#bec3c9" stroke-width="1.6" fill="none" stroke-linecap="round">' +
       '<path d="M83 88 q -12 10 0 24"/><path d="M76 79 q -20 17 0 38"/><path d="M147 88 q 12 10 0 24"/><path d="M154 79 q 20 17 0 38"/></g>' +
       '<rect x="93" y="80" width="44" height="58" rx="8" fill="#202123" stroke="#e3e3e3" stroke-width="1.8"/>' +
       '<rect x="99" y="88" width="32" height="24" rx="3" fill="#101011" stroke="#333538" stroke-width="1.2"/>' +
-      '<text x="115" y="101" font-family="Spline Sans Mono, monospace" font-size="8" font-weight="700" fill="#fb565b" text-anchor="middle">PAGE</text>' +
+      '<text x="115" y="101" font-family="Google Sans Code, monospace" font-size="8" font-weight="700" fill="#fb565b" text-anchor="middle">PAGE</text>' +
       '<circle cx="127" cy="93" r="2" fill="#fb565b"/>' +
       '<rect x="99" y="120" width="13" height="9" rx="2" fill="#333538"/><rect x="114" y="120" width="13" height="9" rx="2" fill="#333538"/>' +
-      '<text x="115" y="199" font-family="Spline Sans Mono, monospace" font-size="10" fill="#bec3c9" text-anchor="middle">01:47 — the pager sings</text>' +
+      '<text x="115" y="199" font-family="Google Sans Code, monospace" font-size="10" fill="#bec3c9" text-anchor="middle">01:47 — the pager sings</text>' +
       '<ellipse cx="330" cy="76" rx="36" ry="11" fill="none" stroke="#e3e3e3" stroke-width="1.8"/>' +
       '<path d="M294 76 L294 118 A36 11 0 0 0 366 118 L366 76" fill="#101011" stroke="#e3e3e3" stroke-width="1.8" stroke-linejoin="round"/>' +
       '<circle cx="318" cy="90" r="3" fill="#e3e3e3"/><circle cx="342" cy="90" r="3" fill="#e3e3e3"/>' +
       '<path d="M318 100 Q330 110 342 100" fill="none" stroke="#e3e3e3" stroke-width="1.6" stroke-linecap="round"/>' +
       '<rect x="291" y="46" width="78" height="22" rx="11" fill="#333538" stroke="#e3e3e3" stroke-width="1.4"/>' +
       '<path d="M318 68 L324 80 L336 68" fill="#333538"/>' +
-      '<text x="330" y="61" font-family="Spline Sans Mono, monospace" font-size="9" fill="#e3e3e3" text-anchor="middle">the db is fine.</text>' +
-      '<text x="330" y="199" font-family="Spline Sans Mono, monospace" font-size="10" fill="#bec3c9" text-anchor="middle">the database is fine.</text>' +
+      '<text x="330" y="61" font-family="Google Sans Code, monospace" font-size="9" fill="#e3e3e3" text-anchor="middle">the db is fine.</text>' +
+      '<text x="330" y="199" font-family="Google Sans Code, monospace" font-size="10" fill="#bec3c9" text-anchor="middle">the database is fine.</text>' +
       '<rect x="497" y="44" width="96" height="22" rx="11" fill="#333538" stroke="#e3e3e3" stroke-width="1.4"/>' +
       '<path d="M523 66 L530 80 L537 66" fill="#333538"/>' +
-      '<text x="545" y="59" font-family="Spline Sans Mono, monospace" font-size="9" fill="#e3e3e3" text-anchor="middle">paging itself.</text>' +
+      '<text x="545" y="59" font-family="Google Sans Code, monospace" font-size="9" fill="#e3e3e3" text-anchor="middle">paging itself.</text>' +
       '<line x1="545" y1="80" x2="545" y2="66" stroke="#e3e3e3" stroke-width="1.6"/>' +
       '<circle cx="545" cy="62" r="3.5" fill="#fb565b"/>' +
       '<rect x="519" y="80" width="52" height="48" rx="10" fill="#202123" stroke="#e3e3e3" stroke-width="1.8"/>' +
       '<rect x="531" y="92" width="8" height="11" fill="#e3e3e3"/><rect x="551" y="96" width="8" height="5" fill="#e3e3e3"/>' +
       '<path d="M531 114 q 7 -5 14 0 q 7 5 14 0" fill="none" stroke="#e3e3e3" stroke-width="1.6" stroke-linecap="round"/>' +
       '<path d="M571 86 A 20 20 0 1 1 569 116" fill="none" stroke="#fb565b" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#occ-arrow)"/>' +
-      '<text x="545" y="199" font-family="Spline Sans Mono, monospace" font-size="10" fill="#bec3c9" text-anchor="middle">it was the LLM, paging itself.</text></svg>';
+      '<text x="545" y="199" font-family="Google Sans Code, monospace" font-size="10" fill="#bec3c9" text-anchor="middle">it was the LLM, paging itself.</text></svg>';
   },
 
   StackHealth: function () {
@@ -94,28 +94,28 @@ window.NewsSvg = {
       '<marker id="sh-arrow-red" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="#fb565b"/></marker></defs>' +
       '<g transform="translate(32 0)">' +
       '<rect x="16" y="134" width="118" height="56" rx="3" fill="#202123" stroke="#444950" stroke-width="1.2"/>' +
-      '<text x="30" y="158" font-family="Spline Sans Mono, monospace" font-size="10" letter-spacing="0.08em" fill="#e3e3e3">APPS · AGENTS</text>' +
-      '<text x="30" y="174" font-family="Spline Sans Mono, monospace" font-size="10" letter-spacing="0.08em" fill="#bec3c9">PORTALS · CRAWL4AI</text>';
+      '<text x="30" y="158" font-family="Google Sans Code, monospace" font-size="10" letter-spacing="0.08em" fill="#e3e3e3">APPS · AGENTS</text>' +
+      '<text x="30" y="174" font-family="Google Sans Code, monospace" font-size="10" letter-spacing="0.08em" fill="#bec3c9">PORTALS · CRAWL4AI</text>';
     collectors.forEach(function (c) {
       html += '<rect x="206" y="' + c.y + '" width="112" height="46" rx="3" fill="#202123" stroke="#444950" stroke-width="1.2"/>' +
-        '<text x="220" y="' + (c.y + 21) + '" font-family="Spline Sans Mono, monospace" font-size="10" letter-spacing="0.1em" fill="#e3e3e3">' + c.name + '</text>' +
-        '<text x="220" y="' + (c.y + 36) + '" font-family="Spline Sans Mono, monospace" font-size="8" letter-spacing="0.1em" fill="#bec3c9">' + c.sub + '</text>' +
+        '<text x="220" y="' + (c.y + 21) + '" font-family="Google Sans Code, monospace" font-size="10" letter-spacing="0.1em" fill="#e3e3e3">' + c.name + '</text>' +
+        '<text x="220" y="' + (c.y + 36) + '" font-family="Google Sans Code, monospace" font-size="8" letter-spacing="0.1em" fill="#bec3c9">' + c.sub + '</text>' +
         '<g transform="translate(' + (206 + 86) + ' ' + (c.y + 23) + ')" stroke="#444950" stroke-width="1.2" fill="none">' + c.icon + '</g>';
     });
     html += '<g stroke="#444950" stroke-width="1.2" fill="none">' +
       '<path d="M134 148 L 204 46" marker-end="url(#sh-arrow)"/><path d="M134 162 L 204 108" marker-end="url(#sh-arrow)"/>' +
       '<path d="M134 166 L 204 172" marker-end="url(#sh-arrow)"/><path d="M134 180 L 204 236" marker-end="url(#sh-arrow)"/></g>' +
       '<rect x="470" y="96" width="170" height="58" rx="3" fill="#202123" stroke="#e3e3e3" stroke-width="1.4"/>' +
-      '<text x="484" y="121" font-family="Spline Sans Mono, monospace" font-size="10" letter-spacing="0.1em" fill="#e3e3e3">GRAFANA</text>' +
-      '<text x="484" y="137" font-family="Spline Sans Mono, monospace" font-size="8" letter-spacing="0.1em" fill="#bec3c9">the glass</text>' +
+      '<text x="484" y="121" font-family="Google Sans Code, monospace" font-size="10" letter-spacing="0.1em" fill="#e3e3e3">GRAFANA</text>' +
+      '<text x="484" y="137" font-family="Google Sans Code, monospace" font-size="8" letter-spacing="0.1em" fill="#bec3c9">the glass</text>' +
       '<path d="M602 108 C 597 104 597 96 602 94 C 606 96 606 102 602 108 z" fill="#e3e3e3"/>' +
       '<rect x="470" y="168" width="170" height="48" rx="3" fill="#202123" stroke="#444950" stroke-width="1.2"/>' +
-      '<text x="484" y="189" font-family="Spline Sans Mono, monospace" font-size="10" letter-spacing="0.1em" fill="#e3e3e3">DATADOG</text>' +
-      '<text x="484" y="204" font-family="Spline Sans Mono, monospace" font-size="8" letter-spacing="0.1em" fill="#bec3c9">cost · tokens · apm</text>' +
+      '<text x="484" y="189" font-family="Google Sans Code, monospace" font-size="10" letter-spacing="0.1em" fill="#e3e3e3">DATADOG</text>' +
+      '<text x="484" y="204" font-family="Google Sans Code, monospace" font-size="8" letter-spacing="0.1em" fill="#bec3c9">cost · tokens · apm</text>' +
       '<polygon points="576,100 584,105 584,113 576,118 568,113 568,105" transform="translate(32 6)" fill="none" stroke="#444950" stroke-width="1.2"/>' +
       '<rect x="470" y="20" width="170" height="48" rx="3" fill="#202123" stroke="#fb565b" stroke-width="1.4"/>' +
-      '<text x="484" y="41" font-family="Spline Sans Mono, monospace" font-size="10" letter-spacing="0.1em" fill="#fb565b">DYNATRACE</text>' +
-      '<text x="484" y="56" font-family="Spline Sans Mono, monospace" font-size="8" letter-spacing="0.1em" fill="#bec3c9">ai problem detection</text>' +
+      '<text x="484" y="41" font-family="Google Sans Code, monospace" font-size="10" letter-spacing="0.1em" fill="#fb565b">DYNATRACE</text>' +
+      '<text x="484" y="56" font-family="Google Sans Code, monospace" font-size="8" letter-spacing="0.1em" fill="#bec3c9">ai problem detection</text>' +
       '<g transform="translate(614 44)" stroke="#fb565b" stroke-width="1.1" fill="none"><circle r="9"/><circle r="5.5"/><circle r="2.5" fill="#fb565b" stroke="none"/><line x1="-9" y1="0" x2="9" y2="0"/></g>' +
       '<g stroke="#444950" stroke-width="1.2" fill="none">' +
       '<path d="M318 46 Q 390 40 474 110" marker-end="url(#sh-arrow)"/><path d="M318 110 Q 390 96 474 124" marker-end="url(#sh-arrow)"/>' +
@@ -123,9 +123,9 @@ window.NewsSvg = {
       '<g stroke="#fb565b" stroke-width="1.2" fill="none" stroke-dasharray="4 3">' +
       '<path d="M318 46 Q 420 10 474 34" marker-end="url(#sh-arrow-red)"/><path d="M318 236 Q 410 250 474 200" marker-end="url(#sh-arrow-red)"/></g>' +
       '<rect x="16" y="282" width="624" height="20" rx="3" fill="none" stroke="#333538" stroke-width="1.2"/>' +
-      '<text x="30" y="296" font-family="Spline Sans Mono, monospace" font-size="9" letter-spacing="0.12em" fill="#bec3c9">PIPELINE: CRAWL4AI → EXTRACT → INDEX → MONITOR → TUNE · MTTR 8 MIN</text>' +
+      '<text x="30" y="296" font-family="Google Sans Code, monospace" font-size="9" letter-spacing="0.12em" fill="#bec3c9">PIPELINE: CRAWL4AI → EXTRACT → INDEX → MONITOR → TUNE · MTTR 8 MIN</text>' +
       '<rect x="16" y="306" width="624" height="20" rx="3" fill="none" stroke="#333538" stroke-width="1.2"/>' +
-      '<text x="30" y="320" font-family="Spline Sans Mono, monospace" font-size="9" letter-spacing="0.12em" fill="#bec3c9">INFRA: OPENSTACK · K8S · DOCKER · LINUX · TERRAFORM · NO ALERT FATIGUE</text>' +
+      '<text x="30" y="320" font-family="Google Sans Code, monospace" font-size="9" letter-spacing="0.12em" fill="#bec3c9">INFRA: OPENSTACK · K8S · DOCKER · LINUX · TERRAFORM · NO ALERT FATIGUE</text>' +
       '</g></svg>';
     return html;
   }
