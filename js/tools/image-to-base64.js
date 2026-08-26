@@ -10,20 +10,20 @@
 App.registerTool('image-to-base64', {
   css: '' +
     '.t-image-to-base64 .border-dashed{border-style:dashed;}\n' +
-    '.t-image-to-base64 .text-muted-foreground\\/60{color:rgba(170,170,179,0.6);}\n' +
-    '.t-image-to-base64 .text-muted-foreground\\/40{color:rgba(170,170,179,0.4);}\n' +
+    '.t-image-to-base64 .text-muted-foreground\\/60{color:rgba(141,148,158,0.6);}\n' +
+    '.t-image-to-base64 .text-muted-foreground\\/40{color:rgba(141,148,158,0.4);}\n' +
     '.t-image-to-base64 .space-y-2 > * + *{margin-top:0.5rem;}\n' +
     '.t-image-to-base64 .max-w-full{max-width:100%;}\n' +
     '.t-image-to-base64 .max-h-\\[200px\\]{max-height:200px;}\n' +
     '.t-image-to-base64 .max-h-\\[180px\\]{max-height:180px;}\n' +
     '.t-image-to-base64 .object-contain{object-fit:contain;}\n' +
-    '.t-image-to-base64 .border-cyan-glow\\/20{border-color:rgba(194,220,212,0.2);}\n' +
-    '.t-image-to-base64 .text-cyan-glow\\/80{color:rgba(194,220,212,0.8);}\n' +
-    '.t-image-to-base64 .hover\\:bg-cyan-glow\\/20:hover{background:rgba(194,220,212,0.2);}\n' +
-    '.t-image-to-base64 .hover\\:border-cyan-glow\\/30:hover{border-color:rgba(194,220,212,0.3);}\n' +
-    '.t-image-to-base64 .hover\\:bg-cyan-glow\\/5:hover{background:rgba(194,220,212,0.05);}\n' +
-    '.t-image-to-base64 .dropzone.dragging{border-color:rgba(194,220,212,0.6);background:rgba(194,220,212,0.05);}\n' +
-    '.t-image-to-base64 .b64-out{width:100%;border:1px solid rgba(30,32,41,0.4);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-size:10px;font-family:var(--font-mono);color:rgba(233,233,236,0.7);resize:vertical;min-height:60px;border-radius:var(--radius);}\n',
+    '.t-image-to-base64 .border-cyan-glow\\/20{border-color:rgba(83,163,249,0.2);}\n' +
+    '.t-image-to-base64 .text-cyan-glow\\/80{color:rgba(83,163,249,0.8);}\n' +
+    '.t-image-to-base64 .hover\\:bg-cyan-glow\\/20:hover{background:rgba(83,163,249,0.2);}\n' +
+    '.t-image-to-base64 .hover\\:border-cyan-glow\\/30:hover{border-color:rgba(83,163,249,0.3);}\n' +
+    '.t-image-to-base64 .hover\\:bg-cyan-glow\\/5:hover{background:rgba(83,163,249,0.05);}\n' +
+    '.t-image-to-base64 .dropzone.dragging{border-color:rgba(83,163,249,0.6);background:rgba(83,163,249,0.05);}\n' +
+    '.t-image-to-base64 .b64-out{width:100%;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-size:10px;font-family:var(--font-mono);color:rgba(227,227,227,0.7);resize:vertical;min-height:60px;border-radius:var(--radius);}\n',
 
   mount: function (root) {
     var b64 = '';

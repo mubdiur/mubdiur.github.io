@@ -10,9 +10,9 @@ App.registerTool('color-converter', {
   css: '' +
     '.t-color-converter .cc-swatch{width:64px;height:64px;}\n' +
     '.t-color-converter .cc-grid{display:grid;grid-template-columns:repeat(2,1fr);column-gap:1rem;row-gap:0.25rem;}\n' +
-    '.t-color-converter .cc-field{background:transparent;border:none;border-bottom:1px solid rgba(30,32,41,0.3);color:rgba(233,233,236,0.8);padding:0 0.25rem;outline:none;font-family:var(--font-mono);font-size:10px;}\n' +
-    '.t-color-converter .cc-field:focus{border-color:rgba(194,220,212,0.5);}\n' +
-    '.t-color-converter .cc-field.cc-dim{color:rgba(233,233,236,0.6);}\n' +
+    '.t-color-converter .cc-field{background:transparent;border:none;border-bottom:1px solid rgba(51,53,56,0.3);color:rgba(227,227,227,0.8);padding:0 0.25rem;outline:none;font-family:var(--font-mono);font-size:10px;}\n' +
+    '.t-color-converter .cc-field:focus{border-color:rgba(83,163,249,0.5);}\n' +
+    '.t-color-converter .cc-field.cc-dim{color:rgba(227,227,227,0.6);}\n' +
     '.t-color-converter .cc-picker{height:32px;width:100%;background:transparent;cursor:pointer;}\n',
 
   mount: function (root) {
@@ -55,8 +55,10 @@ App.registerTool('color-converter', {
     }
 
     function fromRgb(s) {
-      var parts = s.split(',').map(function (p) { return parseInt(p.trim()); });
-      if (parts.length !== 3 || parts.some(function (p) { return isNaN(p); })) return;
+      var parts = s.split(',').map(function (p) { return parseInt(p.trim(), 10); });
+      // Out-of-range channels previously produced garbage hex like #12c00;
+      // reject them so only real colors enter the converter.
+      if (parts.length !== 3 || parts.some(function (p) { return isNaN(p) || p < 0 || p > 255; })) return;
       var h = '#' + parts.map(function (p) { return p.toString(16).padStart(2, '0'); }).join('');
       hex = h.toUpperCase();
       hexInput.value = hex;

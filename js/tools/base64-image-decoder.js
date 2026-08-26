@@ -9,17 +9,17 @@
 
 App.registerTool('base64-image-decoder', {
   css: '' +
-    '.t-base64-image-decoder .b64-input{width:100%;border:1px solid rgba(30,32,41,0.4);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-size:12px;font-family:var(--font-mono);color:rgba(233,233,236,0.9);resize:vertical;min-height:60px;border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
-    '.t-base64-image-decoder .b64-input::placeholder{color:rgba(170,170,179,0.3);}\n' +
-    '.t-base64-image-decoder .b64-input:focus{border-color:rgba(194,220,212,0.4);box-shadow:0 0 0 1px rgba(194,220,212,0.3);}\n' +
+    '.t-base64-image-decoder .b64-input{width:100%;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-size:12px;font-family:var(--font-mono);color:rgba(227,227,227,0.9);resize:vertical;min-height:60px;border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-base64-image-decoder .b64-input::placeholder{color:rgba(141,148,158,0.3);}\n' +
+    '.t-base64-image-decoder .b64-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
     '.t-base64-image-decoder .space-y-2 > * + *{margin-top:0.5rem;}\n' +
     '.t-base64-image-decoder .max-w-full{max-width:100%;}\n' +
     '.t-base64-image-decoder .max-h-\\[300px\\]{max-height:300px;}\n' +
     '.t-base64-image-decoder .min-h-\\[100px\\]{min-height:100px;}\n' +
     '.t-base64-image-decoder .object-contain{object-fit:contain;}\n' +
-    '.t-base64-image-decoder .border-cyan-glow\\/20{border-color:rgba(194,220,212,0.2);}\n' +
-    '.t-base64-image-decoder .text-cyan-glow\\/80{color:rgba(194,220,212,0.8);}\n' +
-    '.t-base64-image-decoder .hover\\:bg-cyan-glow\\/20:hover{background:rgba(194,220,212,0.2);}\n',
+    '.t-base64-image-decoder .border-cyan-glow\\/20{border-color:rgba(83,163,249,0.2);}\n' +
+    '.t-base64-image-decoder .text-cyan-glow\\/80{color:rgba(83,163,249,0.8);}\n' +
+    '.t-base64-image-decoder .hover\\:bg-cyan-glow\\/20:hover{background:rgba(83,163,249,0.2);}\n',
 
   mount: function (root) {
     var input = '';

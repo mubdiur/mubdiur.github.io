@@ -32,7 +32,7 @@ window.TOOLMANIFEST = [
       });
       return [headers.join(','), rows.map(function (r) { return r.join(','); }).join('\n')].join('\n');
     } },
-  { slug: 'json-to-yaml', name: 'JSON → YAML', desc: 'Convert JSON objects to YAML format', category: 'json', tags: ['convert', 'yaml'], icon: 'filetype', template: 'transform',
+  { slug: 'json-to-yaml', name: 'JSON → YAML', desc: 'Convert JSON objects to YAML format — spec-correct quoting of scalars that would re-parse as bools, numbers, nulls or indicators', category: 'json', tags: ['convert', 'yaml'], icon: 'filetype', template: 'transform',
     handler: function (s) {
       var obj = JSON.parse(s);
       var toYaml = function (val, indent) {
@@ -40,10 +40,13 @@ window.TOOLMANIFEST = [
         if (val === null || val === undefined) return 'null';
         if (typeof val === 'boolean') return val ? 'true' : 'false';
         if (typeof val === 'number') return String(val);
-        if (typeof val === 'string') return val.includes('\n') ? '|\n' + indent + '  ' + val : /[:{}\[\],&*\?\|<>=!%@`#]/.test(val) ? '"' + val.replace(/"/g, '\\"') + '"' : val;
+        if (typeof val === 'string') {
+          if (val.indexOf('\n') >= 0) return '|\n' + val.split('\n').map(function (l) { return indent + '  ' + l; }).join('\n');
+          return yamlQuoteIfNeeded(val);
+        }
         if (Array.isArray(val)) return val.length ? val.map(function (v) { return '\n' + indent + '- ' + toYaml(v, indent + '  ').trimStart(); }).join('') : '[]';
         var entries = Object.entries(val);
-        return entries.length ? entries.map(function (e) { return '\n' + indent + e[0] + ': ' + toYaml(e[1], indent + '  ').trimStart(); }).join('') : '{}';
+        return entries.length ? entries.map(function (e) { return '\n' + indent + yamlQuoteIfNeeded(e[0]) + ': ' + toYaml(e[1], indent + '  ').trimStart(); }).join('') : '{}';
       };
       return toYaml(obj).trim();
     } },
@@ -74,7 +77,7 @@ window.TOOLMANIFEST = [
       cmp(oa, ob, 'root');
       return diffs.length ? diffs.join('\n') : 'No differences found';
     },
-    params: [{ key: 'compareTo', label: 'Compare with (JSON)', type: 'text', default: '{}' }] },
+    params: [{ key: 'compareTo', label: 'Compare with (JSON)', type: 'textarea', default: '{}' }] },
   { slug: 'json-to-xml', name: 'JSON → XML', desc: 'Convert JSON to XML format', category: 'json', tags: ['convert', 'xml'], icon: 'filetype', template: 'transform',
     handler: function (s) {
       var obj = JSON.parse(s);
@@ -164,20 +167,13 @@ window.TOOLMANIFEST = [
     ] }] },
   { slug: 'slug-generator', name: 'Slug Generator', desc: 'Generate URL-friendly slug from text', category: 'text', tags: ['slug', 'url'], icon: 'globe', template: 'transform',
     handler: function (s) { return s.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/^-+|-+$/g, ''); } },
-  { slug: 'text-diff', name: 'Text Diff', desc: 'Compare two texts line by line', category: 'text', tags: ['diff', 'compare'], icon: 'gitbranch', template: 'transform',
+  { slug: 'text-diff', name: 'Text Diff', desc: 'Myers shortest-edit-script line diff (the algorithm behind GNU diff/Git) — pinpoints what changed instead of flagging everything after an insertion', category: 'text', tags: ['diff', 'compare'], icon: 'gitbranch', template: 'transform',
     handler: function (s, opts) {
       var b = (opts && opts.compareTo) || '';
-      var aL = s.split('\n'), bL = b.split('\n');
-      var r = [];
-      for (var i = 0; i < Math.max(aL.length, bL.length); i++) {
-        if (i >= aL.length) r.push('+ ' + bL[i]);
-        else if (i >= bL.length) r.push('- ' + aL[i]);
-        else if (aL[i] !== bL[i]) { r.push('- ' + aL[i]); r.push('+ ' + bL[i]); }
-        else r.push('  ' + aL[i]);
-      }
-      return r.join('\n');
+      if (!b) return 'Paste comparison text in the "Compare with" field';
+      return MyersDiff.linesText(s, b);
     },
-    params: [{ key: 'compareTo', label: 'Compare with', type: 'text', default: '' }] },
+    params: [{ key: 'compareTo', label: 'Compare with', type: 'textarea', default: '' }] },
   { slug: 'regex-tester', name: 'Regex Tester', desc: 'Test regular expressions against text with match count', category: 'text', tags: ['regex', 'test', 'pattern'], icon: 'code2', template: 'transform',
     handler: function (s, opts) {
       var pat = (opts && opts.pattern) || ''; var flags = (opts && opts.flags) || 'g';
@@ -218,18 +214,17 @@ window.TOOLMANIFEST = [
     } },
 
   // ── Generators ──────────────────────────────────────────
-  { slug: 'random-string', name: 'Random String Generator', desc: 'Generate random strings with configurable character sets', category: 'generators', tags: ['random', 'generate'], icon: 'shuffle', template: 'generator',
+  { slug: 'random-string', name: 'Random String Generator', desc: 'Generate random strings with configurable character sets — rejection-sampled, zero modulo bias', category: 'generators', tags: ['random', 'generate'], icon: 'shuffle', template: 'generator',
     genHandler: function (opts) {
       var len = parseInt((opts && opts.length) || '16', 10);
+      if (!(len >= 1)) len = 16;
       var sets = (opts && opts.charset) || 'alphanumeric';
       var pool = sets === 'alpha' ? 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' :
         sets === 'numeric' ? '0123456789' :
         sets === 'hex' ? '0123456789abcdef' :
         sets === 'alphanumeric' ? 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' :
         'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
-      var arr = new Uint8Array(len);
-      crypto.getRandomValues(arr);
-      return Array.from(arr, function (b) { return pool[b % pool.length]; }).join('');
+      return CryptoRand.string(len, pool);
     },
     params: [
       { key: 'length', label: 'Length', type: 'number', default: '16', min: 1, max: 1024 },
@@ -238,28 +233,29 @@ window.TOOLMANIFEST = [
         { value: 'numeric', label: 'Digits only' }, { value: 'hex', label: 'Hexadecimal' }, { value: 'all', label: 'All characters' }
       ] }
     ] },
-  { slug: 'uuid-generator', name: 'UUID v4 Generator', desc: 'Generate UUID v4 identifiers — bulk mode available', category: 'generators', tags: ['uuid', 'identifier'], icon: 'key', template: 'generator',
+  { slug: 'uuid-generator', name: 'UUID v4 Generator', desc: 'RFC 4122 UUID v4 from the Web Crypto CSPRNG — 122 secure random bits, bulk mode available', category: 'generators', tags: ['uuid', 'identifier'], icon: 'key', template: 'generator',
     genHandler: function (opts) {
       var count = parseInt((opts && opts.count) || '1', 10);
-      return Array.from({ length: count }, function () {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-          var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-        });
-      }).join('\n');
+      if (!(count >= 1)) count = 1;
+      var out = [];
+      for (var i = 0; i < count; i++) out.push(CryptoRand.uuidV4());
+      return out.join('\n');
     },
     params: [{ key: 'count', label: 'Count', type: 'number', default: '1', min: 1, max: 1000 }] },
-  { slug: 'password-generator', name: 'Password Generator', desc: 'Generate strong passwords with configurable character sets', category: 'generators', tags: ['password', 'security'], icon: 'lock', template: 'generator',
+  { slug: 'password-generator', name: 'Password Generator', desc: 'Strong passwords from the Web Crypto CSPRNG — guaranteed coverage of every selected class, unbiased sampling, shuffled', category: 'generators', tags: ['password', 'security'], icon: 'lock', template: 'generator',
     genHandler: function (opts) {
       var len = parseInt((opts && opts.length) || '24', 10);
-      var sets = [];
-      if (!opts || opts.upper !== 'false') sets.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
-      if (!opts || opts.lower !== 'false') sets.push('abcdefghijklmnopqrstuvwxyz');
-      if (!opts || opts.digits !== 'false') sets.push('0123456789');
-      if (opts && opts.symbols === 'true') sets.push('!@#$%^&*()_+-=[]{}|;:,.<>?~');
-      var pool = sets.join('');
-      if (!pool) throw new Error('Select at least one character set');
-      var arr = new Uint8Array(len); crypto.getRandomValues(arr);
-      return Array.from(arr, function (b) { return pool[b % pool.length]; }).join('');
+      if (!(len >= 4)) len = 4;
+      var upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', lower = 'abcdefghijklmnopqrstuvwxyz';
+      var digits = '0123456789', symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?~';
+      var active = [];
+      if (!opts || opts.upper !== 'false') active.push(upper);
+      if (!opts || opts.lower !== 'false') active.push(lower);
+      if (!opts || opts.digits !== 'false') active.push(digits);
+      if (opts && opts.symbols === 'true') active.push(symbols);
+      if (!active.length) throw new Error('Select at least one character set');
+      var pool = active.join('');
+      return CryptoRand.string(len, pool, active);
     },
     params: [
       { key: 'length', label: 'Length', type: 'number', default: '24', min: 4, max: 256 },
@@ -373,24 +369,11 @@ window.TOOLMANIFEST = [
       var strength = bits < 30 ? 'Weak' : bits < 50 ? 'Fair' : bits < 70 ? 'Good' : bits < 100 ? 'Strong' : 'Very Strong';
       return 'Entropy:    ' + bits + ' bits\nStrength:   ' + strength + '\nLength:     ' + s.length + ' chars\nChar Pool:  ' + pool + ' chars';
     } },
-  { slug: 'jwt-debugger', name: 'JWT Debugger', desc: 'Decode and inspect JWT tokens — header, payload, signature (WASM HMAC verify)', category: 'network', tags: ['jwt', 'token', 'auth'], icon: 'lock', template: 'custom' },
+  { slug: 'jwt-debugger', name: 'JWT Debugger', desc: 'Decode and inspect JWT tokens — human-readable claims, expiry badges, HS256 signature verification via the WebAssembly HMAC core', category: 'network', tags: ['jwt', 'token', 'auth'], icon: 'lock', template: 'custom' },
 
   // ── Converters ──────────────────────────────────────────
-  { slug: 'csv-to-json', name: 'CSV → JSON', desc: 'Convert comma/separated values to JSON', category: 'converters', tags: ['csv', 'json', 'convert'], icon: 'filespreadsheet', template: 'transform',
-    handler: function (s) {
-      var lines = s.split('\n').filter(function (l) { return l.trim(); });
-      if (!lines.length) throw new Error('CSV is empty');
-      var pl = function (line) {
-        var r = []; var cur = '', inq = false;
-        for (var i = 0; i < line.length; i++) {
-          if (inq) { if (line[i] === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else inq = false; } else cur += line[i]; }
-          else { if (line[i] === '"') inq = true; else if (line[i] === ',') { r.push(cur.trim()); cur = ''; } else cur += line[i]; }
-        }
-        r.push(cur.trim()); return r;
-      };
-      var h = pl(lines[0]);
-      return JSON.stringify(lines.slice(1).map(function (r) { var o = {}; h.forEach(function (hdr, i) { o[hdr] = pl(r)[i] || ''; }); return o; }), null, 2);
-    } },
+  { slug: 'csv-to-json', name: 'CSV → JSON', desc: 'RFC 4180-exact CSV parsing: quoted commas, escaped quotes ("") and newlines inside quotes, CRLF, BOM', category: 'converters', tags: ['csv', 'json', 'convert'], icon: 'filespreadsheet', template: 'transform',
+    handler: function (s) { return Transforms.csvToJSON(s); } },
   { slug: 'yaml-to-json', name: 'YAML → JSON', desc: 'Convert YAML to JSON', category: 'converters', tags: ['yaml', 'json', 'convert'], icon: 'filetype', template: 'transform',
     handler: function (s) {
       var lines = s.split('\n').filter(function (l) { return l.trim() && !l.trim().startsWith('#'); });
@@ -454,17 +437,30 @@ window.TOOLMANIFEST = [
   { slug: 'table2xl', name: 'Table2xl — Table Converter', desc: 'Paste dirty HTML tables or ELK/Kibana grids — strip the noise, export as clean HTML or ASCII table', category: 'converters', tags: ['table', 'elk', 'kibana', 'ascii'], icon: 'filespreadsheet', template: 'custom' },
   { slug: 'markdown-preview', name: 'Markdown Preview', desc: 'Preview rendered Markdown in real-time', category: 'converters', tags: ['markdown', 'preview'], icon: 'eye', template: 'custom' },
   { slug: 'time-copier', name: 'Time Copier', desc: 'Copy time in mm/dd/yyyy hh:mm AM/PM across UTC, PT (PDT/PST), and ET (EDT/EST) — DST-aware, for now or any custom moment', category: 'formatters', tags: ['time', 'timezone', 'dst', 'copy', 'convert'], icon: 'clock', template: 'custom' },
-  { slug: 'number-base-converter', name: 'Number Base Converter', desc: 'Convert numbers between binary, octal, decimal, hexadecimal', category: 'math', tags: ['base', 'convert', 'binary', 'hex'], icon: 'calculator', template: 'transform',
+  { slug: 'number-base-converter', name: 'Number Base Converter', desc: 'Convert numbers between binary, octal, decimal, hexadecimal — BigInt-exact at any width, strict digit validation (parseInt silently truncates past 2⁵³)', category: 'math', tags: ['base', 'convert', 'binary', 'hex'], icon: 'calculator', template: 'transform',
     handler: function (s, opts) {
       var from = parseInt((opts && opts.fromBase) || '10', 10);
       var to = parseInt((opts && opts.toBase) || '16', 10);
-      var n = parseInt(s.trim(), from);
-      if (isNaN(n)) throw new Error('Invalid number for base ' + from);
+      var raw = s.trim().replace(/[_\s]/g, '');
+      if (!raw) throw new Error('Enter a number');
+      var neg = raw.charAt(0) === '-';
+      var digits = neg ? raw.slice(1).toLowerCase() : raw.toLowerCase();
+      if (!digits) throw new Error('Enter a number');
+      // Strict per-digit validation — parseInt("0x1f", 16)-style surprises
+      // and silent float truncation are exactly what this replaces.
+      for (var i = 0; i < digits.length; i++) {
+        var v = parseInt(digits.charAt(i), 36);
+        if (!(v >= 0 && v < from)) throw new Error('Invalid digit "' + digits.charAt(i) + '" for base ' + from);
+      }
+      var n = 0n;
+      var base = BigInt(from);
+      for (var j = 0; j < digits.length; j++) n = n * base + BigInt(parseInt(digits.charAt(j), 36));
+      var out = (neg ? '-' : '') + n.toString(to);
+      if (to === 16) out = out.toUpperCase();
       var BASE_NAMES = { 2: 'Binary', 8: 'Octal', 10: 'Decimal', 16: 'Hex' };
       var name = BASE_NAMES[to] || 'Base ' + to;
-      var out = n.toString(to);
-      if (to === 16) out = out.toUpperCase();
-      return s.trim() + ' (base ' + from + ' → ' + name + ')\n' + '─'.repeat(20) + '\n' + name + ': ' + out;
+      return s.trim() + ' (base ' + from + ' → ' + name + ')\n' + '─'.repeat(20) + '\n' + name + ': ' + out +
+        (from !== 10 ? '\nDecimal: ' + (neg ? '-' : '') + n.toString(10) : '');
     },
     params: [
       { key: 'fromBase', label: 'From Base', type: 'select', default: '10', options: [{ value: '2', label: 'Binary' }, { value: '8', label: 'Octal' }, { value: '10', label: 'Decimal' }, { value: '16', label: 'Hex' }] },
@@ -474,37 +470,94 @@ window.TOOLMANIFEST = [
   { slug: 'color-converter', name: 'Color Converter', desc: 'Convert between HEX, RGB, HSL color formats', category: 'formatters', tags: ['color', 'hex', 'rgb', 'hsl'], icon: 'palette', template: 'custom' },
 
   // ── Math ────────────────────────────────────────────────
-  { slug: 'prime-checker', name: 'Prime Number Checker', desc: 'Check if a number is prime, find factors', category: 'math', tags: ['prime', 'math'], icon: 'calculator', template: 'transform',
+  { slug: 'prime-checker', name: 'Prime Number Checker', desc: 'Primality via deterministic Miller–Rabin (exact for any input < 3.3 × 10²⁴) — hundreds of digits welcome, smallest factor reported for composites', category: 'math', tags: ['prime', 'math'], icon: 'calculator', template: 'transform',
     handler: function (s) {
-      var n = parseInt(s.trim(), 10);
-      if (isNaN(n) || n < 2) return s.trim() + ' — not a prime number (must be >= 2)';
-      if (n === 2) return n + ' — prime ✓';
-      for (var i = 2; i <= Math.sqrt(n); i++) if (n % i === 0) return n + ' — not prime ✗\nSmallest divisor: ' + i;
-      return n + ' — prime ✓';
+      var input = s.trim().replace(/[,_\s]/g, '');
+      if (!/^\d+$/.test(input)) throw new Error('Enter a non-negative integer');
+      var n = BigInt(input);
+      if (n < 2n) return input + ' — not a prime number (must be >= 2)';
+      if (n === 2n || n === 3n) return n + ' — prime ✓';
+      if (n % 2n === 0n) return n + ' — not prime ✗\nSmallest factor: 2';
+
+      // Miller–Rabin with the first 12 primes as witnesses: deterministic
+      // (proven, not probabilistic) for all n < 3,317,044,064,679,887,385,961,981.
+      // Beyond that the test is still correct about "prime" answers only with
+      // overwhelming probability (< 4^-12 error); composites here are always
+      // caught because we also search for an explicit factor below.
+      var witnesses = [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n];
+      var d = n - 1n, r = 0n;
+      while (d % 2n === 0n) { d /= 2n; r++; }
+      var composite = false;
+      for (var w = 0; w < witnesses.length && !composite; w++) {
+        if (witnesses[w] >= n) continue; // witness must be coprime-stride below n
+        var x = modPow(witnesses[w], d, n);
+        if (x === 1n || x === n - 1n) continue;
+        for (var i = 1n; i < r; i++) {
+          x = x * x % n;
+          if (x === n - 1n) break;
+        }
+        if (x !== n - 1n) composite = true;
+      }
+      if (!composite) return n + ' — prime ✓';
+
+      // Composite: hunt the smallest factor. Trial division by 6k±1 up to
+      // 10^6 covers every case whose factor is human-findable instantly;
+      // larger semiprimes get an honest verdict instead of a hang.
+      if (n % 3n === 0n) return n + ' — not prime ✗\nSmallest factor: 3';
+      for (var f = 5n; f <= 1000000n; f += 6n) {
+        if (n % f === 0n) return n + ' — not prime ✗\nSmallest factor: ' + f;
+        if (n % (f + 2n) === 0n) return n + ' — not prime ✗\nSmallest factor: ' + (f + 2n);
+      }
+      return n + ' — not prime ✗\nSmallest factor: > 10⁶ (too large to factor quickly)';
     } },
-  { slug: 'fibonacci-generator', name: 'Fibonacci Generator', desc: 'Generate Fibonacci sequence up to N terms', category: 'math', tags: ['fibonacci', 'sequence'], icon: 'sigma', template: 'generator',
+  { slug: 'fibonacci-generator', name: 'Fibonacci Generator', desc: 'Generate Fibonacci sequence up to N terms — arbitrary-precision BigInt, exact past term 78 where floats silently corrupt', category: 'math', tags: ['fibonacci', 'sequence'], icon: 'sigma', template: 'generator',
     genHandler: function (opts) {
-      var n = Math.min(parseInt((opts && opts.terms) || '10', 10), 100);
-      var fib = [0, 1];
-      for (var i = 2; i < n; i++) fib.push(fib[i - 1] + fib[i - 2]);
-      return fib.slice(0, n).join(', ');
+      var n = parseInt((opts && opts.terms) || '10', 10);
+      if (!(n >= 1)) n = 10;
+      n = Math.min(n, 100);
+      var out = [];
+      var a = 0n, b = 1n;
+      for (var i = 0; i < n; i++) { out.push(a); var t = a + b; a = b; b = t; }
+      return out.join(', ');
     },
     params: [{ key: 'terms', label: 'Terms', type: 'number', default: '10', min: 1, max: 100 }] },
-  { slug: 'statistics-calculator', name: 'Statistics Calculator', desc: 'Calculate mean, median, mode, range, standard deviation', category: 'math', tags: ['stats', 'mean', 'median', 'stddev'], icon: 'sigma', template: 'transform',
+  { slug: 'statistics-calculator', name: 'Statistics Calculator', desc: 'Mean, median, mode, range — Welford one-pass variance (numerically stable), population AND sample stddev', category: 'math', tags: ['stats', 'mean', 'median', 'stddev'], icon: 'sigma', template: 'transform',
     handler: function (s) {
       var nums = s.split(/[\s,\n]+/).map(parseFloat).filter(function (n) { return !isNaN(n); });
       if (nums.length < 2) throw new Error('Enter at least 2 numbers');
-      nums.sort(function (a, b) { return a - b; });
-      var sum = nums.reduce(function (a, b) { return a + b; }, 0);
-      var mean = sum / nums.length;
-      var median = nums.length % 2 === 0 ? (nums[nums.length / 2 - 1] + nums[nums.length / 2]) / 2 : nums[Math.floor(nums.length / 2)];
-      var freq = {}; nums.forEach(function (n) { freq[n] = (freq[n] || 0) + 1; });
+      // Welford's online algorithm: mean and M2 accumulate in one pass
+      // without the catastrophic cancellation of Σ(x−μ)² around a large μ.
+      var count = 0, mean = 0, m2 = 0;
+      for (var i = 0; i < nums.length; i++) {
+        count++;
+        var delta = nums[i] - mean;
+        mean += delta / count;
+        var delta2 = nums[i] - mean;
+        m2 += delta * delta2;
+      }
+      var sorted = nums.slice().sort(function (a, b) { return a - b; });
+      var median = count % 2 === 0 ? (sorted[count / 2 - 1] + sorted[count / 2]) / 2 : sorted[Math.floor(count / 2)];
+      var freq = {};
+      nums.forEach(function (n) { freq[n] = (freq[n] || 0) + 1; });
       var maxFreq = Math.max.apply(null, Object.values(freq));
-      var modes = Object.entries(freq).filter(function (e) { return e[1] === maxFreq; }).map(function (e) { return parseFloat(e[0]); });
-      var range = nums[nums.length - 1] - nums[0];
-      var variance = nums.reduce(function (a, b) { return a + Math.pow(b - mean, 2); }, 0) / nums.length;
-      var stdDev = Math.sqrt(variance);
-      return 'Count:  ' + nums.length + '\nSum:    ' + sum + '\nMean:   ' + mean.toFixed(4) + '\nMedian: ' + median.toFixed(4) + '\nMode:   ' + modes.join(', ') + '\nRange:  ' + range + '\nMin:    ' + nums[0] + '\nMax:    ' + nums[nums.length - 1] + '\nVar:    ' + variance.toFixed(4) + '\nStdDev: ' + stdDev.toFixed(4);
+      // Every value appearing once means no value repeats — say so instead
+      // of reporting the entire dataset as "the mode".
+      var modes = maxFreq === 1 ? 'none' : Object.entries(freq)
+        .filter(function (e) { return e[1] === maxFreq; })
+        .map(function (e) { return parseFloat(e[0]); }).join(', ');
+      var popVar = m2 / count;
+      var sampleVar = m2 / (count - 1);
+      return 'Count:       ' + count +
+        '\nSum:         ' + fmtNum(nums.reduce(function (a, b) { return a + b; }, 0)) +
+        '\nMean:        ' + fmtNum(mean) +
+        '\nMedian:      ' + fmtNum(median) +
+        '\nMode:        ' + modes +
+        '\nRange:       ' + fmtNum(sorted[count - 1] - sorted[0]) +
+        '\nMin:         ' + fmtNum(sorted[0]) +
+        '\nMax:         ' + fmtNum(sorted[count - 1]) +
+        '\nVariance:    ' + fmtNum(popVar) + ' (population)' +
+        '\nStdDev:      ' + fmtNum(Math.sqrt(popVar)) + ' (population)' +
+        '\nSample StdDev: ' + fmtNum(Math.sqrt(sampleVar)) + ' (n−1)';
     } },
   { slug: 'unit-converter', name: 'Unit Converter', desc: 'Convert between common units — length, mass, temperature, data', category: 'math', tags: ['units', 'convert', 'length', 'mass', 'temperature'], icon: 'ruler', template: 'custom' },
   { slug: 'number-to-words', name: 'Number to Words', desc: 'Convert numbers to English word representation', category: 'math', tags: ['number', 'words'], icon: 'calculator', template: 'transform',
@@ -517,29 +570,133 @@ window.TOOLMANIFEST = [
     } },
 
   // ── Code Formatters ─────────────────────────────────────
-  { slug: 'html-formatter', name: 'HTML Formatter', desc: 'Beautify and indent HTML', category: 'code', tags: ['html', 'format', 'beautify'], icon: 'code2', template: 'transform',
+  { slug: 'html-formatter', name: 'HTML Formatter', desc: 'Beautify and indent HTML — comment/doctype aware, void elements never gain children, script/style/pre content preserved byte-for-byte', category: 'code', tags: ['html', 'format', 'beautify'], icon: 'code2', template: 'transform',
     handler: function (s) {
-      var indent = 0, result = '';
-      for (var i = 0; i < s.length; i++) {
-        var c = s[i];
-        if (c === '<') {
-          var n = s.indexOf('>', i);
-          if (n === -1) { result += s.slice(i); break; }
-          var t = s.slice(i, n + 1);
-          if (t.startsWith('</')) indent--;
-          result += '\n' + '  '.repeat(Math.max(0, indent)) + t;
-          if (!t.endsWith('/>') && !t.startsWith('</')) indent++;
-          i = n;
-        } else { result += c; }
+      var VOID = { area: 1, base: 1, br: 1, col: 1, embed: 1, hr: 1, img: 1, input: 1, link: 1, meta: 1, param: 1, source: 1, track: 1, wbr: 1 };
+      var RAW = { script: 1, style: 1, pre: 1, textarea: 1 };
+      var out = [];
+      var depth = 0;
+      var i = 0, n = s.length;
+
+      function pushText(text) {
+        // Blank runs between tags collapse; real text gets its own line.
+        var t = text.replace(/\s+/g, ' ');
+        if (t.trim()) out.push('  '.repeat(depth) + t.trim());
       }
-      return result.trim();
+
+      while (i < n) {
+        if (s.charAt(i) !== '<') {
+          var next = s.indexOf('<', i);
+          if (next === -1) next = n;
+          pushText(s.slice(i, next));
+          i = next;
+          continue;
+        }
+        if (s.startsWith('<!--', i)) {
+          var endC = s.indexOf('-->', i + 4);
+          endC = endC === -1 ? n : endC + 3;
+          out.push('  '.repeat(depth) + s.slice(i, endC).trim());
+          i = endC;
+          continue;
+        }
+        if (s.startsWith('<!', i) || s.startsWith('<?', i)) {
+          var endD = s.indexOf('>', i);
+          endD = endD === -1 ? n : endD + 1;
+          out.push('  '.repeat(depth) + s.slice(i, endD).trim());
+          i = endD;
+          continue;
+        }
+        var gt = s.indexOf('>', i);
+        if (gt === -1) { pushText(s.slice(i)); break; }
+        var tag = s.slice(i, gt + 1);
+        var isClose = tag.charAt(1) === '/';
+        var nameMatch = tag.match(/^<\/?\s*([a-zA-Z][a-zA-Z0-9-]*)/);
+        var name = nameMatch ? nameMatch[1].toLowerCase() : '';
+
+        if (!isClose) {
+          out.push('  '.repeat(depth) + tag.trim());
+          var selfClosed = /\/>$/.test(tag);
+          if (!selfClosed && !VOID[name]) {
+            if (RAW[name]) {
+              // Raw-content elements: copy the body verbatim, no reindent.
+              var closeRe = new RegExp('</' + name + '\\s*>', 'i');
+              var rest = s.slice(gt + 1);
+              var m = rest.match(closeRe);
+              if (m) {
+                var inner = rest.slice(0, m.index);
+                if (inner.trim()) out.push(inner.replace(/^\n/, '').replace(/\n$/, ''));
+                out.push('  '.repeat(depth) + m[0].trim());
+                i = gt + 1 + m.index + m[0].length;
+                continue;
+              }
+            }
+            depth++;
+          }
+        } else {
+          depth = Math.max(0, depth - 1);
+          out.push('  '.repeat(depth) + tag.trim());
+        }
+        i = gt + 1;
+      }
+      return out.join('\n').trim();
     } },
-  { slug: 'sql-formatter', name: 'SQL Formatter', desc: 'Format SQL queries for readability', category: 'code', tags: ['sql', 'format'], icon: 'terminal', template: 'transform',
+  { slug: 'sql-formatter', name: 'SQL Formatter', desc: 'Format SQL queries for readability — string literals are never touched, clauses break onto lines, conditions and joins indent', category: 'code', tags: ['sql', 'format'], icon: 'terminal', template: 'transform',
     handler: function (s) {
-      var keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'ON', 'GROUP BY', 'ORDER BY', 'HAVING', 'LIMIT', 'OFFSET', 'INSERT INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CREATE', 'ALTER', 'DROP', 'INDEX', 'TABLE'];
-      var result = s;
-      for (var i = 0; i < keywords.length; i++) result = result.replace(new RegExp('\\b' + keywords[i] + '\\b', 'gi'), '\n' + keywords[i]);
-      return result.replace(/\n+/g, '\n').trim();
+      // Clause starters get their own line. Longer phrases must come
+      // before their prefixes ('UNION ALL' before 'UNION').
+      var BREAKS = ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN', 'CROSS JOIN', 'OUTER JOIN',
+        'GROUP BY', 'ORDER BY', 'UNION ALL', 'INSERT INTO', 'DELETE FROM', 'CREATE TABLE', 'ALTER TABLE',
+        'DROP TABLE', 'SELECT', 'FROM', 'WHERE', 'HAVING', 'LIMIT', 'OFFSET', 'VALUES', 'UPDATE', 'SET',
+        'UNION', 'JOIN', 'ON'];
+      var BREAK_RE = new RegExp('\\b(' + BREAKS.map(function (k) { return k.replace(/ /g, '\\s+'); }).join('|') + ')\\b', 'gi');
+
+      /* Split into literal / code segments so quoted text is opaque. */
+      var segs = [];
+      var lit = false, buf = '';
+      var i = 0;
+      while (i < s.length) {
+        var ch = s.charAt(i);
+        if (!lit && ch === "'") {
+          if (buf) { segs.push({ lit: false, text: buf }); buf = ''; }
+          lit = true; buf = "'";
+        } else if (lit && ch === "'") {
+          if (s.charAt(i + 1) === "'") { buf += "''"; i++; }
+          else { buf += "'"; segs.push({ lit: true, text: buf }); buf = ''; lit = false; }
+        } else {
+          buf += ch;
+        }
+        i++;
+      }
+      if (buf) segs.push({ lit: lit, text: buf });
+
+      /* Break before keywords in code segments; literals pass through. */
+      var broken = '';
+      segs.forEach(function (seg) {
+        if (seg.lit) { broken += seg.text; return; }
+        broken += seg.text.replace(BREAK_RE, function (m) { return '\n' + m.toUpperCase(); });
+      });
+
+      /* Layout: first clause at column 0; joins and continuations indent. */
+      var lines = broken.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+      var out = [];
+      var condCol = false; // inside a WHERE/HAVING leg → continuations align under AND/OR
+      for (var j = 0; j < lines.length; j++) {
+        var line = lines[j];
+        if (j === 0 || /^(SELECT|FROM|WHERE|HAVING|GROUP BY|ORDER BY|LIMIT|OFFSET|VALUES|SET|UNION)/i.test(line)) {
+          condCol = /^WHERE|^HAVING/i.test(line);
+          out.push(line);
+        } else if (/^(INNER |LEFT |RIGHT |FULL |CROSS )?(OUTER )?JOIN/i.test(line)) {
+          condCol = false;
+          out.push('  ' + line);
+        } else if (/^ON\b/i.test(line)) {
+          out.push('    ' + line);
+        } else if (/^(AND|OR)\b/i.test(line)) {
+          out.push(condCol ? '  ' : '    ' + line);
+        } else {
+          out.push(condCol ? '  ' : '    ' + line);
+        }
+      }
+      return out.join('\n');
     } },
 
   // ── Generators (additional) ─────────────────────────────
@@ -559,13 +716,11 @@ window.TOOLMANIFEST = [
       return Array.from({ length: p }, function (_, i) { return sentences.slice(i * 5, i * 5 + 5).join(' '); }).join('\n\n');
     },
     params: [{ key: 'paragraphs', label: 'Paragraphs', type: 'number', default: '1', min: 1, max: 50 }] },
-  { slug: 'api-key-generator', name: 'API Key Generator', desc: 'Generate API keys in various formats', category: 'generators', tags: ['api', 'key', 'token'], icon: 'key', template: 'generator',
+  { slug: 'api-key-generator', name: 'API Key Generator', desc: 'Generate API keys in various formats — 192 bits from the Web Crypto CSPRNG', category: 'generators', tags: ['api', 'key', 'token'], icon: 'key', template: 'generator',
     genHandler: function (opts) {
       var fmt = (opts && opts.format) || 'sk';
       var prefix = fmt === 'sk' ? 'sk-' : fmt === 'pk' ? 'pk-' : '';
-      var bytes = 32; var arr = new Uint8Array(bytes); crypto.getRandomValues(arr);
-      var key = Array.from(arr, function (b) { return 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[b % 62]; }).join('');
-      return prefix + key;
+      return prefix + CryptoRand.string(32, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
     },
     params: [{ key: 'format', label: 'Format', type: 'select', default: 'sk', options: [{ value: 'sk', label: 'sk-...' }, { value: 'pk', label: 'pk-...' }, { value: 'raw', label: 'No prefix' }] }] },
 
@@ -575,14 +730,19 @@ window.TOOLMANIFEST = [
   { slug: 'contrast-checker', name: 'Contrast Checker', desc: 'Check WCAG contrast ratio between two colors', category: 'image', tags: ['color', 'contrast', 'accessibility'], icon: 'palette', template: 'custom' },
 
   // ── Network ─────────────────────────────────────────────
-  { slug: 'mac-address-generator', name: 'MAC Address Generator', desc: 'Generate random MAC addresses', category: 'network', tags: ['mac', 'address'], icon: 'globe', template: 'generator',
+  { slug: 'mac-address-generator', name: 'MAC Address Generator', desc: 'Generate random MAC addresses — locally-administered unicast bit pattern (never collides with real vendor OUIs)', category: 'network', tags: ['mac', 'address'], icon: 'globe', template: 'generator',
     genHandler: function (opts) {
       var count = parseInt((opts && opts.count) || '1', 10);
-      return Array.from({ length: count }, function () {
+      if (!(count >= 1)) count = 1;
+      var out = [];
+      for (var n = 0; n < count; n++) {
         var arr = new Uint8Array(6); crypto.getRandomValues(arr);
-        arr[0] &= 0xfc;
-        return Array.from(arr, function (b) { return b.toString(16).padStart(2, '0'); }).join(':');
-      }).join('\n');
+        // IEEE 802: bit 1 of the first octet = locally administered (1),
+        // bit 0 = unicast (0). Claiming neither would impersonate real OUIs.
+        arr[0] = (arr[0] | 0x02) & 0xfe;
+        out.push(Array.from(arr, function (b) { return b.toString(16).padStart(2, '0'); }).join(':').toUpperCase());
+      }
+      return out.join('\n');
     },
     params: [{ key: 'count', label: 'Count', type: 'number', default: '1', min: 1, max: 100 }] },
   { slug: 'http-status-codes', name: 'HTTP Status Codes', desc: 'Browse and search HTTP status codes', category: 'network', tags: ['http', 'status', 'api'], icon: 'globe', template: 'custom' },
@@ -618,6 +778,48 @@ window.TOOLCATEGORIES = [
 
 window.TOOLS_BY_SLUG = {};
 window.TOOLMANIFEST.forEach(function (t) { window.TOOLS_BY_SLUG[t.slug] = t; });
+
+/** Modular exponentiation (square-and-multiply) over BigInt. */
+function modPow(base, exp, mod) {
+  var result = 1n;
+  base %= mod;
+  while (exp > 0n) {
+    if (exp & 1n) result = result * base % mod;
+    base = base * base % mod;
+    exp >>= 1n;
+  }
+  return result;
+}
+
+/** Stats formatting: 6 decimal places, trailing zeros and bare dot trimmed. */
+function fmtNum(x) {
+  if (!isFinite(x)) return String(x);
+  if (Math.abs(x) >= 1e15 || (Math.abs(x) > 0 && Math.abs(x) < 1e-9)) return x.toExponential(6);
+  var s = x.toFixed(6);
+  if (s.indexOf('.') >= 0) s = s.replace(/0+$/, '').replace(/\.$/, '');
+  return s === '' || s === '-' ? '0' : s;
+}
+
+/**
+ * Quote a plain scalar when YAML 1.2 core schema (or plain-style
+ * grammar) would otherwise misread it: bare "true"/"null"/"123"
+ * strings, leading/trailing whitespace, indicator characters in
+ * leading position, ": " or " #" inside, trailing colon.
+ */
+function yamlQuoteIfNeeded(str) {
+  var must =
+    str === '' ||
+    /^\s|\s$/.test(str) ||
+    /^(true|false|null|~|yes|no|on|off)$/i.test(str) ||
+    /^-?(0|[1-9][0-9_]*)(\.[0-9_]+)?([eE][+-]?[0-9]+)?$/.test(str) ||
+    /^0x[0-9a-fA-F]+$|^0o[0-7]+$/.test(str) ||
+    /^[-?:,\[\]{}#&*!|>'"%@`]/.test(str) ||
+    str.indexOf(': ') >= 0 ||
+    str.indexOf(' #') >= 0 ||
+    str.charAt(str.length - 1) === ':';
+  if (!must) return str;
+  return '"' + str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n') + '"';
+}
 
 function numberToWords(n) {
   var ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];

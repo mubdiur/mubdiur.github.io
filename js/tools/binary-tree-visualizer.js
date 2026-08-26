@@ -8,14 +8,14 @@
 
 App.registerTool('binary-tree-visualizer', {
   css: '' +
-    '.t-binary-tree-visualizer .t-input{width:5rem;height:1.75rem;padding:0 0.5rem;border:1px solid rgba(30,32,41,0.4);background:rgba(0,0,0,0.3);color:rgba(233,233,236,0.8);font-family:var(--font-mono);font-size:12px;border-radius:6px;outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
-    '.t-binary-tree-visualizer .t-input:focus{border-color:rgba(194,220,212,0.4);box-shadow:0 0 0 1px rgba(194,220,212,0.3);}\n' +
-    '.t-binary-tree-visualizer .t-input::placeholder{color:rgba(170,170,179,0.3);}\n' +
-    '.t-binary-tree-visualizer .t-btn-primary{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.625rem;border-radius:6px;background:rgba(194,220,212,0.1);border:1px solid rgba(194,220,212,0.2);color:rgba(194,220,212,0.8);font-family:var(--font-mono);font-size:10px;cursor:pointer;transition:background-color .2s,border-color .2s;}\n' +
-    '.t-binary-tree-visualizer .t-btn-primary:hover{background:rgba(194,220,212,0.2);}\n' +
-    '.t-binary-tree-visualizer .t-btn-ghost{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:6px;background:rgba(30,32,41,0.3);border:1px solid rgba(30,32,41,0.3);color:rgba(170,170,179,0.6);font-family:var(--font-mono);font-size:10px;cursor:pointer;transition:color .2s,background-color .2s;}\n' +
-    '.t-binary-tree-visualizer .t-btn-ghost:hover{color:rgba(233,233,236,0.8);}\n' +
-    '.t-binary-tree-visualizer .t-nodes{font-family:var(--font-mono);font-size:10px;color:rgba(170,170,179,0.5);margin-left:auto;}\n',
+    '.t-binary-tree-visualizer .t-input{width:5rem;height:1.75rem;padding:0 0.5rem;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);color:rgba(227,227,227,0.8);font-family:var(--font-mono);font-size:12px;border-radius:6px;outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-binary-tree-visualizer .t-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
+    '.t-binary-tree-visualizer .t-input::placeholder{color:rgba(141,148,158,0.3);}\n' +
+    '.t-binary-tree-visualizer .t-btn-primary{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.625rem;border-radius:6px;background:rgba(83,163,249,0.1);border:1px solid rgba(83,163,249,0.2);color:rgba(83,163,249,0.8);font-family:var(--font-mono);font-size:10px;cursor:pointer;transition:background-color .2s,border-color .2s;}\n' +
+    '.t-binary-tree-visualizer .t-btn-primary:hover{background:rgba(83,163,249,0.2);}\n' +
+    '.t-binary-tree-visualizer .t-btn-ghost{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:6px;background:rgba(51,53,56,0.3);border:1px solid rgba(51,53,56,0.3);color:rgba(141,148,158,0.6);font-family:var(--font-mono);font-size:10px;cursor:pointer;transition:color .2s,background-color .2s;}\n' +
+    '.t-binary-tree-visualizer .t-btn-ghost:hover{color:rgba(227,227,227,0.8);}\n' +
+    '.t-binary-tree-visualizer .t-nodes{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.5);margin-left:auto;}\n',
 
   mount: function (root) {
     var SVG_NS = 'http://www.w3.org/2000/svg';
@@ -126,7 +126,7 @@ App.registerTool('binary-tree-visualizer', {
         var e = edges[i];
         svg.appendChild(svgEl('line', {
           x1: e.x1, y1: e.y1, x2: e.x2, y2: e.y2,
-          stroke: 'oklch(0.68 0.18 195 / 0.25)', 'stroke-width': 1.5
+          stroke: 'oklch(0.72 0.13 245 / 0.25)', 'stroke-width': 1.5
         }));
       }
 
@@ -137,8 +137,8 @@ App.registerTool('binary-tree-visualizer', {
           svg.appendChild(svgEl('g',
             svgEl('circle', {
               cx: pos.x, cy: pos.y, r: 16,
-              fill: isHighlighted ? 'oklch(0.70 0.18 145 / 0.3)' : 'oklch(0.12 0.012 260)',
-              stroke: isHighlighted ? 'oklch(0.70 0.18 145 / 0.7)' : 'oklch(0.68 0.18 195 / 0.4)',
+              fill: isHighlighted ? 'oklch(0.72 0.17 145 / 0.3)' : 'oklch(0.17 0.004 260)',
+              stroke: isHighlighted ? 'oklch(0.72 0.17 145 / 0.7)' : 'oklch(0.72 0.13 245 / 0.4)',
               'stroke-width': 1.5,
               class: isHighlighted ? 'animate-pulse-glow' : ''
             }),
@@ -146,7 +146,7 @@ App.registerTool('binary-tree-visualizer', {
               x: pos.x, y: pos.y + 3.5,
               'text-anchor': 'middle',
               class: 'text-[10px] font-mono',
-              fill: isHighlighted ? '#c8d4e4' : 'oklch(0.92 0.004 260)',
+              fill: isHighlighted ? '#73b4fa' : 'oklch(0.91 0.003 260)',
               text: String(node.val)
             })
           ));
@@ -155,7 +155,7 @@ App.registerTool('binary-tree-visualizer', {
         svg.appendChild(svgEl('text', {
           x: 200, y: 100, 'text-anchor': 'middle',
           class: 'text-xs font-mono',
-          fill: 'oklch(0.55 0.015 260)',
+          fill: 'oklch(0.55 0.01 260)',
           text: 'Tree is empty — insert nodes to visualize'
         }));
       }
@@ -176,6 +176,42 @@ App.registerTool('binary-tree-visualizer', {
       renderTree();
       inputVal = '';
       input.value = '';
+    }
+
+    /** Walk root → target one comparison at a time, lighting up the path.
+     *  App.timer registrations die with the route, so a mid-animation
+     *  navigation can't leave orphaned callbacks painting removed DOM. */
+    function searchNode() {
+      var v = parseInt(inputVal, 10);
+      if (isNaN(v) || !tree) return;
+      var path = [];
+      for (var cur = tree; ;) {
+        path.push(cur);
+        if (v === cur.val) break;
+        cur = v < cur.val ? cur.left : cur.right;
+        if (!cur) break;
+      }
+      var i = 0;
+      function advance() {
+        if (i < path.length) {
+          highlight = path[i].val;
+          renderTree();
+          i++;
+          App.timer(advance, 220);
+          return;
+        }
+        var found = path[path.length - 1].val === v;
+        var steps = path.length + ' step' + (path.length === 1 ? '' : 's');
+        nodesSpan.textContent = found
+          ? 'Nodes: ' + history.length + ' · found ' + v + ' via BST descent in ' + steps
+          : 'Nodes: ' + history.length + ' · ' + v + ' is absent (' + steps + ', hit a leaf)';
+        App.timer(function () {
+          highlight = null;
+          renderTree();
+          nodesSpan.textContent = 'Nodes: ' + history.length;
+        }, 1400);
+      }
+      advance();
     }
 
     function reset() {
@@ -202,6 +238,11 @@ App.registerTool('binary-tree-visualizer', {
       type: 'button', class: 't-btn-primary', onclick: addNode
     }, App.icon('plus', '', 12), App.el('span', { text: 'Insert' }));
 
+    var searchBtn = App.el('button', {
+      type: 'button', class: 't-btn-primary', onclick: searchNode,
+      title: 'Animate a BST search from the root'
+    }, App.icon('search', '', 12), App.el('span', { text: 'Search' }));
+
     var resetBtn = App.el('button', {
       type: 'button', class: 't-btn-ghost', onclick: reset
     }, App.icon('rotate-ccw', '', 12), App.el('span', { text: 'Reset' }));
@@ -215,6 +256,7 @@ App.registerTool('binary-tree-visualizer', {
 
     var toolbar = App.el('div', { class: 'flex items-center gap-2 flex-wrap' },
       App.el('div', { class: 'flex items-center gap-1.5' }, input, insertBtn),
+      searchBtn,
       resetBtn,
       clearBtn,
       nodesSpan

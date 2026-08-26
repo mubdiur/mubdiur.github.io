@@ -33,13 +33,13 @@ function contrastRatio(c1, c2) {
 
 App.registerTool('contrast-checker', {
   css: '' +
-    '.t-contrast-checker .color-input{display:block;width:100%;height:2.5rem;border:1px solid rgba(30,32,41,0.4);border-radius:var(--radius);margin-top:0.25rem;cursor:pointer;}\n' +
-    '.t-contrast-checker .hex-input{width:100%;height:1.75rem;margin-top:0.25rem;border:1px solid rgba(30,32,41,0.4);background:rgba(0,0,0,0.3);padding:0 0.5rem;font-size:10px;font-family:var(--font-mono);color:rgba(233,233,236,0.8);border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
-    '.t-contrast-checker .hex-input:focus{border-color:rgba(194,220,212,0.4);box-shadow:0 0 0 1px rgba(194,220,212,0.3);}\n' +
-    '.t-contrast-checker .text-muted-foreground\\/60{color:rgba(170,170,179,0.6);}\n' +
-    '.t-contrast-checker .text-muted-foreground\\/70{color:rgba(170,170,179,0.7);}\n' +
+    '.t-contrast-checker .color-input{display:block;width:100%;height:2.5rem;border:1px solid rgba(51,53,56,0.4);border-radius:var(--radius);margin-top:0.25rem;cursor:pointer;}\n' +
+    '.t-contrast-checker .hex-input{width:100%;height:1.75rem;margin-top:0.25rem;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0 0.5rem;font-size:10px;font-family:var(--font-mono);color:rgba(227,227,227,0.8);border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-contrast-checker .hex-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
+    '.t-contrast-checker .text-muted-foreground\\/60{color:rgba(141,148,158,0.6);}\n' +
+    '.t-contrast-checker .text-muted-foreground\\/70{color:rgba(141,148,158,0.7);}\n' +
     '.t-contrast-checker .bg-black\\/10{background:rgba(0,0,0,0.1);}\n' +
-    '.t-contrast-checker .text-green-glow\\/80{color:rgba(194,220,212,0.8);}\n' +
+    '.t-contrast-checker .text-green-glow\\/80{color:rgba(83,163,249,0.8);}\n' +
     '.t-contrast-checker .text-red-400\\/80{color:rgba(248,113,113,0.8);}\n' +
     '.t-contrast-checker .space-y-1\\.5 > * + *{margin-top:0.375rem;}\n',
 
@@ -84,7 +84,7 @@ App.registerTool('contrast-checker', {
 
       resultsBox.appendChild(App.el('div', { class: 'flex justify-between items-center py-1.5 px-2 rounded bg-black/20' },
         App.el('span', { class: 'text-muted-foreground/70', text: 'Contrast Ratio' }),
-        App.el('span', { class: 'text-lg font-bold', style: { color: parseFloat(result.ratio) >= 4.5 ? '#c0d9c8' : '#ffffff' }, text: result.ratio + ':1' })));
+        App.el('span', { class: 'text-lg font-bold', style: { color: parseFloat(result.ratio) >= 4.5 ? '#26b226' : '#ffffff' }, text: result.ratio + ':1' })));
 
       [
         { label: 'WCAG AA Normal Text (≥ 4.5:1)', pass: result.aaSmall },

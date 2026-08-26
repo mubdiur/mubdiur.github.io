@@ -7,30 +7,56 @@
 
 var T = {};
 
-/* ── converters ── */
-T.csvToJSON = function (s) {
-  var lines = s.split('\n').filter(function (l) { return l.trim(); });
-  if (!lines.length) throw new Error('CSV is empty');
-  var parseLine = function (line) {
-    var result = [], current = '', inQuote = false;
-    for (var i = 0; i < line.length; i++) {
-      if (inQuote) {
-        if (line[i] === '"') { if (line[i + 1] === '"') { current += '"'; i++; } else inQuote = false; }
-        else current += line[i];
-      } else {
-        if (line[i] === '"') inQuote = true;
-        else if (line[i] === ',') { result.push(current.trim()); current = ''; }
-        else current += line[i];
+/**
+ * RFC 4180 CSV parser. Handles quoted fields containing commas,
+ * CRLF/newlines and escaped quotes ("") ; strips a UTF-8 BOM;
+ * never trims cell content (whitespace is data).
+ * Returns array of rows (arrays of strings).
+ */
+T.parseCSV = function (s) {
+  var text = s.charCodeAt(0) === 0xFEFF ? s.slice(1) : s;
+  var rows = [];
+  var row = [];
+  var cur = '';
+  var i = 0, n = text.length;
+  var inQuotes = false;
+  var sawAny = false;
+  while (i < n) {
+    var ch = text.charAt(i);
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text.charAt(i + 1) === '"') { cur += '"'; i += 2; continue; }
+        inQuotes = false; i++; continue;
       }
+      cur += ch; i++; continue;
     }
-    result.push(current.trim());
-    return result;
-  };
-  var headers = parseLine(lines[0]);
-  var rows = lines.slice(1).map(parseLine);
-  var json = rows.map(function (r) {
+    if (ch === '"' && cur === '') { inQuotes = true; sawAny = true; i++; continue; }
+    if (ch === ',') { row.push(cur); cur = ''; sawAny = true; i++; continue; }
+    if (ch === '\r') { i++; continue; } // CRLF and bare CR both end records
+    if (ch === '\n') {
+      row.push(cur); rows.push(row);
+      row = []; cur = ''; sawAny = false; i++; continue;
+    }
+    cur += ch; sawAny = true; i++;
+  }
+  if (cur !== '' || row.length || sawAny) { row.push(cur); rows.push(row); }
+  return rows;
+};
+
+T.csvToJSON = function (s) {
+  var rows = T.parseCSV(s);
+  if (!rows.length) throw new Error('CSV is empty');
+  // Duplicate headers would silently overwrite object keys — suffix them.
+  var seen = {};
+  var headers = rows[0].map(function (h) {
+    var name = h === '' ? '(unnamed)' : h;
+    if (seen[name]) { seen[name]++; return name + '_' + seen[name]; }
+    seen[name] = 1;
+    return name;
+  });
+  var json = rows.slice(1).map(function (r) {
     var obj = {};
-    headers.forEach(function (h, i) { obj[h] = r[i] || ''; });
+    headers.forEach(function (h, idx) { obj[h] = idx < r.length ? r[idx] : ''; });
     return obj;
   });
   return JSON.stringify(json, null, 2);
@@ -150,18 +176,61 @@ T.entropy = function (password) {
   return { bits: bits, strength: strength };
 };
 T.jwtDecode = function (token) {
-  var parts = token.split('.');
+  var parts = token.trim().split('.');
   if (parts.length !== 3) throw new Error('Invalid JWT format (expected 3 parts)');
   try {
-    var h = JSON.parse(decodeURIComponent(escape(atob(parts[0]))));
-    var p = JSON.parse(decodeURIComponent(escape(atob(parts[1]))));
-    return { header: JSON.stringify(h, null, 2), payload: JSON.stringify(p, null, 2), signature: parts[2] };
+    // JWT segments are base64url — '-'/'_' and missing '=' padding
+    // throw in plain atob, which is exactly what broke real tokens.
+    var h = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(base64UrlToStandard(parts[0])), function (c) { return c.charCodeAt(0); })));
+    var p = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(base64UrlToStandard(parts[1])), function (c) { return c.charCodeAt(0); })));
+    return { header: JSON.stringify(h, null, 2), payload: JSON.stringify(p, null, 2), signature: parts[2], rawHeader: h, rawPayload: p };
   } catch (e) { throw new Error('Invalid JWT - could not decode header/payload'); }
 };
 
-/* ── encoding ── */
-T.base64Encode = function (s) { try { return btoa(unescape(encodeURIComponent(s))); } catch (e) { throw new Error('Failed to encode as Base64'); } };
-T.base64Decode = function (s) { try { return decodeURIComponent(escape(atob(s.replace(/\s/g, '')))); } catch (e) { throw new Error('Invalid Base64 input'); } };
+/**
+ * Quote a plain scalar when YAML would otherwise misread it
+ * (bool/null/number lookalikes, outer whitespace, indicators).
+ */
+function yamlQuoteIfNeeded(str) {
+  var must =
+    str === '' ||
+    /^\s|\s$/.test(str) ||
+    /^(true|false|null|~|yes|no|on|off)$/i.test(str) ||
+    /^-?(0|[1-9][0-9_]*)(\.[0-9_]+)?([eE][+-]?[0-9]+)?$/.test(str) ||
+    /^0x[0-9a-fA-F]+$|^0o[0-7]+$/.test(str) ||
+    /^[-?:,\[\]{}#&*!|>'"%@`]/.test(str) ||
+    str.indexOf(': ') >= 0 ||
+    str.indexOf(' #') >= 0 ||
+    str.charAt(str.length - 1) === ':';
+  if (!must) return str;
+  return '"' + str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n') + '"';
+}
+
+/* ── encoding ──
+   Base64 via TextEncoder/TextDecoder — correct for all of Unicode.
+   (The previous unescape(encodeURIComponent(s)) trick relied on two
+   deprecated global functions and throws on lone surrogates.) */
+function utf8Bytes(s) { return new TextEncoder().encode(s); }
+function bytesToBinaryString(bytes) {
+  var out = '';
+  var CHUNK = 0x8000;
+  for (var i = 0; i < bytes.length; i += CHUNK) {
+    out += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+  }
+  return out;
+}
+/** RFC 4648 §5 base64url → standard alphabet, padding restored. */
+function base64UrlToStandard(s) {
+  var t = s.replace(/-/g, '+').replace(/_/g, '/');
+  while (t.length % 4 !== 0) t += '=';
+  return t;
+}
+T.base64Encode = function (s) { try { return btoa(bytesToBinaryString(utf8Bytes(s))); } catch (e) { throw new Error('Failed to encode as Base64'); } };
+T.base64Decode = function (s) {
+  try {
+    return new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, '')), function (c) { return c.charCodeAt(0); }));
+  } catch (e) { throw new Error('Invalid Base64 input'); }
+};
 T.urlEncode = function (s) { return encodeURIComponent(s); };
 T.urlDecode = function (s) { try { return decodeURIComponent(s); } catch (e) { throw new Error('Invalid URL encoding'); } };
 T.htmlEncode = function (s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); };
@@ -259,7 +328,10 @@ T.jsonToYAML = function (s) {
     if (val === null || val === undefined) return 'null';
     if (typeof val === 'boolean') return val ? 'true' : 'false';
     if (typeof val === 'number') return String(val);
-    if (typeof val === 'string') return val.includes('\n') ? '|\n' + indent + '  ' + val : /[:{}\[\],&*\?\|<>=!%@`#]/.test(val) ? '"' + val.replace(/"/g, '\\"') + '"' : val;
+    if (typeof val === 'string') {
+      if (val.indexOf('\n') >= 0) return '|\n' + val.split('\n').map(function (l) { return indent + '  ' + l; }).join('\n');
+      return yamlQuoteIfNeeded(val);
+    }
     if (Array.isArray(val)) {
       if (!val.length) return '[]';
       return val.map(function (v) { return '\n' + indent + '- ' + toYaml(v, indent + '  ').trimStart(); }).join('');
@@ -267,7 +339,7 @@ T.jsonToYAML = function (s) {
     if (typeof val === 'object') {
       var entries = Object.entries(val);
       if (!entries.length) return '{}';
-      return entries.map(function (e) { return '\n' + indent + e[0] + ': ' + toYaml(e[1], indent + '  ').trimStart(); }).join('');
+      return entries.map(function (e) { return '\n' + indent + yamlQuoteIfNeeded(e[0]) + ': ' + toYaml(e[1], indent + '  ').trimStart(); }).join('');
     }
     return String(val);
   };
@@ -357,18 +429,7 @@ T.caseConvert = function (s, style) {
   }
 };
 T.slugify = function (s) { return s.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/^-+|-+$/g, ''); };
-T.textDiff = function (a, b) {
-  var linesA = a.split('\n'), linesB = b.split('\n');
-  var result = [];
-  var maxLen = Math.max(linesA.length, linesB.length);
-  for (var i = 0; i < maxLen; i++) {
-    if (i >= linesA.length) result.push('+ ' + linesB[i]);
-    else if (i >= linesB.length) result.push('- ' + linesA[i]);
-    else if (linesA[i] !== linesB[i]) { result.push('- ' + linesA[i]); result.push('+ ' + linesB[i]); }
-    else result.push('  ' + linesA[i]);
-  }
-  return result.join('\n');
-};
+T.textDiff = function (a, b) { return MyersDiff.linesText(a, b); };
 T.deduplicate = function (s) { return Array.from(new Set(s.split('\n'))).join('\n'); };
 T.sortLines = function (s, desc) {
   var lines = s.split('\n');
@@ -392,23 +453,19 @@ T.palindromeCheck = function (s) {
   var clean = s.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
   return clean === clean.split('').reverse().join('');
 };
-T.uuidV4 = function () {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0;
-    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-  });
-};
+T.uuidV4 = function () { return CryptoRand.uuidV4(); };
 T.generatePassword = function (length, opts) {
   length = length || 24;
   opts = opts || {};
-  var sets = { upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', lower: 'abcdefghijklmnopqrstuvwxyz', digits: '0123456789', symbols: '!@#$%^&*()_+-=[]{}|;:,.<>?~' };
-  var active = Object.entries(opts).filter(function (e) { return e[1]; }).map(function (e) { return sets[e[0]]; });
-  var pool = active.length ? active.join('') : sets.lower + sets.upper + sets.digits;
-  var getRandomByte = function () { var arr = new Uint8Array(1); crypto.getRandomValues(arr); return arr[0]; };
-  var result = '';
-  for (var i = 0; i < active.length; i++) result += active[i][getRandomByte() % active[i].length];
-  for (var j = result.length; j < length; j++) result += pool[getRandomByte() % pool.length];
-  return result.split('').sort(function () { return Math.random() - 0.5; }).join('');
+  var upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', lower = 'abcdefghijklmnopqrstuvwxyz';
+  var digits = '0123456789', symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?~';
+  var active = [];
+  if (opts.upper !== false) active.push(upper);
+  if (opts.lower !== false) active.push(lower);
+  if (opts.digits !== false) active.push(digits);
+  if (opts.symbols === true) active.push(symbols);
+  if (!active.length) active = [lower, upper, digits];
+  return CryptoRand.string(length, active.join(''), active);
 };
 T.loremIpsum = function (paragraphs) {
   paragraphs = paragraphs || 1;

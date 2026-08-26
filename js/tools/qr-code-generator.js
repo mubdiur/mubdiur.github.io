@@ -8,16 +8,16 @@
 
 App.registerTool('qr-code-generator', {
   css: '' +
-    '.t-qr-code-generator .qr-input{width:100%;height:32px;border:1px solid rgba(30,32,41,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 8px;font-family:var(--font-mono);font-size:12px;color:rgba(233,233,236,0.9);outline:none;}\n' +
-    '.t-qr-code-generator .qr-input:focus{border-color:rgba(194,220,212,0.4);box-shadow:0 0 0 1px rgba(194,220,212,0.3);}\n' +
-    '.t-qr-code-generator .qr-input::placeholder{color:rgba(170,170,179,0.3);}\n' +
-    '.t-qr-code-generator .qr-stage{display:flex;align-items:center;justify-content:center;background:#fff;border-radius:8px;padding:16px;border:1px solid rgba(30,32,41,0.3);min-height:220px;}\n' +
+    '.t-qr-code-generator .qr-input{width:100%;height:32px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 8px;font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.9);outline:none;}\n' +
+    '.t-qr-code-generator .qr-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
+    '.t-qr-code-generator .qr-input::placeholder{color:rgba(141,148,158,0.3);}\n' +
+    '.t-qr-code-generator .qr-stage{display:flex;align-items:center;justify-content:center;background:#fff;border-radius:8px;padding:16px;border:1px solid rgba(51,53,56,0.3);min-height:220px;}\n' +
     '.t-qr-code-generator .qr-stage canvas{max-width:100%;height:auto;image-rendering:pixelated;}\n' +
-    '.t-qr-code-generator .qr-meta{display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:10px;color:rgba(170,170,179,0.5);gap:0.5rem;flex-wrap:wrap;}\n' +
-    '.t-qr-code-generator .qr-meta select{height:24px;border:1px solid rgba(30,32,41,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 6px;font-family:var(--font-mono);font-size:10px;color:rgba(233,233,236,0.7);}\n' +
+    '.t-qr-code-generator .qr-meta{display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.5);gap:0.5rem;flex-wrap:wrap;}\n' +
+    '.t-qr-code-generator .qr-meta select{height:24px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 6px;font-family:var(--font-mono);font-size:10px;color:rgba(227,227,227,0.7);}\n' +
     '.t-qr-code-generator .ecl-row{display:flex;gap:0.375rem;flex-wrap:wrap;}\n' +
-    '.t-qr-code-generator .ecl-row button{padding:0.25rem 0.625rem;border-radius:6px;font-family:var(--font-mono);font-size:10px;background:rgba(194,220,212,0.1);border:1px solid rgba(194,220,212,0.2);color:rgba(194,220,212,0.8);cursor:pointer;}\n' +
-    '.t-qr-code-generator .ecl-row button.active{background:rgba(194,220,212,0.2);border-color:rgba(194,220,212,0.4);color:var(--ctp-teal);}\n' +
+    '.t-qr-code-generator .ecl-row button{padding:0.25rem 0.625rem;border-radius:6px;font-family:var(--font-mono);font-size:10px;background:rgba(83,163,249,0.1);border:1px solid rgba(83,163,249,0.2);color:rgba(83,163,249,0.8);cursor:pointer;}\n' +
+    '.t-qr-code-generator .ecl-row button.active{background:rgba(83,163,249,0.2);border-color:rgba(83,163,249,0.4);color:var(--ctp-teal);}\n' +
     '.t-qr-code-generator .qr-error{color:var(--ctp-red);font-family:var(--font-mono);font-size:12px;padding:2rem 0;text-align:center;}',
 
   mount: function (root) {
@@ -90,7 +90,7 @@ App.registerTool('qr-code-generator', {
     });
 
     root.appendChild(App.el('div', { class: 'flex flex-col', style: { gap: '0.75rem' } },
-      App.el('span', { class: 'text-[10px] font-mono', style: { color: 'rgba(170,170,179,0.6)' }, text: 'Text or URL to encode — WebAssembly core, versions 1-40' }),
+      App.el('span', { class: 'text-[10px] font-mono', style: { color: 'rgba(141,148,158,0.6)' }, text: 'Text or URL to encode — WebAssembly core, versions 1-40' }),
       input,
       eclRow,
       stage,

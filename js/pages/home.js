@@ -81,7 +81,7 @@ function ObservabilityDashboard() {
   var ERROR_CODE_HITS = [0, 0, 2, 1, 0, 0, 3, 1, 0, 0, 1, 0, 0, 0, 12, 4, 0, 0, 1, 0, 0, 0, 0, 0];
   var GPU_UTIL = [22, 18, 24, 31, 38, 45, 52, 58, 64, 70, 74, 78, 76, 80, 58, 79, 83, 85, 84, 80, 74, 66, 52, 38];
   var GUARDRAIL = [2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 5, 7, 9, 8, 7, 6, 5, 4, 3, 3, 2, 2];
-  var AXIS = { colors: ['#aaaab3'], fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' };
+  var AXIS = { colors: ['#bec3c9'], fontSize: '10px', fontFamily: 'Spline Sans Mono, monospace' };
   var _ = AXIS;
 
   return App.el('div', { class: 'w-full' },
@@ -97,7 +97,7 @@ function ObservabilityDashboard() {
       App.el('div', { class: 'span-2' }, Charts.Panel('Throughput & p95 latency', '24h window', Charts.Chart({
         type: 'combo', categories: HOURS, height: '240px',
         series: [{ name: 'req/min', type: 'bar', data: THROUGHPUT }, { name: 'p95 (ms)', type: 'line', data: P95 }],
-        colors: ['#e9e9ec', '#e4cdd4'],
+        colors: ['#e3e3e3', '#fb565b'],
         yFmt: function (v) { return Math.round(v / 1000) + 'k'; },
         legend: true
       }))),
@@ -112,22 +112,22 @@ function ObservabilityDashboard() {
           var ctx = canvas.getContext('2d');
           ctx.scale(dpr, dpr);
           var cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 26;
-          ctx.strokeStyle = '#1e2029';
+          ctx.strokeStyle = '#333538';
           ctx.lineWidth = 14;
           ctx.lineCap = 'round';
           ctx.beginPath();
           ctx.arc(cx, cy, r, 0, Math.PI * 2);
           ctx.stroke();
-          ctx.strokeStyle = '#c2dcd4';
+          ctx.strokeStyle = '#53a3f9';
           ctx.beginPath();
           ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * 0.9995);
           ctx.stroke();
-          ctx.fillStyle = '#aaaab3';
-          ctx.font = '10px JetBrains Mono, monospace';
+          ctx.fillStyle = '#bec3c9';
+          ctx.font = '10px Spline Sans Mono, monospace';
           ctx.textAlign = 'center';
           ctx.fillText('UPTIME · 30 DAYS', cx, cy + 30);
-          ctx.fillStyle = '#e9e9ec';
-          ctx.font = '26px JetBrains Mono, monospace';
+          ctx.fillStyle = '#e3e3e3';
+          ctx.font = '26px Spline Sans Mono, monospace';
           ctx.fillText('99.95%', cx, cy + 4);
         });
         return wrap;
@@ -135,9 +135,9 @@ function ObservabilityDashboard() {
       Charts.Panel('Error rate', 'incident at 14:02', Charts.Chart({
         type: 'area', categories: HOURS, height: '200px',
         series: [{ name: 'error rate', type: 'area', data: ERROR_RATE }],
-        colors: ['#e4cdd4'],
+        colors: ['#fb565b'],
         yFmt: function (v) { return v.toFixed(2) + '%'; },
-        annotations: [{ x: 14, color: '#dcd3bd', label: { text: 'INCIDENT · DETECTED 12s', background: '#dcd3bd', color: '#09090d' } }]
+        annotations: [{ x: 14, color: '#e6a700', label: { text: 'INCIDENT · DETECTED 12s', background: '#e6a700', color: '#101011' } }]
       })),
       Charts.Panel('p99 latency by service', 'now', Charts.Chart({
         type: 'hbar', height: '200px',
@@ -145,56 +145,56 @@ function ObservabilityDashboard() {
           { x: 'auth-svc', y: 212 }, { x: 'payments', y: 186 }, { x: 'ingest', y: 143 },
           { x: 'rag-retriever', y: 98 }, { x: 'mcp-gateway', y: 76 }, { x: 'edge-web', y: 61 }
         ] }],
-        colors: ['#e4cdd4', '#e9e9ec', '#e9e9ec', '#e9e9ec', '#e9e9ec', '#e9e9ec'],
+        colors: ['#fb565b', '#e3e3e3', '#e3e3e3', '#e3e3e3', '#e3e3e3', '#e3e3e3'],
         labels: ['auth-svc', 'payments', 'ingest', 'rag-retriever', 'mcp-gateway', 'edge-web'],
         yFmt: function (v) { return v + ' ms'; }
       })),
       Charts.Panel('Crawl4ai & extraction pipeline', 'back-to-back', Charts.Chart({
         type: 'combo', categories: HOURS, height: '200px',
         series: [{ name: 'records extracted', type: 'bar', data: EXTRACT }, { name: 'pages crawled', type: 'line', data: CRAWLED }],
-        colors: ['#aaaab3', '#c2dcd4'],
+        colors: ['#bec3c9', '#53a3f9'],
         yFmt: function (v) { return Math.round(v / 1000) + 'k'; },
         legend: true
       })),
       Charts.Panel('Token cost per request', 'datadog', Charts.Chart({
         type: 'area', categories: HOURS, height: '200px',
         series: [{ name: '$ / 1k req', type: 'area', data: COST }],
-        colors: ['#dcd3bd'],
+        colors: ['#e6a700'],
         yFmt: function (v) { return '$' + v.toFixed(2); },
         annotations: [
-          { x: 12, color: '#dcd3bd', label: { text: 'CACHE SHIPPED', background: '#dcd3bd', color: '#09090d' } },
-          { x: 16, color: '#c2dcd4', label: { text: 'PROMPT COMPRESSED', background: '#c2dcd4', color: '#09090d' } }
+          { x: 12, color: '#e6a700', label: { text: 'CACHE SHIPPED', background: '#e6a700', color: '#101011' } },
+          { x: 16, color: '#53a3f9', label: { text: 'PROMPT COMPRESSED', background: '#53a3f9', color: '#101011' } }
         ]
       })),
       Charts.Panel('Model tuning — eval score by iteration', '10 runs', Charts.Chart({
         type: 'line', height: '200px', markers: true,
         series: [{ name: 'eval score', type: 'line', data: TUNING }],
-        colors: ['#e9e9ec'],
+        colors: ['#e3e3e3'],
         categories: ['ITER 1', 'ITER 2', 'ITER 3', 'ITER 4', 'ITER 5', 'ITER 6', 'ITER 7', 'ITER 8', 'ITER 9', 'ITER 10'],
         yFmt: function (v) { return v.toFixed(2); },
         yMin: 0.5, yMax: 1,
-        annotations: [{ x: 5, color: '#dcd3bd', label: { text: 'RETRIEVAL REWORK', background: '#dcd3bd', color: '#09090d' } }]
+        annotations: [{ x: 5, color: '#e6a700', label: { text: 'RETRIEVAL REWORK', background: '#e6a700', color: '#101011' } }]
       })),
       Charts.Panel('Guardrails — injection blocked & PII redacted', 'per hour', Charts.Chart({
         type: 'bar', categories: HOURS, height: '200px',
         series: [{ name: 'blocked / redacted', type: 'bar', data: GUARDRAIL }],
-        colors: ['#e4cdd4'],
+        colors: ['#fb565b'],
         yFmt: function (v) { return String(Math.round(v)); }
       })),
       Charts.Panel('GPU utilization — vllm serving', 'continuous batching', Charts.Chart({
         type: 'area', categories: HOURS, height: '200px',
         series: [{ name: 'GPU util', type: 'area', data: GPU_UTIL }],
-        colors: ['#e9e9ec'],
+        colors: ['#e3e3e3'],
         yFmt: function (v) { return Math.round(v) + '%'; },
         yMax: 100, yMin: 0,
-        annotations: [{ x: 16, color: '#c2dcd4', label: { text: 'VLLM · BATCHING ON', background: '#c2dcd4', color: '#09090d' } }]
+        annotations: [{ x: 16, color: '#53a3f9', label: { text: 'VLLM · BATCHING ON', background: '#53a3f9', color: '#101011' } }]
       })),
       App.el('div', { class: 'span-2' }, Charts.Panel('Error-code surveillance — kibana view', 'threshold 5/min', Charts.Chart({
         type: 'bar', categories: HOURS, height: '200px',
         series: [{ name: 'error-code hits', type: 'bar', data: ERROR_CODE_HITS }],
-        colors: ['#dcd3bd'],
+        colors: ['#e6a700'],
         yFmt: function (v) { return String(Math.round(v)); },
-        annotations: [{ y: 5, color: '#e4cdd4', label: { text: 'ALERT THRESHOLD', background: '#e4cdd4', color: '#09090d' } }]
+        annotations: [{ y: 5, color: '#fb565b', label: { text: 'ALERT THRESHOLD', background: '#fb565b', color: '#101011' } }]
       })))
     ),
     App.el('figure', { class: 'obs-figure' },
@@ -378,7 +378,7 @@ function renderHome() {
     App.el('footer', { class: 'news-colophon' },
       App.el('div', { class: 'inner' },
         App.el('div', { class: 'title', text: 'The Mubdiur Times' }),
-        App.el('p', { class: 'note', text: 'Colophon · Set in Fraunces, Libre Franklin & JetBrains Mono' }),
+        App.el('p', { class: 'note', text: 'Colophon · Set entirely in self-hosted Spline Sans Mono — no CDN, no tracking' }),
         App.el('p', { class: 'byline', text: 'Typeset by hand in HTML & WebAssembly. No trees were harmed; no page was printed.' }),
         App.el('div', { class: 'links' },
           App.el('a', { href: 'https://github.com/mubdiur', target: '_blank', rel: 'noopener noreferrer', text: 'GitHub' }),

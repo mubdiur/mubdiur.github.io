@@ -33,13 +33,14 @@ function mdToHtml(md) {
     .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Images BEFORE links — the link pattern otherwise consumes the
+    // [alt](url) inside ![alt](url) and images never render.
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function (m, alt, url) {
+      return '<img src="' + safeUrl(url) + '" alt="' + alt + '" class="max-w-full rounded border border-border/30 my-2" />';
+    })
     // Links (URL scheme is validated after escaping)
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (m, label, url) {
       return '<a href="' + safeUrl(url) + '" class="text-cyan-glow/80 underline underline-offset-2 hover:text-cyan-glow">' + label + '</a>';
-    })
-    // Images
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function (m, alt, url) {
-      return '<img src="' + safeUrl(url) + '" alt="' + alt + '" class="max-w-full rounded border border-border/30 my-2" />';
     })
     // Horizontal rule
     .replace(/^---$/gm, '<hr class="border-border/30 my-3" />')
@@ -65,31 +66,31 @@ App.registerTool('markdown-preview', {
     '.t-markdown-preview .md-grid{display:grid;grid-template-columns:1fr;gap:0.75rem;flex:1;min-height:0;}\n' +
     '@media(min-width:1024px){.t-markdown-preview .md-grid{grid-template-columns:1fr 1fr;}}\n' +
     '.t-markdown-preview .md-col{display:flex;flex-direction:column;min-height:0;}\n' +
-    '.t-markdown-preview .md-label{font-size:10px;font-family:var(--font-mono);color:rgba(170,170,179,0.6);margin-bottom:0.25rem;}\n' +
-    '.t-markdown-preview .md-input{flex:1;width:100%;min-height:200px;border:1px solid rgba(30,32,41,0.4);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-size:12px;font-family:var(--font-mono);color:rgba(233,233,236,0.9);resize:none;border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
-    '.t-markdown-preview .md-input::placeholder{color:rgba(170,170,179,0.3);}\n' +
-    '.t-markdown-preview .md-input:focus{border-color:rgba(194,220,212,0.4);box-shadow:0 0 0 1px rgba(194,220,212,0.3);}\n' +
-    '.t-markdown-preview .md-preview{flex:1;min-height:200px;border:1px solid rgba(30,32,41,0.4);background:rgba(0,0,0,0.2);padding:0.5rem 0.75rem;overflow:auto;border-radius:var(--radius);}\n' +
+    '.t-markdown-preview .md-label{font-size:10px;font-family:var(--font-mono);color:rgba(141,148,158,0.6);margin-bottom:0.25rem;}\n' +
+    '.t-markdown-preview .md-input{flex:1;width:100%;min-height:200px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-size:12px;font-family:var(--font-mono);color:rgba(227,227,227,0.9);resize:none;border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-markdown-preview .md-input::placeholder{color:rgba(141,148,158,0.3);}\n' +
+    '.t-markdown-preview .md-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
+    '.t-markdown-preview .md-preview{flex:1;min-height:200px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.2);padding:0.5rem 0.75rem;overflow:auto;border-radius:var(--radius);}\n' +
     /* rendered-markdown typography (mirrors the TSX preview pane's [&_...] variant rules) */
     '.t-markdown-preview .md-preview h1{font-size:18px;font-weight:700;font-family:var(--font-mono);margin:0.75rem 0 0.5rem;}\n' +
     '.t-markdown-preview .md-preview h2{font-size:16px;font-weight:700;font-family:var(--font-mono);margin:0.75rem 0 0.25rem;}\n' +
     '.t-markdown-preview .md-preview h3{font-size:14px;font-weight:700;font-family:var(--font-mono);margin:0.5rem 0 0.25rem;}\n' +
     '.t-markdown-preview .md-preview p{font-size:12px;line-height:1.625;margin:0.375rem 0;}\n' +
-    '.t-markdown-preview .md-preview code{background:rgba(0,0,0,0.3);padding:0 0.25rem;border-radius:var(--radius);color:rgba(194,220,212,0.8);font-size:12px;font-family:var(--font-mono);}\n' +
+    '.t-markdown-preview .md-preview code{background:rgba(0,0,0,0.3);padding:0 0.25rem;border-radius:var(--radius);color:rgba(83,163,249,0.8);font-size:12px;font-family:var(--font-mono);}\n' +
     '.t-markdown-preview .md-preview pre{background:rgba(0,0,0,0.4);padding:0.5rem;border-radius:var(--radius);overflow:auto;font-family:var(--font-mono);}\n' +
     '.t-markdown-preview .md-preview pre code{background:transparent;padding:0;}\n' +
-    '.t-markdown-preview .md-preview a{color:rgba(194,220,212,0.8);text-decoration:underline;text-underline-offset:2px;}\n' +
+    '.t-markdown-preview .md-preview a{color:rgba(83,163,249,0.8);text-decoration:underline;text-underline-offset:2px;}\n' +
     '.t-markdown-preview .md-preview a:hover{color:var(--cyan-glow);}\n' +
-    '.t-markdown-preview .md-preview img{max-width:100%;border-radius:var(--radius);border:1px solid rgba(30,32,41,0.3);margin:0.5rem 0;}\n' +
-    '.t-markdown-preview .md-preview blockquote{border-left:2px solid rgba(194,220,212,0.3);padding-left:0.75rem;color:rgba(170,170,179,0.7);font-style:italic;font-size:12px;margin:0.5rem 0;}\n' +
+    '.t-markdown-preview .md-preview img{max-width:100%;border-radius:var(--radius);border:1px solid rgba(51,53,56,0.3);margin:0.5rem 0;}\n' +
+    '.t-markdown-preview .md-preview blockquote{border-left:2px solid rgba(83,163,249,0.3);padding-left:0.75rem;color:rgba(141,148,158,0.7);font-style:italic;font-size:12px;margin:0.5rem 0;}\n' +
     '.t-markdown-preview .md-preview ul{margin:0.25rem 0;list-style:none;}\n' +
-    '.t-markdown-preview .md-preview li{font-size:12px;margin-left:1rem;color:rgba(233,233,236,0.8);}\n' +
+    '.t-markdown-preview .md-preview li{font-size:12px;margin-left:1rem;color:rgba(227,227,227,0.8);}\n' +
     '.t-markdown-preview .md-preview li.list-disc{list-style-type:disc;}\n' +
     '.t-markdown-preview .md-preview li.list-decimal{list-style-type:decimal;}\n' +
     '.t-markdown-preview .md-preview li:not([class]){list-style-type:disc;}\n' +
-    '.t-markdown-preview .md-preview hr{border:none;border-top:1px solid rgba(30,32,41,0.3);margin:0.75rem 0;}\n' +
-    '.t-markdown-preview .md-preview .text-red-400{color:#ffffff;}\n' +
-    '.t-markdown-preview .md-preview .text-muted-foreground\\/30{color:rgba(170,170,179,0.3);}\n',
+    '.t-markdown-preview .md-preview hr{border:none;border-top:1px solid rgba(51,53,56,0.3);margin:0.75rem 0;}\n' +
+    '.t-markdown-preview .md-preview .text-red-400{color:#fb565b;}\n' +
+    '.t-markdown-preview .md-preview .text-muted-foreground\\/30{color:rgba(141,148,158,0.3);}\n',
 
   mount: function (root) {
     var textarea = App.el('textarea', {

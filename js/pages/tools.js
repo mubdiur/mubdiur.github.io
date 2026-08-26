@@ -89,20 +89,13 @@ function renderTools() {
       });
       return;
     }
-    var filtered = TOOLMANIFEST.filter(function (t) {
-      return (!state.cat || t.category === state.cat) &&
-        (!q || t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q) ||
-          t.tags.some(function (tag) { return tag.toLowerCase().includes(q); }));
-    });
-    if (q) {
-      filtered.sort(function (a, b) {
-        var aScore = (a.name.toLowerCase().includes(q) ? 2 : 0) + (a.tags.some(function (t) { return t.toLowerCase().includes(q); }) ? 1 : 0);
-        var bScore = (b.name.toLowerCase().includes(q) ? 2 : 0) + (b.tags.some(function (t) { return t.toLowerCase().includes(q); }) ? 1 : 0);
-        return bScore - aScore;
-      });
-    }
+    var scored = TOOLMANIFEST
+      .map(function (t) { return { tool: t, s: q ? App.toolMatchScore(t, q) : 0 }; })
+      .filter(function (x) { return (!state.cat || x.tool.category === state.cat) && (!q || x.s > 0); })
+      .sort(function (a, b) { return b.s - a.s; });
+    var filtered = scored.map(function (x) { return x.tool; });
     var catName = state.cat ? (TOOLCATEGORIES.find(function (c) { return c.id === state.cat; }) || {}).name : '';
-    results.appendChild(App.el('div', { class: 'text-xs font-mono', style: { color: 'rgba(170,170,179,0.7)', marginBottom: '0.75rem' },
+    results.appendChild(App.el('div', { class: 'text-xs font-mono', style: { color: 'rgba(141,148,158,0.7)', marginBottom: '0.75rem' },
       text: filtered.length + ' tool' + (filtered.length !== 1 ? 's' : '') + ' found' + (catName ? ' in ' + catName : '') }));
     if (!filtered.length) {
       results.appendChild(App.el('div', { class: 'no-results' },
@@ -129,7 +122,7 @@ function renderTools() {
         App.el('div', { class: 'flex items-center gap-3 mb-3' },
           App.el('span', { class: 'badge-pill teal' }, App.icon('zap', '', 14), App.el('span', { text: 'IN-BROWSER · ' + clientCount })),
           App.el('span', { class: 'badge-pill blue' }, App.icon('server', '', 14), App.el('span', { text: 'WASM CORE · ' + (TOOLMANIFEST.filter(function (t) { return t.wasm; }).length) })),
-          App.el('span', { class: 'text-xs font-mono', style: { color: 'rgba(170,170,179,0.7)' }, text: TOOLMANIFEST.length + ' Tools · all client-side, zero server' })),
+          App.el('span', { class: 'text-xs font-mono', style: { color: 'rgba(141,148,158,0.7)' }, text: TOOLMANIFEST.length + ' Tools · all client-side, zero server' })),
         App.el('h1', { class: 'tools-title' }, App.el('span', { class: 'text-gradient-cyber', text: 'Developer Tools' })),
         App.el('p', { class: 'tools-sub', html: '<span class="dollar">$</span> ' + TOOLMANIFEST.length + ' utilities — every one runs entirely in your browser. Hashing, HMAC, QR encoding and X.509 parsing execute in a WebAssembly core; nothing ever leaves your machine.' }))),
     App.el('div', { class: 'tools-content' },
@@ -138,7 +131,7 @@ function renderTools() {
           App.icon('search', 'search-icon', 16),
           searchInput,
           App.el('kbd', { class: 'search-kbd', text: '/' })),
-        App.el('div', { class: 'flex items-center gap-1.5 text-xs font-mono', style: { color: 'rgba(170,170,179,0.6)' } },
+        App.el('div', { class: 'flex items-center gap-1.5 text-xs font-mono', style: { color: 'rgba(141,148,158,0.6)' } },
           App.icon('command', '', 14),
           App.el('kbd', { text: 'K' }))),
       catTabs,

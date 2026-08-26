@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mubdiur Rahman — AI Platform &amp; Reliability Engineer</title>
   <meta name="description" content="Mubdiur Rahman — AI Platform &amp; Reliability Engineer. I build automation that runs itself: production infrastructure on Docker + Traefik, instrumented dashboards, and safe, maintainable AI.">
-  <meta name="theme-color" content="#0c0d13">
+  <meta name="theme-color" content="#1b1b1d">
   <meta property="og:title" content="Mubdiur Rahman — AI Platform &amp; Reliability Engineer">
   <meta property="og:description" content="Automation that runs itself. Docker + Traefik infrastructure, instrumented dashboards, safe &amp; maintainable AI.">
   <meta property="og:type" content="website">
@@ -19,18 +19,33 @@
   <meta name="twitter:description" content="Automation that runs itself. Docker + Traefik infrastructure, instrumented dashboards, safe &amp; maintainable AI.">
   <meta name="twitter:image" content="https://mubdiur.github.io/og.png">
   <link rel="canonical" href="https://mubdiur.github.io/portfolio.html">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
+    /* Self-hosted Spline Sans Mono (variable 300-700) — no CDN. */
+    @font-face {
+      font-family: 'Spline Sans Mono';
+      font-style: normal;
+      font-weight: 300 700;
+      font-display: swap;
+      src: url('fonts/spline-sans-mono-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Spline Sans Mono';
+      font-style: normal;
+      font-weight: 300 700;
+      font-display: swap;
+      src: url('fonts/spline-sans-mono-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+
     :root {
-      --bg: #0c0d13;
-      --fg: #e9e9ec;
-      --dim: #aaaab3;
-      --faint: #7e7f89;
-      --line: #1e2029;
-      --accent: #c2dcd4;
-      --accent-dim: #c0d9c8;
+      --bg: #1b1b1d;
+      --fg: #e3e3e3;
+      --dim: #bec3c9;
+      --faint: #8d949e;
+      --line: #333538;
+      --accent: #53a3f9;
+      --accent-dim: #73b4fa;
       --max: 46rem;
     }
 
@@ -41,7 +56,7 @@
     body {
       background: var(--bg);
       color: var(--fg);
-      font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-family: "Spline Sans Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
       font-size: 1rem;
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;

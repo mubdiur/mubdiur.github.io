@@ -74,23 +74,33 @@ var ALGOS = {
   }
 };
 
+/* Display metadata: the stat line states facts, not vibes. */
+var META = {
+  'Bubble Sort': 'O(n²) — swaps only neighbors',
+  'Selection Sort': 'O(n²) — minimal swaps',
+  'Insertion Sort': 'O(n²), O(n) on nearly-sorted input',
+  'Quick Sort': 'O(n log n) average, O(n²) worst',
+  'Merge Sort': 'O(n log n) guaranteed, O(n) extra space',
+  'Heap Sort': 'O(n log n) guaranteed, in-place'
+};
+
 App.registerTool('sorting-visualizer', {
   css: '' +
     '.t-sorting-visualizer .ctrls{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;}\n' +
     '.t-sorting-visualizer .range-group{display:flex;align-items:center;gap:0.375rem;}\n' +
-    '.t-sorting-visualizer .range-label{font-family:var(--font-mono);font-size:10px;color:rgba(170,170,179,0.5);}\n' +
+    '.t-sorting-visualizer .range-label{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.5);}\n' +
     '.t-sorting-visualizer .range{width:80px;height:6px;accent-color:var(--cyan-glow);cursor:pointer;}\n' +
-    '.t-sorting-visualizer .range-val{font-family:var(--font-mono);font-size:10px;color:rgba(170,170,179,0.5);width:24px;}\n' +
-    '.t-sorting-visualizer .btn-play{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.625rem;border-radius:6px;font-family:var(--font-mono);font-size:10px;background:rgba(194,220,212,0.1);border:1px solid rgba(194,220,212,0.2);color:rgba(194,220,212,0.8);cursor:pointer;transition:background-color .2s;}\n' +
-    '.t-sorting-visualizer .btn-play:hover{background:rgba(194,220,212,0.2);}\n' +
-    '.t-sorting-visualizer .btn-step{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:6px;font-family:var(--font-mono);font-size:10px;background:rgba(30,32,41,0.3);border:1px solid rgba(30,32,41,0.3);color:rgba(170,170,179,0.6);cursor:pointer;transition:color .2s;}\n' +
-    '.t-sorting-visualizer .btn-step:hover{color:rgba(233,233,236,0.8);}\n' +
+    '.t-sorting-visualizer .range-val{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.5);width:24px;}\n' +
+    '.t-sorting-visualizer .btn-play{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.625rem;border-radius:6px;font-family:var(--font-mono);font-size:10px;background:rgba(83,163,249,0.1);border:1px solid rgba(83,163,249,0.2);color:rgba(83,163,249,0.8);cursor:pointer;transition:background-color .2s;}\n' +
+    '.t-sorting-visualizer .btn-play:hover{background:rgba(83,163,249,0.2);}\n' +
+    '.t-sorting-visualizer .btn-step{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:6px;font-family:var(--font-mono);font-size:10px;background:rgba(51,53,56,0.3);border:1px solid rgba(51,53,56,0.3);color:rgba(141,148,158,0.6);cursor:pointer;transition:color .2s;}\n' +
+    '.t-sorting-visualizer .btn-step:hover{color:rgba(227,227,227,0.8);}\n' +
     '.t-sorting-visualizer .btn-step:disabled{opacity:0.4;cursor:not-allowed;}\n' +
     '.t-sorting-visualizer .btn-group{margin-left:auto;display:flex;align-items:center;gap:0.25rem;}\n' +
-    '.t-sorting-visualizer .bars{display:flex;align-items:flex-end;gap:2px;height:250px;border:1px solid rgba(30,32,41,0.3);background:rgba(0,0,0,0.2);padding:0.5rem;border-radius:6px;overflow:hidden;margin-top:0.75rem;}\n' +
+    '.t-sorting-visualizer .bars{display:flex;align-items:flex-end;gap:2px;height:250px;border:1px solid rgba(51,53,56,0.3);background:rgba(0,0,0,0.2);padding:0.5rem;border-radius:6px;overflow:hidden;margin-top:0.75rem;}\n' +
     '.t-sorting-visualizer .bar{flex:1;border-radius:4px 4px 0 0;min-width:3px;transition:all 30ms;}\n' +
-    '.t-sorting-visualizer .stats{display:flex;gap:0.75rem;margin-top:0.75rem;font-family:var(--font-mono);font-size:10px;color:rgba(170,170,179,0.5);}\n' +
-    '.t-sorting-visualizer .stats .sorted{color:rgba(194,220,212,0.7);}\n',
+    '.t-sorting-visualizer .stats{display:flex;gap:0.75rem;margin-top:0.75rem;font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.5);}\n' +
+    '.t-sorting-visualizer .stats .sorted{color:rgba(83,163,249,0.7);}\n',
 
   mount: function (root) {
     var array = [];
@@ -127,15 +137,16 @@ App.registerTool('sorting-visualizer', {
       barsEl.innerHTML = '';
       array.forEach(function (val, i) {
         var bg = highlighted.indexOf(i) >= 0
-          ? 'oklch(0.68 0.18 195)'
+          ? 'oklch(0.72 0.13 245)'
           : done
-            ? 'oklch(0.70 0.18 145 / 0.7)'
-            : 'oklch(0.68 0.18 195 / 0.3)';
+            ? 'oklch(0.72 0.17 145 / 0.7)'
+            : 'oklch(0.72 0.13 245 / 0.3)';
         barsEl.appendChild(App.el('div', { class: 'bar', style: { height: val + '%', backgroundColor: bg } }));
       });
       statsEl.innerHTML = '';
       statsEl.appendChild(App.el('span', { text: 'Elements: ' + array.length }));
-      statsEl.appendChild(App.el('span', { text: 'Comparisons highlighted' }));
+      statsEl.appendChild(App.el('span', { text: META[algo] || '' }));
+      if (running || gen) statsEl.appendChild(App.el('span', { text: done ? '' : 'highlighted bars are being compared' }));
       if (done) statsEl.appendChild(App.el('span', { class: 'sorted', text: '✓ Sorted' }));
       updateButtons();
     }
@@ -150,13 +161,12 @@ App.registerTool('sorting-visualizer', {
 
     async function play() {
       var id = ++runId;
-      var delay = 200 - speed * 1.8;
       var res;
       while (running && runId === id) {
         res = gen.next();
         if (res.done) break;
         applyStep(res.value);
-        await App.sleep(delay);
+        await App.sleep(200 - speed * 1.8); // live: the slider acts mid-run
       }
       if (runId === id && res && res.done) {
         running = false;

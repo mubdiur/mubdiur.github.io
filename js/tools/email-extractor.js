@@ -33,22 +33,22 @@ function extractEmails(text) {
 App.registerTool('email-extractor', {
   css: '' +
     '.t-email-extractor{display:flex;flex-direction:column;gap:1rem;}\n' +
-    '.t-email-extractor .ee-input{width:100%;border-radius:8px;border:1px solid rgba(30,32,41,0.5);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-family:var(--font-mono);font-size:14px;color:rgba(233,233,236,0.9);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
-    '.t-email-extractor .ee-input::placeholder{color:rgba(170,170,179,0.3);}\n' +
-    '.t-email-extractor .ee-input:focus{border-color:rgba(194,220,212,0.4);box-shadow:0 0 0 1px rgba(194,220,212,0.3);}\n' +
+    '.t-email-extractor .ee-input{width:100%;border-radius:8px;border:1px solid rgba(51,53,56,0.5);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-family:var(--font-mono);font-size:14px;color:rgba(227,227,227,0.9);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-email-extractor .ee-input::placeholder{color:rgba(141,148,158,0.3);}\n' +
+    '.t-email-extractor .ee-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
     '.t-email-extractor .ee-input.min-h-180{min-height:180px;resize:vertical;}\n' +
     '.t-email-extractor .ee-input.min-h-120{min-height:120px;resize:vertical;}\n' +
     '.t-email-extractor .ee-input.w-40{width:10rem;}\n' +
     '.t-email-extractor .ee-input.w-auto{width:auto;}\n' +
-    '.t-email-extractor .ee-btn-secondary{color:rgba(170,170,179,0.8);}\n' +
-    '.t-email-extractor .ee-btn-secondary:hover{color:rgba(233,233,236,0.9);}\n' +
-    '.t-email-extractor .ee-check-label{display:flex;align-items:center;gap:0.375rem;font-family:var(--font-mono);font-size:12px;color:rgba(170,170,179,0.8);cursor:pointer;}\n' +
-    '.t-email-extractor .ee-check-label input{width:16px;height:16px;accent-color:#c2dcd4;cursor:pointer;}\n' +
-    '.t-email-extractor .ee-badge{color:rgba(170,170,179,0.8);}\n' +
-    '.t-email-extractor .ee-fg90{color:rgba(233,233,236,0.9);}\n' +
-    '.t-email-extractor .ee-muted70{color:rgba(170,170,179,0.7);}\n' +
-    '.t-email-extractor .ee-out-pre{max-height:16rem;color:rgba(233,233,236,0.9);}\n' +
-    '.t-email-extractor .ee-diff-pre{max-height:10rem;color:rgba(233,233,236,0.85);}\n' +
+    '.t-email-extractor .ee-btn-secondary{color:rgba(141,148,158,0.8);}\n' +
+    '.t-email-extractor .ee-btn-secondary:hover{color:rgba(227,227,227,0.9);}\n' +
+    '.t-email-extractor .ee-check-label{display:flex;align-items:center;gap:0.375rem;font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.8);cursor:pointer;}\n' +
+    '.t-email-extractor .ee-check-label input{width:16px;height:16px;accent-color:#53a3f9;cursor:pointer;}\n' +
+    '.t-email-extractor .ee-badge{color:rgba(141,148,158,0.8);}\n' +
+    '.t-email-extractor .ee-fg90{color:rgba(227,227,227,0.9);}\n' +
+    '.t-email-extractor .ee-muted70{color:rgba(141,148,158,0.7);}\n' +
+    '.t-email-extractor .ee-out-pre{max-height:16rem;color:rgba(227,227,227,0.9);}\n' +
+    '.t-email-extractor .ee-diff-pre{max-height:10rem;color:rgba(227,227,227,0.85);}\n' +
     '@media(min-width:640px){.t-email-extractor .ee-sm-cols2{grid-template-columns:repeat(2,1fr);}.t-email-extractor .ee-col-span2{grid-column:span 2;}}\n',
 
   mount: function (root) {
@@ -99,9 +99,9 @@ App.registerTool('email-extractor', {
       App.icon('eraser', '', 12), App.el('span', { text: 'Clear' }));
     clearBtn.addEventListener('click', clear);
 
-    var lowercaseChk = App.el('input', { type: 'checkbox', style: 'width:16px;height:16px;accent-color:#c2dcd4;cursor:pointer' });
+    var lowercaseChk = App.el('input', { type: 'checkbox', style: 'width:16px;height:16px;accent-color:#53a3f9;cursor:pointer' });
     lowercaseChk.addEventListener('change', function () { lowercase = lowercaseChk.checked; });
-    var sortChk = App.el('input', { type: 'checkbox', style: 'width:16px;height:16px;accent-color:#c2dcd4;cursor:pointer' });
+    var sortChk = App.el('input', { type: 'checkbox', style: 'width:16px;height:16px;accent-color:#53a3f9;cursor:pointer' });
     sortChk.addEventListener('change', function () { sort = sortChk.checked; });
 
     var controls = App.el('div', { class: 'flex flex-wrap items-center gap-2' },

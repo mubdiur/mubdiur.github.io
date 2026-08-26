@@ -83,7 +83,7 @@ function buildHeader(table, headerTexts, keepIndices) {
   keepIndices.forEach(function (idx) {
     var th = document.createElement('th');
     th.textContent = headerTexts[idx];
-    th.style.cssText = 'background:#1e2029;font-weight:700;border:1px solid #1e2029;padding:4px 8px;text-align:left;color:#e9e9ec';
+    th.style.cssText = 'background:#333538;font-weight:700;border:1px solid #333538;padding:4px 8px;text-align:left;color:#e3e3e3';
     tr.appendChild(th);
   });
   thead.appendChild(tr);
@@ -112,7 +112,7 @@ function buildTable(table, rows, cellSelector, keepIndices) {
         text = text.replace(/More/g, '').trim();
       }
       td.textContent = text;
-      td.style.cssText = 'border:1px solid #1e2029;padding:4px 8px;text-align:left;color:#e9e9ec';
+      td.style.cssText = 'border:1px solid #333538;padding:4px 8px;text-align:left;color:#e3e3e3';
       tr.appendChild(td);
     });
 
@@ -171,15 +171,15 @@ function generateAscii(table) {
 App.registerTool('table2xl', {
   css: '' +
     '.t-table2xl textarea.tool-textarea{min-height:140px;font-size:14px;}\n' +
-    '.t-table2xl .fg-90{color:rgba(233,233,236,0.9);}\n' +
-    '.t-table2xl .muted-80{color:rgba(170,170,179,0.8);}\n' +
-    '.t-table2xl .muted-70{color:rgba(170,170,179,0.7);}\n' +
-    '.t-table2xl .muted-60{color:rgba(170,170,179,0.6);}\n' +
-    '.t-table2xl .hover-fg-90:hover{color:rgba(233,233,236,0.9);}\n' +
-    '.t-table2xl .seg{display:flex;gap:0.25rem;border:1px solid rgba(30,32,41,0.5);border-radius:0.5rem;background:var(--mantle);padding:0.25rem;}\n' +
-    '.t-table2xl .seg button{flex:1;padding:0.375rem 0.75rem;border-radius:0.375rem;font-family:var(--font-mono);font-size:12px;border:1px solid transparent;background:none;color:rgba(170,170,179,0.7);cursor:pointer;transition:color .2s,background-color .2s,border-color .2s;}\n' +
-    '.t-table2xl .seg button:hover{color:rgba(233,233,236,0.9);}\n' +
-    '.t-table2xl .seg button.active{background:rgba(194,220,212,0.2);color:var(--ctp-teal);border-color:rgba(194,220,212,0.3);}\n' +
+    '.t-table2xl .fg-90{color:rgba(227,227,227,0.9);}\n' +
+    '.t-table2xl .muted-80{color:rgba(141,148,158,0.8);}\n' +
+    '.t-table2xl .muted-70{color:rgba(141,148,158,0.7);}\n' +
+    '.t-table2xl .muted-60{color:rgba(141,148,158,0.6);}\n' +
+    '.t-table2xl .hover-fg-90:hover{color:rgba(227,227,227,0.9);}\n' +
+    '.t-table2xl .seg{display:flex;gap:0.25rem;border:1px solid rgba(51,53,56,0.5);border-radius:0.5rem;background:var(--mantle);padding:0.25rem;}\n' +
+    '.t-table2xl .seg button{flex:1;padding:0.375rem 0.75rem;border-radius:0.375rem;font-family:var(--font-mono);font-size:12px;border:1px solid transparent;background:none;color:rgba(141,148,158,0.7);cursor:pointer;transition:color .2s,background-color .2s,border-color .2s;}\n' +
+    '.t-table2xl .seg button:hover{color:rgba(227,227,227,0.9);}\n' +
+    '.t-table2xl .seg button.active{background:rgba(83,163,249,0.2);color:var(--ctp-teal);border-color:rgba(83,163,249,0.3);}\n' +
     '.t-table2xl .preview{max-height:24rem;overflow:auto;}\n',
 
   mount: function (root) {

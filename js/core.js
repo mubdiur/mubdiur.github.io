@@ -71,6 +71,48 @@ var App = {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   },
 
+  /**
+   * Fuzzy matcher score, or -1 when `target` doesn't contain `query`
+   * as a subsequence. Scoring favors exact substrings (earlier and
+   * word-boundary anchored rank higher), then runs of consecutive
+   * characters, then compactness. One scorer powers both the
+   * command palette and the tools-index search so they always agree.
+   */
+  fuzzyScore: function (query, target) {
+    var q = String(query).toLowerCase().trim();
+    var t = String(target).toLowerCase();
+    if (!q) return 0;
+    var exact = t.indexOf(q);
+    if (exact >= 0) {
+      var atBoundary = exact === 0 || /[\s\-_.//]/.test(t.charAt(exact - 1));
+      return 1000 - exact * 2 - (atBoundary ? 0 : 10) - Math.floor(t.length / 16);
+    }
+    var score = 0, ti = 0, streak = 0;
+    for (var qi = 0; qi < q.length; qi++) {
+      var ch = q.charAt(qi);
+      if (ch === ' ') continue;
+      var found = t.indexOf(ch, ti);
+      if (found === -1) return -1;
+      if (found === ti && qi > 0) { streak++; score += 8 + streak * 2; }
+      else { streak = 0; score += 1; }
+      if (found === 0 || /[\s\-_.//]/.test(t.charAt(found - 1))) score += 6;
+      ti = found + 1;
+    }
+    return score;
+  },
+
+  /** Best fuzzy score across a tool's searchable fields. */
+  toolMatchScore: function (tool, query) {
+    if (!String(query).trim()) return 0;
+    var self = this;
+    var best = self.fuzzyScore(query, tool.name) * 4;
+    best = Math.max(best, self.fuzzyScore(query, tool.desc) * 2);
+    for (var i = 0; i < tool.tags.length; i++) {
+      best = Math.max(best, self.fuzzyScore(query, tool.tags[i]) * 3);
+    }
+    return Math.max(best, self.fuzzyScore(query, tool.category));
+  },
+
   /* ── timers / raf that auto-clean on route change ── */
   timers: [],
   rafs: [],
@@ -201,9 +243,9 @@ var App = {
     var result = fn(raw, main);
     if (result && typeof result.then === 'function') {
       var loading = App.el('div', { class: 'loading-block', html:
-        '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(194,220,212,0.7);display:inline-block;margin:0 2px"></span>' +
-        '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(194,220,212,0.7);display:inline-block;margin:0 2px"></span>' +
-        '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(194,220,212,0.7);display:inline-block;margin:0 2px"></span>' });
+        '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(83,163,249,0.7);display:inline-block;margin:0 2px"></span>' +
+        '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(83,163,249,0.7);display:inline-block;margin:0 2px"></span>' +
+        '<span class="loading-dot h-2 w-2 rounded-full bg-ctp-teal/70" style="width:10px;height:10px;border-radius:50%;background:rgba(83,163,249,0.7);display:inline-block;margin:0 2px"></span>' });
       main.appendChild(loading);
       result.then(function (node) {
         if (main.contains(loading)) { main.removeChild(loading); }
@@ -258,7 +300,7 @@ var App = {
     footer.innerHTML = '';
     footer.appendChild(App.el('footer', { class: 'site-footer' },
       App.el('div', { class: 'footer-inner' },
-        App.el('p', { class: 'footer-line', html: '<span class="prompt">$</span> echo &quot;© ' + new Date().getFullYear() + ' <span style="font-weight:600;color:rgba(233,233,236,0.9)">Mubdiur Rahman</span>&quot;' }),
+        App.el('p', { class: 'footer-line', html: '<span class="prompt">$</span> echo &quot;© ' + new Date().getFullYear() + ' <span style="font-weight:600;color:rgba(227,227,227,0.9)">Mubdiur Rahman</span>&quot;' }),
         App.el('div', { class: 'footer-links' },
           App.el('a', { class: 'footer-link', href: 'mailto:mubdiur@gmail.com' }, App.icon('mail', '', 14), App.el('span', { text: 'Contact' })),
           App.el('a', { class: 'footer-link', href: 'https://github.com/mubdiur', target: '_blank', rel: 'noopener noreferrer' }, App.icon('github', '', 14), App.el('span', { text: 'GitHub' })),
@@ -308,18 +350,12 @@ var App = {
       var q = input.value.trim().toLowerCase();
       list.innerHTML = '';
       if (q) {
-        var results = TOOLMANIFEST.filter(function (t) {
-          return t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q) ||
-            t.tags.some(function (tag) { return tag.toLowerCase().includes(q); }) || t.category.toLowerCase().includes(q);
-        });
-        results.sort(function (a, b) {
-          var aName = a.name.toLowerCase().indexOf(q) >= 0 ? 2 : 0;
-          var bName = b.name.toLowerCase().indexOf(q) >= 0 ? 2 : 0;
-          var aTag = a.tags.some(function (t) { return t.toLowerCase().includes(q); }) ? 1 : 0;
-          var bTag = b.tags.some(function (t) { return t.toLowerCase().includes(q); }) ? 1 : 0;
-          return (bName + bTag) - (aName + aTag);
-        });
-        results = results.slice(0, 20);
+        var results = TOOLMANIFEST
+          .map(function (t) { return { tool: t, s: App.toolMatchScore(t, q) }; })
+          .filter(function (x) { return x.s > 0; })
+          .sort(function (a, b) { return b.s - a.s; })
+          .map(function (x) { return x.tool; })
+          .slice(0, 20);
         if (!results.length) {
           list.appendChild(App.el('div', { class: 'palette-empty', text: 'No tools match "' + q + '"' }));
         } else {
@@ -427,7 +463,7 @@ window.addEventListener('error', function (e) {
   var d = document.getElementById('page-main');
   if (!d) return;
   if (!d.querySelector('.boot-error')) {
-    d.appendChild(App.el('div', { class: 'boot-error', style: 'color:#ddcdd3;font-family:var(--font-mono);font-size:12px;padding:1rem;white-space:pre-wrap;word-break:break-all',
+    d.appendChild(App.el('div', { class: 'boot-error', style: 'color:#fb565b;font-family:var(--font-mono);font-size:12px;padding:1rem;white-space:pre-wrap;word-break:break-all',
       text: 'JS error: ' + (e.message || e) + '\n' + ((e.filename || '') + ':' + (e.lineno || '')) }));
   }
 });

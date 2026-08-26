@@ -68,7 +68,11 @@ function TransformToolUI(tool) {
   (tool.params || []).forEach(function (p) {
     var control;
     var update = function (val) { state.opts[p.key] = val; run(); };
-    if (p.type === 'select') {
+    if (p.type === 'textarea') {
+      // Multi-line secondary input (diffs compare documents, not lines)
+      control = App.el('textarea', { class: 'tool-textarea', rows: 5, spellcheck: 'false', 'aria-label': p.label });
+      control.addEventListener('input', function () { update(control.value); });
+    } else if (p.type === 'select') {
       control = App.el('select', { class: 'select-control', 'aria-label': p.label });
       (p.options || []).forEach(function (o) {
         control.appendChild(App.el('option', { value: o.value, text: o.label }));
@@ -80,7 +84,7 @@ function TransformToolUI(tool) {
       control.value = state.opts[p.key] || p.default || '';
       control.addEventListener('input', function () { update(control.value); });
     } else if (p.type === 'boolean' || p.type === 'checkbox') {
-      control = App.el('input', { type: 'checkbox', class: 't-checkbox', 'aria-label': p.label, style: 'width:16px;height:16px;accent-color:#c2dcd4' });
+      control = App.el('input', { type: 'checkbox', class: 't-checkbox', 'aria-label': p.label, style: 'width:16px;height:16px;accent-color:#53a3f9' });
       control.checked = state.opts[p.key] === 'true';
       control.addEventListener('change', function () { update(control.checked ? 'true' : 'false'); });
     } else {
@@ -89,14 +93,14 @@ function TransformToolUI(tool) {
       control.addEventListener('input', function () { update(control.value); });
     }
     paramsRow.appendChild(App.el('div', { class: 'flex items-center gap-1.5' },
-      App.el('label', { class: 'text-xs font-mono', style: { color: 'rgba(170,170,179,0.7)', whiteSpace: 'nowrap' }, text: p.label }),
+      App.el('label', { class: 'text-xs font-mono', style: { color: 'rgba(141,148,158,0.7)', whiteSpace: 'nowrap' }, text: p.label }),
       control));
   });
 
   var root = App.el('div', { class: 'flex flex-col', style: { gap: '1rem' } },
     paramsRow,
     App.el('div', {},
-      App.el('div', { class: 'text-xs font-mono mb-1', style: { color: 'rgba(170,170,179,0.7)' }, text: 'Input' }),
+      App.el('div', { class: 'text-xs font-mono mb-1', style: { color: 'rgba(141,148,158,0.7)' }, text: 'Input' }),
       inputTa),
     outputArea);
 

@@ -9,25 +9,25 @@ App.registerTool('search-visualizer', {
   css: '' +
     '.t-search-visualizer .ctrls{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;}\n' +
     '.t-search-visualizer .target-group{display:flex;align-items:center;gap:0.375rem;}\n' +
-    '.t-search-visualizer .target-label{font-family:var(--font-mono);font-size:10px;color:rgba(170,170,179,0.5);}\n' +
-    '.t-search-visualizer .target-input{width:64px;height:28px;border:1px solid rgba(30,32,41,0.4);background:rgba(0,0,0,0.3);color:rgba(233,233,236,0.8);font-family:var(--font-mono);font-size:12px;border-radius:6px;padding:0 8px;outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
-    '.t-search-visualizer .target-input:focus{border-color:rgba(194,220,212,0.4);box-shadow:0 0 0 1px rgba(194,220,212,0.3);}\n' +
-    '.t-search-visualizer .btn-run{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.625rem;border-radius:6px;font-family:var(--font-mono);font-size:10px;background:rgba(194,220,212,0.1);border:1px solid rgba(194,220,212,0.2);color:rgba(194,220,212,0.8);cursor:pointer;transition:background-color .2s;}\n' +
-    '.t-search-visualizer .btn-run:hover{background:rgba(194,220,212,0.2);}\n' +
+    '.t-search-visualizer .target-label{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.5);}\n' +
+    '.t-search-visualizer .target-input{width:64px;height:28px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);color:rgba(227,227,227,0.8);font-family:var(--font-mono);font-size:12px;border-radius:6px;padding:0 8px;outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-search-visualizer .target-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
+    '.t-search-visualizer .btn-run{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.625rem;border-radius:6px;font-family:var(--font-mono);font-size:10px;background:rgba(83,163,249,0.1);border:1px solid rgba(83,163,249,0.2);color:rgba(83,163,249,0.8);cursor:pointer;transition:background-color .2s;}\n' +
+    '.t-search-visualizer .btn-run:hover{background:rgba(83,163,249,0.2);}\n' +
     '.t-search-visualizer .btn-run:disabled{opacity:0.4;cursor:not-allowed;}\n' +
-    '.t-search-visualizer .btn-ghost{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:6px;font-family:var(--font-mono);font-size:10px;background:rgba(30,32,41,0.3);border:1px solid rgba(30,32,41,0.3);color:rgba(170,170,179,0.6);cursor:pointer;transition:color .2s;}\n' +
-    '.t-search-visualizer .btn-ghost:hover{color:rgba(233,233,236,0.8);}\n' +
+    '.t-search-visualizer .btn-ghost{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:6px;font-family:var(--font-mono);font-size:10px;background:rgba(51,53,56,0.3);border:1px solid rgba(51,53,56,0.3);color:rgba(141,148,158,0.6);cursor:pointer;transition:color .2s;}\n' +
+    '.t-search-visualizer .btn-ghost:hover{color:rgba(227,227,227,0.8);}\n' +
     '.t-search-visualizer .btn-group{margin-left:auto;display:flex;align-items:center;gap:0.25rem;}\n' +
-    '.t-search-visualizer .bars{display:flex;align-items:flex-end;gap:4px;height:200px;border:1px solid rgba(30,32,41,0.3);background:rgba(0,0,0,0.2);padding:0.5rem;border-radius:6px;overflow:hidden;margin-top:0.75rem;}\n' +
+    '.t-search-visualizer .bars{display:flex;align-items:flex-end;gap:4px;height:200px;border:1px solid rgba(51,53,56,0.3);background:rgba(0,0,0,0.2);padding:0.5rem;border-radius:6px;overflow:hidden;margin-top:0.75rem;}\n' +
     '.t-search-visualizer .sbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;border-radius:4px 4px 0 0;position:relative;min-width:20px;transition:all 0.2s;}\n' +
-    '.t-search-visualizer .sbar .val{font-family:var(--font-mono);font-size:10px;color:rgba(233,233,236,0.6);position:absolute;top:-16px;}\n' +
+    '.t-search-visualizer .sbar .val{font-family:var(--font-mono);font-size:10px;color:rgba(227,227,227,0.6);position:absolute;top:-16px;}\n' +
     '.t-search-visualizer .indexes{display:flex;gap:4px;padding-left:20px;margin-top:0.5rem;}\n' +
-    '.t-search-visualizer .indexes span{flex:1;font-family:var(--font-mono);font-size:10px;text-align:center;color:rgba(170,170,179,0.4);min-width:20px;}\n' +
+    '.t-search-visualizer .indexes span{flex:1;font-family:var(--font-mono);font-size:10px;text-align:center;color:rgba(141,148,158,0.4);min-width:20px;}\n' +
     '.t-search-visualizer .status{display:none;font-family:var(--font-mono);font-size:12px;padding:0.25rem 0.5rem;border-radius:6px;margin-top:0.75rem;}\n' +
     '.t-search-visualizer .status.show{display:block;}\n' +
-    '.t-search-visualizer .status.found{background:rgba(5,46,22,0.25);color:rgba(194,220,212,0.7);}\n' +
-    '.t-search-visualizer .status.miss{background:rgba(69,10,10,0.25);color:rgba(248,113,113,0.7);}\n' +
-    '.t-search-visualizer .status.info{color:rgba(170,170,179,0.6);}\n',
+    '.t-search-visualizer .status.found{background:rgba(38,178,38,0.12);color:rgba(38,178,38,0.95);}\n' +
+    '.t-search-visualizer .status.miss{background:rgba(250,56,62,0.12);color:rgba(251,86,91,0.95);}\n' +
+    '.t-search-visualizer .status.info{color:rgba(141,148,158,0.6);}\n',
 
   mount: function (root) {
     var array = [];
@@ -144,15 +144,15 @@ App.registerTool('search-visualizer', {
 
       barsEl.innerHTML = '';
       array.forEach(function (val, i) {
-        var bg = 'oklch(0.68 0.18 195 / 0.25)';
-        if (found === i) bg = 'oklch(0.70 0.18 145 / 0.8)';
+        var bg = 'oklch(0.72 0.13 245 / 0.25)';
+        if (found === i) bg = 'oklch(0.72 0.17 145 / 0.8)';
         else if (highlighted.indexOf(i) >= 0) {
           if (algo === 'binary') {
-            if (i === highlighted[2]) bg = 'oklch(0.90 0.30 60 / 0.8)'; // mid
-            else if (i >= highlighted[0] && i <= highlighted[1]) bg = 'oklch(0.68 0.18 195 / 0.5)';
-            else bg = 'oklch(0.68 0.18 195 / 0.1)';
+            if (i === highlighted[2]) bg = 'oklch(0.78 0.15 75 / 0.9)'; // mid
+            else if (i >= highlighted[0] && i <= highlighted[1]) bg = 'oklch(0.72 0.13 245 / 0.5)';
+            else bg = 'oklch(0.72 0.13 245 / 0.1)';
           } else {
-            bg = 'oklch(0.68 0.18 195 / 0.7)';
+            bg = 'oklch(0.72 0.13 245 / 0.7)';
           }
         }
         barsEl.appendChild(App.el('div', { class: 'sbar', style: { height: val + '%', backgroundColor: bg } },

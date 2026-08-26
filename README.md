@@ -8,8 +8,11 @@ runs in your browser, with a **WebAssembly core** doing the heavy lifting.
 ## What's inside
 
 - `index.html` — single-page app shell (hash routing: `#/`, `#/ide`, `#/tools`, `#/tools/<slug>`)
-- `css/app.css` — the whole design system (tinted monochrome + newspaper theme)
-- `js/` — vanilla JavaScript: app core, router, tool manifest, pages, and tools
+- `css/app.css` — the whole design system (graphite & signal-blue dark theme tuned to the [DeepSeek docs](https://api-docs.deepseek.com/) palette, plus the newspaper front page) 
+- `fonts/` — **Spline Sans Mono** (variable 300–700) self-hosted as two woff2 files; it is the site's single typeface. No font CDN anywhere.
+- `js/` — vanilla JavaScript: app core (router, palette with fuzzy matching), tool manifest, pages, tools
+  - `js/lib/random.js` — unbiased CSPRNG helpers (rejection sampling; every generator uses it)
+  - `js/lib/diff.js` — Myers O((N+M)D) shortest-edit line diff powering Text Diff
 - `js/ide/` — the in-browser IDE (`#/ide`): single-file editor + Run for 8 languages
 - `wasm/core.wasm` — WebAssembly core compiled from `wasm/core.rs` (Rust, `no_std`):
   - **Crypto**: MD5, SHA-1, SHA-256, SHA-384, SHA-512, HMAC, CRC32
@@ -73,6 +76,8 @@ esbuild build/editor-entry.js --bundle --format=esm --minify \
   --outfile=js/ide/vendor/editor.js --target=es2020
 ```
 
+`build/smoke-libs.js` and `build/smoke-tools.js` are Node harnesses for the
+core libraries and every rewritten tool handler (`node build/smoke-tools.js`);
 `test-ide.js` is a Node harness that runs every runner worker end-to-end
 (`node test-ide.js js`, `node test-ide.js go`, …).
 
