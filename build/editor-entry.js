@@ -220,7 +220,6 @@ const syntax = HighlightStyle.define([
   // this / super / self — muted grey italic
   { tag: tags.special(tags.variableName), color: '#c1c0c0', fontStyle: 'italic' },
   // params — tangerine orange italic (variable.parameter)
-  { tag: [tags.param, tags.definition(tags.param)], color: '#fc9867', fontStyle: 'italic' },
   // numbers, booleans, atoms — electric purple
   { tag: [tags.number, tags.integer, tags.float, tags.bool, tags.atom, tags.unit, tags.color, tags.constant(tags.variableName), tags.standard(tags.atom)], color: '#ab9df2' },
   // strings — sunshine yellow
@@ -230,8 +229,9 @@ const syntax = HighlightStyle.define([
   // comments — graphite italic
   { tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment, tags.meta, tags.documentMeta], color: '#727072', fontStyle: 'italic' },
   // operators — hot pink (keyword.operator #ff6188) — makes a+b pop
-  { tag: [tags.operator, tags.derefOperator, tags.arithmeticOperator, tags.logicOperator, tags.bitwiseOperator, tags.compareOperator, tags.updateOperator, tags.definitionOperator, tags.typeOperator, tags.controlOperator], color: '#ff6188' },
-  // punctuation & brackets — soft grey, brackets get extra pop via matchingBracket
+  { tag: [tags.operator, tags.arithmeticOperator, tags.logicOperator, tags.bitwiseOperator, tags.compareOperator, tags.updateOperator, tags.definitionOperator, tags.typeOperator, tags.controlOperator], color: '#ff6188' },
+  { tag: [tags.punctuation, tags.bracket, tags.brace, tags.paren, tags.squareBracket, tags.angleBracket, tags.separator, tags.derefOperator], color: '#939293' },
+  // headings — soft grey, brackets get extra pop via matchingBracket
   { tag: [tags.punctuation, tags.bracket, tags.brace, tags.paren, tags.squareBracket, tags.angleBracket, tags.separator], color: '#939293' },
   // headings & strong/emphasis
   { tag: tags.heading, color: '#ffd866', fontWeight: '700' },
