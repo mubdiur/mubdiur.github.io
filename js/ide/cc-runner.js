@@ -2,8 +2,8 @@
    C / C++ runner — Clang + wasm-ld compiled to WebAssembly
    (browsercc, MIT), compiling user source to wasm32-wasi, then
    executed against the pure-JS WASI shim (browser_wasi_shim).
-   First run downloads ~40 MB from jsDelivr (immutable, cached);
-   afterwards it starts in seconds. Persistent worker.
+   Fully vendored same-origin (clang + lld + sysroot, all gzipped
+   and cached via the Cache API); no CDN. Persistent worker.
    Protocol: { code, lang } in → { type:'status'|'out'|'err'|'exit' } out.
    ═══════════════════════════════════════════════════════════ */
 'use strict';

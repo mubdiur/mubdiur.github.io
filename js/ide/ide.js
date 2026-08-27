@@ -100,7 +100,7 @@ function getWorker(lang) {
   var entry = workers[lang];
   if (entry && entry.alive) return entry.w;
   if (entry && entry.w) { try { entry.w.terminate(); } catch (e) {} }
-  var w = new Worker(RUNNER_DIR + def.runner + '?v=6', { type: def.module ? 'module' : 'classic' });
+  var w = new Worker(RUNNER_DIR + def.runner + '?v=7', { type: def.module ? 'module' : 'classic' });
   w.__lang = lang;
   w.addEventListener('message', function (e) { onWorkerMessage(lang, w, e.data || {}); });
   w.addEventListener('error', function (e) {
@@ -132,8 +132,26 @@ function syncRunButton() {
   var lang = state.lang;
   var vs = vendorState[lang];
   if (lang === 'js') { runBtn.disabled = false; runBtn.title = 'Run (Ctrl+Enter)'; return; }
-  if (!vs || vs === 'idle') { vendorState[lang] = 'loading'; ensureWorkerPreload(lang); runBtn.disabled = true; runBtn.title = 'Loading ' + langDef(lang).name + '…'; return; }
-  if (vs === 'loading') { runBtn.disabled = true; runBtn.title = 'Loading ' + langDef(lang).name + '…'; return; }
+  // Non-JS: keep Run enabled — the worker will lazy-load on first Run and
+  // stream progress via 'status' messages.  Preloading is best-effort: if
+  // the worker was already created, show its progress, otherwise mark idle.
+  if (!vs || vs === 'idle') {
+    // Kick off background preload without blocking the UI.  Workers that
+    // understand {type:'init'} will start fetching; others will simply
+    // be created and will load on the first real Run — either way the
+    // user can press Run immediately and see live status.
+    if (!workers[lang]) { try { ensureWorkerPreload(lang); } catch (e) {} }
+    runBtn.disabled = false;
+    runBtn.title = 'Run (Ctrl+Enter)';
+    return;
+  }
+  if (vs === 'loading') {
+    // Show loading in the status bar but keep the button usable — the
+    // run will naturally wait for the engine to be ready.
+    runBtn.disabled = false;
+    runBtn.title = langDef(lang).name + ' is still loading — press Run to queue';
+    return;
+  }
   runBtn.disabled = false; runBtn.title = 'Run (Ctrl+Enter)';
 }
 
@@ -253,8 +271,6 @@ function runCode() {
   if (runningLang) return;
   if (!editor) return;
   var lang = state.lang;
-  var vs = vendorState[lang];
-  if (lang !== 'js' && vs === 'loading') { setStatus('Loading ' + langDef(lang).name + ' — please wait…'); return; }
   var code = editor.getValue();
   if (typeof code !== 'string') code = String(code);
   if (code.length > 512 * 1024) { setStatus('Code too large (max 512 KB)'); return; }
@@ -427,7 +443,7 @@ function renderIde() {
   var panel = App.el('div', { class: 'ide-panel' }, outHead, outputEl, stdinRow);
   root.appendChild(App.el('div', { class: 'ide-main' }, editorWrap, panel));
 
-  import('/js/ide/vendor/editor.js?v=12').then(function (mod) {
+  import('/js/ide/vendor/editor.js?v=13').then(function (mod) {
     editor = mod.createIdeEditor(editorWrap, {
       value: state.code[state.lang] || langDef(state.lang).sample,
       language: state.lang,

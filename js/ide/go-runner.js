@@ -53,7 +53,8 @@ function ensureCompilerWorker() {
       var blob = new Blob([src], { type: 'application/javascript' });
       var url = URL.createObjectURL(blob);
       var w = new Worker(url);
-      w.addEventListener('message', function () {});
+      if (w.addEventListener) w.addEventListener('message', function () {});
+      else w.onmessage = function () {};
       post('status', 'Go compiler ready');
       return w;
     })();
