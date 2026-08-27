@@ -8,7 +8,8 @@
    Design choices
    • Decompressed blobs are stored under a distinct synthetic key
      (`#decompressed`) with a `DecompressionStream` feature probe
-     and a manual fallback so Safari < 16 and Node don't break.
+     and a pure-JS fflate fallback (vendored at vendor/fflate) so
+     Safari < 16, Firefox workers without DS, and Node don't break.
    • `fragment` keys (`#…`) are *not* used as the cache key for the
      decompressed copy — some implementations strip fragments.  We
      namespace by prepending `decompressed:` to the URL string.
@@ -43,6 +44,20 @@ export async function cachedBytes(url) {
   return new Uint8Array(await res.arrayBuffer());
 }
 
+let _fflatePromise = null;
+async function fflateGunzip(data) {
+  if (!_fflatePromise) {
+    _fflatePromise = import('./vendor/fflate/fflate.js');
+  }
+  const mod = await _fflatePromise;
+  const gun = mod.gunzipSync || mod.gunzip || mod.decompressSync || mod.decompress;
+  if (!gun) throw new Error('fflate: gunzip not found');
+  const out = gun(data);
+  if (out instanceof Uint8Array) return out;
+  if (out && out.length !== undefined) return new Uint8Array(out);
+  throw new Error('fflate produced no output');
+}
+
 export async function gunzip(data) {
   if (typeof DecompressionStream !== 'undefined') {
     try {
@@ -51,7 +66,10 @@ export async function gunzip(data) {
       return new Uint8Array(await new Response(stream).arrayBuffer());
     } catch (e) {}
   }
-  throw new Error('DecompressionStream not available — install js/ide/vendor fallback');
+  try {
+    return await fflateGunzip(data);
+  } catch (e2) {}
+  throw new Error('DecompressionStream not available — fflate fallback failed');
 }
 
 export async function cachedGunzip(url) {
@@ -65,7 +83,6 @@ export async function cachedGunzip(url) {
     try { await cache.put(decKey, new Response(out)); } catch (e) {}
     return out;
   } catch (e) {
-    // Either DecompressionStream missing or cache failed — manual pako fallback
     try {
       const raw2 = await cachedBytes(url);
       return await gunzip(raw2);

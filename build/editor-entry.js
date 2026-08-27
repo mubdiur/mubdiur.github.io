@@ -111,7 +111,7 @@ const baseTheme = EditorView.theme({
   },
   '.cm-scroller': {
     fontFamily: "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
-    lineHeight: '1.78',
+    lineHeight: '1.25',
     letterSpacing: '-0.01em',
     overflow: 'auto',
     scrollbarWidth: 'thin',

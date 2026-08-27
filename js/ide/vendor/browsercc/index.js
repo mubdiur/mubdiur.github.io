@@ -101,7 +101,18 @@ export async function compile({ source, fileName, flags, extraFiles, }) {
             stderr += data + "\n";
         },
     });
-    async function __gunzip(data){const ds=new DecompressionStream("gzip");const stream=new Blob([data]).stream().pipeThrough(ds);return new Uint8Array(await new Response(stream).arrayBuffer())}const sysroot = await __gunzip(await (await fetch(new URL("sysroot.tar.gz", import.meta.url).href)).arrayBuffer());
+    async function __gunzip(data){
+  if(typeof DecompressionStream!=='undefined'){
+    try{const ds=new DecompressionStream("gzip");const stream=new Blob([data]).stream().pipeThrough(ds);return new Uint8Array(await new Response(stream).arrayBuffer());}catch(e){}
+  }
+  try{
+    let mod=null;
+    try{mod=await import('../fflate/fflate.js');}catch(e2){try{mod=await import('../../vendor/fflate/fflate.js');}catch(e3){}}
+    if(mod){const g=mod.gunzipSync||mod.gunzip; if(g){const r=g(data); return r instanceof Uint8Array? r:new Uint8Array(r);}}
+  }catch(e){}
+  throw new Error('DecompressionStream not available — fflate fallback failed');
+}
+const sysroot = await __gunzip(await (await fetch(new URL("sysroot.tar.gz", import.meta.url).href)).arrayBuffer());
     const invocation = await getCompilerInvocation(fileName, source, flags);
     const clang = await clangPromise;
     clang.FS.writeFile(fileName, source);

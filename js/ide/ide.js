@@ -57,6 +57,8 @@ var stdinWaiting = false;
 var stdinSupported = true;
 var runningLang = null;
 var runStart = 0;
+var vendorState = {};
+var vendorProgress = {};
 
 function loadState() {
   try {
@@ -98,19 +100,51 @@ function getWorker(lang) {
   var entry = workers[lang];
   if (entry && entry.alive) return entry.w;
   if (entry && entry.w) { try { entry.w.terminate(); } catch (e) {} }
-  var w = new Worker(RUNNER_DIR + def.runner + '?v=5', { type: def.module ? 'module' : 'classic' });
+  var w = new Worker(RUNNER_DIR + def.runner + '?v=6', { type: def.module ? 'module' : 'classic' });
   w.__lang = lang;
   w.addEventListener('message', function (e) { onWorkerMessage(lang, w, e.data || {}); });
   w.addEventListener('error', function (e) {
     if (workers[lang] && workers[lang].w === w && workers[lang].alive) {
       appendOutput('Runner error: ' + (e.message || 'unknown'), true);
       markDead(lang);
+      vendorState[lang] = 'error'; syncRunButton();
       finishRun(null, true);
       setStatus('worker error — press Run again');
     }
   });
   workers[lang] = { w: w, alive: true };
+  vendorState[lang] = 'loading';
+  vendorProgress[lang] = 'Loading ' + def.name + '…';
+  syncRunButton();
+  if (statusEl && state.lang === lang && !runningLang) setStatus(vendorProgress[lang]);
   return w;
+}
+
+function ensureWorkerPreload(lang) {
+  var entry = workers[lang];
+  if (entry && entry.alive) return entry.w;
+  try { return getWorker(lang); } catch (e) { return null; }
+}
+
+function syncRunButton() {
+  if (!runBtn) return;
+  if (runningLang) return;
+  var lang = state.lang;
+  var vs = vendorState[lang];
+  if (lang === 'js') { runBtn.disabled = false; runBtn.title = 'Run (Ctrl+Enter)'; return; }
+  if (!vs || vs === 'idle') { vendorState[lang] = 'loading'; ensureWorkerPreload(lang); runBtn.disabled = true; runBtn.title = 'Loading ' + langDef(lang).name + '…'; return; }
+  if (vs === 'loading') { runBtn.disabled = true; runBtn.title = 'Loading ' + langDef(lang).name + '…'; return; }
+  runBtn.disabled = false; runBtn.title = 'Run (Ctrl+Enter)';
+}
+
+function markVendorReady(lang) {
+  vendorState[lang] = 'ready';
+  if (state.lang === lang) syncRunButton();
+}
+
+function markVendorLoading(lang, text) {
+  vendorProgress[lang] = text || vendorProgress[lang];
+  if (state.lang === lang && !runningLang) setStatus(vendorProgress[lang]);
 }
 
 function markDead(lang) {
@@ -120,13 +154,18 @@ function markDead(lang) {
 function onWorkerMessage(lang, w, m) {
   if (workers[lang] && workers[lang].w !== w) return;
   if (runningLang) kickWatchdog(lang);
-  if (m.type === 'status') setStatus(m.text);
-  else if (m.type === 'out') appendOutput(String(m.text || ''), false);
+  if (m.type === 'status') {
+    markVendorLoading(lang, m.text);
+    if (!runningLang && state.lang !== lang) return;
+    setStatus(m.text);
+    if (/ready/i.test(String(m.text||''))) markVendorReady(lang);
+  } else if (m.type === 'out') appendOutput(String(m.text || ''), false);
   else if (m.type === 'err') appendOutput(String(m.text || ''), true);
   else if (m.type === 'diag') { if (editor && editor.setDiagnostics) editor.setDiagnostics(m.diags || []); }
   else if (m.type === 'stdin') onStdinRequest();
+  else if (m.type === 'ready') markVendorReady(lang);
   else if (m.type === 'exit') {
-    if (m.terminated) markDead(lang);
+    if (m.terminated) markDead(lang); else markVendorReady(lang);
     finishRun(m.code === null || m.code === undefined ? null : m.code, !!m.terminated);
   }
 }
@@ -183,10 +222,10 @@ function finishRun(code, terminated) {
   if (stdinRow) stdinRow.classList.remove('waiting');
   stdinWaiting = false;
   if (runBtn) {
-    runBtn.disabled = false;
     runBtn.innerHTML = '<span class="ide-run-glyph">▶</span> Run';
   }
   setTabsEnabled(true);
+  syncRunButton();
   var secs = ((Date.now() - runStart) / 1000).toFixed(1);
   if (terminated) setStatus('terminated after ' + secs + 's');
   else if (code) setStatus('exited with code ' + code + ' in ' + secs + 's');
@@ -214,6 +253,8 @@ function runCode() {
   if (runningLang) return;
   if (!editor) return;
   var lang = state.lang;
+  var vs = vendorState[lang];
+  if (lang !== 'js' && vs === 'loading') { setStatus('Loading ' + langDef(lang).name + ' — please wait…'); return; }
   var code = editor.getValue();
   if (typeof code !== 'string') code = String(code);
   if (code.length > 512 * 1024) { setStatus('Code too large (max 512 KB)'); return; }
@@ -344,7 +385,11 @@ function renderIde() {
         if (editor.clearDiagnostics) editor.clearDiagnostics();
         clearOutput();
         syncStdin();
-        setStatus(l.name + ' — press Run (Ctrl+Enter)');
+        if (l.id !== 'js' && (!vendorState[l.id] || vendorState[l.id] === 'idle')) { vendorState[l.id] = 'loading'; ensureWorkerPreload(l.id); }
+        syncRunButton();
+        var vs2 = vendorState[l.id];
+        if (vs2 === 'loading') setStatus('Loading ' + l.name + '…');
+        else setStatus(l.name + ' — press Run (Ctrl+Enter)');
         editor.focus();
       }
     }, dot, l.name);
@@ -382,7 +427,7 @@ function renderIde() {
   var panel = App.el('div', { class: 'ide-panel' }, outHead, outputEl, stdinRow);
   root.appendChild(App.el('div', { class: 'ide-main' }, editorWrap, panel));
 
-  import('/js/ide/vendor/editor.js?v=11').then(function (mod) {
+  import('/js/ide/vendor/editor.js?v=12').then(function (mod) {
     editor = mod.createIdeEditor(editorWrap, {
       value: state.code[state.lang] || langDef(state.lang).sample,
       language: state.lang,
@@ -393,7 +438,12 @@ function renderIde() {
       saveState();
       if (editor.clearDiagnostics) editor.clearDiagnostics();
     });
-    setStatus(langDef(state.lang).name + ' — press Run (Ctrl+Enter)');
+    vendorState['js'] = 'ready';
+    if (state.lang !== 'js' && (!vendorState[state.lang] || vendorState[state.lang] === 'idle')) { vendorState[state.lang] = 'loading'; ensureWorkerPreload(state.lang); }
+    syncRunButton();
+    var vs0 = vendorState[state.lang];
+    if (vs0 === 'loading') setStatus('Loading ' + langDef(state.lang).name + '…');
+    else setStatus(langDef(state.lang).name + ' — press Run (Ctrl+Enter)');
     editor.focus();
   }).catch(function (err) {
     editorWrap.appendChild(App.el('div', { class: 'not-found', html: '<span class="nf-sub">Editor failed to load: ' + App.esc(err.message || err) + '</span>' }));
