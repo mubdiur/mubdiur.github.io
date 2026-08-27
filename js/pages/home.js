@@ -5,22 +5,22 @@
 'use strict';
 
 var technologies = [
-  { kicker: 'Automation Desk', title: 'Browser Automation at Scale', body: 'Browser automation at scale — Playwright, Cypress, Appium. Shared browser instances with strict lifecycle management, deterministic resource use, and structured extraction from live UIs.', tags: ['Playwright', 'Cypress', 'Appium'] },
-  { kicker: 'Observability Desk', title: 'Monitoring & Observability', body: 'Surveillance of Dynatrace problem boards, Kibana error views, Datadog cost panels, and transaction portals. eBPF probes and OTel spans under the hood — near-realtime, back-to-back checks with append-only results.', tags: ['Dynatrace', 'Kibana', 'Datadog', 'eBPF'] },
-  { kicker: 'Infrastructure Desk', title: 'Reliability & Infrastructure', body: 'Docker and Traefik hosts with Let\u2019s Encrypt TLS and zero-downtime rebuilds. OpenStack and bare Linux underneath, server backends guarded by rate limits and SSRF checks. Hardened to least privilege.', tags: ['Docker', 'OpenStack', 'Linux'] },
-  { kicker: 'Safety Desk', title: 'Safe AI & Guardrails', body: 'Guardrails in the loop: prompt-injection defense, PII redaction, output validation, allow-listed tools. Agents get capabilities, not keys — and every action is audited.', tags: ['Guardrails', 'Injection Defense', 'PII'] },
-  { kicker: 'Architecture Desk', title: 'Maintainable AI Architecture', body: 'Agents as state machines with explicit failure paths — not prompt spaghetti. Versioned prompts, typed tool contracts, and architecture that survives the engineer who built it.', tags: ['State Machines', 'Versioned', 'No Spaghetti'] },
-  { kicker: 'AI Desk', title: 'AI-Enabled Engineering', body: 'MCP tooling in production stacks, agent-driven automation, and eval-driven iteration. AI is a force multiplier and an on-call copilot — never a demo.', tags: ['MCP', 'Agents', 'AIOps'] },
-  { kicker: 'Foundry Desk', title: 'Backend & Tooling', body: 'Node.js and TypeScript services with zero unnecessary dependencies. Git and CI/CD workflows, terminal-first operations, rapid prototyping with production discipline.', tags: ['Node.js', 'TypeScript', 'Git'] },
-  { kicker: 'Pipeline Desk', title: 'Web Crawling & Data Extraction', body: 'crawl4ai-powered intake and Playwright-driven extraction — map a portal once, pull structured records back-to-back. Built for hostile UIs and shifting layouts.', tags: ['crawl4ai', 'Playwright', 'Extraction'] },
-  { kicker: 'Governance Desk', title: 'Evaluation & Governance', body: 'Every prompt, model, and tool change ships behind a regression suite. Shadow traffic, canary deploys, automated rollback, drift detection — the AI equivalent of code review.', tags: ['Eval Gates', 'Shadow Traffic', 'Rollback'] }
+  { kicker: 'Automation Desk', title: 'Browser Automation, at Scale', body: 'Playwright, Cypress and Appium — orchestrated as shared browser fleets. Deterministic lifecycles, bounded resources, and structured extraction from live, hostile UIs.', tags: ['Playwright', 'Cypress', 'Appium'] },
+  { kicker: 'Observability Desk', title: 'Observability — Know Before You’re Paged', body: 'Dynatrace problems, Kibana error views, Datadog cost panels and transaction portals — underwritten by eBPF probes and OTel spans. Near-realtime, back-to-back checks with append-only evidence.', tags: ['Dynatrace', 'Kibana', 'Datadog', 'eBPF'] },
+  { kicker: 'Infrastructure Desk', title: 'Reliability & Infrastructure', body: 'Docker and Traefik with Let’s Encrypt TLS and zero-downtime rebuilds. OpenStack and bare Linux beneath; backends guarded by rate limits and SSRF checks — least privilege, always.', tags: ['Docker', 'OpenStack', 'Linux'] },
+  { kicker: 'Safety Desk', title: 'Safe AI — Guardrails in the Loop', body: 'Prompt-injection defense, PII redaction, output validation and allow-listed tools. Agents receive capabilities, not keys — every action audited, every boundary enforced.', tags: ['Guardrails', 'Injection Defense', 'PII'] },
+  { kicker: 'Architecture Desk', title: 'Maintainable AI Architecture', body: 'Agents modelled as state machines with explicit failure paths — not prompt spaghetti. Versioned prompts, typed tool contracts, and systems that outlive their author.', tags: ['State Machines', 'Versioned', 'No Spaghetti'] },
+  { kicker: 'AI Desk', title: 'AI-Enabled Engineering', body: 'MCP tooling in production, agent-driven automation and eval-led iteration. AI as a force multiplier and on-call copilot — never a demo, always a lever.', tags: ['MCP', 'Agents', 'AIOps'] },
+  { kicker: 'Foundry Desk', title: 'Backend & Tooling', body: 'Node.js and TypeScript with zero vanity dependencies. Git-native workflows, terminal-first operations, and rapid prototyping held to production standards.', tags: ['Node.js', 'TypeScript', 'Git'] },
+  { kicker: 'Pipeline Desk', title: 'Crawl & Extract — Hostile-UI Ready', body: 'crawl4ai intake and Playwright extraction — map a portal once, pull structured records on repeat. Built for shifting layouts and uncooperative markup.', tags: ['crawl4ai', 'Playwright', 'Extraction'] },
+  { kicker: 'Governance Desk', title: 'Evaluation & Governance', body: 'Every prompt, model and tool change behind a regression suite: shadow traffic, canary deploys, automated rollback and drift detection — code review for AI.', tags: ['Eval Gates', 'Shadow Traffic', 'Rollback'] }
 ];
 
 var systems = [
-  { kicker: 'Business Section', title: 'Incident Response & On-Call Discipline', body: 'SLO-based paging, burn-rate alerting, runbooks, and MTTR tracking — the discipline of being paged less while knowing more. Automation handles the noise; humans handle the judgment.', tags: ['SLOs', 'Runbooks', 'MTTR'] },
-  { kicker: 'Business Section', title: 'Automation Daemons & Bot Operations', body: 'Long-running Node.js daemons that run unattended — messenger-based operations with self-confirming delivery, structured logging, and recovery built in. Set-and-forget systems that report back.', tags: ['Node.js', 'Daemons', 'Unattended'] },
-  { kicker: 'Business Section', title: 'mubdiur.github.io — Production Platform', body: 'A static site with a WebAssembly core — every utility runs in your browser, no server required. Deployable to GitHub Pages, edge-cached, zero cold starts.', tags: ['Static', 'WebAssembly', 'GitHub Pages'] },
-  { kicker: 'Business Section', title: 'CodeAlign VPS — Infrastructure Spine', body: 'A multi-project Docker host operating as the backbone for everything shipped. Containerized isolation, least-privilege access, Let\u2019s Encrypt TLS across the board.', tags: ['Docker', 'VPS'] }
+  { kicker: 'Business Section', title: 'Incident Response & On-Call Discipline', body: 'SLO-based paging, burn-rate alerting, runbooks and MTTR — the discipline of being paged less while knowing more. Automation absorbs the noise; humans keep the judgment.', tags: ['SLOs', 'Runbooks', 'MTTR'] },
+  { kicker: 'Business Section', title: 'Automation Daemons & Bot Operations', body: 'Long-running Node.js daemons, unattended — messenger-based ops with self-confirming delivery, structured logs and built-in recovery. Set-and-forget, with receipts.', tags: ['Node.js', 'Daemons', 'Unattended'] },
+  { kicker: 'Business Section', title: 'mubdiur.github.io — Production Platform', body: 'A fully static site with a WebAssembly core — every utility runs in your browser, no server required. GitHub Pages-ready, edge-cached, zero cold starts.', tags: ['Static', 'WebAssembly', 'GitHub Pages'] },
+  { kicker: 'Business Section', title: 'CodeAlign VPS — Infrastructure Spine', body: 'A multi-project Docker host — the backbone for everything shipped. Containerized isolation, least-privilege access and Let’s Encrypt TLS, end to end.', tags: ['Docker', 'VPS'] }
 ];
 
 var featuredSlugs = ['time-copier', 'json-validator', 'qr-code-generator'];
@@ -272,14 +272,14 @@ function renderHome() {
           App.el('div', { class: 'lead-story' },
             Kicker('Front Page · Lead Story · The Operator'),
             App.el('h2', { class: 'lead-title', text: 'Automation That Replaces Human Monitoring' }),
-            App.el('p', { class: 'lead-deck', text: 'Mubdiur Rahman — AI Platform & Reliability Engineer — designs platforms that learn production portals, run near-realtime checks, and alert on what matters. AI is the force multiplier; reliability is the job; safety is non-negotiable.' }),
+            App.el('p', { class: 'lead-deck', text: 'Mubdiur Rahman — AI Platform & Reliability Engineer — builds platforms that learn a production portal once, then run near-realtime checks and alert only on what matters. AI is the force multiplier. Reliability is the job. Safety is non-negotiable.' }),
             App.el('div', { class: 'lead-byline' },
               App.el('span', { text: 'By Mubdiur Rahman' }),
               App.el('span', { 'aria-hidden': 'true', text: '·' }),
               App.el('span', { text: 'Reported from Dhaka, Bangladesh' })),
             App.el('div', { class: 'lead-body', html:
-              '<p><span class="dropcap">T</span>he monitoring industry runs on humans staring at dashboards for eight-hour shifts. This operator&rsquo;s answer is automation: platforms that learn a system&rsquo;s structure once, then run checks back-to-back with no polling gap — catching failures before they ever reach an error log. The tooling is browser-grade; the discipline is production-grade.</p>' +
-              '<p>The same discipline runs the infrastructure underneath: Docker and Traefik hosts with Let&rsquo;s Encrypt TLS, zero-downtime rebuilds, and server backends guarded by rate limits and SSRF checks. Guardrails — injection defense, PII redaction, audit trails — sit between every model call and the data. MCP tooling and AI-assisted workflows are used where they earn their keep: as force multipliers, not demos.</p>' })),
+              '<p><span class="dropcap">T</span>he monitoring industry runs on humans staring at dashboards for eight-hour shifts. This operator&rsquo;s answer is simpler: automation that learns a system&rsquo;s structure once, then runs checks back-to-back with no polling gap — catching failures before they ever reach an error log. The tooling is browser-grade. The discipline is production-grade.</p>' +
+              '<p>The same discipline runs the infrastructure beneath it: Docker and Traefik with Let&rsquo;s Encrypt TLS, zero-downtime rebuilds, and server backends hardened with rate limits and SSRF checks. Guardrails — injection defense, PII redaction, audit trails — stand between every model call and the data. MCP tooling and AI-assisted workflows are used only where they earn their keep: as force multipliers, never as theatre.</p>' })),
 
           App.el('aside', { class: 'news-index' },
             App.el('div', { class: 'index-head', text: 'The Index' }),
@@ -318,8 +318,8 @@ function renderHome() {
         App.el('article', { class: 'news-panel', style: { border: '1px solid var(--rule-strong)', background: 'var(--paper-warm)' } },
           App.el('div', { class: 'p-5 sm:p-8' },
             Kicker('Business Section · Flagship System'),
-            App.el('h3', { class: 'mt-2', style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.25rem,2vw,1.55rem)', lineHeight: '1.04', letterSpacing: '-0.01em', color: 'var(--ink)', fontWeight: '400' }, text: 'mubdiur.github.io — the production platform behind this page' }),
-            App.el('p', { class: 'mt-3', style: { maxWidth: '48rem', fontFamily: 'var(--font-serif)', fontSize: '1rem', lineHeight: '1.7', color: 'var(--ink-soft)' }, text: 'This newspaper is not a template — it\u2019s a production system. A fully static site with a WebAssembly core: every utility below runs entirely in your browser, no server required. Deployable to GitHub Pages from a public repo, edge-cached, zero cold starts.' }),
+            App.el('h3', { class: 'mt-2', style: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.25rem,2vw,1.55rem)', lineHeight: '1.04', letterSpacing: '-0.02em', color: 'var(--ink)', fontWeight: '700' }, text: 'mubdiur.github.io — the production platform behind this page' }),
+            App.el('p', { class: 'mt-3', style: { maxWidth: '48rem', fontFamily: 'var(--font-serif)', fontSize: '1rem', lineHeight: '1.7', color: 'var(--ink-soft)' }, text: 'This newspaper is not a template — it’s a production system. Fully static, with a WebAssembly core: every utility on this site runs entirely in your browser, no server required. Edge-cached on GitHub Pages. Zero cold starts.' }),
             App.el('ul', { class: 'mt-6', style: { display: 'grid', gap: '0.5rem 2rem', gridTemplateColumns: '1fr' } },
               [
                 'Static HTML + WebAssembly — no server, no build step, no dependencies',

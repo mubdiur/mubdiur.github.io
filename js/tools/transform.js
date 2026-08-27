@@ -97,10 +97,10 @@ function TransformToolUI(tool) {
       control));
   });
 
-  var root = App.el('div', { class: 'flex flex-col', style: { gap: '1rem' } },
-    paramsRow,
+  var root = App.el('div', { class: 'flex flex-col', style: { gap: '1.1rem' } },
+    paramsRow.childNodes.length ? App.el('div', { style: { background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'10px', padding:'0.6rem 0.75rem' } }, paramsRow) : paramsRow,
     App.el('div', {},
-      App.el('div', { class: 'text-xs font-mono mb-1', style: { color: 'rgba(141,148,158,0.7)' }, text: 'Input' }),
+      App.el('div', { class: 'text-xs font-mono mb-1', style: { color: 'rgba(184,178,178,0.72)', letterSpacing:'0.04em', textTransform:'uppercase', fontWeight:'600', fontSize:'10.5px' }, text: 'Input' }),
       inputTa),
     outputArea);
 

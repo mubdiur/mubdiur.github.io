@@ -76,7 +76,9 @@ function GeneratorToolUI(tool) {
 
   generate();
 
-  return App.el('div', { class: 'flex flex-col', style: { gap: '1rem' } }, paramsRow, outputArea);
+  return App.el('div', { class: 'flex flex-col', style: { gap: '1.1rem' } },
+    App.el('div', { style: { background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'10px', padding:'0.6rem 0.75rem', display:'flex', flexWrap:'wrap', gap:'0.5rem', alignItems:'center' } }, paramsRow),
+    outputArea);
 }
 
 window.GeneratorToolUI = GeneratorToolUI;
