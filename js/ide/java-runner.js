@@ -9,6 +9,10 @@
 
 import { cachedBytes } from './cache.js';
 
+/* Confirm to the IDE that this worker script loaded successfully */
+console.log('[java-runner] script loaded');
+self.postMessage({ type: 'worker-loaded' });
+
 var RUN_TIMEOUT = 20000;
 var running = false;
 

@@ -8,6 +8,10 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
+/* Confirm to the IDE that this worker script loaded successfully */
+console.log('[cc-runner] script loaded');
+self.postMessage({ type: 'worker-loaded' });
+
 /* Vendored browsercc (clang + wasm-ld compiled to WASM, MIT) — same-origin. */
 var BROWSERCC_BASE = './vendor/browsercc/';
 var RUN_TIMEOUT = 20000;

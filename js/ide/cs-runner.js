@@ -11,6 +11,10 @@
 
 import { cachedBytes } from './cache.js';
 
+/* Confirm to the IDE that this worker script loaded successfully */
+console.log('[cs-runner] script loaded');
+self.postMessage({ type: 'worker-loaded' });
+
 var RUN_TIMEOUT = 30000;
 var running = false;
 

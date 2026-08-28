@@ -100,9 +100,14 @@ function getWorker(lang) {
   var entry = workers[lang];
   if (entry && entry.alive) return entry.w;
   if (entry && entry.w) { try { entry.w.terminate(); } catch (e) {} }
-  var w = new Worker(RUNNER_DIR + def.runner + '?v=8', { type: def.module ? 'module' : 'classic' });
+  var w = new Worker(RUNNER_DIR + def.runner + '?v=9', { type: def.module ? 'module' : 'classic' });
   w.__lang = lang;
-  w.addEventListener('message', function (e) { onWorkerMessage(lang, w, e.data || {}); });
+  var scriptLoaded = false;
+  w.addEventListener('message', function (e) {
+    var d = e.data || {};
+    if (d.type === 'worker-loaded') scriptLoaded = true;
+    onWorkerMessage(lang, w, d);
+  });
   w.addEventListener('error', function (e) {
     if (workers[lang] && workers[lang].w === w && workers[lang].alive) {
       appendOutput('Runner error: ' + (e.message || 'unknown'), true);
@@ -112,7 +117,7 @@ function getWorker(lang) {
       setStatus('worker error — press Run again');
     }
   });
-  workers[lang] = { w: w, alive: true };
+  workers[lang] = { w: w, alive: true, scriptLoaded: scriptLoaded };
   vendorState[lang] = 'loading';
   vendorProgress[lang] = 'Loading ' + def.name + '…';
   syncRunButton();
@@ -182,7 +187,20 @@ function onWorkerMessage(lang, w, m) {
   else if (m.type === 'diag') { if (editor && editor.setDiagnostics) editor.setDiagnostics(m.diags || []); }
   else if (m.type === 'stdin') onStdinRequest();
   else if (m.type === 'ready') markVendorReady(lang);
-  else if (m.type === 'exit') {
+  else if (m.type === 'worker-loaded') {
+    /* Worker script confirmed loaded — not an engine yet, but script is alive */
+    console.log('[ide] worker ' + lang + ' script loaded');
+  } else if (m.type === 'init-error') {
+    /* Engine init failed (e.g. DecompressionStream missing + fflate failed) */
+    var errMsg = m.error || 'Unknown engine error';
+    console.error('[ide] worker ' + lang + ' init error:', errMsg);
+    appendOutput('Engine failed to load:\n' + errMsg, true);
+    markDead(lang);
+    vendorState[lang] = 'error';
+    syncRunButton();
+    if (runningLang) finishRun(null, true);
+    setStatus(langDef(lang).name + ' engine failed — press Run to retry');
+  } else if (m.type === 'exit') {
     if (m.terminated) markDead(lang); else markVendorReady(lang);
     finishRun(m.code === null || m.code === undefined ? null : m.code, !!m.terminated);
   }
@@ -285,7 +303,22 @@ function runCode() {
   clearOutput();
   if (editor && editor.clearDiagnostics) editor.clearDiagnostics();
   setStatus('Starting ' + langDef(lang).name + '…');
+  var entry = workers[lang];
+  /* Guard: if a previous worker was alive but its script never loaded
+     (no 'worker-loaded' message received), terminate it and recreate.
+     Dead workers silently swallow posted messages. */
+  if (entry && entry.alive && !entry.scriptLoaded) {
+    try { entry.w.terminate(); } catch (e) {}
+    markDead(lang);
+  }
   var w = getWorker(lang);
+  /* If getWorker returned a dead worker (script failed to load), abort */
+  if (!workers[lang] || !workers[lang].alive) {
+    appendOutput('Runner failed to load — try refreshing the page', true);
+    finishRun(null, true);
+    setStatus('runner failed — press Run to retry');
+    return;
+  }
   kickWatchdog(lang);
   var payload = { code: code, lang: lang };
   if (STDIN_LANGS.indexOf(lang) >= 0) {

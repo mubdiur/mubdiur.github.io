@@ -11,6 +11,10 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
+/* Confirm to the IDE that this worker script loaded successfully */
+console.log('[js-runner] script loaded');
+self.postMessage({ type: 'worker-loaded' });
+
 var PENDING_TIMEOUT = 20000;   // total run budget (ms) — worker is killed by the page too
 var STDIN_WAIT_TIMEOUT = 120000; // generous budget while the program waits for typed input
 

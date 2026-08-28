@@ -12,6 +12,10 @@
 
 import { cachedGunzip, cachedBytes } from './cache.js';
 
+/* Confirm to the IDE that this worker script loaded successfully */
+console.log('[go-runner] script loaded');
+self.postMessage({ type: 'worker-loaded' });
+
 var RUN_TIMEOUT = 60000;
 var COMPILE_TIMEOUT = 180000;
 var QUIET_MS = 1500;

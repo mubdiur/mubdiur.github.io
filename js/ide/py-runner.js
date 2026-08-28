@@ -12,6 +12,10 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
+/* Confirm to the IDE that this worker script loaded successfully */
+console.log('[py-runner] script loaded');
+self.postMessage({ type: 'worker-loaded' });
+
 /* Vendored Pyodide — everything is served from this site, nothing external. */
 var PYODIDE_BASE = './vendor/pyodide/';
 var RUN_TIMEOUT = 20000;

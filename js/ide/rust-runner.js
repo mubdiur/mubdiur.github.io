@@ -12,6 +12,12 @@
 import { Directory, Fd, File, OpenFile, PreopenDirectory, WASI } from './vendor/wasi/index.js';
 import { cachedGunzip } from './cache.js';
 
+/* Confirm to the IDE that this worker script loaded successfully.
+   Without this, a dead worker (script failed to load) is indistinguishable
+   from a live one — the IDE has no way to detect the failure. */
+console.log('[rust-runner] script loaded');
+self.postMessage({ type: 'worker-loaded' });
+
 var RUN_TIMEOUT = 30000;
 
 var rustcModule = null;
