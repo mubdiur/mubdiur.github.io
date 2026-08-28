@@ -401,14 +401,17 @@ function renderIde() {
     '.ide-output{flex:1;min-height:0;overflow-y:auto;padding:14px 14px 16px;font-family:var(--font-mono);font-size:12.2px;line-height:1.72;letter-spacing:-0.01em;background:transparent;scrollbar-width:thin;scrollbar-color:#4a474d transparent;}' +
     '.ide-line{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;color:#ece9e9;}' +
     '.ide-line.err{color:#ff7a96;background:rgba(255,97,136,0.08);border:1px solid rgba(255,97,136,0.14);border-radius:8px;padding:6px 8px;margin:4px 0;}' +
-    '.ide-stdin{display:flex;align-items:center;gap:0.6rem;padding:10px 12px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);flex-shrink:0;}' +
+    '.ide-stdin{display:flex;flex-direction:column;gap:0.4rem;padding:10px 12px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);flex-shrink:0;}' +
     '.ide-stdin.waiting{background:rgba(255,216,102,0.10);box-shadow:inset 0 1px 0 rgba(255,216,102,0.22);border-top-color:rgba(255,216,102,0.18);}' +
+    '.ide-stdin-top{display:flex;align-items:center;gap:0.6rem;}' +
     '.ide-stdin-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;color:#b8b7bc;flex:none;font-weight:600;}' +
     '.ide-stdin.waiting .ide-stdin-label{color:#ffd866;}' +
-    '.ide-stdin-input{flex:1;min-width:0;background:rgba(26,24,28,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#ece9e9;font-family:var(--font-mono);font-size:12.5px;line-height:1.6;padding:7px 11px;outline:none;transition:border-color .15s, box-shadow .15s, background .15s;}' +
+    '.ide-stdin-input{width:100%;min-height:54px;max-height:140px;resize:vertical;background:rgba(26,24,28,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#ece9e9;font-family:var(--font-mono);font-size:12.5px;line-height:1.6;padding:7px 11px;outline:none;transition:border-color .15s, box-shadow .15s, background .15s;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#4a474d transparent;}' +
     '.ide-stdin-input::placeholder{color:#7a7980;}' +
     '.ide-stdin-input:focus{border-color:rgba(255,216,102,0.42);box-shadow:0 0 0 3px rgba(255,216,102,0.14);background:rgba(26,24,28,1);}' +
     '.ide-stdin-input::selection{background:rgba(255,216,102,0.28);color:#1a181c;}' +
+    '.ide-stdin-bottom{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;}' +
+    '.ide-stdin-hint{font-family:var(--font-mono);font-size:9.5px;color:#6a696e;letter-spacing:-0.01em;}' +
     '.ide-stdin-send{font-family:var(--font-mono);font-size:11px;font-weight:750;letter-spacing:-0.01em;padding:7px 14px;border-radius:999px;border:1px solid #ffd866;background:#ffd866;color:#1e1c1e;cursor:pointer;flex:none;transition:transform .12s, opacity .12s;}' +
     '.ide-stdin-send:hover{opacity:0.92;transform:translateY(-0.5px);}' +
     '.ide-stdin-send:active{transform:translateY(0);}' +
@@ -466,18 +469,22 @@ function renderIde() {
     App.el('button', { class: 'ide-clear', type: 'button', text: 'clear', onclick: function () { clearOutput(); } }));
   outputEl = App.el('div', { class: 'ide-output' });
 
-  stdinInput = App.el('input', {
-    class: 'ide-stdin-input', type: 'text', autocomplete: 'off', spellcheck: 'false',
+  stdinInput = App.el('textarea', {
+    class: 'ide-stdin-input', autocomplete: 'off', spellcheck: 'false',
     placeholder: 'type input — it goes to the program',
-    'aria-label': 'stdin input'
+    'aria-label': 'stdin input', rows: 3
   });
   stdinInput.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') { e.preventDefault(); deliverStdin(); }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); deliverStdin(); }
   });
   stdinSend = App.el('button', { class: 'ide-stdin-send', type: 'button', text: 'Send ↵' });
   stdinSend.addEventListener('click', deliverStdin);
+  var stdinHint = App.el('span', { class: 'ide-stdin-hint', text: 'Ctrl+Enter to send' });
   stdinRow = App.el('div', { class: 'ide-stdin' },
-    App.el('span', { class: 'ide-stdin-label', text: 'stdin' }), stdinInput, stdinSend);
+    App.el('div', { class: 'ide-stdin-top' },
+      App.el('span', { class: 'ide-stdin-label', text: 'stdin' })),
+    stdinInput,
+    App.el('div', { class: 'ide-stdin-bottom' }, stdinHint, stdinSend));
 
   var panel = App.el('div', { class: 'ide-panel' }, outHead, outputEl, stdinRow);
   root.appendChild(App.el('div', { class: 'ide-main' }, editorWrap, panel));
@@ -534,7 +541,7 @@ function renderIde() {
     var live = state.lang === 'js';
     stdinInput.placeholder = live
       ? 'type input — delivered live to the running program'
-      : (stdinSupported ? 'stdin — sent to the program when you press Run' : '');
+      : (stdinSupported ? 'type multi-line input here…' : '');
   }
   syncStdin();
 
