@@ -12,9 +12,9 @@
    and any external references don't break.  All actual work is in
    ./cache.js.
    ═══════════════════════════════════════════════════════════ */
-import { CACHE_NAME, cachedFetch, cachedBytes, gunzip, cachedGunzip } from './cache.js';
+import { CACHE_NAME, cachedFetch, cachedBytes, cachedBytesProgress, gunzip, cachedGunzip } from './cache.js';
 
-export { CACHE_NAME, cachedFetch, cachedBytes, gunzip, cachedGunzip };
+export { CACHE_NAME, cachedFetch, cachedBytes, cachedBytesProgress, gunzip, cachedGunzip };
 
 /* Legacy globals for any non-ESM script still doing `window.IDECache`. */
 try {

@@ -48,7 +48,18 @@ function ensureCompilerWorker() {
   if (!compileWorkerPromise) {
     compileWorkerPromise = (async function () {
       post('status', 'Loading Go compiler (vendored, first run)…');
-      var bytes = await cachedGunzip('./vendor/gopherjs/compile.js.gz');
+      var bytes = await cachedGunzip('./vendor/gopherjs/compile.js.gz', function (loaded, total) {
+        if (loaded === -1) {
+          post('status', 'Decompressing Go compiler…');
+        } else if (total > 0) {
+          var pct = Math.round((loaded / total) * 100);
+          var mb = (loaded / 1048576).toFixed(1);
+          var totalMb = (total / 1048576).toFixed(1);
+          post('status', 'Loading Go compiler (' + mb + '/' + totalMb + ' MB · ' + pct + '%)…');
+        } else if (loaded > 0) {
+          post('status', 'Loading Go compiler (' + (loaded / 1048576).toFixed(1) + ' MB)…');
+        }
+      });
       var src = patchCompilerSource(new TextDecoder().decode(bytes));
       var blob = new Blob([src], { type: 'application/javascript' });
       var url = URL.createObjectURL(blob);

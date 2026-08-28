@@ -68,16 +68,51 @@ function stdSysrootPreopen() {
 async function ensureEngine() {
   if (!enginePromise) {
     enginePromise = (async function () {
-      post('status', 'Loading rustc (vendored, first run)…');
-      var rustcBytes = await cachedGunzip('./vendor/rust/rustc.wasm.gz');
-      rustcModule = await WebAssembly.compile(rustcBytes);
+      var fileLabel = function (name, bytes, total, phase) {
+        if (phase === 'decompress') return 'Decompressing ' + name + '…';
+        if (total > 0) {
+          var pct = Math.round((bytes / total) * 100);
+          var mb = (bytes / 1048576).toFixed(1);
+          var totalMb = (total / 1048576).toFixed(1);
+          return 'Loading ' + name + ' (' + mb + '/' + totalMb + ' MB · ' + pct + '%)…';
+        }
+        if (bytes > 0) {
+          var mb = (bytes / 1048576).toFixed(1);
+          return 'Loading ' + name + ' (' + mb + ' MB)…';
+        }
+        return 'Loading ' + name + '…';
+      };
 
-      var bundleBytes = await cachedGunzip('./vendor/rust/sysroot-wasip1.bundle.gz');
+      post('status', fileLabel('rustc', 0, 0));
+      var rustcBytes = await cachedGunzip('./vendor/rust/rustc.wasm.gz', function (loaded, total) {
+        if (loaded === -1) {
+          post('status', 'Decompressing rustc…');
+        } else {
+          post('status', fileLabel('rustc', loaded, total));
+        }
+      });
+      post('status', 'Compiling rustc WASM module…');
+      rustcModule = await WebAssembly.compile(rustcBytes);
+      post('status', rustcModule ? 'rustc WASM ready' : 'rustc WASM ready');
+
+      post('status', fileLabel('sysroot', 0, 0));
+      var bundleBytes = await cachedGunzip('./vendor/rust/sysroot-wasip1.bundle.gz', function (loaded, total) {
+        if (loaded === -1) {
+          post('status', 'Decompressing sysroot…');
+        } else {
+          post('status', fileLabel('sysroot', loaded, total));
+        }
+      });
+      post('status', 'Parsing sysroot bundle…');
       stdSysroot = parseBundle(bundleBytes);
       post('status', 'rustc ready');
       return true;
     })();
-    enginePromise.catch(function () { enginePromise = null; });
+    enginePromise.catch(function (err) {
+      enginePromise = null;
+      post('status', 'rustc failed to load');
+      console.error('[rust-runner] engine init failed:', err);
+    });
   }
   return enginePromise;
 }
