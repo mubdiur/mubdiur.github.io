@@ -119,7 +119,7 @@ function getWorker(lang) {
   });
   workers[lang] = { w: w, alive: true, scriptLoaded: scriptLoaded };
   vendorState[lang] = 'loading';
-  vendorProgress[lang] = 'Loading ' + def.name + '…';
+  vendorProgress[lang] = def.name + ' — engine loads on first Run';
   syncRunButton();
   if (statusEl && state.lang === lang && !runningLang) setStatus(vendorProgress[lang]);
   return w;
@@ -190,6 +190,10 @@ function onWorkerMessage(lang, w, m) {
   else if (m.type === 'worker-loaded') {
     /* Worker script confirmed loaded — not an engine yet, but script is alive */
     console.log('[ide] worker ' + lang + ' script loaded');
+    if (state.lang === lang && !runningLang) {
+      vendorProgress[lang] = langDef(lang).name + ' — press Run (Ctrl+Enter)';
+      setStatus(vendorProgress[lang]);
+    }
   } else if (m.type === 'init-error') {
     /* Engine init failed (e.g. DecompressionStream missing + fflate failed) */
     var errMsg = m.error || 'Unknown engine error';

@@ -54,6 +54,14 @@ async function _loadFflate() {
 }
 
 export async function gunzip(data) {
+  /* Fast path: if data is not gzip-compressed (missing magic bytes 1f 8b),
+     return it as-is.  This handles the common case where GitHub Pages serves
+     .gz files with Content-Encoding: gzip — fetch() transparently
+     decompresses, so the bytes we receive are already decompressed. */
+  if (!(data[0] === 0x1f && data[1] === 0x8b)) {
+    console.log('[cache] data is not gzip-compressed (' + data.length + ' bytes), returning as-is');
+    return data;
+  }
   if (typeof DecompressionStream !== 'undefined') {
     try {
       const ds = new DecompressionStream('gzip');
@@ -65,19 +73,13 @@ export async function gunzip(data) {
   } else {
     console.warn('[cache] DecompressionStream not available, using fflate fallback');
   }
-  /* fflate fallback — use async gunzip (worker-based) for large files (>2MB),
-     fall back to sync gunzipSync for smaller payloads.  The async path
-     offloads decompression to a sub-worker to avoid blocking the main thread
-     and reduces peak memory in the calling worker. */
   try {
     const mod = await _loadFflate();
-    /* Prefer gunzipSync — it avoids Worker overhead and works everywhere */
     if (mod.gunzipSync) {
       var out = mod.gunzipSync(data);
       if (out instanceof Uint8Array) return out;
       if (out && out.length !== undefined) return new Uint8Array(out);
     }
-    /* If gunzipSync is not available (unlikely in fflate ≥0.4), try async gunzip */
     if (mod.gunzip) {
       return await new Promise(function (resolve, reject) {
         mod.gunzip(data, function (err, result) {
@@ -98,9 +100,8 @@ export async function gunzip(data) {
     console.error('[cache] fflate fallback failed:', e2.message || e2);
   }
   throw new Error(
-    'DecompressionStream not available — fflate fallback failed. ' +
-    'DecompressionStream: ' + (typeof DecompressionStream !== 'undefined' ? 'available' : 'missing') +
-    ', fflate: ' + (typeof _loadFflate === 'function' ? 'loaded' : 'not loaded')
+    'gunzip failed for ' + data.length + ' bytes. ' +
+    'First bytes: ' + data[0].toString(16) + ' ' + data[1].toString(16) + ' ' + data[2].toString(16)
   );
 }
 
@@ -150,6 +151,18 @@ export async function cachedGunzip(url, onProgress) {
   const rawKey = 'raw:' + url;
   try {
     const cache = await openCache();
+    /* 0. Purge stale caches from before this fix — if the decompressed cache
+          entry or raw cache entry is not actually gzip data, remove it. */
+    try {
+      const oldDec = await cache.match(decKey);
+      if (oldDec) {
+        const ob = new Uint8Array(await oldDec.arrayBuffer());
+        if (!(ob[0] === 0x1f && ob[1] === 0x8b)) {
+          console.warn('[cache] purging stale decompressed cache for', url);
+          await cache.delete(decKey);
+        }
+      }
+    } catch (e) {}
     /* 1. Check if already decompressed */
     const decHit = await cache.match(decKey);
     if (decHit) {
@@ -173,10 +186,11 @@ export async function cachedGunzip(url, onProgress) {
   } catch (e) {
     console.warn('[cache] cachedGunzip failed for', url, '— retrying:', e.message || e);
     try {
+      /* Purge stale cache and re-fetch */
+      try { const c = await openCache(); await c.delete(decKey); await c.delete(rawKey); } catch (e) {}
       const raw2 = await cachedBytesProgress(url, onProgress);
       if (onProgress) onProgress(-1, -1);
       const out2 = await gunzip(raw2);
-      /* Cache the successful decompression for next time */
       try { const c = await openCache(); await c.put(decKey, new Response(out2)); } catch (e) {}
       return out2;
     } catch (e2) {
