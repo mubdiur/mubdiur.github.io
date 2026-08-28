@@ -328,10 +328,22 @@ export function createIdeEditor(parent, opts) {
       baseTheme,
       syntaxHighlighting(syntax),
       EditorView.lineWrapping,
+      EditorView.editable.of(true),
+      EditorState.readOnly.of(false),
+      EditorView.updateListener.of(function (update) {
+        if (update.docChanged && opts.onChange) {
+          try { opts.onChange(update.state.doc.toString()); } catch (e) {}
+        }
+      }),
     ],
   });
 
   const view = new EditorView({ state, parent });
+  // Hard guarantee: contentDOM must be editable even if a facet is overridden
+  try {
+    view.contentDOM.setAttribute('contenteditable', 'true');
+    view.contentDOM.contentEditable = 'true';
+  } catch (e) {}
 
   return {
     view,

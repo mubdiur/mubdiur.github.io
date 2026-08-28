@@ -352,7 +352,9 @@ function renderIde() {
     '.ide-run-glyph{font-size:10px;}' +
     '.ide-main{display:flex;flex:1;min-height:0;gap:0.75rem;overflow:hidden;}' +
     '.ide-editor-wrap{flex:1;min-width:0;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;background:#2d2a2e;display:flex;flex-direction:column;min-height:0;box-shadow:0 10px 30px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.04) inset;}' +
-    '.ide-editor-wrap .cm-editor{flex:1;min-height:0;}' +
+    '.ide-editor-wrap .cm-editor{flex:1;min-height:0;pointer-events:auto;}' +
+    '.ide-editor-wrap .cm-scroller{pointer-events:auto;}' +
+    '.ide-editor-wrap .cm-content{pointer-events:auto;user-select:text;-webkit-user-select:text;caret-color:#ffd866;}' +
     '.ide-panel{width:392px;flex:none;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,0.07);border-radius:14px;background:linear-gradient(180deg, rgba(64,62,65,0.98) 0%, rgba(58,56,60,0.98) 100%);min-height:0;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.05) inset;}' +
     '.ide-outhead{display:flex;align-items:center;gap:0.75rem;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);flex-shrink:0;}' +
     '.ide-outlabel{font-family:var(--font-mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;color:#b8b7bc;flex:none;font-weight:600;}' +
@@ -443,26 +445,50 @@ function renderIde() {
   var panel = App.el('div', { class: 'ide-panel' }, outHead, outputEl, stdinRow);
   root.appendChild(App.el('div', { class: 'ide-main' }, editorWrap, panel));
 
-  import('/js/ide/vendor/editor.js?v=13').then(function (mod) {
+  // Robust import: try relative first (works for file:// and sub-paths), fall back to absolute
+  var editorUrls = ['js/ide/vendor/editor.js?v=14', '/js/ide/vendor/editor.js?v=14'];
+  function tryImportEditor(i) {
+    if (i >= editorUrls.length) throw new Error('Editor failed to load: all import paths failed');
+    return import(editorUrls[i]).catch(function (e) {
+      if (i + 1 < editorUrls.length) return tryImportEditor(i + 1);
+      throw e;
+    });
+  }
+  tryImportEditor(0).then(function (mod) {
     editor = mod.createIdeEditor(editorWrap, {
       value: state.code[state.lang] || langDef(state.lang).sample,
       language: state.lang,
-      onRun: runCode
+      onRun: runCode,
+      onChange: function (val) {
+        state.code[state.lang] = val;
+        saveState();
+        if (editor && editor.clearDiagnostics) editor.clearDiagnostics();
+      }
     });
-    editor.view.dom.addEventListener('input', function () {
-      state.code[state.lang] = editor.getValue();
-      saveState();
-      if (editor.clearDiagnostics) editor.clearDiagnostics();
-    });
+    // Defensive: ensure contentDOM is editable and focusable even if a facet was mis-set
+    try {
+      if (editor.view && editor.view.contentDOM) {
+        editor.view.contentDOM.setAttribute('contenteditable', 'true');
+        editor.view.contentDOM.contentEditable = 'true';
+        editor.view.contentDOM.style.pointerEvents = 'auto';
+        editor.view.contentDOM.style.userSelect = 'text';
+      }
+    } catch (e) {}
+    // Clicking the wrapper should focus the editor (covers dead-zone clicks)
+    try { editorWrap.addEventListener('click', function () { if (editor) editor.focus(); }); } catch (e) {}
     vendorState['js'] = 'ready';
     if (state.lang !== 'js' && (!vendorState[state.lang] || vendorState[state.lang] === 'idle')) { vendorState[state.lang] = 'loading'; ensureWorkerPreload(state.lang); }
     syncRunButton();
     var vs0 = vendorState[state.lang];
     if (vs0 === 'loading') setStatus('Loading ' + langDef(state.lang).name + '…');
     else setStatus(langDef(state.lang).name + ' — press Run (Ctrl+Enter)');
-    editor.focus();
+    // Focus after paint; also retry after fonts-loading guard clears
+    setTimeout(function () { try { editor.focus(); } catch (e) {} }, 50);
+    setTimeout(function () { try { editor.focus(); } catch (e) {} }, 600);
   }).catch(function (err) {
-    editorWrap.appendChild(App.el('div', { class: 'not-found', html: '<span class="nf-sub">Editor failed to load: ' + App.esc(err.message || err) + '</span>' }));
+    editorWrap.appendChild(App.el('div', { class: 'not-found', html: '<span class="nf-sub">Editor failed to load: ' + App.esc(err.message || err) + '</span><button class="btn-primary-sm" style="margin-top:0.75rem" onclick="location.reload()">Retry</button>' }));
+    setStatus('editor failed — click Retry');
+    console.error('IDE editor import failed', err);
   });
 
   function syncStdin() {
