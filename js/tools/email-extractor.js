@@ -135,7 +135,7 @@ App.registerTool('email-extractor', {
       var delim = format === '\\n' ? '\n' : format;
       output = list.join(delim);
       count = list.length;
-      status = { kind: 'ok', msg: 'Extracted ' + emails.length + ' email(s).' };
+      status = { kind: 'ok', msg: 'Extracted ' + list.length + ' email(s).' };
       render();
     }
 

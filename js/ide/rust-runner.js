@@ -83,7 +83,7 @@ async function ensureEngine() {
           return 'Loading ' + name + ' (' + mb + '/' + totalMb + ' MB · ' + pct + '%)…';
         }
         if (bytes > 0) {
-          var mb = (bytes / 1048576).toFixed(1);
+          mb = (bytes / 1048576).toFixed(1);
           return 'Loading ' + name + ' (' + mb + ' MB)…';
         }
         return 'Loading ' + name + '…';

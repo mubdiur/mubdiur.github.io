@@ -52,7 +52,7 @@ function parseCSV(csvText) {
   if (lines.length > 0) lines.shift(); // header
   return lines
     .map(function (line, index) {
-      var regex = /(".*?"|[^",]+)(?=\s*,|\s*$)/g;
+      var regex = /(".*?"|[^",]*)(?=\s*,|\s*$)/g;
       var matches = line.match(regex) || [];
       var values = matches.map(function (v) { return v.replace(/^"|"$/g, '').replace(/""/g, '"'); });
       if (values.length < 3) return null;

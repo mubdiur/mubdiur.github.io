@@ -308,13 +308,18 @@ function base64UrlToStandard(s) {
 T.base64Encode = function (s) { try { return btoa(bytesToBinaryString(utf8Bytes(s))); } catch (e) { throw new Error('Failed to encode as Base64'); } };
 T.base64Decode = function (s) {
   try {
-    return new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, '')), function (c) { return c.charCodeAt(0); }));
+    var t = s.replace(/\s/g, '');
+    while (t.length % 4 !== 0) t += '=';
+    return new TextDecoder().decode(Uint8Array.from(atob(t), function (c) { return c.charCodeAt(0); }));
   } catch (e) { throw new Error('Invalid Base64 input'); }
 };
 T.urlEncode = function (s) { return encodeURIComponent(s); };
 T.urlDecode = function (s) { try { return decodeURIComponent(s); } catch (e) { throw new Error('Invalid URL encoding'); } };
 T.htmlEncode = function (s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); };
-T.htmlDecode = function (s) { return s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#x27;/g, "'").replace(/&#x2F;/g, '/'); };
+T.htmlDecode = function (s) {
+  var map = { amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", '#x27': "'", '#x2F': '/' };
+  return s.replace(/&(amp|lt|gt|quot|#39|#x27|#x2F);/g, function (m, e) { return map[e]; });
+};
 T.hexEncode = function (s) { return Array.from(new TextEncoder().encode(s)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); };
 T.hexDecode = function (s) {
   var hex = s.replace(/\s/g, '');
@@ -341,6 +346,7 @@ T.base32Encode = function (s) {
   for (var i = 0; i < bytes.length; i++) bits += bytes[i].toString(2).padStart(8, '0');
   while (bits.length % 5 !== 0) bits += '0';
   for (var j = 0; j < bits.length; j += 5) result += alphabet[parseInt(bits.slice(j, j + 5), 2)];
+  while (result.length % 8 !== 0) result += '=';
   return result;
 };
 T.base32Decode = function (s) {
@@ -465,7 +471,20 @@ T.jsonToXML = function (s) {
   return '<?xml version="1.0" encoding="UTF-8"?>\n' + toXml(obj, 'root');
 };
 T.jsonEscape = function (s) { return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t'); };
-T.jsonUnescape = function (s) { return s.replace(/\\t/g, '\t').replace(/\\r/g, '\r').replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\'); };
+T.jsonUnescape = function (s) {
+  return s.replace(/\\(\\|t|r|n|"|'|\/)/g, function (m, ch) {
+    switch (ch) {
+      case '\\': return '\\';
+      case 't': return '\t';
+      case 'r': return '\r';
+      case 'n': return '\n';
+      case '"': return '"';
+      case "'": return "'";
+      case '/': return '/';
+      default: return m;
+    }
+  });
+};
 
 /* ── text ── */
 var EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;

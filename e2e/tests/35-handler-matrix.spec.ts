@@ -103,6 +103,25 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('uuid-v4-validate', 'valid', TOOLS['uuid-v4-validate'].handler('550e8400-e29b-41d4-a716-446655440000').includes('\u2713') || TOOLS['uuid-v4-validate'].handler('550e8400-e29b-41d4-a716-446655440000').toLowerCase().includes('valid'));
     push('password-entropy', 'happy', TOOLS['password-entropy'].handler('correct horse battery staple').toLowerCase().includes('entropy'));
 
+    // --- new tools ---
+    push('epoch-converter', 'epoch seconds', TOOLS['epoch-converter'].handler('1718035200').includes('2024-06-10'));
+    push('epoch-converter', 'epoch millis', TOOLS['epoch-converter'].handler('1718035200000').includes('2024-06-10'));
+    push('epoch-converter', 'date string', TOOLS['epoch-converter'].handler('2024-06-10T12:00:00Z').includes('1718020800'));
+    push('epoch-converter', 'garbage throws', mustThrow(() => TOOLS['epoch-converter'].handler('not a date at all!!!')));
+    push('cidr-calculator', 'slash 24', TOOLS['cidr-calculator'].handler('192.168.1.10/24').includes('192.168.1.0'));
+    push('cidr-calculator', 'host count', TOOLS['cidr-calculator'].handler('10.0.0.0/22').includes('1022'));
+    push('cidr-calculator', 'bad throws', mustThrow(() => TOOLS['cidr-calculator'].handler('999.1.1.1/24')));
+    push('cidr-calculator', 'missing prefix throws', mustThrow(() => TOOLS['cidr-calculator'].handler('192.168.1.1')));
+    push('url-parser', 'table', TOOLS['url-parser'].handler('https://example.com:8443/p?a=hello%20world&b=1&b=2', { view: 'table' }).includes('a = hello world'));
+    push('url-parser', 'json', JSON.parse(TOOLS['url-parser'].handler('https://example.com/p?a=1', { view: 'json' })).host === 'example.com');
+    push('url-parser', 'relative throws', mustThrow(() => TOOLS['url-parser'].handler('/just/a/path', { view: 'table' })));
+    push('xml-to-json', 'happy', JSON.parse(TOOLS['xml-to-json'].handler('<root><a>1</a><a>2</a></root>')).root.a.join(',') === '1,2');
+    push('xml-to-json', 'attrs', JSON.parse(TOOLS['xml-to-json'].handler('<r id="7"><v>x</v></r>')).r['@id'] === '7');
+    push('xml-to-json', 'bad xml throws', mustThrow(() => TOOLS['xml-to-json'].handler('<root><unclosed>')));
+    push('css-formatter', 'beautify', TOOLS['css-formatter'].handler('a{color:red}', { mode: 'beautify' }).includes('color: red'));
+    push('css-formatter', 'minify', TOOLS['css-formatter'].handler('a { color: red; } /* c */', { mode: 'minify' }) === 'a{color:red}');
+    push('css-formatter', 'minify keeps strings', TOOLS['css-formatter'].handler('a::after{content:"/*x*/"}', { mode: 'minify' }).includes('"/*x*/"'));
+
     // --- generators ---
     push('random-string', 'alphanumeric', TOOLS['random-string'].genHandler({ length: '16', charset: 'alphanumeric' }).length === 16);
     push('random-string', 'hex', /^[0-9a-f]+$/.test(TOOLS['random-string'].genHandler({ length: '8', charset: 'hex' })));
@@ -129,8 +148,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
   console.log(`handler matrix: ${pass} passed, ${failed.length} failed of ${(result as any[]).length}`);
   if (failed.length) console.log('failed handlers:', JSON.stringify(failed, null, 2));
   expect(failed, `handler matrix failures:\n` + JSON.stringify(failed, null, 2)).toEqual([]);
-  expect((result as any[]).length, 'handler matrix must cover all 79 tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
-  // Full manifest is 79; 2 are wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
+  expect((result as any[]).length, 'handler matrix must cover all tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
+  // Full manifest is 85; wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
-  expect(manifest, 'TOOLMANIFEST must be 79').toBe(79);
+  expect(manifest, 'TOOLMANIFEST must be 85').toBe(85);
 });

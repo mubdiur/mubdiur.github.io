@@ -442,6 +442,19 @@ self.addEventListener('message', function (e) {
   var timers = new Set();
   var timeoutMap = new Map();
   var pending = 0;
+  /* Live intervals keep the run alive until cleared or the 20s budget
+     hits — without this, setInterval-only programs exit as soon as the
+     main promise resolves. */
+  var intervals = 0;
+  var intervalSet = new Set();
+  function clearLiveInterval(id) {
+    if (!id || !intervalSet.has(id)) { timers.delete(id); try { clearInterval(id); } catch (e) {} return; }
+    intervalSet.delete(id);
+    timers.delete(id);
+    try { clearInterval(id); } catch (e) {}
+    intervals = Math.max(0, intervals - 1);
+    if (pending === 0 && stdinHold === 0 && intervals === 0) finish();
+  }
 
   var sandbox = {
     module: { exports: {} },
@@ -474,15 +487,18 @@ self.addEventListener('message', function (e) {
         try { fn(); } catch (err) { if (!(err instanceof ExitSignal)) post('err', fmtError(err) + '\n'); }
       }, Math.max(ms || 0, 0));
       timers.add(native);
+      intervalSet.add(native);
+      intervals++;
       return native;
     },
     clearTimeout: function (id) {
       if (!id) return;
+      if (intervalSet.has(id)) { clearLiveInterval(id); return; }
       var native = timeoutMap.get(id);
       if (native !== undefined) { try { clearTimeout(native); } catch (e) {} timeoutMap.delete(id); timers.delete(id); pending = Math.max(0, pending - 1); return; }
       try { clearTimeout(id); } catch (e) {}
     },
-    clearInterval: function (id) { timers.delete(id); try { clearInterval(id); } catch (e) {} },
+    clearInterval: function (id) { clearLiveInterval(id); },
     queueMicrotask: function (fn) { queueMicrotask(fn); },
     readline: readline,
     TextEncoder: TextEncoder,
@@ -501,7 +517,7 @@ self.addEventListener('message', function (e) {
 
   function finish() {
     if (!running) return;
-    if (pending > 0 || stdinHold > 0) return;
+    if (pending > 0 || stdinHold > 0 || intervals > 0) return;
     running = false;
     clearTimeout(budgetTimer);
     var code2 = exitRequested === null ? 0 : exitRequested;
@@ -536,7 +552,7 @@ self.addEventListener('message', function (e) {
         post('err', fmtError(err) + '\n');
         postDiags(fmtError(err));
       }).then(function () {
-        if (pending === 0 && stdinHold === 0) finish();
+        if (pending === 0 && stdinHold === 0 && intervals === 0) finish();
       });
     }
   } catch (err) {

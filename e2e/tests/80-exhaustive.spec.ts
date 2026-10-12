@@ -63,6 +63,11 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'html-formatter': { good: '<div><p>hi</p></div>', expectInOutput: /<div>/ },
   'sql-formatter': { good: 'select * from t', expectInOutput: /SELECT/i },
   'uuid-v4-validate': { good: '550e8400-e29b-41d4-a716-446655440000', expectInOutput: /valid|✓/i },
+  'epoch-converter': { good: '1718035200', expectInOutput: /2024-06-10|Epoch/ },
+  'cidr-calculator': { good: '192.168.1.10/24', expectInOutput: /192\.168\.1\.0/ },
+  'url-parser': { good: 'https://example.com:8443/p?a=1&b=2', expectInOutput: /example\.com/ },
+  'xml-to-json': { good: '<root><a>1</a></root>', expectInOutput: /"a": "1"/ },
+  'css-formatter': { good: 'a{color:red}', expectInOutput: /color:\s*red/ },
 };
 
 const CUSTOM_FIXTURES: Record<string, () => Promise<void> | void> = {};
@@ -256,10 +261,16 @@ test('custom tools — 18 interactive flows', async ({ page }) => {
 
 // ── WASM variants ──
 test('wasm — every hash + hmac alg + crc + qr', async ({ page }) => {
+  // WASM core loads lazily on first wasm:true tool mount — assert it does,
+  // and that plain pages never fetch it.
   await page.goto('/');
+  await page.waitForTimeout(1000);
+  const homeFetch: boolean = await page.evaluate(() => (window as any).Core?.isReady?.() ?? false);
+  expect(homeFetch, 'home must not fetch the 645 KB wasm core').toBe(false);
+  await gotoTool(page, 'md5-hash');
   await page.waitForFunction(() => (window as any).Core && (window as any).Core.isReady?.(), undefined, { timeout: 15000 }).catch(() => {});
   const ready: boolean = await page.evaluate(() => (window as any).Core?.isReady?.() ?? false);
-  expect(ready, 'WASM Core.isReady must be true — wasm/core.wasm must load in http-server').toBe(true);
+  expect(ready, 'WASM Core.isReady must be true after mounting a wasm tool — wasm/core.wasm must load in http-server').toBe(true);
 
   for (const slug of ['md5-hash', 'sha1-hash', 'sha256-hash', 'sha512-hash', 'crc32-checksum']) {
     await gotoTool(page, slug);

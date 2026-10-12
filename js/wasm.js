@@ -133,7 +133,7 @@ var Core = {
     p = allocBytes(bytes);
     mSlot = allocSlot();
     sSlot = allocSlot();
-    try { rc = exp.qr_encode(p, bytes.length, ecl || 1, mSlot, sSlot); } finally { if (rc !== 0) { exp.reset(); throw new Error('Text too long for a QR code (' + bytes.length + ' bytes)'); } }
+    try { rc = exp.qr_encode(p, bytes.length, (ecl === undefined || ecl === null) ? 1 : ecl, mSlot, sSlot); } finally { if (rc !== 0) { exp.reset(); throw new Error('Text too long for a QR code (' + bytes.length + ' bytes)'); } }
     mPtr = readU32(mSlot);
     size = readU32(sSlot);
     if (size <= 0 || size > 177) { exp.reset(); throw new Error('Invalid QR size'); }

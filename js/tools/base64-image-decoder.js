@@ -57,7 +57,7 @@ App.registerTool('base64-image-decoder', {
       function b(i) { return bytes.charCodeAt(i) & 0xFF; }
       if (len >= 8 && b(0) === 0x89 && b(1) === 0x50 && b(2) === 0x4E && b(3) === 0x47) return 'image/png';
       if (len >= 3 && b(0) === 0xFF && b(1) === 0xD8 && b(2) === 0xFF) return 'image/jpeg';
-      if (len >= 6 && b(0) === 0x47 && b(1) === 0x49 && b(2) === 0x46 && b(3) === 0x38 && b(4) === 0x37 && b(5) === 0x61) return 'image/gif';
+      if (len >= 6 && b(0) === 0x47 && b(1) === 0x49 && b(2) === 0x46 && b(3) === 0x38 && (b(4) === 0x37 || b(4) === 0x39) && b(5) === 0x61) return 'image/gif';
       if (len >= 12 && b(0) === 0x52 && b(1) === 0x49 && b(2) === 0x46 && b(3) === 0x46 && b(8) === 0x57 && b(9) === 0x45 && b(10) === 0x42 && b(11) === 0x50) return 'image/webp';
       if (len >= 1 && bytes.charCodeAt(0) === 60 && bytes.indexOf('<svg') >= 0) return 'image/svg+xml';
       return null;

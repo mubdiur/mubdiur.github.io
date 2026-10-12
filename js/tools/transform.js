@@ -15,7 +15,7 @@ function TransformToolUI(tool) {
     class: 'tool-textarea', rows: 6, placeholder: 'Paste input here...',
     spellcheck: 'false'
   });
-  inputTa.addEventListener('input', function () { state.input = inputTa.value; run(); });
+  inputTa.addEventListener('input', App.debounce(function () { state.input = inputTa.value; run(); }, 150));
 
   var outputArea = App.el('div');
 

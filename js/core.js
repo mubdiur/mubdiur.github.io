@@ -185,6 +185,17 @@ var App = {
     }
   },
   sleep: function (ms) { return new Promise(function (r) { App.timer(r, ms); }); },
+  /* Trailing-edge debounce — collapses per-keystroke heavy work (full
+     re-transform, palette re-score) into one run after typing pauses. */
+  debounce: function (fn, ms) {
+    var t = 0;
+    return function () {
+      var args = arguments, self = this;
+      if (t) { try { clearTimeout(t); } catch (e) {} }
+      App.clearTimer(t);
+      t = App.timer(function () { fn.apply(self, args); }, ms || 120);
+    };
+  },
 
   /* ── tool registry ── */
   tools: {},
@@ -226,7 +237,13 @@ var App = {
     location.hash = path;
   },
   pages: {},
-  registerPage: function (pattern, renderFn) { App.pages[pattern] = renderFn; },
+  _routeRes: {},
+  registerPage: function (pattern, renderFn) {
+    App.pages[pattern] = renderFn;
+    /* Precompile once — render() runs on every hash change. */
+    var esc = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/:[^/]+/g, '[^/]+');
+    App._routeRes[pattern] = new RegExp('^' + esc + '$');
+  },
 
   _renderGen: 0,
   render: function () {
@@ -240,9 +257,7 @@ var App = {
     var match = null;
     for (var p in App.pages) {
       if (p === '*') continue;
-      var esc = p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/:[^/]+/g, '[^/]+');
-      var re = new RegExp('^' + esc + '$');
-      if (re.test(path)) { match = p; break; }
+      if (App._routeRes[p].test(path)) { match = p; break; }
     }
     if (!match) match = '*';
     var fn = App.pages[match] || App.pages['*'];
@@ -433,7 +448,7 @@ var App = {
         else if (!App.paletteResults && TOOLCATEGORIES[App.paletteSelected]) { App.navigate('/tools?cat=' + TOOLCATEGORIES[App.paletteSelected].id); close(); }
       }
     }
-    input.addEventListener('input', function () { App.paletteSelected = 0; render(); });
+    input.addEventListener('input', App.debounce(function () { App.paletteSelected = 0; render(); }, 100));
     document.addEventListener('keydown', keyHandler);
     input.focus();
     render();
@@ -502,6 +517,7 @@ window.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('keydown', function (e) {
     if (e.key === 'k' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); App.openPalette(); }
   });
-  loadWasm().catch(function () { /* site still works; wasm tools show a loading error */ });
+  /* WASM core (645 KB) loads lazily — only when a wasm:true tool mounts
+     (see pages/tool.js). Nothing else on the site needs it. */
 });
 })();

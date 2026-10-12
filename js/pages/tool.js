@@ -46,6 +46,33 @@ function renderTool(path) {
   root.appendChild(shell);
 
   /* template dispatch */
+  mountWithWasmGate();
+  function loadingDots() {
+    return App.el('div', { class: 'loading-block' },
+      App.el('span', { class: 'loading-dot', style: 'width:10px;height:10px;border-radius:50%;background:rgba(83,163,249,0.7);display:inline-block;margin:0 2px' }),
+      App.el('span', { class: 'loading-dot', style: 'width:10px;height:10px;border-radius:50%;background:rgba(83,163,249,0.7);display:inline-block;margin:0 2px' }),
+      App.el('span', { class: 'loading-dot', style: 'width:10px;height:10px;border-radius:50%;background:rgba(83,163,249,0.7);display:inline-block;margin:0 2px' }));
+  }
+  /* The 645 KB WASM core loads lazily — only wasm:true tools fetch it.
+     Everything else mounts instantly with zero downloads. */
+  function mountWithWasmGate() {
+    if (!tool.wasm || (window.Core && window.Core.isReady())) { mountAll(); return; }
+    body.innerHTML = '';
+    body.appendChild(loadingDots());
+    window.loadWasm().then(function () {
+      if (!body.isConnected) return;
+      body.innerHTML = '';
+      mountAll();
+    }).catch(function (err) {
+      if (!body.isConnected) return;
+      body.innerHTML = '';
+      body.appendChild(App.el('div', { class: 'not-found' },
+        App.el('span', { class: 'nf-sub', text: 'WebAssembly core failed to load: ' + App.esc((err && err.message) || String(err)) }),
+        App.el('button', { class: 'btn-primary-sm', type: 'button', style: 'margin-top:0.75rem', text: 'Retry',
+          onclick: function () { mountWithWasmGate(); } })));
+    });
+  }
+  function mountAll() {
   if (tool.template === 'transform') {
     body.appendChild(window.TransformToolUI(tool));
   } else if (tool.template === 'generator') {
@@ -95,7 +122,8 @@ function renderTool(path) {
         body.appendChild(App.el('div', { class: 'not-found', html: '<span class="nf-sub">' + App.esc(err && err.message || String(err)) + '</span>' }));
       }
     }
-  }
+  } /* end custom branch */
+  } /* end mountAll */
 
   return root;
 }

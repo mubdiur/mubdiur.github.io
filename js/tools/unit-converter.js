@@ -112,8 +112,7 @@ App.registerTool('unit-converter', {
       convert(); // the result must follow the new unit family immediately
     });
 
-    valueInput.addEventListener('input', function () { value = valueInput.value; });
-    valueInput.addEventListener('keyup', convert);
+    valueInput.addEventListener('input', function () { value = valueInput.value; convert(); });
 
     fromSel.addEventListener('change', function () { fromUnit = parseInt(fromSel.value, 10); convert(); });
     toSel.addEventListener('change', function () { toUnit = parseInt(toSel.value, 10); convert(); });

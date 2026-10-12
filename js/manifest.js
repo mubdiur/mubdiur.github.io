@@ -348,11 +348,66 @@ window.TOOLMANIFEST = [
   // ── Converters ──────────────────────────────────────────
   { slug: 'csv-to-json', name: 'CSV → JSON', desc: 'RFC 4180-exact CSV parsing: quoted commas, escaped quotes ("") and newlines inside quotes, CRLF, BOM', category: 'converters', tags: ['csv', 'json', 'convert'], icon: 'filespreadsheet', template: 'transform',
     handler: function (s) { return Transforms.csvToJSON(s); } },
+  { slug: 'xml-to-json', name: 'XML → JSON', desc: 'Convert XML (SOAP, RSS, configs) to JSON via the native DOMParser — attributes as @-keys, repeats as arrays', category: 'converters', tags: ['xml', 'json', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
+    handler: function (s) {
+      var d;
+      try { d = new DOMParser().parseFromString(s, 'text/xml'); }
+      catch (e) { throw new Error('Invalid XML'); }
+      var perr = d.getElementsByTagName('parsererror');
+      if (perr.length) throw new Error('Invalid XML: ' + ((perr[0].textContent || '').replace(/\s+/g, ' ').slice(0, 120)));
+      function walk(el) {
+        var out = {}, i, n;
+        var hasAttrs = !!(el.attributes && el.attributes.length);
+        for (i = 0; i < (el.attributes ? el.attributes.length : 0); i++) out['@' + el.attributes[i].name] = el.attributes[i].value;
+        var text = '', kids = {};
+        for (i = 0; i < el.childNodes.length; i++) {
+          n = el.childNodes[i];
+          if (n.nodeType === 3 || n.nodeType === 4) {
+            var tv = n.nodeValue.replace(/\s+/g, ' ').trim();
+            if (tv) text += (text ? ' ' : '') + tv;
+          } else if (n.nodeType === 1) {
+            var v = walk(n);
+            if (kids[n.tagName] === undefined) kids[n.tagName] = v;
+            else if (Array.isArray(kids[n.tagName])) kids[n.tagName].push(v);
+            else kids[n.tagName] = [kids[n.tagName], v];
+          }
+        }
+        var keys = Object.keys(kids);
+        if (!hasAttrs && !keys.length) return text;
+        if (text) out['#text'] = text;
+        for (i = 0; i < keys.length; i++) out[keys[i]] = kids[keys[i]];
+        return out;
+      }
+      var res = {};
+      res[d.documentElement.tagName] = walk(d.documentElement);
+      return JSON.stringify(res, null, 2);
+    } },
   { slug: 'yaml-to-json', name: 'YAML → JSON', desc: 'Convert YAML to JSON', category: 'converters', tags: ['yaml', 'json', 'convert'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.yamlToJSON(s); } },
   { slug: 'table2xl', name: 'Table2xl — Table Converter', desc: 'Paste dirty HTML tables or ELK/Kibana grids — strip the noise, export as clean HTML or ASCII table', category: 'converters', tags: ['table', 'elk', 'kibana', 'ascii'], icon: 'filespreadsheet', template: 'custom' },
   { slug: 'markdown-preview', name: 'Markdown Preview', desc: 'Preview rendered Markdown in real-time', category: 'converters', tags: ['markdown', 'preview'], icon: 'eye', template: 'custom' },
   { slug: 'time-copier', name: 'Time Copier', desc: 'Copy time in mm/dd/yyyy hh:mm AM/PM across UTC, PT (PDT/PST), and ET (EDT/EST) — DST-aware, for now or any custom moment', category: 'formatters', tags: ['time', 'timezone', 'dst', 'copy', 'convert'], icon: 'clock', template: 'custom' },
+  { slug: 'epoch-converter', name: 'Epoch Converter', desc: 'Convert Unix timestamps (seconds or milliseconds) to dates and back — epoch, ISO-8601, UTC and local in one view', category: 'formatters', tags: ['epoch', 'timestamp', 'date', 'unix', 'time'], icon: 'clock', template: 'transform',
+    handler: function (s) {
+      var t = s.trim();
+      if (!t) throw new Error('Enter a Unix timestamp or a date');
+      var d;
+      if (/^-?\d+(\.\d+)?$/.test(t)) {
+        var n = parseFloat(t);
+        var digits = t.replace(/[-.]/g, '').replace(/^0+/, '').length || 1;
+        d = new Date(digits > 10 ? n : n * 1000);
+      } else {
+        var ms = Date.parse(t);
+        if (isNaN(ms)) throw new Error('Unrecognized timestamp or date — try 1718035200 or 2024-06-10T12:00:00Z');
+        d = new Date(ms);
+      }
+      if (isNaN(d.getTime())) throw new Error('Out-of-range date');
+      return 'Epoch (s):  ' + Math.floor(d.getTime() / 1000) +
+        '\nEpoch (ms): ' + d.getTime() +
+        '\nISO-8601:   ' + d.toISOString() +
+        '\nUTC:        ' + d.toUTCString() +
+        '\nLocal:      ' + d.toString();
+    } },
   { slug: 'number-base-converter', name: 'Number Base Converter', desc: 'Convert numbers between binary, octal, decimal, hexadecimal — BigInt-exact at any width, strict digit validation', category: 'math', tags: ['base', 'convert', 'binary', 'hex'], icon: 'calculator', template: 'transform',
     handler: function (s, opts) {
       var from = parseInt((opts && opts.fromBase) || '10', 10);
@@ -596,6 +651,58 @@ window.TOOLMANIFEST = [
       return out.join('\n');
     } },
 
+  { slug: 'css-formatter', name: 'CSS Formatter', desc: 'Beautify minified CSS or minify it — comments and quoted strings preserved', category: 'code', tags: ['css', 'format', 'minify', 'beautify'], icon: 'code2', template: 'transform',
+    handler: function (s, opts) {
+      if (opts && opts.mode === 'minify') {
+        var out = '', inStr = false, q = '', inCom = false;
+        for (var i = 0; i < s.length; i++) {
+          var c = s.charAt(i), nx = s.charAt(i + 1);
+          if (inCom) { if (c === '*' && nx === '/') { inCom = false; i++; } continue; }
+          if (inStr) {
+            out += c;
+            if (c === '\\' && i + 1 < s.length) { out += s.charAt(i + 1); i++; }
+            else if (c === q) inStr = false;
+            continue;
+          }
+          if (c === '/' && nx === '*') { inCom = true; i++; continue; }
+          if (c === '"' || c === "'") { inStr = true; q = c; out += c; continue; }
+          out += c;
+        }
+        return out.replace(/\s+/g, ' ').replace(/\s*([{};:,>+~])\s*/g, '$1').replace(/;}/g, '}').trim();
+      }
+      /* beautify: string/comment-aware, brace depth + paren depth tracked */
+      var lines = [], buf = '', depth = 0, parens = 0, si = false, sq = '', ci = false;
+      function flush() {
+        var t = buf.replace(/\s+/g, ' ').trim();
+        if (t) lines.push('  '.repeat(Math.max(0, depth)) + t);
+        buf = '';
+      }
+      for (var j = 0; j < s.length; j++) {
+        var ch = s.charAt(j), nxt = s.charAt(j + 1);
+        if (ci) { buf += ch; if (ch === '*' && nxt === '/') { buf += '/'; j++; flush(); } continue; }
+        if (si) {
+          buf += ch;
+          if (ch === '\\' && j + 1 < s.length) { buf += s.charAt(j + 1); j++; }
+          else if (ch === sq) si = false;
+          continue;
+        }
+        if (ch === '/' && nxt === '*') { flush(); ci = true; buf += '/*'; j++; continue; }
+        if (ch === '"' || ch === "'") { si = true; sq = ch; buf += ch; continue; }
+        if (ch === '(') { parens++; buf += ch; continue; }
+        if (ch === ')') { parens = Math.max(0, parens - 1); buf += ch; continue; }
+        if (ch === '{') { buf += ' {'; flush(); depth++; continue; }
+        if (ch === '}') { flush(); depth = Math.max(0, depth - 1); buf += '}'; flush(); continue; }
+        if (ch === ';') { buf += ';'; flush(); continue; }
+        if (ch === ':' && depth > 0 && parens === 0) { buf = buf.replace(/\s+$/, '') + ': '; continue; }
+        if (ch === ',' && parens === 0) { buf += ','; flush(); continue; }
+        if (ch === '\n' || ch === '\r') { flush(); continue; }
+        buf += ch;
+      }
+      flush();
+      return lines.join('\n').trim();
+    },
+    params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'beautify', options: [{ value: 'beautify', label: 'Beautify' }, { value: 'minify', label: 'Minify' }] }] },
+
   // ── Generators (additional) ─────────────────────────────
   { slug: 'qr-code-generator', name: 'QR Code Generator', desc: 'Generate scannable QR codes from text or URLs — WebAssembly core', category: 'generators', tags: ['qr', 'barcode', 'generate'], icon: 'images', template: 'custom', wasm: true },
   { slug: 'post-maker', name: 'HTML Post Maker', desc: 'Compose rich HTML posts — text and image blocks, drag & drop, reorder, copy or preview as self-contained HTML', category: 'generators', tags: ['html', 'post', 'builder', 'image'], icon: 'filetype', template: 'custom' },
@@ -651,6 +758,56 @@ window.TOOLMANIFEST = [
         return (valid ? '✓' : '✗') + ' ' + u.trim() + (valid ? '' : ' — invalid UUID v4');
       }).join('\n');
     } },
+  { slug: 'cidr-calculator', name: 'CIDR Subnet Calculator', desc: 'Paste 192.168.1.10/24 — network, broadcast, mask, wildcard, host count and usable range', category: 'network', tags: ['cidr', 'subnet', 'ip', 'network', 'mask'], icon: 'globe', template: 'transform',
+    handler: function (s) {
+      var m = s.trim().match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\/(\d{1,2})$/);
+      if (!m) throw new Error('Enter IPv4 CIDR like 192.168.1.10/24');
+      var oct = [m[1], m[2], m[3], m[4]].map(Number);
+      var pre = parseInt(m[5], 10);
+      if (oct.some(function (o) { return o < 0 || o > 255; }) || pre < 0 || pre > 32) throw new Error('Octets must be 0–255 and prefix 0–32');
+      function i2s(i) { return [(i >>> 24) & 255, (i >>> 16) & 255, (i >>> 8) & 255, i & 255].join('.'); }
+      var ip = (((oct[0] * 256 + oct[1]) * 256 + oct[2]) * 256 + oct[3]) >>> 0;
+      var mask = pre === 0 ? 0 : (0xFFFFFFFF << (32 - pre)) >>> 0;
+      var network = (ip & mask) >>> 0;
+      var broadcast = (network | (~mask >>> 0)) >>> 0;
+      var hosts = pre === 32 ? 1 : pre === 31 ? 2 : Math.pow(2, 32 - pre) - 2;
+      var first = pre >= 31 ? network : (network + 1) >>> 0;
+      var last = pre >= 31 ? broadcast : (broadcast - 1) >>> 0;
+      return 'IP:           ' + i2s(ip) +
+        '\nPrefix:       /' + pre +
+        '\nMask:         ' + i2s(mask) +
+        '\nWildcard:     ' + i2s((~mask >>> 0)) +
+        '\nNetwork:      ' + i2s(network) +
+        '\nBroadcast:    ' + i2s(broadcast) +
+        '\nUsable range: ' + i2s(first) + ' – ' + i2s(last) +
+        '\nHosts:        ' + hosts;
+    } },
+  { slug: 'url-parser', name: 'URL Parser', desc: 'Decompose any URL — protocol, host, port, path and a decoded query-param table', category: 'network', tags: ['url', 'parse', 'query', 'params'], icon: 'globe', template: 'transform',
+    handler: function (s, opts) {
+      var u;
+      try { u = new URL(s.trim()); } catch (e) { throw new Error('Enter a valid absolute URL (include https://)'); }
+      var params = [];
+      u.searchParams.forEach(function (v, k) { params.push([k, v]); });
+      if (opts && opts.view === 'json') {
+        var o = { protocol: u.protocol.replace(/:$/, ''), host: u.hostname, port: u.port || '(default)', path: u.pathname, hash: u.hash || '(none)', query: {} };
+        params.forEach(function (p) {
+          if (o.query[p[0]] === undefined) o.query[p[0]] = p[1];
+          else if (Array.isArray(o.query[p[0]])) o.query[p[0]].push(p[1]);
+          else o.query[p[0]] = [o.query[p[0]], p[1]];
+        });
+        return JSON.stringify(o, null, 2);
+      }
+      var lines = ['Protocol: ' + u.protocol.replace(/:$/, ''),
+        'Host:     ' + u.hostname,
+        'Port:     ' + (u.port || '(default)'),
+        'Path:     ' + u.pathname,
+        'Hash:     ' + (u.hash || '(none)'),
+        'Query params (' + params.length + '):'];
+      if (!params.length) lines.push('  (none)');
+      params.forEach(function (p) { lines.push('  ' + p[0] + ' = ' + p[1]); });
+      return lines.join('\n');
+    },
+    params: [{ key: 'view', label: 'View', type: 'select', default: 'table', options: [{ value: 'table', label: 'Table' }, { value: 'json', label: 'JSON' }] }] },
 
   // ── Algorithm Visualizers ───────────────────────────────
   { slug: 'sorting-visualizer', name: 'Sorting Algorithm Visualizer', desc: 'Watch bubble, quick, merge, insertion, selection sorts in action', category: 'algorithms', tags: ['sorting', 'visualizer', 'algorithm'], icon: 'gitbranch', template: 'custom' },

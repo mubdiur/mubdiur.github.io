@@ -430,6 +430,8 @@ function renderIde() {
     '.ide-stdin{padding:8px 10px;gap:0.3rem;}' +
     '.ide-stdin-input{height:40px;min-height:40px;}}' +
     '@media(max-height:500px){.ide-page{height:auto;min-height:calc(100dvh - 48px);overflow-y:auto;}.ide-main{overflow:visible;}.ide-editor-wrap{min-height:180px;}.ide-panel{height:auto;min-height:200px;}}';
+  var staleIdeCss = document.getElementById('ide-css');
+  if (staleIdeCss && staleIdeCss.parentNode) staleIdeCss.parentNode.removeChild(staleIdeCss);
   document.head.appendChild(css);
 
   var headLeft = App.el('div', { class: 'ide-head-left' },
