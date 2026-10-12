@@ -152,6 +152,7 @@ App.registerTool('time-copier', {
     '.t-time-copier .tc-copyall{border-color:rgba(83,163,249,0.25);}\n' +
     '.t-time-copier .tc-copyall:hover{border-color:rgba(83,163,249,0.35);}\n' +
     '.t-time-copier .tc-label{width:2.25rem;}\n' +
+    '.t-time-copier .tc-rows{grid-template-columns:minmax(0,1fr);}\n' +
     '.t-time-copier .tc-maxw180{max-width:180px;}\n' +
     '.t-time-copier .tc-row{background:rgba(0,0,0,0.25);}\n' +
     '.t-time-copier .tc-bg40{background:rgba(51,53,56,0.4);}\n' +
@@ -225,7 +226,7 @@ App.registerTool('time-copier', {
       App.el('span', { class: 'text-xs font-mono font-medium tc-muted80', text: 'Copy-ready times' }),
       copyAllBtn);
 
-    var rowsGrid = App.el('div', { class: 'grid gap-2' });
+    var rowsGrid = App.el('div', { class: 'grid gap-2 tc-rows' });
     var rows = ZONES.map(function (z) {
       var lineEl = App.el('div', { class: 'text-sm font-mono truncate tc-fg90' });
       var subEl = App.el('div', { class: 'text-[10px] font-mono tc-muted60' });
