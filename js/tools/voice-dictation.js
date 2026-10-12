@@ -460,15 +460,31 @@ App.registerTool('voice-dictation', {
       r.continuous = true; // one session, no per-utterance restart churn
       r.interimResults = true; // stream partials for lowest perceived latency
       r.maxAlternatives = 3; // confidence pick across hypotheses beats res[0] alone
+      /* Exactly-once commit per session. Desktop Chrome advances resultIndex
+         so resends never happen — but mobile Chrome re-fires the CUMULATIVE
+         list with resultIndex stuck at 0, so naive "append everything new"
+         inserts every word 2–3×. Keying committed finals by index + text
+         makes repeats idempotent while genuine repeats ("yes" … "yes" as
+         separate results) still commit, since their indices differ. */
+      var seenFinal = {};
+      var maxSeen = -1;
       r.onresult = function (ev) {
         failStreak = 0;
         var finals = [];
         var partials = [];
-        var i, res;
-        for (i = ev.resultIndex; i < ev.results.length; i++) {
+        var i, res, txt, key, len;
+        try { len = ev.results.length; } catch (eRn) { len = 0; }
+        if (len <= maxSeen) { seenFinal = {}; maxSeen = -1; } // session reset: list shrank, re-index from 0
+        for (i = 0; i < len; i++) {
           res = ev.results[i];
-          if (res.isFinal) finals.push(bestTranscript(res));
-          else if (res[0]) partials.push(res[0].transcript);
+          if (res.isFinal) {
+            txt = bestTranscript(res);
+            key = i + '|' + txt;
+            if (!seenFinal[key]) { seenFinal[key] = 1; finals.push(txt); }
+            if (i > maxSeen) maxSeen = i;
+          } else if (res[0]) {
+            partials.push(res[0].transcript);
+          }
         }
         if (finals.length) {
           setInterim('');
