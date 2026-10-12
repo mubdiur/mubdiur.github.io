@@ -212,7 +212,7 @@ window.TOOLMANIFEST = [
       var isPal = clean === clean.split('').reverse().join('');
       return (isPal ? '✓ YES' : '✗ NO') + ' — "' + clean + '" ' + (isPal ? 'is' : 'is not') + ' a palindrome\n\nOriginal: ' + s.slice(0, 200);
     } },
-  { slug: 'voice-dictation', name: 'Voice Dictation', desc: 'Hands-free English speech-to-text — speak to replace selections, voice commands for punctuation, smart caps, Ctrl+C copies the transcript', category: 'text', tags: ['voice', 'speech', 'dictation', 'microphone', 'transcribe'], icon: 'mic', template: 'custom' },
+  { slug: 'voice-dictation', name: 'Voice Dictation', desc: 'Hands-free English speech-to-text — speak to replace selections, voice commands, always-on-top pop-out, Ctrl+C copies', category: 'text', tags: ['voice', 'speech', 'dictation', 'microphone', 'transcribe', 'pip', 'pop-out'], icon: 'mic', template: 'custom' },
 
   // ── Generators ──────────────────────────────────────────
   { slug: 'random-string', name: 'Random String Generator', desc: 'Generate random strings with configurable character sets — rejection-sampled, zero modulo bias', category: 'generators', tags: ['random', 'generate'], icon: 'shuffle', template: 'generator',
