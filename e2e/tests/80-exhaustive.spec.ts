@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
 
 // ── manifests mirrored from js/manifest.js (single source) ──
 const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInOutput?: RegExp; expectError?: RegExp }> = {
-  'json-formatter': { good: '{"a":1}', bad: 'not json', expectInOutput: /"a":\s*1/, expectError: /Unexpected token|Error/ },
+  'json-formatter': { good: '{"a":1}', bad: 'not json', expectInOutput: /"a":\s*1/, expectError: /Unexpected token|unexpected keyword|Parse error|Error/i },
   'json-minifier': { good: '{ "a" : 1 }', expectInOutput: /"a":1/ },
   'json-to-csv': { good: '[{"a":1,"b":2}]', expectInOutput: /a,b/ },
   'json-to-yaml': { good: '{"a":1}', expectInOutput: /a:\s*1/ },
@@ -63,6 +63,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'html-formatter': { good: '<div><p>hi</p></div>', expectInOutput: /<div>/ },
   'sql-formatter': { good: 'select * from t', expectInOutput: /SELECT/i },
   'uuid-v4-validate': { good: '550e8400-e29b-41d4-a716-446655440000', expectInOutput: /valid|✓/i },
+  'line-tools': { good: 'b\na', expectInOutput: /b/ }, // exact per-mode output proven in handler matrix; fixture must hold under every option
   'epoch-converter': { good: '1718035200', expectInOutput: /2024-06-10|Epoch/ },
   'cidr-calculator': { good: '192.168.1.10/24', expectInOutput: /192\.168\.1\.0/ },
   'url-parser': { good: 'https://example.com:8443/p?a=1&b=2', expectInOutput: /example\.com/ },

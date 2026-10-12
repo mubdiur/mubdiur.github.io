@@ -212,6 +212,29 @@ window.TOOLMANIFEST = [
       var isPal = clean === clean.split('').reverse().join('');
       return (isPal ? '✓ YES' : '✗ NO') + ' — "' + clean + '" ' + (isPal ? 'is' : 'is not') + ' a palindrome\n\nOriginal: ' + s.slice(0, 200);
     } },
+  { slug: 'line-tools', name: 'Line Tools', desc: 'Number, trim or clean lines — prefix/suffix every line, drop empties', category: 'text', tags: ['lines', 'number', 'trim', 'prefix', 'clean'], icon: 'textsearch', template: 'transform',
+    handler: function (s, opts) {
+      var mode = (opts && opts.mode) || 'number';
+      var affix = (opts && opts.affix) || '';
+      var lines = s.split('\n');
+      if (mode === 'trim') return lines.map(function (l) { return l.trim(); }).join('\n');
+      if (mode === 'remove-empty') return lines.filter(function (l) { return l.trim() !== ''; }).join('\n');
+      if (mode === 'prefix') return lines.map(function (l) { return affix + l; }).join('\n');
+      if (mode === 'suffix') return lines.map(function (l) { return l + affix; }).join('\n');
+      var w = String(lines.length).length;
+      return lines.map(function (l, i) {
+        var n = String(i + 1);
+        while (n.length < w) n = '0' + n;
+        return n + '  ' + l;
+      }).join('\n');
+    },
+    params: [
+      { key: 'mode', label: 'Mode', type: 'select', default: 'number', options: [
+        { value: 'number', label: 'Number lines' }, { value: 'trim', label: 'Trim each line' },
+        { value: 'remove-empty', label: 'Remove empty lines' }, { value: 'prefix', label: 'Add prefix' }, { value: 'suffix', label: 'Add suffix' }
+      ] },
+      { key: 'affix', label: 'Affix', type: 'text', default: '' }
+    ] },
   { slug: 'voice-dictation', name: 'Voice Dictation', desc: 'Hands-free English speech-to-text — speak to replace selections, voice commands, always-on-top pop-out, Ctrl+C copies', category: 'text', tags: ['voice', 'speech', 'dictation', 'microphone', 'transcribe', 'pip', 'pop-out'], icon: 'mic', template: 'custom' },
 
   // ── Generators ──────────────────────────────────────────

@@ -37,15 +37,18 @@ App.registerTool('qr-code-generator', {
         cell = Math.max(cell, 1);
         var pad = 4 * cell;
         var dim = n * cell + pad * 2;
-        canvas.width = dim;
-        canvas.height = dim;
+        /* Integer DPR-scaled backing store: on-screen stays dim CSS px
+           (crisp via pixelated), the downloaded PNG is 2–3x for print. */
+        var k = Math.max(1, Math.min(3, Math.round(window.devicePixelRatio || 1)));
+        canvas.width = dim * k;
+        canvas.height = dim * k;
         var ctx = canvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, dim, dim);
+        ctx.fillRect(0, 0, dim * k, dim * k);
         ctx.fillStyle = '#000000';
         for (var y = 0; y < n; y++) {
           for (var x = 0; x < n; x++) {
-            if (qr.matrix[y * n + x]) ctx.fillRect(pad + x * cell, pad + y * cell, cell, cell);
+            if (qr.matrix[y * n + x]) ctx.fillRect((pad + x * cell) * k, (pad + y * cell) * k, cell * k, cell * k);
           }
         }
         canvas.style.width = Math.min(pxSize, 420) + 'px';

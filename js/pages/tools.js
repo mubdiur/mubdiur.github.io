@@ -5,10 +5,41 @@
 (function () {
 'use strict';
 
-function ToolCard(tool) {
-  return App.el('button', {
-    class: 'tool-card',
+function favLoad() {
+  try {
+    var raw = localStorage.getItem('mub.favtools.v1');
+    var arr = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(arr)) return [];
+    var known = {};
+    TOOLMANIFEST.forEach(function (t) { known[t.slug] = true; });
+    return arr.filter(function (s) { return typeof s === 'string' && known[s]; });
+  } catch (e) { return []; }
+}
+function favSave(list) {
+  try { localStorage.setItem('mub.favtools.v1', JSON.stringify(list)); } catch (e) {}
+}
+function favHas(list, slug) { return list.indexOf(slug) >= 0; }
+function favToggle(list, slug) {
+  var i = list.indexOf(slug);
+  if (i >= 0) list.splice(i, 1);
+  else list.push(slug);
+  favSave(list);
+  return list;
+}
+
+function ToolCard(tool, favs, onFav) {
+  var isFav = favHas(favs, tool.slug);
+  var star = App.el('button', {
     type: 'button',
+    class: 'tc-fav' + (isFav ? ' on' : ''),
+    title: isFav ? 'Remove from favorites' : 'Add to favorites',
+    'aria-label': (isFav ? 'Remove ' : 'Add ') + tool.name + (isFav ? ' from' : ' to') + ' favorites',
+    'aria-pressed': isFav ? 'true' : 'false',
+    onclick: function (e) { e.stopPropagation(); onFav(tool.slug); }
+  }, App.el('span', { 'aria-hidden': 'true', text: isFav ? '★' : '☆' }));
+  var card = App.el('div', {
+    class: 'tool-card', role: 'link', tabindex: '0',
+    'aria-label': tool.name + ' — open tool',
     onclick: function () { App.navigate('/tools/' + tool.slug); }
   },
     App.el('div', { class: 'tc-icon' }, App.icon(tool.icon, '', 16)),
@@ -18,7 +49,12 @@ function ToolCard(tool) {
       App.el('div', { class: 'tc-tags' },
         tool.tags.slice(0, 3).map(function (tag) {
           return App.el('span', { class: 'tc-tag', text: tag });
-        }))));
+        }))),
+    star);
+  card.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); App.navigate('/tools/' + tool.slug); }
+  });
+  return card;
 }
 
 function renderTools() {
@@ -76,6 +112,23 @@ function renderTools() {
   function renderResults() {
     var q = state.search.trim().toLowerCase();
     results.innerHTML = '';
+    var favs = favLoad();
+    function cards(tools) {
+      return tools.map(function (t) {
+        return ToolCard(t, favs, function (slug) { favs = favToggle(favs.slice(), slug); renderResults(); });
+      });
+    }
+    if (!q && !state.cat && favs.length) {
+      var favTools = favs.map(function (s) { return TOOLS_BY_SLUG[s]; }).filter(Boolean);
+      if (favTools.length) {
+        results.appendChild(App.el('div', { class: 'cat-section' },
+          App.el('div', { class: 'cat-head' },
+            App.el('span', { class: 'cat-fav-star', 'aria-hidden': 'true', text: '★' }),
+            App.el('h2', { text: 'Favorites' }),
+            App.el('span', { text: String(favTools.length) })),
+          App.el('div', { class: 'tool-grid' }, cards(favTools))));
+      }
+    }
     if (!q && !state.cat) {
       TOOLCATEGORIES.forEach(function (cat) {
         var tools = TOOLMANIFEST.filter(function (t) { return t.category === cat.id; });
@@ -85,7 +138,7 @@ function renderTools() {
             App.icon(cat.icon, '', 16),
             App.el('h2', { text: cat.name }),
             App.el('span', { text: String(tools.length) })),
-          App.el('div', { class: 'tool-grid' }, tools.map(ToolCard))));
+          App.el('div', { class: 'tool-grid' }, cards(tools))));
       });
       return;
     }
@@ -102,7 +155,7 @@ function renderTools() {
         App.el('h3', { text: 'No tools match your search' }),
         App.el('button', { type: 'button', onclick: clearFilters, text: 'Clear filters' })));
     } else {
-      results.appendChild(App.el('div', { class: 'tool-grid' }, filtered.map(ToolCard)));
+      results.appendChild(App.el('div', { class: 'tool-grid' }, cards(filtered)));
     }
   }
 

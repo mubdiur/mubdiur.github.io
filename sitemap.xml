@@ -83,4 +83,11 @@
   <url><loc>https://mubdiur.github.io/#/tools/sorting-visualizer</loc><lastmod>2026-08-21</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://mubdiur.github.io/#/tools/search-visualizer</loc><lastmod>2026-08-21</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://mubdiur.github.io/#/tools/binary-tree-visualizer</loc><lastmod>2026-08-21</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://mubdiur.github.io/#/tools/voice-dictation</loc><lastmod>2026-10-12</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://mubdiur.github.io/#/tools/xml-to-json</loc><lastmod>2026-10-12</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://mubdiur.github.io/#/tools/epoch-converter</loc><lastmod>2026-10-12</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://mubdiur.github.io/#/tools/css-formatter</loc><lastmod>2026-10-12</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://mubdiur.github.io/#/tools/cidr-calculator</loc><lastmod>2026-10-12</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://mubdiur.github.io/#/tools/url-parser</loc><lastmod>2026-10-12</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://mubdiur.github.io/#/tools/line-tools</loc><lastmod>2026-10-12</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>

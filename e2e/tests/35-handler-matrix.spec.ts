@@ -121,6 +121,11 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('css-formatter', 'beautify', TOOLS['css-formatter'].handler('a{color:red}', { mode: 'beautify' }).includes('color: red'));
     push('css-formatter', 'minify', TOOLS['css-formatter'].handler('a { color: red; } /* c */', { mode: 'minify' }) === 'a{color:red}');
     push('css-formatter', 'minify keeps strings', TOOLS['css-formatter'].handler('a::after{content:"/*x*/"}', { mode: 'minify' }).includes('"/*x*/"'));
+    push('line-tools', 'number', TOOLS['line-tools'].handler('b\na', { mode: 'number' }) === '1  b\n2  a');
+    push('line-tools', 'trim', TOOLS['line-tools'].handler('  a  \n b ', { mode: 'trim' }) === 'a\nb');
+    push('line-tools', 'remove-empty', TOOLS['line-tools'].handler('a\n\nb', { mode: 'remove-empty' }) === 'a\nb');
+    push('line-tools', 'prefix', TOOLS['line-tools'].handler('a', { mode: 'prefix', affix: '> ' }) === '> a');
+    push('line-tools', 'suffix', TOOLS['line-tools'].handler('a', { mode: 'suffix', affix: '!' }) === 'a!');
 
     // --- generators ---
     push('random-string', 'alphanumeric', TOOLS['random-string'].genHandler({ length: '16', charset: 'alphanumeric' }).length === 16);
@@ -149,7 +154,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
   if (failed.length) console.log('failed handlers:', JSON.stringify(failed, null, 2));
   expect(failed, `handler matrix failures:\n` + JSON.stringify(failed, null, 2)).toEqual([]);
   expect((result as any[]).length, 'handler matrix must cover all tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
-  // Full manifest is 85; wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
+  // Full manifest is 86; wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
-  expect(manifest, 'TOOLMANIFEST must be 85').toBe(85);
+  expect(manifest, 'TOOLMANIFEST must be 86').toBe(86);
 });

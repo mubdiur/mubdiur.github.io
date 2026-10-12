@@ -42,8 +42,6 @@ const TARGETS = [
   'js/ide/vendor/editor.js',
   'js/core.js',
   'js/manifest.js',
-  'js/charts.js',
-  'js/svg.js',
   'js/pages/home.js',
   'js/pages/tools.js',
   'js/pages/tool.js',

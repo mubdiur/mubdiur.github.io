@@ -261,6 +261,20 @@ var App = {
     }
     if (!match) match = '*';
     var fn = App.pages[match] || App.pages['*'];
+    /* Per-route title: bookmarks, history and screen readers get the
+       real page name instead of one static title for the whole SPA. */
+    try {
+      var baseTitle = 'Mubdiur Rahman — AI Platform & Reliability Engineer';
+      var pageTitle = baseTitle;
+      if (path === '/tools' || path.indexOf('/tools?') === 0) pageTitle = 'Developer Tools — ' + baseTitle;
+      else if (path.indexOf('/tools/') === 0) {
+        var tSlug = path.replace(/^\/tools\//, '').replace(/[?#].*$/, '');
+        var tDef = (window.TOOLS_BY_SLUG || {})[tSlug];
+        pageTitle = (tDef ? tDef.name : 'Developer Tool') + ' — Developer Tools';
+      }
+      else if (path === '/ide' || path.indexOf('/ide') === 0) pageTitle = 'In-Browser IDE — ' + baseTitle;
+      if (document.title !== pageTitle) document.title = pageTitle;
+    } catch (e) {}
     main.innerHTML = '';
     var footerEl = document.getElementById('site-footer');
     if (footerEl) footerEl.style.display = (path === '/ide' || path.indexOf('/ide') === 0) ? 'none' : '';
