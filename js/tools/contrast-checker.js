@@ -41,7 +41,8 @@ App.registerTool('contrast-checker', {
     '.t-contrast-checker .bg-black\\/10{background:rgba(0,0,0,0.1);}\n' +
     '.t-contrast-checker .text-green-glow\\/80{color:rgba(83,163,249,0.8);}\n' +
     '.t-contrast-checker .text-red-400\\/80{color:rgba(248,113,113,0.8);}\n' +
-    '.t-contrast-checker .space-y-1\\.5 > * + *{margin-top:0.375rem;}\n',
+    '.t-contrast-checker .space-y-1\\.5 > * + *{margin-top:0.375rem;}\n' +
+    '@media(max-width:480px){.t-contrast-checker .cc-cols{grid-template-columns:1fr;}}\n',
 
   mount: function (root) {
     var fg = '#ffffff';
@@ -108,7 +109,7 @@ App.registerTool('contrast-checker', {
     fgHex.addEventListener('input', function () { var n = normalizeHex(fgHex.value); if (n) { fg = n; render(); } });
     bgHex.addEventListener('input', function () { var n = normalizeHex(bgHex.value); if (n) { bg = n; render(); } });
 
-    root.appendChild(App.el('div', { class: 'grid grid-cols-2 gap-3' },
+    root.appendChild(App.el('div', { class: 'grid grid-cols-2 gap-3 cc-cols' },
       App.el('div', {},
         App.el('span', { class: 'text-[10px] font-mono text-muted-foreground/60', text: 'Foreground' }),
         fgColor, fgHex),

@@ -387,8 +387,7 @@ function renderIde() {
     '.ide-run-btn:active:not(:disabled){transform:translateY(0px);}' +
     '.ide-run-btn:disabled{opacity:0.55;cursor:wait;box-shadow:none;}' +
     '.ide-run-glyph{font-size:10px;}' +
-    '.ide-main{display:flex;flex:1;min-height:0;gap:0.75rem;overflow:hidden;}' +
-    '.ide-editor-wrap{flex:1;min-width:0;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;background:#2d2a2e;display:flex;flex-direction:column;min-height:0;box-shadow:0 10px 30px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.04) inset;}' +
+    '.ide-main{display:flex;flex:1;min-height:0;gap:0.75rem;overflow:hidden;}' +    '.ide-editor-wrap{flex:1;min-width:0;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;background:#2d2a2e;display:flex;flex-direction:column;min-height:0;box-shadow:0 10px 30px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.04) inset;}' +
     '.ide-editor-wrap .cm-editor{flex:1;min-height:0;pointer-events:auto;}' +
     '.ide-editor-wrap .cm-scroller{pointer-events:auto;}' +
     '.ide-editor-wrap .cm-content{pointer-events:auto;user-select:text;-webkit-user-select:text;caret-color:#ffd866;}' +
@@ -416,7 +415,19 @@ function renderIde() {
     '.ide-stdin-send:hover{opacity:0.92;transform:translateY(-0.5px);}' +
     '.ide-stdin-send:active{transform:translateY(0);}' +
     '@media(max-width:900px){.ide-main{flex-direction:column;}.ide-panel{width:auto;height:38%;min-height:180px;}}' +
-    '@media(max-width:640px){.ide-page{height:calc(100dvh - 48px);padding:0.5rem;gap:0.5rem;}.ide-editor-wrap,.ide-panel{border-radius:12px;}}';
+    '@media(max-width:640px){.ide-page{height:calc(100dvh - 48px);padding:0.5rem;gap:0.5rem;}.ide-editor-wrap,.ide-panel{border-radius:12px;}' +
+    '.ide-head{gap:0.5rem;padding:0;}' +
+    '.ide-head-left{gap:0.5rem;}' +
+    '.ide-badge{display:none;}' +
+    '.ide-head-right{width:100%;gap:0.5rem;}' +
+    '.ide-head-right kbd{display:none;}' +
+    '.ide-tabs{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding-bottom:2px;scrollbar-width:none;flex:1;min-width:0;}' +
+    '.ide-tabs::-webkit-scrollbar{display:none;}' +
+    '.ide-tab{flex:none;}' +
+    '.ide-run-btn{padding:6px 14px;font-size:11px;}' +
+    '.ide-editor-wrap{min-height:220px;}' +
+    '.ide-panel{min-height:230px;}' +
+    '.ide-stdin-input{min-height:44px;}}';
   document.head.appendChild(css);
 
   var headLeft = App.el('div', { class: 'ide-head-left' },

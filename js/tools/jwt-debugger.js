@@ -11,7 +11,7 @@
 App.registerTool('jwt-debugger', {
   css: '' +
     '.t-jwt-debugger .jwt-sec{margin-top:0.75rem;}\n' +
-    '.t-jwt-debugger .jwt-label{display:flex;align-items:center;gap:0.375rem;font-family:var(--font-mono);font-size:10px;margin-bottom:0.25rem;}\n' +
+    '.t-jwt-debugger .jwt-label{display:flex;align-items:center;flex-wrap:wrap;gap:0.375rem;font-family:var(--font-mono);font-size:10px;margin-bottom:0.25rem;}\n' +
     '.t-jwt-debugger .jwt-label .btn-copy{margin-left:auto;padding:0.125rem 0.375rem;font-size:10px;}\n' +
     '.t-jwt-debugger .lbl-header{color:var(--ctp-blue);}\n' +
     '.t-jwt-debugger .lbl-payload{color:var(--ctp-blue);}\n' +

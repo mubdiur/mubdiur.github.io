@@ -9,8 +9,8 @@
 App.registerTool('color-converter', {
   css: '' +
     '.t-color-converter .cc-swatch{width:64px;height:64px;}\n' +
-    '.t-color-converter .cc-grid{display:grid;grid-template-columns:repeat(2,1fr);column-gap:1rem;row-gap:0.25rem;}\n' +
-    '.t-color-converter .cc-field{background:transparent;border:none;border-bottom:1px solid rgba(51,53,56,0.3);color:rgba(227,227,227,0.8);padding:0 0.25rem;outline:none;font-family:var(--font-mono);font-size:10px;}\n' +
+    '.t-color-converter .cc-grid{display:grid;grid-template-columns:repeat(2,1fr);column-gap:1rem;row-gap:0.25rem;min-width:0;}\n' +
+    '.t-color-converter .cc-field{background:transparent;border:none;border-bottom:1px solid rgba(51,53,56,0.3);color:rgba(227,227,227,0.8);padding:0 0.25rem;outline:none;font-family:var(--font-mono);font-size:10px;min-width:0;width:100%;}\n' +
     '.t-color-converter .cc-field:focus{border-color:rgba(83,163,249,0.5);}\n' +
     '.t-color-converter .cc-field.cc-dim{color:rgba(227,227,227,0.6);}\n' +
     '.t-color-converter .cc-picker{height:32px;width:100%;background:transparent;cursor:pointer;}\n',

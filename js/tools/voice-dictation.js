@@ -27,7 +27,7 @@ if (!window.ICONS.mic) {
 var VD_CSS = '' +
   '.t-voice-dictation{display:flex;flex-direction:column;gap:0.75rem;flex:1;min-height:0;}\n' +
   '.t-voice-dictation .vd-top{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem 0.75rem;}\n' +
-  '.t-voice-dictation .vd-status{display:flex;align-items:center;gap:0.5rem;font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.8);}\n' +
+  '.t-voice-dictation .vd-status{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.8);min-width:0;}\n' +
   '.t-voice-dictation .vd-dot{width:10px;height:10px;border-radius:50%;background:rgba(141,148,158,0.5);flex-shrink:0;}\n' +
   '.t-voice-dictation .vd-dot.live{background:#fb565b;animation:vd-pulse 1.2s ease-in-out infinite;}\n' +
   '.t-voice-dictation .vd-dot.hearing{background:#4ade80;animation:vd-pulse 0.6s ease-in-out infinite;}\n' +

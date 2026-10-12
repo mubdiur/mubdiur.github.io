@@ -263,7 +263,7 @@ App.registerTool('binary-tree-visualizer', {
     );
 
     var svg = svgEl('svg', { style: { display: 'block' } });
-    var svgBox = App.el('div', { class: 'rounded border border-border/30 bg-black/20 overflow-auto' }, svg);
+    var svgBox = App.el('div', { class: 'rounded border border-border/30 bg-black/20 overflow-auto', style: { maxWidth: '100%', WebkitOverflowScrolling: 'touch' } }, svg);
 
     root.appendChild(toolbar);
     root.appendChild(svgBox);
