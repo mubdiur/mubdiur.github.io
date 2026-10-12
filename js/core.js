@@ -519,5 +519,14 @@ window.addEventListener('DOMContentLoaded', function () {
   });
   /* WASM core (645 KB) loads lazily — only when a wasm:true tool mounts
      (see pages/tool.js). Nothing else on the site needs it. */
+
+  /* Offline shell: service worker precaches the app shell (~1.3 MB) on
+     first visit; IDE engines/wasm/fonts join the runtime cache on use.
+     file:// has no SW support — skip there. */
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    window.addEventListener('load', function () {
+      try { navigator.serviceWorker.register('sw.js').catch(function () {}); } catch (e) {}
+    });
+  }
 });
 })();
