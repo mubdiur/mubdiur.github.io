@@ -371,7 +371,7 @@ function renderIde() {
     '.ide-head{display:flex;align-items:center;justify-content:space-between;gap:0.875rem;flex-wrap:wrap;flex-shrink:0;padding:2px 2px;}' +
     '.ide-head-left{display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap;min-width:0;}' +
     '.ide-head-right{display:flex;align-items:center;gap:0.625rem;flex-wrap:wrap;}' +
-    '.ide-title{font-family:var(--font-mono);font-size:13.5px;font-weight:700;color:#f5f3f5;letter-spacing:-0.035em;}' +
+    '.ide-title{font-family:var(--font-mono);font-size:13.5px;font-weight:700;color:#f5f3f5;letter-spacing:-0.035em;margin:0;}' +
     '.ide-sub{font-family:var(--font-mono);font-size:11px;color:#9a999e;letter-spacing:-0.01em;display:none;}' +
     '@media(min-width:1400px){.ide-sub{display:inline;}}' +
     '.ide-badge{font-family:var(--font-mono);font-size:10px;letter-spacing:0.02em;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,216,102,0.22);color:#ffd866;background:rgba(255,216,102,0.10);white-space:nowrap;backdrop-filter:blur(6px);}' +
@@ -390,6 +390,7 @@ function renderIde() {
     '.ide-main{display:flex;flex:1;min-height:0;gap:0.75rem;overflow:hidden;}' +    '.ide-editor-wrap{flex:1;min-width:0;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;background:#2d2a2e;display:flex;flex-direction:column;min-height:0;box-shadow:0 10px 30px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.04) inset;}' +
     '.ide-editor-wrap .cm-editor{flex:1;min-height:0;pointer-events:auto;}' +
     '.ide-editor-wrap .cm-scroller{pointer-events:auto;}' +
+    '.ide-editor-wrap .cm-gutterElement{color:#b8b7bc;}' +
     '.ide-editor-wrap .cm-content{pointer-events:auto;user-select:text;-webkit-user-select:text;caret-color:#ffd866;}' +
     '.ide-panel{width:392px;flex:none;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,0.07);border-radius:14px;background:linear-gradient(180deg, rgba(64,62,65,0.98) 0%, rgba(58,56,60,0.98) 100%);min-height:0;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.05) inset;}' +
     '.ide-outhead{display:flex;align-items:center;gap:0.75rem;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);flex-shrink:0;}' +
@@ -435,7 +436,7 @@ function renderIde() {
   document.head.appendChild(css);
 
   var headLeft = App.el('div', { class: 'ide-head-left' },
-    App.el('span', { class: 'ide-title', text: 'In-Browser IDE' }),
+    App.el('h1', { class: 'ide-title', text: 'In-Browser IDE' }),
     App.el('span', { class: 'ide-badge', text: '8 languages · zero servers · zero CDN' }),
     App.el('span', { class: 'ide-sub', text: 'every compiler runs as WebAssembly in this tab' }));
 
@@ -473,7 +474,7 @@ function renderIde() {
     App.el('span', { class: 'ide-run-glyph', text: '▶' }), App.el('span', { text: 'Run' }));
   runBtn.addEventListener('click', function () { if (runningLang) stopRun(); else runCode(); });
   var headRight = App.el('div', { class: 'ide-head-right' }, tabs, runBtn,
-    App.el('kbd', { style: { fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--ink-faint)' }, text: 'Ctrl+Enter' }));
+    App.el('kbd', { style: { fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#9a999e' }, text: 'Ctrl+Enter' }));
   root.appendChild(App.el('div', { class: 'ide-head' }, headLeft, headRight));
 
   var editorWrap = App.el('div', { class: 'ide-editor-wrap' });
@@ -505,7 +506,7 @@ function renderIde() {
   root.appendChild(App.el('div', { class: 'ide-main' }, editorWrap, panel));
 
   // Robust import: try relative first (works for file:// and sub-paths), fall back to absolute
-  var editorUrls = ['js/ide/vendor/editor.js?v=14', '/js/ide/vendor/editor.js?v=14'];
+  var editorUrls = ['js/ide/vendor/editor.js?v=15', '/js/ide/vendor/editor.js?v=15'];
   function tryImportEditor(i) {
     if (i >= editorUrls.length) throw new Error('Editor failed to load: all import paths failed');
     return import(editorUrls[i]).catch(function (e) {
@@ -531,6 +532,10 @@ function renderIde() {
         editor.view.contentDOM.contentEditable = 'true';
         editor.view.contentDOM.style.pointerEvents = 'auto';
         editor.view.contentDOM.style.userSelect = 'text';
+        /* Screen readers need a name for the editing surface. */
+        if (!editor.view.contentDOM.getAttribute('aria-label')) {
+          editor.view.contentDOM.setAttribute('aria-label', 'Code editor (' + state.lang + ')');
+        }
       }
     } catch (e) {}
     // Clicking the wrapper should focus the editor (covers dead-zone clicks)

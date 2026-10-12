@@ -83,7 +83,7 @@ function renderHome() {
           App.el('a', { class: 'btn-ghost-sm home-btn', href: 'https://linkedin.com/in/mubdiur', target: '_blank', rel: 'noopener noreferrer', text: 'LinkedIn' }))),
 
       /* ── footer ── */
-      App.el('footer', { class: 'home-foot', text: '\u00A9 2026 Mubdiur Rahman \u00B7 Static site \u2014 no tracking, no server.' })));
+      App.el('div', { class: 'home-foot', text: '\u00A9 2026 Mubdiur Rahman \u00B7 Static site \u2014 no tracking, no server.' })));
 
   return root;
 }

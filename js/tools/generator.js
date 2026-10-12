@@ -64,7 +64,7 @@ function GeneratorToolUI(tool) {
       control.addEventListener('input', function () { update(control.value); generate(); });
     }
     paramsRow.appendChild(App.el('div', { class: 'flex items-center gap-1.5' },
-      App.el('label', { class: 'text-xs font-mono', style: { color: 'rgba(141,148,158,0.7)', whiteSpace: 'nowrap' }, text: p.label }),
+      App.el('label', { class: 'text-xs font-mono', style: { color: '#8d949e', whiteSpace: 'nowrap' }, text: p.label }),
       control));
   });
   paramsRow.appendChild(App.el('button', {

@@ -134,8 +134,8 @@ const baseTheme = EditorView.theme({
     fontSize: '11px',
     letterSpacing: '-0.02em',
   },
-  '.cm-activeLine': { backgroundColor: 'rgba(255,255,255,0.045)' },
-  '.cm-activeLineGutter': { backgroundColor: 'rgba(255,255,255,0.045)', color: '#ece9e9' },
+  '.cm-activeLine': { backgroundColor: 'rgba(255,255,255,0.02)' },
+  '.cm-activeLineGutter': { backgroundColor: 'rgba(255,255,255,0.02)', color: '#ece9e9' },
   '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
     backgroundColor: 'rgba(255,216,102,0.26)',
   },
@@ -223,7 +223,7 @@ const baseTheme = EditorView.theme({
      cyan   #78dce8  types / classes / stdlib
      purple #ab9df2  numbers / booleans / constants
      white  #fcfcfa  identifiers / properties
-     grey   #727072  comments (italic)
+     grey   #9a999e  comments (italic, 5:1 on the editor well)
             #939293  punctuation / brackets
             #c1c0c0  this/super + attribute values
    Order matters: most specific first, catch-alls last. */
@@ -258,7 +258,7 @@ const syntax = HighlightStyle.define([
   // regexp & escapes — also yellow
   { tag: [tags.regexp, tags.escape, tags.special(tags.string)], color: '#ffd866' },
   // comments — graphite italic
-  { tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment, tags.meta, tags.documentMeta], color: '#727072', fontStyle: 'italic' },
+  { tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment, tags.meta, tags.documentMeta], color: '#9a999e', fontStyle: 'italic' },
   // operators — hot pink (keyword.operator #ff6188) — makes a+b pop
   { tag: [tags.operator, tags.arithmeticOperator, tags.logicOperator, tags.bitwiseOperator, tags.compareOperator, tags.updateOperator, tags.definitionOperator, tags.typeOperator, tags.controlOperator], color: '#ff6188' },
   { tag: [tags.punctuation, tags.bracket, tags.brace, tags.paren, tags.squareBracket, tags.angleBracket, tags.separator, tags.derefOperator], color: '#939293' },

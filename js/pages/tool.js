@@ -23,7 +23,7 @@ function renderTool(path) {
   var header = App.el('div', { class: 'tool-shell-header' },
     App.el('div', { class: 'tool-icon-box' }, App.icon(tool.icon, '', 16)),
     App.el('div', { class: 'min-w-0 flex-1' },
-      App.el('div', { class: 'tool-title', text: tool.name }),
+      App.el('h1', { class: 'tool-title', text: tool.name }),
       App.el('div', { class: 'tool-desc', text: tool.desc })),
     App.el('a', { class: 'tool-back-link', href: '#/tools', text: '← All Tools' }));
   shell.appendChild(header);
