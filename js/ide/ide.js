@@ -553,7 +553,7 @@ function renderIde() {
     stdinRow.classList.toggle('hidden', !stdinSupported);
     var live = state.lang === 'js';
     stdinInput.placeholder = live
-      ? 'type input — delivered live to the running program'
+      ? 'type here — sent live to the program'
       : (stdinSupported ? 'type multi-line input here…' : '');
   }
   syncStdin();
