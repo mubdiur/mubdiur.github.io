@@ -224,10 +224,36 @@ T.csvToJSON = function (s, opts) {
  * quoted scalars; duplicate-key and indent errors carry line numbers.
  * Returns plain JS values; yamlToJSON and yamlFormat both build on it.
  */
+/** Cut a YAML " #comment" tail off one physical line. The hash needs a
+ * preceding blank at flow depth zero and must sit outside quotes, so
+ * spaceless hashes (abc#123), URLsina#frag and quoted "#" survive. A
+ * quote only opens after a blank or opener character, so plain-text
+ * apostrophes (it's) never swallow the rest of the line. */
+function yamlStripComment(line) {
+  var inS = false, inD = false, depth = 0;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line.charAt(i);
+    if (inS) { if (ch === "'") inS = false; continue; }
+    if (inD) {
+      if (ch === '\\') { i++; continue; }
+      if (ch === '"') inD = false;
+      continue;
+    }
+    if ((ch === "'" || ch === '"') && (i === 0 || ' \t[{,:='.indexOf(line.charAt(i - 1)) >= 0)) {
+      if (ch === "'") inS = true; else inD = true;
+      continue;
+    }
+    if (ch === '[' || ch === '{') { depth++; continue; }
+    if (ch === ']' || ch === '}') { depth = Math.max(0, depth - 1); continue; }
+    if (ch === '#' && depth === 0 && (i === 0 || line.charAt(i - 1) === ' ' || line.charAt(i - 1) === '\t')) return line.slice(0, i);
+  }
+  return line;
+}
+
 function yamlParseDocument(text) {
   var lines = text.split('\n').filter(function (l) { return !l.trim().startsWith('#'); });
   if (!lines.length) return {};
-  var items = lines.map(function (l) { var t = l.trim(); return { indent: t ? l.search(/\S/) : l.length, content: t, raw: l, blank: !t }; });
+  var items = lines.map(function (l) { var t = yamlStripComment(l).trim(); return { indent: t ? l.search(/\S/) : l.length, content: t, raw: l, blank: !t }; });
   while (items.length && items[0].blank) items.shift();
   if (!items.length) return '{}';
   function yamlBad(n, msg) { throw new Error("Line " + (n + 1) + ": " + msg); }
@@ -289,13 +315,14 @@ function yamlParseDocument(text) {
         if (ch === '"') inD = false;
         continue;
       }
-      if (ch === "'") { inS = true; cur += ch; continue; }
-      if (ch === '"') { inD = true; cur += ch; continue; }
+      if (ch === "'" && (i === 0 || ' \t[{,:='.indexOf(inner.charAt(i - 1)) >= 0)) { inS = true; cur += ch; continue; }
+      if (ch === '"' && (i === 0 || ' \t[{,:='.indexOf(inner.charAt(i - 1)) >= 0)) { inD = true; cur += ch; continue; }
       if (ch === '[' || ch === '{') { depth++; cur += ch; continue; }
       if (ch === ']' || ch === '}') {
         if (depth === 0) yamlBad(n, 'Stray "' + ch + '" in flow ' + what);
         depth--; cur += ch; continue;
       }
+      if (ch === '#' && depth === 0 && (i === 0 || inner.charAt(i - 1) === ' ' || inner.charAt(i - 1) === '\t')) break;
       if (ch === ',' && depth === 0) { parts.push(cur); cur = ''; continue; }
       cur += ch;
     }
