@@ -343,6 +343,10 @@ window.TOOLMANIFEST = [
   { slug: 'toml-to-xml', name: 'TOML \u2192 XML', desc: 'Convert TOML configs to XML \u2014 tables nest, arrays repeat as siblings, shared dependency-free emitter', category: 'converters', tags: ['toml', 'xml', 'convert'], icon: 'filetype', template: 'transform',
     placeholder: '[server]\nport = 8080',
     handler: function (s) { return Transforms.tomlToXML(s); } },
+  { slug: 'toml-to-markdown', name: 'TOML \u2192 Markdown', desc: 'Convert TOML configs to GitHub pipe tables \u2014 tables flatten to dotted columns, single row, shared dependency-free parser', category: 'converters', tags: ['toml', 'markdown', 'table', 'convert'], icon: 'filespreadsheet', template: 'transform',
+    placeholder: '[server]\nport = 8080',
+    handler: function (s, opts) { return Transforms.tomlToMarkdown(s, opts); },
+    params: [{ key: 'align', label: 'Align', type: 'select', default: 'left', options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }] }, { key: 'nested', label: 'Nested objects', type: 'select', default: 'flatten', options: [{ value: 'flatten', label: 'Flatten (a.b)' }, { value: 'stringify', label: 'Stringify JSON' }] }] },
   { slug: 'markdown-table-generator', name: 'Markdown Table Generator', desc: 'CSV rows to GitHub-flavored Markdown tables — optional header, alignment, auto delimiter', category: 'converters', tags: ['markdown', 'table', 'csv'], icon: 'filespreadsheet', template: 'transform',
     handler: function (s, opts) { return Transforms.csvToMarkdown(s, opts); },
     params: [
