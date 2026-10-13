@@ -67,6 +67,9 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('csv-pivot-table', 'agg avg', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'avg' }).includes('eng,10,20'));
     push('csv-pivot-table', 'unknown col throws', mustThrow(() => TOOLS['csv-pivot-table'].handler(PV, { row: 'nope', col: 'q', agg: 'count' })));
     push('csv-pivot-table', 'empty throws', mustThrow(() => TOOLS['csv-pivot-table'].handler('   ', {})));
+    push('csv-column-profiler', 'types', TOOLS['csv-column-profiler'].handler('a,b\n1,x\n2,y', {}).includes('a,integer'));
+    push('csv-column-profiler', 'empty throws', mustThrow(() => TOOLS['csv-column-profiler'].handler('   ', {})));
+    push('csv-column-profiler', 'auto semicolon', TOOLS['csv-column-profiler'].handler('a;b\n1;x', {}).includes('a;integer'));
     push('csv-pivot-table', 'totals', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', totals: 'true' }).includes('Total,15,20,35'));
     push('csv-pivot-table', 'sort row-total', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', sort: 'row-total' }) === ',q1,q2\neng,10,20\nops,5,');
     push('csv-pivot-table', 'sort col-total', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', sort: 'col-total' }) === ',q2,q1\neng,20,10\nops,,5');
@@ -308,7 +311,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
   if (failed.length) console.log('failed handlers:', JSON.stringify(failed, null, 2));
   expect(failed, `handler matrix failures:\n` + JSON.stringify(failed, null, 2)).toEqual([]);
   expect((result as any[]).length, 'handler matrix must cover all tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
-  // Full manifest is 133 (csv-pivot-table added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
+  // Full manifest is 134 (csv-column-profiler added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
-  expect(manifest, 'TOOLMANIFEST must be 133').toBe(133);
+  expect(manifest, 'TOOLMANIFEST must be 134').toBe(134);
 });

@@ -365,6 +365,10 @@ console.log('-- text / formats --');
   ok(TOOLS['har-inspector'].handler(_har, { failedOnly: 'true' }).indexOf('1 request') === 0, 'har failed only');
   ok(TOOLS['har-inspector'].handler(_har, { filter: 'zzz' }).indexOf('no requests match') >= 0, 'har empty filter');
   ok(TOOLS['csv-pivot-table'].handler.toString().indexOf('csvPivot') >= 0, 'pivot delegates single source');
+  ok(TOOLS['csv-column-profiler'].handler.toString().indexOf('csvProfile') >= 0, 'profiler delegates single source');
+  ok(TOOLS['csv-column-profiler'].handler('a,b\n1,x\n2,y', {}) === 'column,type,filled,empty,distinct,min,max\na,integer,2,0,2,1,2\nb,string,2,0,2,x,y', 'profiler types');
+  ok((function(){ try { TOOLS['csv-column-profiler'].handler('   ', {}); return false; } catch (e) { return true; } })(), 'profiler empty throws');
+
   var _pv = 'dept,q,sales\neng,q1,10\neng,q2,20\nops,q1,5';
   ok(TOOLS['csv-pivot-table'].handler(_pv, { row: 'dept', col: 'q', value: 'sales', agg: 'sum' }) === ',q1,q2\neng,10,20\nops,5,', 'pivot sum');
   ok(TOOLS['csv-pivot-table'].handler(_pv, {}).indexOf(',q1,q2') === 0, 'pivot count defaults');

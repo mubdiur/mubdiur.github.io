@@ -94,6 +94,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'jsonl-to-json': { good: '{"a":1}\n{"b":2}', bad: '{"a":1}\nnope', expectInOutput: /"b": 2/, expectError: /Line 2/ },
   'har-inspector': { good: '{"log":{"entries":[{"time":120,"request":{"method":"GET","url":"https://a.test/x"},"response":{"status":200,"bodySize":100}},{"time":5,"request":{"method":"GET","url":"https://a.test/y"},"response":{"status":404,"bodySize":10}}]}}', bad: 'nope', expectInOutput: /2 requests/, expectError: /Invalid HAR/ },
   'csv-pivot-table': { good: 'dept,q,sales\neng,q1,10\nops,q1,5', expectInOutput: /,q1/ },
+  'csv-column-profiler': { good: 'a,b\n1,x\n2,y', expectInOutput: /column,type,filled/ },
   'xml-to-json': { good: '<root><a>1</a></root>', bad: '<root><unclosed>', expectInOutput: /"a": "1"/, expectError: /Invalid XML/ },
   'css-formatter': { good: 'a{color:red}', expectInOutput: /color:\s*red/ },
   'levenshtein-distance': { good: 'kitten', expectInOutput: /Distance: 3/ },

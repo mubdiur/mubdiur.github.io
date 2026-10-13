@@ -1032,6 +1032,57 @@ T.csvPivot = function (s, opts) {
   return grid.join('\n');
 };
 
+/* CSV column profiler: per-column type, fill, distinct, min/max. First row
+   is headers; types inferred from non-empty cells (integer/float/bool/date
+   else string; no values means empty). Output is CSV with one row per col. */
+T.csvProfile = function (s, opts) {
+  var o = opts || {};
+  var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
+  var d = Object.prototype.hasOwnProperty.call(DELIMS, o.delimiter) ? DELIMS[o.delimiter] : null;
+  var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
+  var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
+  if (!lines.length) throw new Error('Paste delimited rows first \u2014 one record per line, first row headers');
+  if (d === null) d = T.detectDelimChar(lines.slice(0, 10)) || ',';
+  var rows = T.parseCSV(s, d);
+  if (rows.length < 2) throw new Error('Need a header row plus at least one data row');
+  var out = (d === ';' ? ';' : ',');
+  function cell(v) {
+    v = String(v === undefined || v === null ? '' : v);
+    return (v.indexOf(out) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  function isInt(v) { return /^[+-]?\d+$/.test(v.trim()); }
+  function isNum(v) { var x = Number(v); return v.trim() !== '' && isFinite(x); }
+  function isBool(v) { var x = v.trim().toLowerCase(); return x === 'true' || x === 'false'; }
+  function isDate(v) { var x = v.trim(); return /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?)?$/.test(x) && !isNaN(Date.parse(x)); }
+  var heads = rows[0], body = rows.slice(1), grid = [];
+  heads.forEach(function (h, c) {
+    var vals = body.map(function (r) { return c < r.length ? r[c] : ''; });
+    var filled = vals.filter(function (v) { return String(v).trim() !== ''; });
+    var seen = Object.create(null), distinct = 0;
+    filled.forEach(function (v) { var k = String(v); if (!Object.prototype.hasOwnProperty.call(seen, k)) { seen[k] = 1; distinct++; } });
+    var type = 'empty';
+    if (filled.length) {
+      if (filled.every(isInt)) type = 'integer';
+      else if (filled.every(isNum)) type = 'float';
+      else if (filled.every(isBool)) type = 'bool';
+      else if (filled.every(isDate)) type = 'date';
+      else type = 'string';
+    }
+    var mn = '', mx = '';
+    if (filled.length) {
+      if (type === 'integer' || type === 'float') {
+        var nums = filled.map(Number).sort(function (a, b) { return a - b; });
+        mn = String(nums[0]); mx = String(nums[nums.length - 1]);
+      } else {
+        var ss = filled.map(String).sort();
+        mn = ss[0]; mx = ss[ss.length - 1];
+      }
+    }
+    grid.push([h, type, String(filled.length), String(vals.length - filled.length), String(distinct), mn, mx].map(cell).join(out));
+  });
+  return ['column' + out + 'type' + out + 'filled' + out + 'empty' + out + 'distinct' + out + 'min' + out + 'max'].concat(grid).join('\n');
+};
+
 /* HAR inspector: DevTools HAR JSON becomes a timing summary -
    per-request method/status/ms/size lines plus totals and failure count. */
 T.harSummary = function (s, opts) {
