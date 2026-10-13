@@ -655,6 +655,12 @@ console.log('-- url parser port --');
   ok(TOOLS['url-cleaner'].handler('https://e.com/?utm_source=n', { keep: 'utm_source' }) === 'https://e.com/?utm_source=n', 'url-cleaner keep-list wins');
   ok(TOOLS['url-cleaner'].handler('https://www.amazon.com/dp/X?tag=af-20&pd_rd_w=a&psc=1', { mode: 'aggressive' }) === 'https://www.amazon.com/dp/X?psc=1', 'url-cleaner aggressive strips affiliate tags');
   ok(TOOLS['url-cleaner'].handler('https://www.amazon.com/dp/X?tag=af-20&psc=1') === 'https://www.amazon.com/dp/X?psc=1&tag=af-20', 'url-cleaner standard spares affiliate tags');
+  ok(T.tzOffsetMinutes(Date.UTC(2026, 0, 15), 'UTC') === 0, 'tz UTC offset zero');
+  var TZ1 = T.tzConvert('2026-01-15T12:00', 'America/New_York', 'UTC');
+  ok(TZ1.utcMs === Date.UTC(2026, 0, 15, 17, 0) && TZ1.toText === '2026-01-15 17:00' && TZ1.fromOffset === 'GMT-5:00' && TZ1.toOffset === 'GMT+0:00', 'tz winter NY to UTC vector');
+  var TZ2 = T.tzConvert('2026-07-15 12:00', 'America/New_York', 'Asia/Kolkata');
+  ok(TZ2.utcMs === Date.UTC(2026, 6, 15, 16, 0) && TZ2.toText === '2026-07-15 21:30' && TZ2.fromOffset === 'GMT-4:00' && TZ2.toOffset === 'GMT+5:30', 'tz summer NY to Kolkata vector');
+  ok(T.tzConvert('2026-01-15T12:00', 'UTC', 'UTC').utcISO === '2026-01-15T12:00:00.000Z', 'tz identity UTC ISO');
 }
 
 console.log('-- dns lookup (DoH core, no network) --');

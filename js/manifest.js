@@ -273,6 +273,7 @@ window.TOOLMANIFEST = [
     { slug: 'cron-explainer', name: 'Cron Expression Explainer', desc: 'Explain cron schedules in plain words — per-field breakdown, summary, next 5 runs', category: 'formatters', tags: ['cron', 'schedule', 'time', 'trigger'], icon: 'clock', template: 'transform',
     placeholder: '*/5 * * * *',
     handler: function (s) { return Transforms.cronExplain(s); } },
+  { slug: 'timezone-converter', name: 'Timezone Converter', desc: 'Convert wall-clock time across IANA zones — exact UTC instant plus per-zone offsets, DST correct', category: 'formatters', tags: ['timezone', 'time', 'convert', 'dst', 'utc'], icon: 'clock', template: 'custom' },
   { slug: 'cron-builder', name: 'Cron Builder', desc: 'Plan cron schedules visually — presets plus per-field inputs, plain-words breakdown, next 5 runs, 7x24 fire grid', category: 'formatters', tags: ['cron', 'schedule', 'builder', 'time'], icon: 'clock', template: 'custom' },
   { slug: 'readability-analyzer', name: 'Readability Analyzer', desc: 'Flesch Reading Ease and grade level — sentence stats, hardest words flagged', category: 'text', tags: ['readability', 'flesch', 'text'], icon: 'textsearch', template: 'transform',
     handler: function (s) { return Transforms.readability(s); } },

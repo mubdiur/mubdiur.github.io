@@ -4735,5 +4735,58 @@ T.cleanURL = function (s, opts) {
   if (!out.length) throw new Error('Paste at least one URL — one per line, https:// included');
   return out.join('\n');
 };
+/* Timezone conversion over the Intl API — no tables, DST correct by
+   construction. A wall time resolves to the exact UTC instant in the
+   source zone (two-pass offset refine), then renders in the target
+   zone. Fall-back repeats take the first occurrence; spring-forward
+   gaps land on the nearest valid minute. */
+function tzParts(ms, zone) {
+  var dtf = new Intl.DateTimeFormat('en-US', { timeZone: zone, hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  var p = {};
+  dtf.formatToParts(new Date(ms)).forEach(function (x) { p[x.type] = x.value; });
+  return p;
+}
+T.tzOffsetMinutes = function (ms, zone) {
+  var p = tzParts(ms, zone);
+  var asUTC = Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day), Number(p.hour) % 24, Number(p.minute), Number(p.second));
+  return Math.round((asUTC - Number(ms)) / 60000);
+};
+T.tzConvert = function (input, fromZone, toZone) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?$/.exec(String(input === undefined || input === null ? '' : input).trim());
+  if (!m) throw new Error('Pick a date and time first — format YYYY-MM-DD HH:mm');
+  var from = String(fromZone === undefined || fromZone === null ? '' : fromZone).trim();
+  var to = String(toZone === undefined || toZone === null ? '' : toZone).trim();
+  if (!from) throw new Error('Choose a source zone — try Asia/Tokyo');
+  if (!to) throw new Error('Choose a target zone — try UTC');
+  var zones = [from, to];
+  for (var zi = 0; zi < zones.length; zi++) {
+    try { new Intl.DateTimeFormat('en-US', { timeZone: zones[zi] }); }
+    catch (e) { throw new Error('Unknown time zone "' + zones[zi] + '" — use an IANA name like Europe/Paris'); }
+  }
+  var comp = [Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4]), Number(m[5]), Number(m[6] || 0)];
+  if (comp[1] < 1 || comp[1] > 12) throw new Error('Month is out of range in that date');
+  if (comp[2] < 1 || comp[2] > 31) throw new Error('Day is out of range in that date');
+  if (comp[3] > 23 || comp[4] > 59 || comp[5] > 59) throw new Error('Clock time is out of range in that date');
+  var guess = Date.UTC(comp[0], comp[1] - 1, comp[2], comp[3], comp[4], comp[5]);
+  var off = T.tzOffsetMinutes(guess, from);
+  var utc = guess - off * 60000;
+  var off2 = T.tzOffsetMinutes(utc, from);
+  if (off2 !== off) utc = guess - off2 * 60000;
+  function fmt(ms, zone) {
+    var p = tzParts(ms, zone);
+    return p.year + '-' + p.month + '-' + p.day + ' ' + ('0' + (Number(p.hour) % 24)).slice(-2) + ':' + p.minute;
+  }
+  function gmt(min) {
+    var s = min < 0 ? '-' : '+';
+    var a = Math.abs(min);
+    return 'GMT' + s + Math.floor(a / 60) + ':' + ('0' + (a % 60)).slice(-2);
+  }
+  var oF = T.tzOffsetMinutes(utc, from), oT = T.tzOffsetMinutes(utc, to);
+  return {
+    fromText: fmt(utc, from), fromZone: from, fromOffset: gmt(oF),
+    utcMs: utc, utcISO: new Date(utc).toISOString(), utcText: fmt(utc, 'UTC'),
+    toText: fmt(utc, to), toZone: to, toOffset: gmt(oT)
+  };
+};
 window.Transforms = T;
 })();
