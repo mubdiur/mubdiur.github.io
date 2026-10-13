@@ -427,6 +427,27 @@ var App = {
     App.onUnmount(close);
   },
 
+  /* -- recent tools (command palette) -- */
+  recentToolsKey: 'mub.recenttools.v1',
+  recentToolsMax: 6,
+  getRecentTools: function () {
+    var slugs = [];
+    try { slugs = JSON.parse(localStorage.getItem(App.recentToolsKey) || '[]'); } catch (e) { slugs = []; }
+    if (!Array.isArray(slugs)) return [];
+    var known = {};
+    TOOLMANIFEST.forEach(function (t) { known[t.slug] = t; });
+    var out = [], seen = {};
+    slugs.forEach(function (s) { if (typeof s === 'string' && known[s] && !seen[s]) { seen[s] = true; out.push(known[s]); } });
+    return out.slice(0, App.recentToolsMax);
+  },
+  recordRecentTool: function (slug) {
+    if (typeof slug !== 'string' || !slug) return;
+    var slugs = [];
+    try { slugs = JSON.parse(localStorage.getItem(App.recentToolsKey) || '[]'); } catch (e) { slugs = []; }
+    if (!Array.isArray(slugs)) slugs = [];
+    slugs = [slug].concat(slugs.filter(function (s) { return s !== slug; })).slice(0, App.recentToolsMax);
+    try { localStorage.setItem(App.recentToolsKey, JSON.stringify(slugs)); } catch (e) {}
+  },
   /* ── command palette ── */
   paletteOpen: false,
   paletteSelected: 0,
@@ -455,9 +476,25 @@ var App = {
       App.setModalInert(false);
       if (opener && opener.focus) opener.focus();
     }
+    function toolItem(t, i) {
+      return App.el('button', {
+        type: 'button',
+        class: 'palette-item' + (i === App.paletteSelected ? ' selected' : ''),
+        role: 'option',
+        'aria-selected': (i === App.paletteSelected).toString(),
+        tabindex: i === App.paletteSelected ? '0' : '-1',
+        onclick: function () { runTool(t.slug); },
+        onmouseenter: function () { App.paletteSelected = i; refreshSel(); }
+      },
+        App.icon(t.icon, '', 14),
+        App.el('div', { class: 'pi-main' },
+          App.el('div', { class: 'pi-name', text: t.name }),
+          App.el('div', { class: 'pi-sub', text: t.category + ' · ' + t.tags.slice(0, 2).join(', ') })));
+    }
     function render() {
       var q = input.value.trim().toLowerCase();
       list.innerHTML = '';
+      App.paletteRows = [];
       if (q) {
         var results = TOOLMANIFEST
           .map(function (t) { return { tool: t, s: App.toolMatchScore(t, q) }; })
@@ -470,35 +507,34 @@ var App = {
         } else {
           App.paletteResults = results;
           list.appendChild(App.el('div', { class: 'palette-label', text: 'Tools (' + results.length + ')' }));
-          results.forEach(function (t, i) {
-            list.appendChild(App.el('button', {
-              type: 'button',
-              class: 'palette-item' + (i === App.paletteSelected ? ' selected' : ''),
-              role: 'option',
-              'aria-selected': (i === App.paletteSelected).toString(),
-              tabindex: i === App.paletteSelected ? '0' : '-1',
-              onclick: function () { runTool(t.slug); },
-              onmouseenter: function () { App.paletteSelected = i; refreshSel(); }
-            },
-              App.icon(t.icon, '', 14),
-              App.el('div', { class: 'pi-main' },
-                App.el('div', { class: 'pi-name', text: t.name }),
-                App.el('div', { class: 'pi-sub', text: t.category + ' · ' + t.tags.slice(0, 2).join(', ') }))));
+          results.forEach(function (t) {
+            App.paletteRows.push({ kind: 'tool', slug: t.slug });
+            list.appendChild(toolItem(t, App.paletteRows.length - 1));
           });
         }
       } else {
         App.paletteResults = null;
+        var recents = App.getRecentTools();
+        if (recents.length) {
+          list.appendChild(App.el('div', { class: 'palette-label', text: 'Recent' }));
+          recents.forEach(function (t) {
+            App.paletteRows.push({ kind: 'tool', slug: t.slug });
+            list.appendChild(toolItem(t, App.paletteRows.length - 1));
+          });
+        }
         list.appendChild(App.el('div', { class: 'palette-label', text: 'Categories' }));
-        TOOLCATEGORIES.forEach(function (cat, i) {
+        TOOLCATEGORIES.forEach(function (cat) {
           var count = TOOLMANIFEST.filter(function (t) { return t.category === cat.id; }).length;
+          var idx = App.paletteRows.length;
+          App.paletteRows.push({ kind: 'cat', id: cat.id });
           list.appendChild(App.el('button', {
             type: 'button',
-            class: 'palette-item' + (i === App.paletteSelected ? ' selected' : ''),
+            class: 'palette-item' + (idx === App.paletteSelected ? ' selected' : ''),
             role: 'option',
-            'aria-selected': (i === App.paletteSelected).toString(),
-            tabindex: i === App.paletteSelected ? '0' : '-1',
+            'aria-selected': (idx === App.paletteSelected).toString(),
+            tabindex: idx === App.paletteSelected ? '0' : '-1',
             onclick: function () { App.navigate('/tools?cat=' + cat.id); close(); },
-            onmouseenter: function () { App.paletteSelected = i; refreshSel(); }
+            onmouseenter: function () { App.paletteSelected = idx; refreshSel(); }
           },
             App.icon(cat.icon, '', 14),
             App.el('span', { text: cat.name }),
@@ -519,13 +555,15 @@ var App = {
     }
     function runTool(slug) { App.navigate('/tools/' + slug); close(); }
     function keyHandler(e) {
-      if (e.key === 'ArrowDown') { e.preventDefault(); App.paletteSelected = Math.min(App.paletteSelected + 1, (App.paletteResults || TOOLCATEGORIES).length - 1); refreshSel(); if (document.activeElement !== input) focusSel(); }
+      var rowCount = (App.paletteRows || []).length;
+      if (e.key === 'ArrowDown') { e.preventDefault(); App.paletteSelected = Math.min(App.paletteSelected + 1, rowCount - 1); refreshSel(); if (document.activeElement !== input) focusSel(); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); App.paletteSelected = Math.max(App.paletteSelected - 1, 0); refreshSel(); if (document.activeElement !== input) focusSel(); }
       else if (e.key === 'Enter') {
         if (document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('palette-item')) return;
         e.preventDefault();
-        if (App.paletteResults && App.paletteResults[App.paletteSelected]) runTool(App.paletteResults[App.paletteSelected].slug);
-        else if (!App.paletteResults && TOOLCATEGORIES[App.paletteSelected]) { App.navigate('/tools?cat=' + TOOLCATEGORIES[App.paletteSelected].id); close(); }
+        var row = App.paletteRows[App.paletteSelected];
+        if (row && row.kind === 'tool') runTool(row.slug);
+        else if (row && row.kind === 'cat') { App.navigate('/tools?cat=' + row.id); close(); }
       }
     }
     input.addEventListener('input', App.debounce(function () { App.paletteSelected = 0; render(); }, 100));

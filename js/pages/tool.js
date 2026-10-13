@@ -17,6 +17,8 @@ function renderTool(path) {
     return root;
   }
 
+  if (App.recordRecentTool) App.recordRecentTool(slug);
+
   var shell = App.el('div', { class: 'tool-shell' });
 
   /* header */
