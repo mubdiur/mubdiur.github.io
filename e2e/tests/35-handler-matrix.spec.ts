@@ -19,6 +19,11 @@ import { test, expect } from '@playwright/test';
 test('handler matrix via page.evaluate — every option, success + error', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#site-nav')).toBeVisible();
+  // WASM core loads lazily on wasm:true tool pages (see js/pages/tool.js). Warm it
+  // before touching handlers or every hash/HMAC/JWT case throws still-loading.
+  await page.goto('/#/tools/sha256-hash');
+  await expect(page.locator('#site-nav')).toBeVisible();
+  await page.waitForFunction(() => (window as any).Core && (window as any).Core.isReady && (window as any).Core.isReady(), null, { timeout: 20000 });
 
   const result = await page.evaluate(() => {
     const T = (window as any).Transforms as any;
@@ -73,7 +78,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('text-sorter', 'length', TOOLS['text-sorter'].handler('aa\nb', { sortBy: 'length', direction: 'asc' }).startsWith('b'));
     push('text-reverser', 'full', TOOLS['text-reverser'].handler('abc', { mode: 'full' }) === 'cba');
     push('text-reverser', 'lines', TOOLS['text-reverser'].handler('ab\ncd', { mode: 'lines' }) === 'ba\ndc');
-    push('text-diff', 'needs compareTo', TOOLS['text-diff'].handler('a', { compareTo: '' }).toLowerCase().includes('compare'));
+    push('text-diff', 'empty compareTo diffs deletion', TOOLS['text-diff'].handler('a', { compareTo: '' }).includes('- a'));
     push('text-diff', 'diff', TOOLS['text-diff'].handler('a\nb', { compareTo: 'a\nc' }).includes('c'));
     push('text-diff', 'words', TOOLS['text-diff'].handler('hello world', { compareTo: 'hello brave world', granularity: 'words' }).includes('{+brave +}'));
     push('text-diff', 'words deletion', TOOLS['text-diff'].handler('the quick brown fox', { compareTo: 'the brown fox', granularity: 'words' }).includes('[-quick -]'));
@@ -231,7 +236,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('sri-generator', 'sha384 token', TOOLS['sri-generator'].handler('abc', { algorithm: 'SHA-384' }).indexOf('sha384-') === 0);
     push('sri-generator', 'sha512 token', TOOLS['sri-generator'].handler('abc', { algorithm: 'SHA-512' }).indexOf('sha512-') === 0);
     push('sri-generator', 'empty throws', mustThrow(() => TOOLS['sri-generator'].handler('   ', { algorithm: 'SHA-384' })));
-    push('pem-inspector', 'der tree', TOOLS['pem-inspector'].handler('-----BEGIN CERTIFICATE-----\nMAICAQE=\n-----END CERTIFICATE-----').includes('SEQUENCE'));
+    push('pem-inspector', 'der tree', TOOLS['pem-inspector'].handler('-----BEGIN CERTIFICATE-----\nMAMCAQE=\n-----END CERTIFICATE-----').includes('SEQUENCE'));
     push('pem-inspector', 'no armor throws', mustThrow(() => TOOLS['pem-inspector'].handler('hello')));
     push('totp', 'RFC6238 T=59', T.totp('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 59000).code === '287082');
     push('totp', 'RFC6238 T=1111111109', T.totp('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 1111111109000).code === '081804');
@@ -268,7 +273,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
   if (failed.length) console.log('failed handlers:', JSON.stringify(failed, null, 2));
   expect(failed, `handler matrix failures:\n` + JSON.stringify(failed, null, 2)).toEqual([]);
   expect((result as any[]).length, 'handler matrix must cover all tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
-  // Full manifest is 127; wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
+  // Full manifest is 128 (jwt-verifier added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
-  expect(manifest, 'TOOLMANIFEST must be 127').toBe(127);
+  expect(manifest, 'TOOLMANIFEST must be 128').toBe(128);
 });

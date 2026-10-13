@@ -289,7 +289,7 @@ window.TOOLMANIFEST = [
     handler: function (s, opts) { return Transforms.sriHashOpts(s, opts); },
     params: [{ key: 'algorithm', label: 'Algorithm', type: 'select', default: 'SHA-384', options: [{ value: 'SHA-384', label: 'SHA-384' }, { value: 'SHA-512', label: 'SHA-512' }, { value: 'SHA-256', label: 'SHA-256' }] }] },
   { slug: 'pem-inspector', name: 'PEM Inspector', desc: 'Inspect PEM blocks — label, DER length, ASN.1 tree via the WebAssembly core', category: 'crypto', tags: ['pem', 'der', 'asn1', 'certificate'], icon: 'lock', template: 'transform', wasm: true,
-    placeholder: '-----BEGIN CERTIFICATE-----\nMAICAQE=\n-----END CERTIFICATE-----',
+    placeholder: '-----BEGIN CERTIFICATE-----\nMAMCAQE=\n-----END CERTIFICATE-----',
     handler: function (s) { return Transforms.pemInspect(s); } },
   { slug: 'totp-generator', name: 'TOTP Generator', desc: 'Time-based one-time passwords — RFC 6238, 30-second countdown, copy-ready codes', category: 'crypto', tags: ['totp', 'otp', 'auth', '2fa'], icon: 'lock', template: 'custom' },
   { slug: 'uuid-v7-generator', name: 'UUID v7 Generator', desc: 'RFC 9562 UUID v7 from the Web Crypto CSPRNG — Unix-millisecond time prefix, bulk mode available', category: 'generators', tags: ['uuid', 'identifier'], icon: 'key', template: 'generator',
