@@ -246,40 +246,11 @@ window.TOOLMANIFEST = [
     placeholder: '{"n":"b"}\n{"n":"a"}',
     handler: function (s, opts) { return Transforms.jsonlSort(s, opts); },
     params: [{ key: 'key', label: 'Sort keys (comma names, blank = whole doc)', type: 'text', default: '' }, { key: 'order', label: 'Order', type: 'select', default: 'asc', options: [{ value: 'asc', label: 'Ascending' }, { value: 'desc', label: 'Descending' }] }] },
-  { slug: 'xml-to-json', name: 'XML → JSON', desc: 'Convert XML (SOAP, RSS, configs) to JSON via the native DOMParser — attributes as @-keys, repeats as arrays', category: 'converters', tags: ['xml', 'json', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
-    handler: function (s) {
-      var d;
-      try { d = new DOMParser().parseFromString(s, 'text/xml'); }
-      catch { throw new Error('Invalid XML'); }
-      var perr = d.getElementsByTagName('parsererror');
-      if (perr.length) throw new Error('Invalid XML: ' + ((perr[0].textContent || '').replace(/\s+/g, ' ').slice(0, 120)));
-      function walk(el) {
-        var out = {}, i, n;
-        var hasAttrs = !!(el.attributes && el.attributes.length);
-        for (i = 0; i < (el.attributes ? el.attributes.length : 0); i++) out['@' + el.attributes[i].name] = el.attributes[i].value;
-        var text = '', kids = {};
-        for (i = 0; i < el.childNodes.length; i++) {
-          n = el.childNodes[i];
-          if (n.nodeType === 3 || n.nodeType === 4) {
-            var tv = n.nodeValue.replace(/\s+/g, ' ').trim();
-            if (tv) text += (text ? ' ' : '') + tv;
-          } else if (n.nodeType === 1) {
-            var v = walk(n);
-            if (kids[n.tagName] === undefined) kids[n.tagName] = v;
-            else if (Array.isArray(kids[n.tagName])) kids[n.tagName].push(v);
-            else kids[n.tagName] = [kids[n.tagName], v];
-          }
-        }
-        var keys = Object.keys(kids);
-        if (!hasAttrs && !keys.length) return text;
-        if (text) out['#text'] = text;
-        for (i = 0; i < keys.length; i++) out[keys[i]] = kids[keys[i]];
-        return out;
-      }
-      var res = {};
-      res[d.documentElement.tagName] = walk(d.documentElement);
-      return JSON.stringify(res, null, 2);
-    } },
+  { slug: 'xml-to-json', name: 'XML → JSON', desc: 'Convert XML (SOAP, RSS, configs) to JSON via the shared dependency-free parser \u2014 attributes as @-keys, repeats as arrays', category: 'converters', tags: ['xml', 'json', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
+    handler: function (s) { return Transforms.xmlToJsonDoc(s); } },
+  { slug: 'xml-to-yaml', name: 'XML → YAML', desc: 'Convert XML (SOAP, RSS, configs) to YAML \u2014 attributes as @-keys, repeats as sequences, shared dependency-free parser', category: 'converters', tags: ['xml', 'yaml', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
+    placeholder: '<server><host>example.com</host><port>8080</port></server>',
+    handler: function (s) { return Transforms.xmlToYAML(s); } },
   { slug: 'yaml-to-json', name: 'YAML → JSON', desc: 'Convert YAML to JSON', category: 'converters', tags: ['yaml', 'json', 'convert'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.yamlToJSON(s); } },
   { slug: 'table2xl', name: 'Table2xl — Table Converter', desc: 'Paste dirty HTML tables or ELK/Kibana grids — strip the noise, export as clean HTML or ASCII table', category: 'converters', tags: ['table', 'elk', 'kibana', 'ascii'], icon: 'filespreadsheet', template: 'custom' },

@@ -5246,5 +5246,141 @@ T.iniToJSON = function (s) {
   if (!count) throw new Error('No keys found - need KEY=value lines');
   return JSON.stringify(obj, null, 2);
 };
+/* Dependency-free XML tree parser: comments, PIs and doctypes skip, CDATA
+   folds into text, entities decoded. Strict about mismatches, stray closers,
+   bare ampersands and unknown entities so bad XML throws with context.
+   Null-prototype maps keep a <__proto__> tag from polluting the result.
+   Shared single source behind XML to JSON and XML to YAML. */
+T.xmlParseTree = function (s) {
+  var text = String(s === undefined || s === null ? '' : s);
+  if (!text.trim()) throw new Error('Paste XML first \u2014 a declaration, element or fragment');
+  function unescapeEntities(chunk) {
+    return chunk.replace(/&(#\d+;|#x[0-9a-fA-F]+;|[a-zA-Z][a-zA-Z0-9]*;|[\s\S]|$)/g, function (m, ent) {
+      if (!ent) throw new Error('Bare & at end of input \u2014 escape it as &amp;');
+      if (ent.charAt(ent.length - 1) !== ';') throw new Error('Bare & near ' + JSON.stringify(ent.slice(0, 12)) + ' \u2014 escape it as &amp;');
+      var body = ent.slice(0, -1);
+      if (body.charAt(0) === '#') {
+        var hex = body.charAt(1) === 'x';
+        var cp = parseInt(hex ? body.slice(2) : body.slice(1), hex ? 16 : 10);
+        if (!isFinite(cp) || cp < 1 || cp > 1114111) throw new Error('Bad character reference &' + body + ';');
+        return cp > 65535 ? String.fromCharCode(55296 + ((cp - 65536) >> 10), 56320 + ((cp - 65536) & 1023)) : String.fromCharCode(cp);
+      }
+      if (body === 'amp') return '&';
+      if (body === 'lt') return '<';
+      if (body === 'gt') return '>';
+      if (body === 'quot') return '"';
+      if (body === 'apos') return String.fromCharCode(39);
+      throw new Error('Unknown entity &' + body + ';');
+    });
+  }
+  function parseTag(v) {
+    var close = v.charAt(1) === '/';
+    var body = v.slice(close ? 2 : 1, v.length - 1).trim();
+    var selfClose = false;
+    if (!close && body.charAt(body.length - 1) === '/') { selfClose = true; body = body.slice(0, -1).trim(); }
+    var m = /^[A-Za-z_][\w:.-]*/.exec(body);
+    if (!m) throw new Error('Bad tag ' + v.slice(0, 24));
+    var name = m[0], rest = body.slice(name.length), attrs = Object.create(null);
+    var am = /([A-Za-z_][\w:.-]*)\s*=\s*("[^"><]*"|'[^'<>]*')/g;
+    var last = 0, a;
+    while ((a = am.exec(rest)) !== null) {
+      if (rest.slice(last, a.index).trim()) throw new Error('Bad attribute near ' + JSON.stringify(rest.slice(last, last + 16)) + ' in <' + name + '>');
+      if (Object.prototype.hasOwnProperty.call(attrs, a[1])) throw new Error('Duplicate attribute "' + a[1] + '" in <' + name + '>');
+      attrs[a[1]] = unescapeEntities(a[2].slice(1, -1));
+      last = a.index + a[0].length;
+    }
+    if (rest.slice(last).trim()) throw new Error('Bad attribute near ' + JSON.stringify(rest.slice(last, last + 16)) + ' in <' + name + '>');
+    return { name: name, attrs: attrs, close: close, selfClose: selfClose };
+  }
+  var root = null, stack = [];
+  function top() { return stack[stack.length - 1]; }
+  function pushText(raw) {
+    var seg = unescapeEntities(raw).replace(/\s+/g, ' ').trim();
+    if (!seg) return;
+    if (!stack.length) throw new Error('Text outside the root element (near ' + JSON.stringify(seg.slice(0, 24)) + ')');
+    top().chunks.push(seg);
+  }
+  var i = 0, n = text.length;
+  while (i < n) {
+    var lt = text.indexOf('<', i);
+    if (lt < 0) { pushText(text.slice(i)); break; }
+    if (lt > i) pushText(text.slice(i, lt));
+    if (text.slice(lt, lt + 4) === '<!--') {
+      var end = text.indexOf('-->', lt + 4);
+      if (end < 0) throw new Error('Unterminated comment');
+      i = end + 3; continue;
+    }
+    if (text.slice(lt, lt + 9) === '<![CDATA[') {
+      var ce = text.indexOf(']]>', lt + 9);
+      if (ce < 0) throw new Error('Unterminated CDATA section');
+      pushText(text.slice(lt + 9, ce));
+      i = ce + 3; continue;
+    }
+    if (text.slice(lt, lt + 2) === '<?') {
+      var pe = text.indexOf('?>', lt + 2);
+      if (pe < 0) throw new Error('Unterminated processing instruction');
+      i = pe + 2; continue;
+    }
+    if (text.slice(lt, lt + 2) === '<!') {
+      var de = text.indexOf('>', lt + 2);
+      if (de < 0) throw new Error('Unterminated declaration');
+      i = de + 1; continue;
+    }
+    var gt = text.indexOf('>', lt + 1);
+    if (gt < 0) throw new Error('Unterminated tag');
+    var tag = parseTag(text.slice(lt, gt + 1));
+    if (tag.close) {
+      var done = stack.pop();
+      if (!done) throw new Error('Stray closing tag </' + tag.name + '> \u2014 nothing is open');
+      if (done.name !== tag.name) throw new Error('Mismatched tag: expected </' + done.name + '> but found </' + tag.name + '>');
+      if (!stack.length) {
+        if (root) throw new Error('Multiple root elements');
+        root = done;
+      }
+    } else if (tag.selfClose) {
+      var leaf = { name: tag.name, attrs: tag.attrs, kids: [], chunks: [] };
+      if (stack.length) top().kids.push(leaf);
+      else { if (root) throw new Error('Multiple root elements'); root = leaf; }
+    } else {
+      if (!stack.length && root) throw new Error('Multiple root elements');
+      var node = { name: tag.name, attrs: tag.attrs, kids: [], chunks: [] };
+      if (stack.length) top().kids.push(node);
+      stack.push(node);
+    }
+    i = gt + 1;
+  }
+  if (stack.length) throw new Error('Unclosed tag <' + stack[stack.length - 1].name + '> \u2014 missing closing tag');
+  if (!root) throw new Error('No root element found');
+  return root;
+};
+/* XML tree to value: attributes as @-keys, repeats as arrays, bare text
+   for attr-less leafless elements, #text when mixed. Mirrors the historic
+   DOM-walk contract so XML to JSON output is unchanged. */
+T.xmlTreeToValue = function (node) {
+  var out = Object.create(null), i;
+  var anames = Object.keys(node.attrs);
+  for (i = 0; i < anames.length; i++) out['@' + anames[i]] = node.attrs[anames[i]];
+  var text = node.chunks.join(' ');
+  var groups = Object.create(null), order = [];
+  node.kids.forEach(function (k) {
+    var v = T.xmlTreeToValue(k);
+    if (!Object.prototype.hasOwnProperty.call(groups, k.name)) { groups[k.name] = []; order.push(k.name); }
+    groups[k.name].push(v);
+  });
+  if (!anames.length && !order.length) return text;
+  if (text) out['#text'] = text;
+  order.forEach(function (k) { out[k] = groups[k].length > 1 ? groups[k] : groups[k][0]; });
+  return out;
+};
+/* XML document to JSON value ({ root: ... }), pretty JSON doc, and YAML doc.
+   YAML composes the canonical JSON emitter, so quoting stays single-sourced. */
+T.xmlToJsonValue = function (s) {
+  var t = T.xmlParseTree(s);
+  var res = Object.create(null);
+  res[t.name] = T.xmlTreeToValue(t);
+  return res;
+};
+T.xmlToJsonDoc = function (s) { return JSON.stringify(T.xmlToJsonValue(s), null, 2); };
+T.xmlToYAML = function (s) { return T.jsonToYAML(JSON.stringify(T.xmlToJsonValue(s))); };
 window.Transforms = T;
 })();
