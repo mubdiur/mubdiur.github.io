@@ -1187,6 +1187,51 @@ T.csvDiffOpts = function (s, opts) {
   return T.csvDiff(s, o.datasetB, o.key);
 };
 
+/* CSV sampler: keep the header plus N data rows picked by a seeded
+   shuffle (mulberry32 over a string hash), so a seed always replays the
+   same sample. Count clamps to the data rows; blank seed means '0'. */
+T.csvSample = function (s, opts) {
+  var o = opts || {};
+  var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
+  var d = Object.prototype.hasOwnProperty.call(DELIMS, o.delimiter) ? DELIMS[o.delimiter] : null;
+  var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
+  var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
+  if (!lines.length) throw new Error('Paste delimited rows first \u2014 one record per line, first row headers');
+  if (d === null) d = T.detectDelimChar(lines.slice(0, 10)) || ',';
+  var rows = T.parseCSV(s, d);
+  if (rows.length < 2) throw new Error('Need a header row plus at least one data row');
+  var out = (d === ';' ? ';' : ',');
+  function cell(v) {
+    v = String(v === undefined || v === null ? '' : v);
+    return (v.indexOf(out) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  var seedStr = String(o.seed === undefined || o.seed === null ? '' : o.seed);
+  if (!seedStr) seedStr = '0';
+  var h = 2166136261;
+  for (var i = 0; i < seedStr.length; i++) { h ^= seedStr.charCodeAt(i); h = Math.imul(h, 16777619); }
+  var rnd = (h >>> 0) || 1;
+  function next() {
+    rnd |= 0; rnd = (rnd + 0x6D2B79F5) | 0;
+    var z = Math.imul(rnd ^ (rnd >>> 15), 1 | rnd);
+    z = (z + Math.imul(z ^ (z >>> 7), 61 | z)) ^ z;
+    return ((z ^ (z >>> 14)) >>> 0) / 4294967296;
+  }
+  var n = parseInt(o.count, 10);
+  if (!isFinite(n)) n = 5;
+  var body = rows.slice(1);
+  n = Math.max(1, Math.min(body.length, n));
+  var idx = body.map(function (_, k) { return k; });
+  for (var j = idx.length - 1; j > 0; j--) {
+    var k = Math.floor(next() * (j + 1));
+    var tmp = idx[j]; idx[j] = idx[k]; idx[k] = tmp;
+  }
+  var keep = {};
+  idx.slice(0, n).forEach(function (k) { keep[k] = 1; });
+  var grid = [rows[0].map(cell).join(out)];
+  body.forEach(function (r, k) { if (keep[k]) grid.push(r.map(cell).join(out)); });
+  return grid.join('\n');
+};
+
 /* HAR inspector: DevTools HAR JSON becomes a timing summary -
    per-request method/status/ms/size lines plus totals and failure count. */
 T.harSummary = function (s, opts) {

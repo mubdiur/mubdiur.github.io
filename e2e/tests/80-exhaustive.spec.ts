@@ -97,6 +97,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'csv-column-profiler': { good: 'a,b\n1,x\n2,y', expectInOutput: /column,type,filled/ },
   'csv-duplicate-finder': { good: 'e,p\na@x,pro\nb@x,free\na@x,pro', expectInOutput: /count,e,p/ },
   'csv-diff': { good: 'id,p\n1,pro', expectInOutput: /status,key,details|No differences found/ },
+  'csv-sampler': { good: 'id\n1\n2\n3', expectInOutput: /id/ },
   'xml-to-json': { good: '<root><a>1</a></root>', bad: '<root><unclosed>', expectInOutput: /"a": "1"/, expectError: /Invalid XML/ },
   'css-formatter': { good: 'a{color:red}', expectInOutput: /color:\s*red/ },
   'levenshtein-distance': { good: 'kitten', expectInOutput: /Distance: 3/ },
