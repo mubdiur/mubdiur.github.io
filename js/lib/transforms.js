@@ -6075,6 +6075,8 @@ T.xmlToMarkdown = function (s, opts) { var v = T.xmlToJsonValue(s); var ks = Obj
 
 /* INI to Markdown: parse sections to a single object, bridge through one compact JSON line, emit pipe tables with the canonical JSONL-to-Markdown core (nested sections flatten to dotted columns). */
 T.iniToMarkdown = function (s, opts) { return T.jsonlToMarkdown(JSON.stringify(JSON.parse(T.iniToJSON(s))), opts); };
+/* INI to CSV: parse once with the INI core (sections as objects, line-numbered errors), emit with the canonical JSON-to-CSV core (sections flatten to dotted columns, delimiter shared). */
+T.iniToCSV = function (s, opts) { return T.jsonToCSV(T.iniToJSON(s), opts); };
 /* ENV to Markdown: parse dotenv to one flat object, bridge through one compact JSON line, emit pipe tables with the canonical JSONL-to-Markdown core. */
 T.envToMarkdown = function (s, opts) { return T.jsonlToMarkdown(JSON.stringify(JSON.parse(T.envToJSON(s))), opts); };
 /* ENV to CSV: parse once with the dotenv core (export prefixes, line-numbered key errors), emit with the canonical JSON-to-CSV core (keys become columns, single row). */
