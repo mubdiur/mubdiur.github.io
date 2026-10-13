@@ -5,7 +5,7 @@
   "scripts": {
     "lint": "eslint js --ext .js",
     "lint:all": "eslint js --ext .js && node --check js/wasm.js && node --check js/core.js && node --check js/manifest.js",
-    "test": "node build/smoke-libs.js && node build/smoke-tools.js && node build/smoke-error-paths.js",
+    "test": "node build/smoke-libs.js && node build/smoke-tools.js && node build/smoke-error-paths.js && node build/smoke-sw.js && node build/check-versions.js && node build/check-sw-version-bump.js",
     "verify": "npm run lint:all && npm test && echo \"verify: lint + node --check + smoke suites passed\"",
     "test:e2e": "playwright test --config=e2e/playwright.config.ts",
     "test:e2e:ui": "playwright test --config=e2e/playwright.config.ts --ui",

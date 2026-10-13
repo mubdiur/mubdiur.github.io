@@ -24,7 +24,15 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'word-counter': { good: 'hello world', expectInOutput: /Words:/ },
   'case-converter': { good: 'Hello World', expectInOutput: /hello/i }, // task requires heuristic comment free — this is exact fixture, not heuristic; case variants verified in handler matrix
   'slug-generator': { good: 'Hello World!', expectInOutput: /hello-world/ },
-  'text-diff': { good: 'a\nb', expectInOutput: /\+ c/ },
+  'text-diff': { good: 'a\nb', expectInOutput: /(\+ c|\{\+c\+\})/ },
+  'matrix-calculator': { good: '1 2\n3 4', expectInOutput: /-2/ },
+  'markdown-table-generator': { good: 'a,b\n1,2', expectInOutput: /\| a \| b \|/ },
+  'xml-formatter': { good: '<r><a>1</a></r>', expectInOutput: /<a>1<\/a>/ },
+  'readability-analyzer': { good: 'The cat sat on the mat. It was happy.', expectInOutput: /Flesch Reading Ease/ },
+  'env-to-json': { good: 'A=1\nB=hello', bad: 'NOEQUALS', expectInOutput: /hello/, expectError: /has no/ },
+  'curl-to-fetch': { good: 'curl https://example.com', bad: 'hello world', expectInOutput: /fetch/, expectError: /curl command/ },
+  'json-path-extractor': { good: '[10,20]', bad: 'not json', expectInOutput: /10/ },
+  'unicode-inspector': { good: 'A', expectInOutput: /U\+0041/ },
   'regex-tester': { good: 'ignore', expectInOutput: /Matches|Enter a regex pattern/ },
   'regex-escape': { good: 'a.b', expectInOutput: /\\\./ },
   'text-sorter': { good: 'c\na\nb', expectInOutput: /a/ },
@@ -43,6 +51,11 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'binary-decode': { good: '01000001', expectInOutput: /A/ },
   'base32-encode': { good: 'hello', expectInOutput: /NBSWY/ },
   'base32-decode': { good: 'NBSWY3DP', expectInOutput: /hello/ },
+  'base58-encode': { good: 'hello', expectInOutput: /Cn8eVZg/ },
+  'base58-decode': { good: 'Cn8eVZg', expectInOutput: /hello/ },
+  'semver-compare': { good: '1.2.3', expectInOutput: /each field/ },
+  'html-to-markdown': { good: '<h1>Hi</h1>', expectInOutput: /# Hi/ },
+  'yaml-formatter': { good: 'a: 1', expectInOutput: /a: 1/ },
   'rot13': { good: 'hello', expectInOutput: /uryyb/ },
   'rot47': { good: 'Hello', expectInOutput: /Hello|/ },
   'morse-encode': { good: 'SOS', expectInOutput: /\.\.\./ },
@@ -50,6 +63,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'md5-hash': { good: 'hello', expectInOutput: /[0-9a-f]{32}/i },
   'sha256-hash': { good: 'hello', expectInOutput: /[0-9a-f]{64}/i },
   'sha1-hash': { good: 'hello', expectInOutput: /[0-9a-f]{40}/i },
+  'sha384-hash': { good: 'hello', expectInOutput: /[0-9a-f]{96}/i },
   'sha512-hash': { good: 'hello', expectInOutput: /[0-9a-f]{128}/i },
   'hmac-generator': { good: 'hello', expectInOutput: /[0-9a-f]+/i },
   'crc32-checksum': { good: 'hello', expectInOutput: /[0-9a-f]+/i },
@@ -61,14 +75,31 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'statistics-calculator': { good: '1 2 3 4 5', expectInOutput: /Mean:/ },
   'number-to-words': { good: '42', expectInOutput: /forty/i },
   'html-formatter': { good: '<div><p>hi</p></div>', expectInOutput: /<div>/ },
+  'html-minifier': { good: '<div><!-- c --><p>hi</p></div>', expectInOutput: /<div><p>hi<\/p><\/div>/ },
   'sql-formatter': { good: 'select * from t', expectInOutput: /SELECT/i },
+  'json-to-toml': { good: '{"a":1}', expectInOutput: /a = 1/ },
+  'toml-to-json': { good: 'a = 1', expectInOutput: /"a": 1/ },
+  'user-agent-parser': { good: 'Mozilla/5.0 (Windows NT 10.0) Chrome/139.0.0.0', expectInOutput: /Browser:.*Chrome/ },
+  'sql-minifier': { good: 'select  *  -- c\nfrom t', expectInOutput: /select \* from t/i },
   'uuid-v4-validate': { good: '550e8400-e29b-41d4-a716-446655440000', expectInOutput: /valid|✓/i },
+  'ulid-validator': { good: '01ARZ3NDEKTSV4RRFFQ69G5FAV', expectInOutput: /valid|✓/i },
   'line-tools': { good: 'b\na', expectInOutput: /b/ }, // exact per-mode output proven in handler matrix; fixture must hold under every option
   'epoch-converter': { good: '1718035200', expectInOutput: /2024-06-10|Epoch/ },
   'cidr-calculator': { good: '192.168.1.10/24', expectInOutput: /192\.168\.1\.0/ },
   'url-parser': { good: 'https://example.com:8443/p?a=1&b=2', expectInOutput: /example\.com/ },
   'xml-to-json': { good: '<root><a>1</a></root>', expectInOutput: /"a": "1"/ },
   'css-formatter': { good: 'a{color:red}', expectInOutput: /color:\s*red/ },
+  'levenshtein-distance': { good: 'kitten', expectInOutput: /Distance: 3/ },
+  'json-to-typescript': { good: '{"a":1}', bad: 'not json', expectInOutput: /interface Root/, expectError: /Invalid JSON|Unexpected|Error/i },
+  'byte-size-formatter': { good: '1536', bad: 'abc', expectInOutput: /1\.5 KiB/, expectError: /byte count|Enter|number/i },
+  'svg-optimizer': { good: '<svg><rect/></svg>', bad: 'hello', expectInOutput: /<svg>/, expectError: /SVG/i },
+  'javascript-minifier': { good: 'var a = 1; // strip', bad: '   ', expectInOutput: /var a=1/, expectError: /minify|Enter/i },
+  'sha384-hash': { good: 'hello', expectInOutput: /[0-9a-f]{96}/i },
+  'chmod-converter': { good: '755', expectInOutput: /rwxr-xr-x/ },
+  'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
+  'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
+  'sri-generator': { good: 'console.log(1)', expectInOutput: /sha384-/ },
+  'pem-inspector': { good: '-----BEGIN CERTIFICATE-----\nMAICAQE=\n-----END CERTIFICATE-----', expectInOutput: /SEQUENCE/ },
 };
 
 const CUSTOM_FIXTURES: Record<string, () => Promise<void> | void> = {};
@@ -93,8 +124,8 @@ test('exhaustive: every transform × every option × success+error', async ({ pa
     if (!f) continue;
     const params: any[] = tool.params || [];
     // For diff tools that need a second document, fill the compare textarea
-    const needsCompare = (tool.slug === 'json-diff' || tool.slug === 'text-diff');
-    const compareValue = tool.slug === 'json-diff' ? '{"a":2}' : 'a\nc';
+    const needsCompare = (tool.slug === 'json-diff' || tool.slug === 'text-diff' || tool.slug === 'levenshtein-distance' || tool.slug === 'matrix-calculator');
+    const compareValue = tool.slug === 'json-diff' ? '{"a":2}' : tool.slug === 'levenshtein-distance' ? 'sitting' : tool.slug === 'matrix-calculator' ? '5 6\n7 8' : 'a\nc';
 
     // build cartesian: for each param with options, try every option
     // We cap to 2 values per param to stay fast but still cover switch logic.
@@ -102,7 +133,7 @@ test('exhaustive: every transform × every option × success+error', async ({ pa
     // pre-fill compare value for diff tools so handler sees it before first good fill
     if (needsCompare) {
       await page.waitForTimeout(500);
-      const sel = tool.slug === 'json-diff' ? '[aria-label="Compare with (JSON)"]' : '[aria-label="Compare with"]';
+      const sel = tool.slug === 'json-diff' ? '[aria-label="Compare with (JSON)"]' : tool.slug === 'levenshtein-distance' ? '[aria-label="Compare with (text)"]' : tool.slug === 'matrix-calculator' ? '[aria-label="Matrix B"]' : '[aria-label="Compare with"]';
       const compareBox = page.locator(sel).first();
       await expect(compareBox, `${tool.slug} compare box`).toBeVisible({ timeout: 8000 });
       await compareBox.fill(compareValue);
@@ -124,7 +155,7 @@ test('exhaustive: every transform × every option × success+error', async ({ pa
         await sel.selectOption(opt.value);
         await input.fill('');
         await input.fill(f.good);
-        if (tool.slug === 'number-base-converter') {
+        if (tool.slug === 'number-base-converter' || tool.slug === 'matrix-calculator' || tool.slug === 'markdown-table-generator') {
           await expect(page.locator('.output-box').first(), `${tool.slug} ${p.key}=${opt.value}`).not.toBeEmpty({ timeout: 10000 });
         } else {
           await assertOutput(page, f.expectInOutput!, `${tool.slug} ${p.key}=${opt.value}`);
@@ -163,8 +194,8 @@ test('exhaustive: every generator × every option', async ({ page }) => {
   }
 });
 
-// ── 18 custom interactive flows — one assertion per real interaction ──
-test('custom tools — 18 interactive flows', async ({ page }) => {
+// ── 19 custom interactive flows — one assertion per real interaction ──
+test('custom tools — 21 interactive flows', async ({ page }) => {
   test.setTimeout(300000);
   // 1 json-validator
   await gotoTool(page, 'json-validator');
@@ -257,6 +288,15 @@ test('custom tools — 18 interactive flows', async ({ page }) => {
   // 18 binary-tree-visualizer
   await gotoTool(page, 'binary-tree-visualizer');
   await expect(page.locator('button, canvas, input').first()).toBeVisible({ timeout: 8000 });
+
+  // 19 cron-builder — preset fills expr, bad field errors
+  await gotoTool(page, 'cron-builder');
+  await expect(page.locator('.t-cron-builder').first()).toBeVisible({ timeout: 8000 });
+  await page.locator('.t-cron-builder select').first().selectOption('daily');
+  await expect(page.locator('.t-cron-builder .cb-expr').first()).toContainText(/0 0 \* \* \*/, { timeout: 8000 });
+  await expect(page.locator('.t-cron-builder .cb-runs').first()).not.toBeEmpty({ timeout: 8000 });
+  await page.locator('.cb-f-minute').first().fill('bad!');
+  await expect(page.locator('.t-cron-builder .cb-error').first()).toContainText(/bad value/i, { timeout: 8000 });
 });
 
 
@@ -273,7 +313,7 @@ test('wasm — every hash + hmac alg + crc + qr', async ({ page }) => {
   const ready: boolean = await page.evaluate(() => (window as any).Core?.isReady?.() ?? false);
   expect(ready, 'WASM Core.isReady must be true after mounting a wasm tool — wasm/core.wasm must load in http-server').toBe(true);
 
-  for (const slug of ['md5-hash', 'sha1-hash', 'sha256-hash', 'sha512-hash', 'crc32-checksum']) {
+  for (const slug of ['md5-hash', 'sha1-hash', 'sha256-hash', 'sha512-hash', 'sha384-hash', 'crc32-checksum']) {
     await gotoTool(page, slug);
     await page.locator('textarea.tool-textarea').first().fill('hello');
     await expect(page.locator('.output-box').first(), slug).not.toBeEmpty({ timeout: 8000 });
@@ -287,6 +327,20 @@ test('wasm — every hash + hmac alg + crc + qr', async ({ page }) => {
     await page.locator('textarea.tool-textarea').first().fill('hello');
     await expect(page.locator('.output-box').first(), `hmac ${alg}`).not.toBeEmpty({ timeout: 8000 });
   }
+  // hmac custom key reaches the handler
+  await gotoTool(page, 'hmac-generator');
+  await page.locator('input[aria-label="Secret Key"]').first().fill('k2');
+  await page.locator('textarea.tool-textarea').first().fill('hello');
+  await expect(page.locator('.output-box').first(), 'hmac custom key').not.toBeEmpty({ timeout: 8000 });
+  // 20 totp-generator — RFC secret renders a 6-digit code
+  await gotoTool(page, 'totp-generator');
+  await page.locator('.t-totp-generator .totp-secret').first().fill('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ');
+  await expect(page.locator('.t-totp-generator .totp-code').first(), 'totp code').toContainText(/\d{3} \d{3}/, { timeout: 8000 });
+  // 19 qr-code-decoder — dropzone renders with idle prompt
+  await gotoTool(page, 'qr-code-decoder');
+  await expect(page.locator('.t-qr-code-decoder .qr-drop').first()).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('.t-qr-code-decoder').first()).toContainText(/Drop a QR image/i, { timeout: 8000 });
+  await expect(page.locator('.t-qr-code-decoder').first()).toContainText(/versions 1\u20136/i, { timeout: 8000 });
   // qr custom
   await gotoTool(page, 'qr-code-generator');
   await page.locator('input, textarea').first().fill('hello wasm qr');

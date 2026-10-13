@@ -111,6 +111,19 @@ var Core = {
     return hex;
   },
 
+  crc32Bytes: function (b) {
+    ensureReady();
+    if (!(b instanceof Uint8Array)) throw new Error('WASM crc32 needs bytes');
+    var p = allocBytes(b);
+    var out = exp.alloc(4);
+    if (out < 0) throw new Error('WASM allocation failed (OOM)');
+    var rc;
+    try { rc = exp.crc32(p, b.length, out); } catch (e) { exp.reset(); throw e; }
+    if (rc !== 0) { exp.reset(); throw new Error('WASM crc32 failed'); }
+    var hex;
+    try { hex = hexOf(out, 4); } finally { exp.reset(); }
+    return hex;
+  },
   hmacHex: function (key, message, alg) {
     var kb = new TextEncoder().encode(key);
     var mb = new TextEncoder().encode(message);
@@ -121,6 +134,23 @@ var Core = {
     out = exp.alloc(outLen);
     if (out < 0) throw new Error('WASM allocation failed (OOM)');
     try { rc = exp.hmac(mp, mb.length, kp, kb.length, alg, out); } finally { if (rc !== 0) { exp.reset(); throw new Error('WASM hmac failed'); } }
+    try { hex = hexOf(out, outLen); } finally { exp.reset(); }
+    return hex;
+  },
+
+  /* Byte-array HMAC for binary keys/messages (TOTP counters, raw digests).
+     hmacHex UTF-8-encodes strings, which mangles bytes above 0x7F. */
+  hmacBytes: function (keyBytes, msgBytes, alg) {
+    ensureReady();
+    if (!keyBytes || !keyBytes.length) throw new Error('HMAC key is empty');
+    if (!msgBytes || !msgBytes.length) throw new Error('HMAC message is empty');
+    var kp = allocBytes(keyBytes);
+    var mp = allocBytes(msgBytes);
+    var outLen = alg === 0 ? 20 : 32;
+    var out = exp.alloc(outLen);
+    if (out < 0) throw new Error('WASM allocation failed (OOM)');
+    var rc, hex;
+    try { rc = exp.hmac(mp, msgBytes.length, kp, keyBytes.length, alg, out); } finally { if (rc !== 0) { exp.reset(); throw new Error('WASM hmac failed'); } }
     try { hex = hexOf(out, outLen); } finally { exp.reset(); }
     return hex;
   },

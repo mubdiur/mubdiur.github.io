@@ -7,7 +7,7 @@
 
 var App = {
   icons: {},
-  TOOL_VERSION: '25',
+  TOOL_VERSION: '38',
 
   /* ── DOM helpers ── */
   SVG_TAGS: ['svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'text', 'g', 'defs', 'marker', 'pattern', 'use', 'ellipse', 'tspan'],
@@ -101,11 +101,12 @@ var App = {
     return score;
   },
 
-  /** Best fuzzy score across a tool's searchable fields. */
+  /** Slug-first fuzzy score across a tool's searchable fields. */
   toolMatchScore: function (tool, query) {
     if (!String(query).trim()) return 0;
     var self = this;
-    var best = self.fuzzyScore(query, tool.name) * 4;
+    var best = self.fuzzyScore(query, tool.slug) * 5;
+    best = Math.max(best, self.fuzzyScore(query, tool.name) * 4);
     best = Math.max(best, self.fuzzyScore(query, tool.desc) * 2);
     for (var i = 0; i < tool.tags.length; i++) {
       best = Math.max(best, self.fuzzyScore(query, tool.tags[i]) * 3);
@@ -364,17 +365,52 @@ var App = {
         ))));
   },
 
+  /* ── focus trap: Escape closes, Tab wraps within selector ── */
+  trapFocus: function (container, selector, onEscape, onKey) {
+    function handler(e) {
+      if (e.key === 'Escape') { e.preventDefault(); onEscape(); return; }
+      if (e.key === 'Tab' && selector) {
+        var items = container.querySelectorAll(selector);
+        if (items.length) {
+          var first = items[0], last = items[items.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); return; }
+          if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); return; }
+        }
+      }
+      if (onKey) onKey(e);
+    }
+    document.addEventListener('keydown', handler);
+    return function release() { document.removeEventListener('keydown', handler); };
+  },
+  /* ── modal inert: hide nav/main/footer while a dialog owns input ── */
+  _modalDepth: 0,
+  setModalInert: function (on) {
+    if (on) { App._modalDepth++; } else { App._modalDepth = Math.max(0, App._modalDepth - 1); }
+    var show = App._modalDepth > 0;
+    ['site-nav', 'page-main', 'site-footer'].forEach(function (id) {
+      var n = document.getElementById(id);
+      if (!n) return;
+      if (show) n.setAttribute('inert', '');
+      else n.removeAttribute('inert');
+    });
+  },
   /* ── mobile drawer ── */
   openDrawer: function () {
+    var opener = document.activeElement;
     var backdrop = App.el('div', { class: 'drawer-backdrop', onclick: function () { close(); } });
-    var drawer = App.el('div', { class: 'mobile-drawer' },
+    var drawer = App.el('div', { class: 'mobile-drawer', role: 'dialog', 'aria-label': 'Site navigation' },
       App.el('a', { class: 'drawer-link' + (App.route() === '/' ? ' active' : ''), href: '#/', text: 'Home' }),
       App.el('a', { class: 'drawer-link' + (App.route().indexOf('/ide') === 0 ? ' active' : ''), href: '#/ide', text: 'IDE' }),
       App.el('a', { class: 'drawer-link' + (App.route().indexOf('/tools') === 0 ? ' active' : ''), href: '#/tools', text: 'Tools' }),
       App.el('div', { class: 'drawer-footer', text: 'Press ⌘K to search' }));
-    function close() { backdrop.remove(); drawer.remove(); }
+    var releaseTrap = null, closed = false;
+    function close() { if (closed) return; closed = true; if (releaseTrap) releaseTrap(); backdrop.remove(); drawer.remove(); App.setModalInert(false); if (opener && opener.focus) opener.focus(); }
     document.body.appendChild(backdrop);
     document.body.appendChild(drawer);
+    releaseTrap = App.trapFocus(drawer, 'a.drawer-link', close);
+    App.setModalInert(true);
+    var firstLink = drawer.querySelector('a.drawer-link');
+    if (firstLink) firstLink.focus();
     requestAnimationFrame(function () { drawer.classList.add('open'); });
     App.onUnmount(close);
   },
@@ -386,9 +422,10 @@ var App = {
     if (App.paletteOpen) return;
     App.paletteOpen = true;
     App.paletteSelected = 0;
+    var opener = document.activeElement;
     var backdrop = App.el('div', { class: 'palette-backdrop', onclick: function (e) { if (e.target === backdrop) close(); } });
     var input = App.el('input', { class: 'palette-input', placeholder: 'Search ' + TOOLMANIFEST.length + '+ tools...', autocomplete: 'off' });
-    var list = App.el('div', { class: 'palette-list' });
+    var list = App.el('div', { class: 'palette-list', role: 'listbox', 'aria-label': 'Tools' });
     var palette = App.el('div', { class: 'palette' },
       App.el('div', { class: 'palette-input-row' }, App.icon('search', '', 16), input, App.el('kbd', { text: 'ESC' })),
       list,
@@ -397,10 +434,14 @@ var App = {
     backdrop.appendChild(palette);
     document.body.appendChild(backdrop);
 
+    var releaseTrap = null, closed = false;
     function close() {
+      if (closed) return; closed = true;
       App.paletteOpen = false;
+      if (releaseTrap) releaseTrap();
       backdrop.remove();
-      document.removeEventListener('keydown', keyHandler);
+      App.setModalInert(false);
+      if (opener && opener.focus) opener.focus();
     }
     function render() {
       var q = input.value.trim().toLowerCase();
@@ -409,7 +450,7 @@ var App = {
         var results = TOOLMANIFEST
           .map(function (t) { return { tool: t, s: App.toolMatchScore(t, q) }; })
           .filter(function (x) { return x.s > 0; })
-          .sort(function (a, b) { return b.s - a.s; })
+          .sort(function (a, b) { return b.s - a.s || a.tool.slug.length - b.tool.slug.length; })
           .map(function (x) { return x.tool; })
           .slice(0, 20);
         if (!results.length) {
@@ -418,8 +459,12 @@ var App = {
           App.paletteResults = results;
           list.appendChild(App.el('div', { class: 'palette-label', text: 'Tools (' + results.length + ')' }));
           results.forEach(function (t, i) {
-            list.appendChild(App.el('div', {
+            list.appendChild(App.el('button', {
+              type: 'button',
               class: 'palette-item' + (i === App.paletteSelected ? ' selected' : ''),
+              role: 'option',
+              'aria-selected': (i === App.paletteSelected).toString(),
+              tabindex: i === App.paletteSelected ? '0' : '-1',
               onclick: function () { runTool(t.slug); },
               onmouseenter: function () { App.paletteSelected = i; refreshSel(); }
             },
@@ -434,8 +479,12 @@ var App = {
         list.appendChild(App.el('div', { class: 'palette-label', text: 'Categories' }));
         TOOLCATEGORIES.forEach(function (cat, i) {
           var count = TOOLMANIFEST.filter(function (t) { return t.category === cat.id; }).length;
-          list.appendChild(App.el('div', {
+          list.appendChild(App.el('button', {
+            type: 'button',
             class: 'palette-item' + (i === App.paletteSelected ? ' selected' : ''),
+            role: 'option',
+            'aria-selected': (i === App.paletteSelected).toString(),
+            tabindex: i === App.paletteSelected ? '0' : '-1',
             onclick: function () { App.navigate('/tools?cat=' + cat.id); close(); },
             onmouseenter: function () { App.paletteSelected = i; refreshSel(); }
           },
@@ -447,23 +496,34 @@ var App = {
     }
     function refreshSel() {
       var items = list.querySelectorAll('.palette-item');
-      items.forEach(function (el, i) { el.classList.toggle('selected', i === App.paletteSelected); });
+      items.forEach(function (el, i) {
+        var on = i === App.paletteSelected;
+        el.classList.toggle('selected', on);
+        el.setAttribute('tabindex', on ? '0' : '-1');
+        el.setAttribute('aria-selected', on.toString());
+      });
       var sel = items[App.paletteSelected];
       if (sel) sel.scrollIntoView({ block: 'nearest' });
     }
     function runTool(slug) { App.navigate('/tools/' + slug); close(); }
     function keyHandler(e) {
-      if (e.key === 'Escape') { e.preventDefault(); close(); }
-      else if (e.key === 'ArrowDown') { e.preventDefault(); App.paletteSelected = Math.min(App.paletteSelected + 1, (App.paletteResults || TOOLCATEGORIES).length - 1); refreshSel(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); App.paletteSelected = Math.max(App.paletteSelected - 1, 0); refreshSel(); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); App.paletteSelected = Math.min(App.paletteSelected + 1, (App.paletteResults || TOOLCATEGORIES).length - 1); refreshSel(); if (document.activeElement !== input) focusSel(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); App.paletteSelected = Math.max(App.paletteSelected - 1, 0); refreshSel(); if (document.activeElement !== input) focusSel(); }
       else if (e.key === 'Enter') {
+        if (document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('palette-item')) return;
         e.preventDefault();
         if (App.paletteResults && App.paletteResults[App.paletteSelected]) runTool(App.paletteResults[App.paletteSelected].slug);
         else if (!App.paletteResults && TOOLCATEGORIES[App.paletteSelected]) { App.navigate('/tools?cat=' + TOOLCATEGORIES[App.paletteSelected].id); close(); }
       }
     }
     input.addEventListener('input', App.debounce(function () { App.paletteSelected = 0; render(); }, 100));
-    document.addEventListener('keydown', keyHandler);
+    function focusSel() {
+      var items = list.querySelectorAll('.palette-item');
+      var sel = items[App.paletteSelected];
+      if (sel) sel.focus();
+    }
+    releaseTrap = App.trapFocus(backdrop, '.palette-input,.palette-item', close, keyHandler);
+    App.setModalInert(true);
     input.focus();
     render();
   },
@@ -539,7 +599,19 @@ window.addEventListener('DOMContentLoaded', function () {
      file:// has no SW support — skip there. */
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
     window.addEventListener('load', function () {
-      try { navigator.serviceWorker.register('sw.js').catch(function () {}); } catch (e) {}
+      try {
+        var hadController = !!(navigator.serviceWorker.controller);
+        navigator.serviceWorker.register('sw.js').catch(function () {});
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (!hadController) { hadController = true; return; }
+          if (document.getElementById('sw-update-toast')) return;
+          var bar = App.el('div', { id: 'sw-update-toast', style: { position: 'fixed', left: '50%', bottom: '1rem', transform: 'translateX(-50%)', zIndex: '60', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(20,22,26,0.95)', border: '1px solid rgba(83,163,249,0.4)', color: '#e3e3e3', fontSize: '12px', padding: '0.5rem 0.75rem', borderRadius: '8px' } },
+            App.el('span', { role: 'status', text: 'New shell cached — refresh to load it.' }),
+            App.el('button', { class: 'btn-primary-sm', type: 'button', text: 'Refresh', onclick: function () { window.location.reload(); } }),
+            App.el('button', { class: 'btn-copy', type: 'button', text: 'Dismiss', onclick: function () { var n = document.getElementById('sw-update-toast'); if (n) n.parentNode.removeChild(n); } }));
+          document.body.appendChild(bar);
+        });
+      } catch (e) {}
     });
   }
 });

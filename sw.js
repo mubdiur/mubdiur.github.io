@@ -5,7 +5,7 @@
    ────────
    • STATIC_CACHE (versioned, purged on activate): the app shell —
      index.html + CSS + all first-party JS + editor + every custom
-     tool script + preloaded fonts. ~1.3 MB. Makes all 85 tools and
+     tool script + preloaded fonts. ~1.3 MB. Makes all 127 tools and
      the IDE shell work offline after the first visit.
    • RUNTIME_CACHE (version-stable, NEVER purged on shell updates):
      IDE engine payloads (up to ~43 MB per language), wasm/core.wasm
@@ -22,7 +22,7 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-var SW_VERSION = 'v1';
+var SW_VERSION = 'v109';
 var STATIC_CACHE = 'mub-static-' + SW_VERSION;
 var RUNTIME_CACHE = 'mub-runtime-v1';
 
@@ -30,41 +30,49 @@ var SHELL = [
   './',
   'index.html',
   'favicon.ico',
-  'css/app.css?v=32',
+  'css/app.css?v=33',
   'js/icons.js?v=26',
-  'js/lib/random.js?v=26',
-  'js/lib/diff.js?v=26',
+  'js/lib/random.js?v=27',
+  'js/lib/diff.js?v=27',
   'js/lib/adaptive-radix.js?v=1',
-  'js/manifest.js?v=27',
-  'js/lib/transforms.js?v=26',
-  'js/wasm.js?v=26',
-  'js/core.js?v=27',
-  'js/pages/home.js?v=29',
-  'js/pages/tools.js?v=26',
+  'js/lib/qr-decode.js?v=1',
+  'js/manifest.js?v=108',
+  'js/lib/transforms.js?v=94',
+  'js/lib/crypto.js?v=1',
+  'js/wasm.js?v=28',
+  'js/core.js?v=45',
+  'js/pages/home.js?v=30',
+  'js/pages/tools.js?v=27',
   'js/pages/tool.js?v=26',
   'js/ide/ide.js?v=14',
-  'js/tools/transform.js?v=30',
-  'js/tools/generator.js?v=27',
+  'js/tools/transform.js?v=35',
+  'js/tools/generator.js?v=30',
   'js/ide/vendor/editor.js?v=15',
-  'js/tools/json-validator.js?v=25',
-  'js/tools/email-extractor.js?v=25',
-  'js/tools/voice-dictation.js?v=25',
-  'js/tools/jwt-debugger.js?v=25',
-  'js/tools/table2xl.js?v=25',
-  'js/tools/markdown-preview.js?v=25',
-  'js/tools/time-copier.js?v=25',
-  'js/tools/timeline-taker.js?v=25',
-  'js/tools/color-converter.js?v=25',
-  'js/tools/unit-converter.js?v=25',
-  'js/tools/qr-code-generator.js?v=25',
-  'js/tools/post-maker.js?v=25',
-  'js/tools/base64-image-decoder.js?v=25',
-  'js/tools/image-to-base64.js?v=25',
-  'js/tools/contrast-checker.js?v=25',
-  'js/tools/http-status-codes.js?v=25',
-  'js/tools/sorting-visualizer.js?v=25',
-  'js/tools/search-visualizer.js?v=25',
-  'js/tools/binary-tree-visualizer.js?v=25',
+  'js/tools/json-validator.js?v=38',
+  'js/tools/email-extractor.js?v=38',
+  'js/tools/voice-dictation.js?v=38',
+  'js/tools/jwt-debugger.js?v=38',
+  'js/tools/table2xl.js?v=38',
+  'js/tools/markdown-preview.js?v=38',
+  'js/tools/time-copier.js?v=38',
+  'js/tools/cron-builder.js?v=38',
+  'js/tools/morse-code-player.js?v=38',
+  'js/tools/totp-generator.js?v=38',
+  'js/tools/timeline-taker.js?v=38',
+  'js/tools/color-converter.js?v=38',
+  'js/tools/unit-converter.js?v=38',
+  'js/tools/qr-code-generator.js?v=38',
+  'js/tools/qr-code-decoder.js?v=38',
+  'js/tools/post-maker.js?v=38',
+  'js/tools/base64-image-decoder.js?v=38',
+  'js/tools/image-to-base64.js?v=38',
+  'js/tools/image-palette-extractor.js?v=38',
+  'js/tools/contrast-checker.js?v=38',
+  'js/tools/http-status-codes.js?v=38',
+  'js/tools/dns-lookup.js?v=38',
+  'js/tools/sorting-visualizer.js?v=38',
+  'js/tools/search-visualizer.js?v=38',
+  'js/tools/binary-tree-visualizer.js?v=38',
   'fonts/ibm-plex-mono-latin-400.woff2',
   'fonts/ibm-plex-mono-latin-600.woff2'
 ];

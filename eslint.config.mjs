@@ -24,6 +24,7 @@ export default [
         Transforms: 'readonly',
         CryptoRand: 'readonly',
         MyersDiff: 'readonly',
+        QrDecode: 'readonly',
         Core: 'readonly',
         loadWasm: 'readonly',
       },

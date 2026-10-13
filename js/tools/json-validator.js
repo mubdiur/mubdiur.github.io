@@ -15,7 +15,10 @@ App.registerTool('json-validator', {
     '.t-json-validator .seg button:last-child{border-right:none;}\n' +
     '.t-json-validator .seg button:hover{color:rgba(227,227,227,0.9);}\n' +
     '.t-json-validator .seg button.active{background:rgba(83,163,249,0.15);color:var(--cyan-glow);}\n' +
-    '.t-json-validator .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;margin-bottom:0.75rem;}\n',
+    '.t-json-validator .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;margin-bottom:0.75rem;}\n' +
+    '.t-json-validator .badge{margin-left:auto;font-family:var(--font-mono);font-size:11px;padding:0.2rem 0.6rem;border-radius:999px;border:1px solid;}\n' +
+    '.t-json-validator .badge.ok{color:var(--green-glow);border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.08);}\n' +
+    '.t-json-validator .badge.bad{color:var(--destructive);border-color:rgba(255,100,103,0.4);background:rgba(255,100,103,0.08);}\n',
 
   mount: function (root) {
     var mode = 'validate';
@@ -23,13 +26,14 @@ App.registerTool('json-validator', {
     var input = '';
 
     var outputBox = App.el('div');
+    var badge = App.el('span', { class: 'badge hidden', role: 'status', text: '' });
     var textarea = App.el('textarea', {
       class: 'tool-textarea', rows: 8, spellcheck: 'false',
       placeholder: '{"name": "example", "data": [1, 2, 3]}'
     });
 
     function run() {
-      if (!input.trim()) { outputBox.innerHTML = ''; return; }
+      if (!input.trim()) { outputBox.innerHTML = ''; setBadge(null); return; }
       try {
         if (mode === 'validate') {
           var result = Transforms.validateJSON(input);
@@ -39,14 +43,27 @@ App.registerTool('json-validator', {
           } else {
             setOutput('', result.error || 'Invalid JSON');
           }
+          setBadge(Transforms.jsonBadge('validate', result.valid));
         } else if (mode === 'format') {
           setOutput(Transforms.formatJSON(input, indent), null);
+          setBadge(Transforms.jsonBadge('format', true));
         } else {
           setOutput(Transforms.minifyJSON(input), null);
+          setBadge(Transforms.jsonBadge('minify', true));
         }
       } catch (e) {
         setOutput('', e instanceof Error ? e.message : String(e));
+        setBadge(Transforms.jsonBadge(mode, false));
       }
+    }
+
+    function setBadge(b) {
+      if (!b) { badge.classList.add('hidden'); return; }
+      badge.textContent = b.text;
+      badge.setAttribute('aria-label', b.text);
+      badge.classList.remove('hidden');
+      badge.classList.toggle('ok', b.cls === 'ok');
+      badge.classList.toggle('bad', b.cls !== 'ok');
     }
 
     function setOutput(output, error) {
@@ -57,6 +74,7 @@ App.registerTool('json-validator', {
     function clear() {
       input = '';
       textarea.value = '';
+      setBadge(null);
       outputBox.innerHTML = '';
     }
 
@@ -88,7 +106,7 @@ App.registerTool('json-validator', {
     indentSel.style.display = 'none';
     indentSel.addEventListener('change', function () { indent = parseInt(indentSel.value, 10); run(); });
 
-    var toolbar = App.el('div', { class: 'toolbar' }, seg, indentSel);
+    var toolbar = App.el('div', { class: 'toolbar' }, seg, indentSel, badge);
     root.appendChild(toolbar);
     root.appendChild(textarea);
     root.appendChild(outputBox);

@@ -131,5 +131,35 @@ function linesText(textA, textB) {
   return out.join('\n');
 }
 
-window.MyersDiff = { diff: diff, linesText: linesText };
+/**
+ * Word diff convenience: same Myers core over whitespace-split tokens,
+ * with runs grouped into [-removed-] / {+added+} brackets. Newlines and
+ * tabs inside a changed run render as visible glyphs so the markers
+ * never silently span lines.
+ */
+function wordsText(textA, textB) {
+  function toks(str) { return str.split(/(\s+)/).filter(function (t) { return t !== ''; }); }
+  var a = toks(textA), b = toks(textB);
+  var ops = diff(a, b);
+  var out = [], buf = '', bufType = null;
+  function vis(str) { return str.replace(/\n/g, '\u23CE').replace(/\t/g, '\u2192'); }
+  function flush() {
+    if (bufType === 'del') out.push('[-' + vis(buf) + '-]');
+    else if (bufType === 'add') out.push('{+' + vis(buf) + '+}');
+    buf = ''; bufType = null;
+  }
+  for (var i = 0; i < ops.length; i++) {
+    var op = ops[i];
+    if (op.t === 'eq') { flush(); out.push(a[op.ai]); }
+    else {
+      if (bufType !== op.t) flush();
+      bufType = op.t;
+      buf += op.t === 'del' ? a[op.ai] : b[op.bi];
+    }
+  }
+  flush();
+  return out.join('');
+}
+
+window.MyersDiff = { diff: diff, linesText: linesText, wordsText: wordsText };
 })();

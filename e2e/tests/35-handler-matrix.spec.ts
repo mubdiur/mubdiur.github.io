@@ -41,9 +41,23 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('json-to-csv', 'happy', TOOLS['json-to-csv'].handler('[{"a":1,"b":2},{"a":3}]').includes('a,b'));
     push('csv-to-json', 'happy', JSON.parse(TOOLS['csv-to-json'].handler('name,age\nAda,30')).length === 1);
     push('yaml-to-json', 'happy', JSON.parse(TOOLS['yaml-to-json'].handler('a: 1\nb: hello')).a === 1);
+    push('yaml-to-json', 'nested roundtrip', JSON.parse(TOOLS['yaml-to-json'].handler(TOOLS['json-to-yaml'].handler('{"a":1,"nest":{"k":true}}'))).nest.k === true);
+    push('yaml-to-json', 'literal roundtrip', JSON.parse(TOOLS['yaml-to-json'].handler(TOOLS['json-to-yaml'].handler('{"s":"a\\n\\nb"}'))).s === 'a\n\nb');
+    push('yaml-to-json', 'inline nested seq', JSON.stringify(JSON.parse(TOOLS['yaml-to-json'].handler('m:\n  - - 1\n    - 2')).m) === '[[1,2]]');
+    push('yaml-to-json', 'folded scalar', TOOLS['yaml-to-json'].handler('s: >\n  a\n  b').includes('a b'));
     push('json-diff', 'diff', TOOLS['json-diff'].handler('{"a":1}', { compareTo: '{"a":2}' }).includes('→'));
     push('html-formatter', 'happy', TOOLS['html-formatter'].handler('<div><p>hi</p></div>').includes('<div>'));
+    push('html-minifier', 'happy', TOOLS['html-minifier'].handler('<div>\n<!-- c -->\n<p>hi</p>\n</div>') === '<div><p>hi</p></div>');
+    push('html-minifier', 'empty throws', mustThrow(() => TOOLS['html-minifier'].handler('   ')));
     push('sql-formatter', 'happy', TOOLS['sql-formatter'].handler('select * from t where id=1').toUpperCase().includes('SELECT'));
+    push('sql-minifier', 'happy', TOOLS['sql-minifier'].handler('select  id,\n  name -- c\nfrom t') === 'select id, name from t');
+    push('sql-minifier', 'empty throws', mustThrow(() => TOOLS['sql-minifier'].handler('   ')));
+    push('json-to-toml', 'happy', TOOLS['json-to-toml'].handler('{"a":1}') === 'a = 1');
+    push('json-to-toml', 'array throws', mustThrow(() => TOOLS['json-to-toml'].handler('[1]')));
+    push('toml-to-json', 'happy', TOOLS['toml-to-json'].handler('a = 1').includes('"a": 1'));
+    push('toml-to-json', 'dup throws', mustThrow(() => TOOLS['toml-to-json'].handler('a = 1\na = 2')));
+    push('user-agent-parser', 'happy', TOOLS['user-agent-parser'].handler('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/139.0.0.0').includes('Chrome'));
+    push('user-agent-parser', 'empty throws', mustThrow(() => TOOLS['user-agent-parser'].handler('   ')));
 
     // --- text ---
     push('case-converter', 'lower', TOOLS['case-converter'].handler('Hello World', { style: 'lower' }) === 'hello world');
@@ -61,6 +75,27 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('text-reverser', 'lines', TOOLS['text-reverser'].handler('ab\ncd', { mode: 'lines' }) === 'ba\ndc');
     push('text-diff', 'needs compareTo', TOOLS['text-diff'].handler('a', { compareTo: '' }).toLowerCase().includes('compare'));
     push('text-diff', 'diff', TOOLS['text-diff'].handler('a\nb', { compareTo: 'a\nc' }).includes('c'));
+    push('text-diff', 'words', TOOLS['text-diff'].handler('hello world', { compareTo: 'hello brave world', granularity: 'words' }).includes('{+brave +}'));
+    push('text-diff', 'words deletion', TOOLS['text-diff'].handler('the quick brown fox', { compareTo: 'the brown fox', granularity: 'words' }).includes('[-quick -]'));
+    push('matrix-calculator', 'determinant', TOOLS['matrix-calculator'].handler('1 2\n3 4', {}).includes('-2'));
+    push('matrix-calculator', 'multiply', TOOLS['matrix-calculator'].handler('1 2\n3 4', { operation: 'multiply', matrixB: '5 6\n7 8' }).includes('19 22'));
+    push('matrix-calculator', 'singular throws', mustThrow(() => TOOLS['matrix-calculator'].handler('1 1\n1 1', { operation: 'inverse' })));
+    push('markdown-table-generator', 'basic', TOOLS['markdown-table-generator'].handler('a,b\n1,2', {}).includes('| a | b |'));
+    push('markdown-table-generator', 'center', TOOLS['markdown-table-generator'].handler('a,b\n1,2', { align: 'center' }).includes(':center:'));
+    push('markdown-table-generator', 'empty throws', mustThrow(() => TOOLS['markdown-table-generator'].handler('   ', {})));
+    push('xml-formatter', 'inline', TOOLS['xml-formatter'].handler('<r><a>1</a></r>', {}).includes('<a>1</a>'));
+    push('xml-formatter', 'tab indent', TOOLS['xml-formatter'].handler('<r><a>1</a></r>', { indent: 'tab' }).includes('\t<a>1</a>'));
+    push('xml-formatter', 'mismatch throws', mustThrow(() => TOOLS['xml-formatter'].handler('<a><b></a>', {})));
+    push('readability-analyzer', 'scores', TOOLS['readability-analyzer'].handler('The cat sat on the mat. It was happy.').includes('Flesch Reading Ease'));
+    push('readability-analyzer', 'empty throws', mustThrow(() => TOOLS['readability-analyzer'].handler('   ')));
+    push('env-to-json', 'basic', TOOLS['env-to-json'].handler('A=1\nB=hi', {}).includes('hi'));
+    push('env-to-json', 'no equals throws', mustThrow(() => TOOLS['env-to-json'].handler('NOEQUALS', {})));
+    push('curl-to-fetch', 'basic', TOOLS['curl-to-fetch'].handler('curl https://example.com', {}).includes('fetch('));
+    push('curl-to-fetch', 'no url throws', mustThrow(() => TOOLS['curl-to-fetch'].handler('curl -X POST', {})));
+    push('json-path-extractor', 'index', TOOLS['json-path-extractor'].handler('[10,20]', { path: '$[1]' }).includes('20'));
+    push('json-path-extractor', 'no match throws', mustThrow(() => TOOLS['json-path-extractor'].handler('[10,20]', { path: '$[9]' })));
+    push('unicode-inspector', 'ascii', TOOLS['unicode-inspector'].handler('A', {}).includes('U+0041'));
+    push('unicode-inspector', 'empty throws', mustThrow(() => TOOLS['unicode-inspector'].handler('', {})));
     push('regex-tester', 'flags g', TOOLS['regex-tester'].handler('aaa', { pattern: 'a', flags: 'g' }).includes('3'));
     push('regex-tester', 'flags gi', TOOLS['regex-tester'].handler('Aaa', { pattern: 'a', flags: 'gi' }).includes('3'));
     push('regex-tester', 'flags gm', (() => { try { return TOOLS['regex-tester'].handler('a\na', { pattern: '^a', flags: 'gm' }).includes('2'); } catch { return false; } })());
@@ -74,6 +109,19 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('base64-encode', 'happy', TOOLS['base64-encode'].handler('hello') === 'aGVsbG8=');
     push('base64-decode', 'happy', TOOLS['base64-decode'].handler('aGVsbG8=') === 'hello');
     push('base64-decode', 'bad throws', mustThrow(() => TOOLS['base64-decode'].handler('!!!')));
+    push('base64-decode', 'paste data-uri', TOOLS['base64-decode'].handler('data:text/plain;base64,aGVsbG8=') === 'hello');
+    push('hex-decode', 'paste 0x + dashes', TOOLS['hex-decode'].handler('0x41-42') === 'AB');
+    push('levenshtein-distance', 'kitten/sitting', TOOLS['levenshtein-distance'].handler('kitten', { compareTo: 'sitting' }).includes('Distance: 3'));
+    push('levenshtein-distance', 'identical', TOOLS['levenshtein-distance'].handler('abc', { compareTo: 'abc' }).includes('Distance: 0'));
+    push('levenshtein-distance', 'quadratic guard', mustThrow(() => TOOLS['levenshtein-distance'].handler('a'.repeat(2001), { compareTo: 'b'.repeat(2001) })));
+    push('json-to-typescript', 'scalars', TOOLS['json-to-typescript'].handler('{"name":"Ada","age":30}').includes('name: string'));
+    push('json-to-typescript', 'nested', TOOLS['json-to-typescript'].handler('{"addr":{"city":"X"}}').includes('interface RootAddr'));
+    push('json-to-typescript', 'bad json throws', mustThrow(() => TOOLS['json-to-typescript'].handler('not json')));
+    push('byte-size-formatter', 'binary', TOOLS['byte-size-formatter'].handler('1536') === '1.5 KiB (1,536 bytes)');
+    push('byte-size-formatter', 'decimal', TOOLS['byte-size-formatter'].handler('1000', { mode: 'decimal' }) === '1 KB (1,000 bytes)');
+    push('byte-size-formatter', 'bad throws', mustThrow(() => TOOLS['byte-size-formatter'].handler('abc')));
+    push('svg-optimizer', 'strips comment', TOOLS['svg-optimizer'].handler('<!--c--><svg><rect/></svg>').indexOf('<rect') >= 0);
+    push('svg-optimizer', 'non-svg throws', mustThrow(() => TOOLS['svg-optimizer'].handler('hello')));
     push('url-encode', 'happy', TOOLS['url-encode'].handler('a b') === 'a%20b');
     push('url-decode', 'happy', TOOLS['url-decode'].handler('a%20b') === 'a b');
     push('html-encode', 'happy', TOOLS['html-encode'].handler('<b>').includes('&lt;'));
@@ -83,6 +131,17 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('binary-decode', 'happy', TOOLS['binary-decode'].handler('01000001') === 'A');
     push('base32-encode', 'happy', TOOLS['base32-encode'].handler('hello').length > 0);
     push('base32-decode', 'happy', TOOLS['base32-decode'].handler(TOOLS['base32-encode'].handler('hello')) === 'hello');
+    push('base58-encode', 'happy', TOOLS['base58-encode'].handler('hello') === 'Cn8eVZg');
+    push('base58-decode', 'happy', TOOLS['base58-decode'].handler('Cn8eVZg') === 'hello');
+    push('semver-compare', 'needs compareTo', TOOLS['semver-compare'].handler('1.2.3', { compareTo: '' }).toLowerCase().includes('each field'));
+    push('semver-compare', 'happy', TOOLS['semver-compare'].handler('1.2.3', { compareTo: '2.0.0' }).includes('major bump'));
+    push('tool-scaffold', 'transform stub', TOOLS['tool-scaffold'].genHandler({ slug: 'my-tool', kind: 'transform' }).includes('myTool'));
+    push('tool-scaffold', 'throws', mustThrow(() => TOOLS['tool-scaffold'].genHandler({ slug: '!!', kind: 'transform' })));
+    push('html-to-markdown', 'happy', TOOLS['html-to-markdown'].handler('<h1>Hi</h1>').includes('# Hi'));
+    push('html-to-markdown', 'throws', mustThrow(() => TOOLS['html-to-markdown'].handler('   ')));
+    push('yaml-formatter', 'happy', TOOLS['yaml-formatter'].handler('a: 1').includes('a: 1'));
+    push('yaml-formatter', 'throws', mustThrow(() => TOOLS['yaml-formatter'].handler('   ')));
+    push('semver-compare', 'throws', mustThrow(() => TOOLS['semver-compare'].handler('1.2', { compareTo: '1.2.3' })));
     push('rot13', 'happy', TOOLS['rot13'].handler('hello') === 'uryyb');
     push('rot47', 'happy', TOOLS['rot47'].handler('Hello').length > 0);
     push('morse-encode', 'happy', TOOLS['morse-encode'].handler('SOS').includes('...'));
@@ -95,13 +154,21 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('number-base-converter', '8→10', TOOLS['number-base-converter'].handler('10', { fromBase: '8', toBase: '10' }).includes('8'));
     push('prime-checker', 'prime', TOOLS['prime-checker'].handler('13').toLowerCase().includes('prime'));
     push('prime-checker', 'composite', TOOLS['prime-checker'].handler('15').toLowerCase().includes('not prime'));
+    push('prime-checker', 'strong pseudoprime rejected', TOOLS['prime-checker'].handler('3215031751').includes('Smallest factor: 151'));
     push('statistics-calculator', 'happy', TOOLS['statistics-calculator'].handler('1 2 3 4 5').includes('Mean:'));
     push('number-to-words', 'happy', TOOLS['number-to-words'].handler('42').includes('forty'));
     push('number-to-words', 'throws non-int', mustThrow(() => TOOLS['number-to-words'].handler('3.14')));
 
     // --- crypto (delegate) ---
     push('uuid-v4-validate', 'valid', TOOLS['uuid-v4-validate'].handler('550e8400-e29b-41d4-a716-446655440000').includes('\u2713') || TOOLS['uuid-v4-validate'].handler('550e8400-e29b-41d4-a716-446655440000').toLowerCase().includes('valid'));
+    push('uuid-v4-validate', 'accepts generated v7', TOOLS['uuid-v4-validate'].handler(T.uuidV7(0)).includes('UUIDv7'));
+    push('uuid-v4-validate', 'Nil valid', TOOLS['uuid-v4-validate'].handler('00000000-0000-0000-0000-000000000000').includes('Nil'));
+    push('uuid-v4-validate', 'garbage invalid', TOOLS['uuid-v4-validate'].handler('nope').includes('\u2717'));
     push('password-entropy', 'happy', TOOLS['password-entropy'].handler('correct horse battery staple').toLowerCase().includes('entropy'));
+    push('password-entropy', 'pool line', TOOLS['password-entropy'].handler('abc123').indexOf('Char Pool:  36 chars') >= 0);
+    push('case-converter', 'snake vector', TOOLS['case-converter'].handler('foo BAR baz', {style:'snake'}) === 'foo_bar_baz');
+    push('slug-generator', 'hello vector', TOOLS['slug-generator'].handler('Hello, World!') === 'hello-world');
+    push('json-escape', 'round-trip', TOOLS['json-unescape'].handler(TOOLS['json-escape'].handler('a' + String.fromCharCode(92))) === 'a' + String.fromCharCode(92));
 
     // --- new tools ---
     push('epoch-converter', 'epoch seconds', TOOLS['epoch-converter'].handler('1718035200').includes('2024-06-10'));
@@ -115,12 +182,18 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('url-parser', 'table', TOOLS['url-parser'].handler('https://example.com:8443/p?a=hello%20world&b=1&b=2', { view: 'table' }).includes('a = hello world'));
     push('url-parser', 'json', JSON.parse(TOOLS['url-parser'].handler('https://example.com/p?a=1', { view: 'json' })).host === 'example.com');
     push('url-parser', 'relative throws', mustThrow(() => TOOLS['url-parser'].handler('/just/a/path', { view: 'table' })));
+    push('http-header-inspector', 'clean', TOOLS['http-header-inspector'].handler('strict-transport-security: max-age=31536000; includeSubDomains\ncontent-security-policy: default-src \u0027self\u0027\nx-frame-options: DENY\nx-content-type-options: nosniff\nreferrer-policy: no-referrer\n').includes('Security: 0 issues'));
+    push('http-header-inspector', 'missing CSP flagged', TOOLS['http-header-inspector'].handler('content-type: text/html\n').includes('content-security-policy missing'));
+    push('http-header-inspector', 'bad line throws', mustThrow(() => TOOLS['http-header-inspector'].handler('no colon here')));
     push('xml-to-json', 'happy', JSON.parse(TOOLS['xml-to-json'].handler('<root><a>1</a><a>2</a></root>')).root.a.join(',') === '1,2');
     push('xml-to-json', 'attrs', JSON.parse(TOOLS['xml-to-json'].handler('<r id="7"><v>x</v></r>')).r['@id'] === '7');
     push('xml-to-json', 'bad xml throws', mustThrow(() => TOOLS['xml-to-json'].handler('<root><unclosed>')));
     push('css-formatter', 'beautify', TOOLS['css-formatter'].handler('a{color:red}', { mode: 'beautify' }).includes('color: red'));
     push('css-formatter', 'minify', TOOLS['css-formatter'].handler('a { color: red; } /* c */', { mode: 'minify' }) === 'a{color:red}');
     push('css-formatter', 'minify keeps strings', TOOLS['css-formatter'].handler('a::after{content:"/*x*/"}', { mode: 'minify' }).includes('"/*x*/"'));
+    push('javascript-minifier', 'strips comment', TOOLS['javascript-minifier'].handler('var a = 1; // c').includes('var a=1'));
+    push('javascript-minifier', 'strings preserved', TOOLS['javascript-minifier'].handler('var s = "a // b";').includes('"a // b"'));
+    push('javascript-minifier', 'empty throws', mustThrow(() => TOOLS['javascript-minifier'].handler('   ')));
     push('line-tools', 'number', TOOLS['line-tools'].handler('b\na', { mode: 'number' }) === '1  b\n2  a');
     push('line-tools', 'trim', TOOLS['line-tools'].handler('  a  \n b ', { mode: 'trim' }) === 'a\nb');
     push('line-tools', 'remove-empty', TOOLS['line-tools'].handler('a\n\nb', { mode: 'remove-empty' }) === 'a\nb');
@@ -135,6 +208,9 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('random-string', 'all', TOOLS['random-string'].genHandler({ length: '16', charset: 'all' }).length === 16);
     push('uuid-generator', 'count 1', TOOLS['uuid-generator'].genHandler({ count: '1' }).split('\n').length === 1);
     push('uuid-generator', 'count 5', TOOLS['uuid-generator'].genHandler({ count: '5' }).split('\n').length === 5);
+    push('ulid-generator', 'count 1', TOOLS['ulid-generator'].genHandler({ count: '1' }).split('\n').length === 1);
+    push('ulid-generator', 'format', /^[0-9A-HJKMNP-TV-Z]{26}$/.test(TOOLS['ulid-generator'].genHandler({ count: '1' })));
+    push('ulid-validator', 'happy', TOOLS['ulid-validator'].handler('01ARZ3NDEKTSV4RRFFQ69G5FAV').includes('valid'));
     push('password-generator', 'symbols on', /[!@#$%^&*]/.test(TOOLS['password-generator'].genHandler({ length: '16', symbols: 'true' })) || true);
     push('fibonacci-generator', 'happy', TOOLS['fibonacci-generator'].genHandler({ terms: '10' }).split(',').length === 10);
     push('lorem-ipsum', 'para 1', TOOLS['lorem-ipsum'].genHandler({ paragraphs: '1' }).length > 10);
@@ -144,7 +220,45 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('api-key-generator', 'raw', !TOOLS['api-key-generator'].genHandler({ format: 'raw' }).startsWith('sk-'));
     push('mac-address-generator', 'count 1', TOOLS['mac-address-generator'].genHandler({ count: '1' }).length > 0);
     push('mac-address-generator', 'count 3', TOOLS['mac-address-generator'].genHandler({ count: '3' }).split('\n').length === 3);
+    push('chmod-converter', 'octal', TOOLS['chmod-converter'].handler('755').includes('rwxr-xr-x'));
+    push('chmod-converter', 'symbolic', TOOLS['chmod-converter'].handler('rwxr-xr-x').includes('755'));
+    push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
+    push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));
+    push('cron-builder', 'custom fields', T.cronBuild({ preset: 'custom', minute: '*/5' }).includes('*/5'));
+    push('cron-builder', 'structured parse', T.cronParse('*/5 * * * *').fieldTexts.length === 5);
+    push('sri-hex', 'hexToBase64 vector', T.hexToBase64('616263') === 'YWJj');
+    push('sri-generator', 'sha384 token', TOOLS['sri-generator'].handler('abc', { algorithm: 'SHA-384' }).indexOf('sha384-') === 0);
+    push('sri-generator', 'sha512 token', TOOLS['sri-generator'].handler('abc', { algorithm: 'SHA-512' }).indexOf('sha512-') === 0);
+    push('sri-generator', 'empty throws', mustThrow(() => TOOLS['sri-generator'].handler('   ', { algorithm: 'SHA-384' })));
+    push('pem-inspector', 'der tree', TOOLS['pem-inspector'].handler('-----BEGIN CERTIFICATE-----\nMAICAQE=\n-----END CERTIFICATE-----').includes('SEQUENCE'));
+    push('pem-inspector', 'no armor throws', mustThrow(() => TOOLS['pem-inspector'].handler('hello')));
+    push('totp', 'RFC6238 T=59', T.totp('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 59000).code === '287082');
+    push('totp', 'RFC6238 T=1111111109', T.totp('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 1111111109000).code === '081804');
+    push('totp', 'RFC6238 8-digit', T.totp('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 59000, 8).code === '94287082');
+    push('totp', 'bad secret throws', mustThrow(() => T.totp('!!!!', 59000)));
+    push('passphrase-generator', '6 words hyphen', TOOLS['passphrase-generator'].genHandler({ words: '6', separator: '-' }).split('-').length === 6);
+    push('passphrase-generator', 'space separator', TOOLS['passphrase-generator'].genHandler({ words: '4', separator: ' ' }).split(' ').length === 4);
+    push('passphrase-generator', 'entropy 48 bits', T.passphraseEntropyBits(6) === 48);
+    push('passphrase-generator', 'two words throws', mustThrow(() => TOOLS['passphrase-generator'].genHandler({ words: '2', separator: '-' })));
+    push('passphrase-generator', 'bad separator throws', mustThrow(() => T.passphrase(6, '!')));
+    push('uuid-v7-generator', 'count 5 v7 format', TOOLS['uuid-v7-generator'].genHandler({ count: '5' }).split('\n').every((l: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(l)));
+    push('uuid-v7-generator', 'epoch-zero prefix', T.uuidV7(0).indexOf('00000000-0000-7') === 0);
+    push('uuid-v7-generator', 'bad time throws', mustThrow(() => T.uuidV7(-1)));
+    push('qr-code-decoder', 'v1 matrix exact', (window as any).QrDecode.decodeMatrix('111111100101101111111100000101101001000001101110101100101011101101110100101001011101101110101000101011101100000101001101000001111111101010101111111000000001111100000000110100110110001110110111010010010001101000101001111110110000001111111010111000100001101110100000101110001000000001001000010110111111101010010110110100000100101110010001101110100101001001101101110101011000001011101110100110100110101100000101000011010000111111101001100111110'.split('').map(Number), 21).text === 'QR-TEST');
+    const APP = (window as any).App as any;
+    const MAN = (window as any).TOOLMANIFEST as any[];
+    function topSlug(q: string): string { return MAN.map(function (t: any) { return { s: t.slug as string, r: APP.toolMatchScore(t, q) as number }; }).sort(function (a: any, b: any) { return b.r - a.r; })[0].s; }
+    push('palette-rank', 'slug exact wins', APP.toolMatchScore(TOOLS['sha384-hash'], 'sha384-hash') > APP.toolMatchScore(TOOLS['sha512-hash'], 'sha384-hash'));
+    push('palette-rank', 'slug prefix tops', topSlug('sha384') === 'sha384-hash');
+    push('palette-rank', 'exact slug tops', topSlug('totp-generator') === 'totp-generator');
+    push('palette-rank', 'ties break shorter-first', (function () { var rs = MAN.map(function (t: any) { return { l: (t.slug as string).length, r: APP.toolMatchScore(t, 'json') as number }; }).filter(function (x: any) { return x.r > 0; }).sort(function (a: any, b: any) { return b.r - a.r || a.l - b.l; }); for (var k = 1; k < rs.length; k++) { if (rs[k].r === rs[k - 1].r && rs[k].l < rs[k - 1].l) return false; } return rs.length > 3; })());
+    push('wordcount', 'frequency map', T.wordCount('Go go gone').go === 2);
+    push('word-counter', 'stats delegate', TOOLS['word-counter'].handler('a b').indexOf('Words:       2') >= 0);
+    push('morse-encode', 'SOS vector', TOOLS['morse-encode'].handler('SOS') === '... --- ...');
+    push('morse-decode', 'SOS vector', TOOLS['morse-decode'].handler('... --- ...') === 'SOS');
+    push('rot13', 'Hello vector', TOOLS['rot13'].handler('Hello') === 'Uryyb');
+    push('rot47', 'Hello vector', TOOLS['rot47'].handler('Hello') === 'w6==@');
     return cases;
   });
 
@@ -154,7 +268,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
   if (failed.length) console.log('failed handlers:', JSON.stringify(failed, null, 2));
   expect(failed, `handler matrix failures:\n` + JSON.stringify(failed, null, 2)).toEqual([]);
   expect((result as any[]).length, 'handler matrix must cover all tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
-  // Full manifest is 86; wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
+  // Full manifest is 127; wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
-  expect(manifest, 'TOOLMANIFEST must be 86').toBe(86);
+  expect(manifest, 'TOOLMANIFEST must be 127').toBe(127);
 });

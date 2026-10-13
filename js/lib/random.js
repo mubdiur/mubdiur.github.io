@@ -59,6 +59,14 @@ function shuffle(arr) {
   return arr;
 }
 
+/** Raw secure bytes: `n` uniformly random bytes via getRandomValues. */
+function bytes(n) {
+  if (!Number.isInteger(n) || n < 1 || n > 65536) throw new Error('CryptoRand.bytes: n must be an integer in [1, 65536]');
+  var out = new Uint8Array(n);
+  cryptoObject().getRandomValues(out);
+  return out;
+}
+
 /**
  * RFC 4122 §4.4 UUID v4: 122 secure random bits, version nibble 4
  * and the RFC variant bits set explicitly — no string templates,
@@ -93,5 +101,5 @@ function string(len, pool, requireFrom) {
   return shuffle(out).join('');
 }
 
-window.CryptoRand = { int: int, pick: pick, shuffle: shuffle, uuidV4: uuidV4, string: string };
+window.CryptoRand = { int: int, pick: pick, shuffle: shuffle, uuidV4: uuidV4, string: string, bytes: bytes };
 })();
