@@ -5,14 +5,15 @@
 (function () {
 'use strict';
 
+function favClean(arr) {
+  if (!Array.isArray(arr)) return [];
+  var known = {};
+  TOOLMANIFEST.forEach(function (t) { known[t.slug] = true; });
+  return arr.filter(function (s) { return typeof s === 'string' && known[s]; });
+}
 function favLoad() {
   try {
-    var raw = localStorage.getItem('mub.favtools.v1');
-    var arr = raw ? JSON.parse(raw) : [];
-    if (!Array.isArray(arr)) return [];
-    var known = {};
-    TOOLMANIFEST.forEach(function (t) { known[t.slug] = true; });
-    return arr.filter(function (s) { return typeof s === 'string' && known[s]; });
+    return favClean(JSON.parse(localStorage.getItem('mub.favtools.v1') || '[]'));
   } catch (e) { return []; }
 }
 function favSave(list) {
@@ -68,6 +69,44 @@ function renderTools() {
   });
   searchInput.addEventListener('input', function () { state.search = searchInput.value; renderResults(); });
 
+  var ioStatus = App.el('span', { class: 'text-xs font-mono', style: { color: 'rgba(141,148,158,0.6)' }, text: '' });
+  var fileInput = App.el('input', { type: 'file', accept: 'application/json,.json', style: { display: 'none' }, 'aria-label': 'Import favorites file' });
+  fileInput.addEventListener('change', function () {
+    var f = fileInput.files && fileInput.files[0];
+    fileInput.value = '';
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      var arr;
+      try { arr = JSON.parse(rd.result); }
+      catch (e) { ioStatus.textContent = 'Import failed \u2014 not valid JSON'; return; }
+      if (!Array.isArray(arr)) { ioStatus.textContent = 'Import failed \u2014 expected a JSON array of tool slugs'; return; }
+      var clean = favClean(arr);
+      if (!clean.length) { ioStatus.textContent = 'Import failed \u2014 no known tool slugs found'; return; }
+      var favs = favLoad(), added = 0;
+      clean.forEach(function (slug) { if (favs.indexOf(slug) < 0) { favs.push(slug); added++; } });
+      favSave(favs);
+      renderResults();
+      ioStatus.textContent = 'Imported ' + clean.length + ' favorite' + (clean.length !== 1 ? 's' : '') + (added ? ' (' + added + ' new)' : ' (already saved)');
+    };
+    rd.onerror = function () { ioStatus.textContent = 'Import failed \u2014 could not read file'; };
+    rd.readAsText(f);
+  });
+  var ioBox = App.el('div', { class: 'flex items-center gap-1.5' },
+    App.el('button', {
+      class: 'cat-tab', type: 'button', title: 'Download favorites as a JSON backup', 'aria-label': 'Export favorites as JSON',
+      onclick: function () {
+        var favs = favLoad();
+        if (!favs.length) { ioStatus.textContent = 'No favorites yet \u2014 tap \u2606 on any tool first'; return; }
+        App.download('developer-tools-favorites.json', JSON.stringify(favs, null, 2), 'application/json');
+        ioStatus.textContent = 'Exported ' + favs.length + ' favorite' + (favs.length !== 1 ? 's' : '');
+      }
+    }, App.icon('download', '', 14), App.el('span', { text: 'Export' })),
+    App.el('button', {
+      class: 'cat-tab', type: 'button', title: 'Restore favorites from a JSON backup', 'aria-label': 'Import favorites from JSON',
+      onclick: function () { fileInput.click(); }
+    }, App.icon('upload', '', 14), App.el('span', { text: 'Import' })),
+    ioStatus);
   var catTabs = App.el('div', { class: 'cat-tabs' });
   var results = App.el('div', { class: 'tools-results' });
 
@@ -186,7 +225,8 @@ function renderTools() {
           App.el('kbd', { class: 'search-kbd', text: '/' })),
         App.el('div', { class: 'flex items-center gap-1.5 text-xs font-mono', style: { color: 'rgba(141,148,158,0.6)' } },
           App.icon('command', '', 14),
-          App.el('kbd', { text: 'K' }))),
+          App.el('kbd', { text: 'K' })),
+        ioBox, fileInput),
       catTabs,
       results));
 

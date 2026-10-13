@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import * as nodeFs from 'fs';
 
 /**
  * Exhaustive UI-driven coverage — every tool × every option × success
@@ -206,7 +207,7 @@ test('exhaustive: every generator × every option', async ({ page }) => {
 });
 
 // ── 19 custom interactive flows — one assertion per real interaction ──
-test('custom tools — 21 interactive flows', async ({ page }) => {
+test('custom tools — 22 interactive flows', async ({ page }) => {
   test.setTimeout(300000);
   // 1 json-validator
   await gotoTool(page, 'json-validator');
@@ -356,6 +357,27 @@ test('wasm — every hash + hmac alg + crc + qr', async ({ page }) => {
   await gotoTool(page, 'qr-code-generator');
   await page.locator('input, textarea').first().fill('hello wasm qr');
   await expect(page.locator('canvas, svg').first()).toBeVisible({ timeout: 10000 });
+  // 22 favorites export/import round-trip
+  await page.goto('/#/tools');
+  await expect(page.locator('.tools-results').first()).toBeVisible({ timeout: 8000 });
+  await page.locator('.tc-fav').first().click();
+  await expect(page.locator('.cat-head', { hasText: 'Favorites' }).first()).toBeVisible({ timeout: 8000 });
+  const favSlug: string = await page.evaluate(() => JSON.parse(localStorage.getItem('mub.favtools.v1') || '[]')[0] as string);
+  expect(favSlug, 'starred slug persisted').toBeTruthy();
+  const [dl] = await Promise.all([
+    page.waitForEvent('download'),
+    page.locator('button[aria-label="Export favorites as JSON"]').first().click(),
+  ]);
+  expect(dl.suggestedFilename(), 'export filename').toBe('developer-tools-favorites.json');
+  const exported = JSON.parse(nodeFs.readFileSync(await dl.path() as string, 'utf8'));
+  expect(exported, 'export contains starred slug').toContain(favSlug);
+  await page.locator('.tc-fav.on').first().click();
+  await expect(page.locator('.cat-head', { hasText: 'Favorites' })).toHaveCount(0);
+  await page.locator('input[aria-label="Import favorites file"]').first().setInputFiles({ name: 'fav.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify([favSlug])) });
+  await expect(page.locator('.cat-head', { hasText: 'Favorites' }).first()).toBeVisible({ timeout: 8000 });
+  await expect(page.locator('body')).toContainText(/Imported 1 favorite/, { timeout: 8000 });
+  await page.locator('input[aria-label="Import favorites file"]').first().setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('nope') });
+  await expect(page.locator('body')).toContainText(/Import failed/, { timeout: 8000 });
 });
 
 // ── IDE — all 8 languages ──
