@@ -258,6 +258,8 @@ mustNotThrow(() => T.readability('Hello world. Bye world.'), 'readability good')
   ok(TOOLS['number-to-words'].handler('1,000') === 'one thousand', 'number-to-words manifest delegates');
 mustThrow(() => T.xmlMinify('<a></b>'), 'xmlMinify mismatch');
 mustThrow(() => T.xmlMinify('<a>'), 'xmlMinify unclosed');
+mustThrow(() => T.xmlFormat('a < b', {}), 'xmlFormat bare lt');
+mustThrow(() => T.xmlMinify('a < b'), 'xmlMinify bare lt');
 mustThrow(() => T.xmlMinify('   '), 'xmlMinify empty');
 mustNotThrow(() => T.xmlMinify('<a>t</a>'), 'xmlMinify good');
 mustThrow(() => TOOLS['xml-minifier'].handler(''), 'xml-minifier empty');

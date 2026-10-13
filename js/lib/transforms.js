@@ -3605,6 +3605,9 @@ T.xmlFormat = function (s, opts) {
   var text = String(s === undefined || s === null ? '' : s);
   if (!text.trim()) throw new Error('Paste XML first \u2014 a declaration, element or fragment');
   var toks = text.match(/<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<![^<>]*>|<\/?[A-Za-z_][\w:.-]*[^<>]*\/?>|[^<]+/g) || [];
+  var tkAt = 0, tkCi = 0;
+  while (tkCi < toks.length && text.slice(tkAt, tkAt + toks[tkCi].length) === toks[tkCi]) { tkAt += toks[tkCi].length; tkCi++; }
+  if (tkAt !== text.length) throw new Error('Bare "<" near ' + JSON.stringify(text.slice(tkAt, tkAt + 16)) + ' \u2014 escape it as &lt;');
   function isText(t) { return t.charAt(0) !== '<'; }
   function tagName(t) { var m = /^<\/?([A-Za-z_][\w:.-]*)/.exec(t); return m ? m[1] : null; }
   function isClose(t) { return t.charAt(0) === '<' && t.charAt(1) === '/'; }
@@ -3654,6 +3657,9 @@ T.xmlMinify = function (s) {
   var text = String(s === undefined || s === null ? '' : s);
   if (!text.trim()) throw new Error('Paste XML first \u2014 a declaration, element or fragment');
   var toks = text.match(/<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<![^<>]*>|<\/?[A-Za-z_][\w:.-]*[^<>]*\/?>|[^<]+/g) || [];
+  var tkAt = 0, tkCi = 0;
+  while (tkCi < toks.length && text.slice(tkAt, tkAt + toks[tkCi].length) === toks[tkCi]) { tkAt += toks[tkCi].length; tkCi++; }
+  if (tkAt !== text.length) throw new Error('Bare "<" near ' + JSON.stringify(text.slice(tkAt, tkAt + 16)) + ' \u2014 escape it as &lt;');
   function isText(t) { return t.charAt(0) !== '<'; }
   function tagName(t) { var m = /^<\/?([A-Za-z_][\w:.-]*)/.exec(t); return m ? m[1] : null; }
   function isClose(t) { return t.charAt(0) === '<' && t.charAt(1) === '/'; }
