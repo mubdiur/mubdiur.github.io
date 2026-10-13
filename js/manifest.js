@@ -297,10 +297,10 @@ window.TOOLMANIFEST = [
     },
     params: [{ key: 'count', label: 'Count', type: 'number', default: '1', min: 1, max: 1000 }] },
   { slug: 'ulid-generator', name: 'ULID Generator', desc: 'Universally-unique lexicographically-sortable identifiers — Crockford Base32, millisecond timestamp, CSPRNG entropy', category: 'generators', tags: ['ulid', 'identifier'], icon: 'key', template: 'generator',
-    genHandler: function (opts) { return Transforms.ulidBatch((opts && opts.count) || '1'); },
+    genHandler: function (opts) { return Transforms.ulidBatchOpts(opts); },
     params: [{ key: 'count', label: 'Count', type: 'number', default: '1', min: 1, max: 1000 }] },
   { slug: 'passphrase-generator', name: 'Passphrase Generator', desc: 'Diceware-style passphrases — 256-word list, 8 bits of entropy per word, CSPRNG draws', category: 'generators', tags: ['passphrase', 'password', 'words'], icon: 'lock', template: 'generator',
-    genHandler: function (opts) { return Transforms.passphrase(parseInt((opts && opts.words) || '6', 10), (opts && opts.separator) || '-'); },
+    genHandler: function (opts) { return Transforms.passphraseOpts(opts); },
     params: [
       { key: 'words', label: 'Words', type: 'number', default: '6', min: 3, max: 12 },
       { key: 'separator', label: 'Separator', type: 'select', default: '-', options: [{ value: '-', label: 'Hyphen (-)' }, { value: ' ', label: 'Space' }, { value: '_', label: 'Underscore (_)' }, { value: '.', label: 'Dot (.)' }] }

@@ -157,7 +157,7 @@ console.log('-- math --');
   ok(TOOLS['mac-address-generator'].genHandler({ count: '20' }).split('\n').every(function (x) { return (parseInt(x.slice(0, 2), 16) & 3) === 2; }), 'mac locally-administered unicast bits x20');
   ok(TOOLS['uuid-generator'].genHandler.toString().indexOf('uuidV4BatchOpts') >= 0, 'uuid-generator delegates opts');
   ok(TOOLS['uuid-generator'].genHandler({ count: '999999' }).split('\n').length === 1000, 'uuid count clamped');
-  ok(TOOLS['ulid-generator'].genHandler.toString().indexOf('ulidBatch') >= 0, 'ulid-generator delegates');
+  ok(TOOLS['ulid-generator'].genHandler.toString().indexOf('ulidBatchOpts') >= 0, 'ulid-generator delegates opts');
   ok(TOOLS['random-string'].genHandler.toString().indexOf('randomStringOpts') >= 0, 'random-string delegates opts');
   ok(TOOLS['random-string'].genHandler({ length: '999999', charset: 'hex' }).length === 1024, 'random-string length clamped to 1024');
   ok(TOOLS['word-counter'].handler.toString().indexOf('wordReport') >= 0, 'word-counter delegates');
@@ -495,7 +495,8 @@ console.log('-- json to toml --');
     for (var pi = 0; pi < 20; pi++) { TOOLS['passphrase-generator'].genHandler({ words: '6', separator: '-' }).split('-').forEach(function (w) { seen[w] = 1; }); }
     ok(Object.keys(seen).length > 6, 'passphrase draws vary (CSPRNG)');
     ok(T.passphraseEntropyBits(6) === 48 && T.passphraseEntropyBits(8) === 64, 'passphrase 8 bits per word');
-    ok(T.PASSPHRASE_WORDS.length === 256 && new Set(T.PASSPHRASE_WORDS).size === 256, 'passphrase 256-word list unique'); }
+    ok(T.PASSPHRASE_WORDS.length === 256 && new Set(T.PASSPHRASE_WORDS).size === 256, 'passphrase 256-word list unique');
+    ok(TOOLS['passphrase-generator'].genHandler.toString().indexOf('passphraseOpts') >= 0, 'passphrase delegates opts'); }
 
 }
 

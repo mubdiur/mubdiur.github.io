@@ -3244,6 +3244,10 @@ T.ulidBatch = function (count) {
   for (var i = 0; i < count; i++) out.push(T.ulid());
   return out.join('\n');
 };
+/* ULID UI contract: count option. Moved from the manifest for single source. */
+T.ulidBatchOpts = function (opts) {
+  return T.ulidBatch((opts && opts.count) || '1');
+};
 T.randomString = function (length, charset) {
   length = parseInt(length, 10);
   if (!charset) charset = 'alphanumeric';
@@ -3331,6 +3335,10 @@ T.passphrase = function (count, sep) {
   var out = [];
   for (var i = 0; i < count; i++) out.push(CryptoRand.pick(T.PASSPHRASE_WORDS));
   return out.join(sep);
+};
+/* Passphrase UI contract: words and separator options. Moved from the manifest for single source. */
+T.passphraseOpts = function (opts) {
+  return T.passphrase(parseInt((opts && opts.words) || '6', 10), (opts && opts.separator) || '-');
 };
 T.passphraseEntropyBits = function (count) { count = parseInt(count, 10); if (!(count >= 1)) throw new Error('Enter a word count'); return count * 8; };
 T.unicodeInspector = function (s) {
