@@ -1265,6 +1265,11 @@ console.log('-- rot --');
   ok(TOOLS['two-square-cipher'].handler(TOOLS['two-square-cipher'].handler('HELLOWORLD', { key1: 'EXAMPLE', key2: 'KEYWORD' }), { key1: 'EXAMPLE', key2: 'KEYWORD', mode: 'decode' }) === 'HELLOWORLD', 'twosquare roundtrip');
   ok(TOOLS['two-square-cipher'].handler('HELLO', { key1: 'EXAMPLE', key2: 'KEYWORD' }).length === 6, 'twosquare odd pads');
   ok(TOOLS['two-square-cipher'].handler.toString().indexOf('twoSquareCipher') >= 0, 'twosquare delegates');
+  ok(TOOLS['hill-cipher'].handler('HELP', { ka: '3', kb: '3', kc: '2', kd: '5' }) === 'HIAT', 'hill vector');
+  ok(TOOLS['hill-cipher'].handler('HIAT', { ka: '3', kb: '3', kc: '2', kd: '5', mode: 'decode' }) === 'HELP', 'hill decode');
+  ok(TOOLS['hill-cipher'].handler(TOOLS['hill-cipher'].handler('HELLOWORLD', { ka: '3', kb: '3', kc: '2', kd: '5' }), { ka: '3', kb: '3', kc: '2', kd: '5', mode: 'decode' }) === 'HELLOWORLD', 'hill roundtrip');
+  ok(TOOLS['hill-cipher'].handler('HELLO', { ka: '3', kb: '3', kc: '2', kd: '5' }).length === 6, 'hill odd pads');
+  ok(TOOLS['hill-cipher'].handler.toString().indexOf('hillCipher') >= 0, 'hill delegates');
   ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
   ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }

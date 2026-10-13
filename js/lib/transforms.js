@@ -2175,6 +2175,40 @@ T.twoSquareDecode = function (s, key1, key2) {
   return out;
 };
 T.twoSquareCipher = function (s, opts) { var o = opts || {}; var k1 = o.key1 === undefined ? 'EXAMPLE' : o.key1; var k2 = o.key2 === undefined ? 'KEYWORD' : o.key2; if ((o.mode || 'encode') === 'decode') return T.twoSquareDecode(s, k1, k2); return T.twoSquareEncode(s, k1, k2); };
+/* Hill cores: 2x2 matrix mod 26; determinant must be coprime to 26, full A-Z kept, odd tails padded with X. */
+T.hillKey = function (a, b, c, d) {
+  var m = [a, b, c, d].map(function (v, i) { var n = parseInt(v, 10); if (isNaN(n) || n < 0 || n > 25) throw new Error('Hill key numbers must be 0-25 \u2014 saw ' + v); return n; });
+  var det = ((m[0] * m[3] - m[1] * m[2]) % 26 + 26) % 26;
+  var g = (function (x, y) { while (y) { var t = x % y; x = y; y = t; } return x; })(det, 26);
+  if (g !== 1) throw new Error('Key matrix not invertible \u2014 determinant ' + det + ' shares a factor with 26');
+  var inv = 1; for (var i = 1; i < 26; i++) if ((det * i) % 26 === 1) { inv = i; break; }
+  return { m: m, det: det, inv: inv };
+};
+T.hillEncode = function (s, a, b, c, d) {
+  var k = T.hillKey(a === undefined ? 3 : a, b === undefined ? 3 : b, c === undefined ? 2 : c, d === undefined ? 5 : d);
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  if (t.length % 2) t += 'X';
+  var out = '';
+  for (var i = 0; i < t.length; i += 2) {
+    var x0 = t.charCodeAt(i) - 65, x1 = t.charCodeAt(i + 1) - 65;
+    out += String.fromCharCode(65 + (k.m[0] * x0 + k.m[1] * x1) % 26) + String.fromCharCode(65 + (k.m[2] * x0 + k.m[3] * x1) % 26);
+  }
+  return out;
+};
+T.hillDecode = function (s, a, b, c, d) {
+  var k = T.hillKey(a === undefined ? 3 : a, b === undefined ? 3 : b, c === undefined ? 2 : c, d === undefined ? 5 : d);
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (t.length % 2) throw new Error('Bad Hill input \u2014 need letter pairs, saw ' + t.length);
+  var ai = (k.m[3] * k.inv) % 26, bi = ((26 - k.m[1]) * k.inv) % 26, ci = ((26 - k.m[2]) * k.inv) % 26, di = (k.m[0] * k.inv) % 26;
+  var out = '';
+  for (var i = 0; i < t.length; i += 2) {
+    var y0 = t.charCodeAt(i) - 65, y1 = t.charCodeAt(i + 1) - 65;
+    out += String.fromCharCode(65 + (ai * y0 + bi * y1) % 26) + String.fromCharCode(65 + (ci * y0 + di * y1) % 26);
+  }
+  return out;
+};
+T.hillCipher = function (s, opts) { var o = opts || {}; var a = o.ka === undefined ? 3 : o.ka, b = o.kb === undefined ? 3 : o.kb, c = o.kc === undefined ? 2 : o.kc, d = o.kd === undefined ? 5 : o.kd; if ((o.mode || 'encode') === 'decode') return T.hillDecode(s, a, b, c, d); return T.hillEncode(s, a, b, c, d); };
 /* Columnar cores: keyword-ordered columns (stable for duplicate letters), no padding, uneven columns handled, code points preserved. */
 T.columnarOrder = function (key) {
   var k = String(key === undefined ? 'ZEBRAS' : key).toUpperCase().replace(/[^A-Z]/g, '');
