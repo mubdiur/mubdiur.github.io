@@ -603,6 +603,8 @@ console.log('-- matrix calculator --');
   ok(mi.indexOf('-2 1') >= 0 && mi.indexOf('1.5 -0.5') >= 0, 'matrix inverse');
   var mm = TOOLS['matrix-calculator'].handler('1 2\n3 4', { operation: 'multiply', matrixB: '5 6\n7 8' });
   ok(mm.indexOf('19 22') >= 0 && mm.indexOf('43 50') >= 0, 'matrix multiply');
+  ok(TOOLS['matrix-calculator'].handler.toString().indexOf('matrixCalcOpts') >= 0, 'matrix delegates opts');
+  ok(TOOLS['matrix-calculator'].handler('1 2\n3 4') === T.matrixCalc('1 2\n3 4', '', 'determinant'), 'matrix default determinant');
   var mt = TOOLS['matrix-calculator'];
   ok(mt && mt.template === 'transform' && mt.category === 'math', 'matrix manifest registered');
 }

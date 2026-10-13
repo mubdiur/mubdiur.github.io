@@ -310,7 +310,7 @@ window.TOOLMANIFEST = [
       { key: 'separator', label: 'Separator', type: 'select', default: '-', options: [{ value: '-', label: 'Hyphen (-)' }, { value: ' ', label: 'Space' }, { value: '_', label: 'Underscore (_)' }, { value: '.', label: 'Dot (.)' }] }
     ] },
 { slug: 'matrix-calculator', name: 'Matrix Calculator', desc: 'Add, multiply, invert, transpose \u2014 determinant via pivoted elimination, Gauss-Jordan inverse, strict shape checks', category: 'math', tags: ['matrix', 'linear-algebra', 'determinant', 'inverse'], icon: 'calculator', template: 'transform',
-    handler: function (s, opts) { return Transforms.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant'); },
+    handler: function (s, opts) { return Transforms.matrixCalcOpts(s, opts); },
     params: [{ key: 'operation', label: 'Operation', type: 'select', default: 'determinant', options: [{ value: 'determinant', label: 'Determinant' }, { value: 'inverse', label: 'Inverse' }, { value: 'transpose', label: 'Transpose' }, { value: 'trace', label: 'Trace' }, { value: 'add', label: 'Add (A+B)' }, { value: 'subtract', label: 'Subtract (A-B)' }, { value: 'multiply', label: 'Multiply (A*B)' }] }, { key: 'matrixB', label: 'Matrix B', type: 'textarea', default: '' }] },
   { slug: 'number-base-converter', name: 'Number Base Converter', desc: 'Convert numbers between binary, octal, decimal, hexadecimal — BigInt-exact at any width, strict digit validation', category: 'math', tags: ['base', 'convert', 'binary', 'hex'], icon: 'calculator', template: 'transform',
     handler: function (s, opts) { return Transforms.baseConvertOpts(s, opts); },

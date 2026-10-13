@@ -853,6 +853,10 @@ T.matrixCalc = function (aText, bText, op) {
   var out = A.map(function (r, i) { return r.map(function (v, j) { return mode === 'subtract' ? v - B[i][j] : v + B[i][j]; }); });
   return show(out, mode === 'subtract' ? 'Difference' : 'Sum');
 };
+/* Matrix UI contract: matrix A input plus matrixB and operation options. Moved from the manifest for single source. */
+T.matrixCalcOpts = function (s, opts) {
+  return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
+};
 
 /* ── crypto (hashes, HMAC, SRI, PEM, JWT): moved to js/lib/crypto.js, shares Transforms ── */
 
