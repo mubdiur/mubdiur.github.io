@@ -6060,6 +6060,8 @@ T.xmlToCSV = function (s, opts) { var v = T.xmlToJsonValue(s); var ks = Object.k
 T.iniToXML = function (s) { return T.jsonToXML(T.iniToJSON(s)); };
 /* ENV to XML: parse once with the dotenv core (export prefixes, line-numbered key errors), emit with the canonical JSON-to-XML emitter. */
 T.envToXML = function (s) { return T.jsonToXML(T.envToJSON(s)); };
+/* JSONL to XML: validate one JSON value per line (line-numbered errors), emit the doc array with the canonical JSON-to-XML emitter (docs repeat as siblings). */
+T.jsonlToXML = function (s) { return T.jsonToXML(T.jsonlToJSON(s)); };
 
 /* Duration calculator: one signed duration per line, summed. Each line takes
    jammed or spaced unit groups (1h30m, 2 days 4 hours), colon times (1:30:00,

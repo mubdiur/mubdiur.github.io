@@ -58,6 +58,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('csv-transposer', 'square', TOOLS['csv-transposer'].handler('a,b\nc,d', {}) === 'a,c\nb,d');
     push('csv-transposer', 'involution', TOOLS['csv-transposer'].handler(TOOLS['csv-transposer'].handler('a,b\nc,d', {}), {}) === 'a,b\nc,d');
     push('jsonl-to-json', 'two docs', JSON.parse(TOOLS['jsonl-to-json'].handler('{"a":1}\n{"b":2}')).length === 2);
+    push('jsonl-to-xml', 'happy', TOOLS['jsonl-to-xml'].handler('1\n2').indexOf('<root>1</root>') >= 0);
+    push('jsonl-to-xml', 'line number throws', mustThrow(() => TOOLS['jsonl-to-xml'].handler('1\nnope')));
     push('jsonl-to-json', 'bad line throws', mustThrow(() => TOOLS['jsonl-to-json'].handler('{"a":1}\nnope')));
     var HAR = '{"log":{"entries":[{"time":120,"request":{"method":"GET","url":"https://a.test/x"},"response":{"status":200,"bodySize":100}},{"time":5,"request":{"method":"GET","url":"https://a.test/y"},"response":{"status":404,"bodySize":10}}]}}';
     push('har-inspector', 'table header', TOOLS['har-inspector'].handler(HAR, {}).includes('2 requests'));

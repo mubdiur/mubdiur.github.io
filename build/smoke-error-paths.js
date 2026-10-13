@@ -267,6 +267,9 @@ mustNotThrow(() => T.markdownToCSV('prose\n| a |\n|---|\n| 1 |\ntail', {}), 'mar
 
 mustThrow(() => T.jsonlToMarkdown('', {}), 'jsonlToMarkdown empty');
 mustThrow(() => T.jsonlToMarkdown('{"a":1}' + '\n' + 'nope', {}), 'jsonlToMarkdown line number');
+mustThrow(() => T.jsonlToXML(''), 'jsonlToXML empty');
+mustThrow(() => T.jsonlToXML('1\nnope'), 'jsonlToXML line number');
+mustNotThrow(() => T.jsonlToXML('1\n2'), 'jsonlToXML good');
 mustThrow(() => T.jsonlToMarkdown('[1,2]', {}), 'jsonlToMarkdown array not objects');
 mustThrow(() => TOOLS['jsonl-to-markdown'].handler('nope', {}), 'jsonl-to-markdown bad json');
 mustNotThrow(() => T.jsonlToMarkdown('{"v":"a|b"}', {}), 'jsonlToMarkdown pipe escapes');
