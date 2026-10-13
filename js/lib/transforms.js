@@ -6076,6 +6076,8 @@ T.markdownToXML = function (s, opts) { return T.jsonToXML(T.csvToJSON(T.markdown
 T.markdownToJSON = function (s, opts) { return T.csvToJSON(T.markdownToCSV(s, opts), opts); };
 /* Markdown table to TOML: pipe table to CSV rows, CSV rows to header-keyed records, records as [[docs]] tables (delimiter shared). */
 T.markdownToTOML = function (s, opts) { return T.csvToTOML(T.markdownToCSV(s, opts), opts); };
+/* Markdown table to YAML: pipe table to CSV rows, CSV rows to header-keyed records, records as sequences (delimiter shared). */
+T.markdownToYAML = function (s, opts) { return T.jsonToYAML(T.csvToJSON(T.markdownToCSV(s, opts), opts)); };
 /* XML to Markdown: parse once with the shared XML parser, unwrap the first repeating group to rows (single records stay one row), emit pipe tables with the canonical JSONL-to-Markdown core. */
 T.xmlToMarkdown = function (s, opts) { var v = T.xmlToJsonValue(s); var ks = Object.keys(v); var root = v[ks[0]]; var rows; if (Array.isArray(root)) rows = root; else if (root !== null && typeof root === 'object') { var found = null; Object.keys(root).forEach(function (k) { if (!found && Array.isArray(root[k])) found = root[k]; }); rows = found || [root]; } else throw new Error('XML has no tabular rows \u2014 need repeating elements'); return T.jsonlToMarkdown(rows.map(function (r) { return JSON.stringify(r); }).join('\n'), opts); };
 
