@@ -1245,6 +1245,11 @@ console.log('-- rot --');
   ok(TOOLS['columnar-transposition'].handler(TOOLS['columnar-transposition'].handler('Hello World', { key: 'ZEBRAS' }), { key: 'ZEBRAS', mode: 'decode' }) === 'Hello World', 'columnar roundtrip');
   ok(TOOLS['columnar-transposition'].handler(TOOLS['columnar-transposition'].handler('HELLO', { key: 'BALLOON' }), { key: 'BALLOON', mode: 'decode' }) === 'HELLO', 'columnar duplicate key roundtrip');
   ok(TOOLS['columnar-transposition'].handler.toString().indexOf('columnarCipher') >= 0, 'columnar delegates');
+  ok(TOOLS['four-square-cipher'].handler('AB', { key1: 'A', key2: 'A' }) === 'BA', 'foursquare vector');
+  ok(TOOLS['four-square-cipher'].handler('BA', { key1: 'A', key2: 'A', mode: 'decode' }) === 'AB', 'foursquare decode');
+  ok(TOOLS['four-square-cipher'].handler(TOOLS['four-square-cipher'].handler('HELLOWORLD', { key1: 'EXAMPLE', key2: 'KEYWORD' }), { key1: 'EXAMPLE', key2: 'KEYWORD', mode: 'decode' }) === 'HELLOWORLD', 'foursquare roundtrip');
+  ok(TOOLS['four-square-cipher'].handler('HELLO', { key1: 'EXAMPLE', key2: 'KEYWORD' }).length === 6, 'foursquare odd pads');
+  ok(TOOLS['four-square-cipher'].handler.toString().indexOf('fourSquareCipher') >= 0, 'foursquare delegates');
   ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
   ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }

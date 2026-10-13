@@ -2048,6 +2048,38 @@ T.playfairDecode = function (s, key) {
   return out;
 };
 T.playfairCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'PLAYFAIR EXAMPLE' : o.key; if ((o.mode || 'encode') === 'decode') return T.playfairDecode(s, k); return T.playfairEncode(s, k); };
+/* Four-square cores: reuse Playfair squares (I/J merged); plain squares are standard, keyed squares from two keys; doubles allowed, odd tails padded with X (Q for X). */
+T.fourSquareEncode = function (s, key1, key2) {
+  var plain = T.playfairSquare('A');
+  var sq1 = T.playfairSquare(key1 === undefined ? 'EXAMPLE' : key1);
+  var sq2 = T.playfairSquare(key2 === undefined ? 'KEYWORD' : key2);
+  var t = String(s).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  if (t.length % 2) t += (t.charAt(t.length - 1) === 'X' ? 'Q' : 'X');
+  var out = '';
+  for (var i = 0; i < t.length; i += 2) {
+    var ia = plain.pos[t.charAt(i)]; var ib = plain.pos[t.charAt(i + 1)];
+    var ra = (ia / 5) | 0, ca = ia % 5, rb = (ib / 5) | 0, cb = ib % 5;
+    out += sq1.seq[ra * 5 + cb] + sq2.seq[rb * 5 + ca];
+  }
+  return out;
+};
+T.fourSquareDecode = function (s, key1, key2) {
+  var plain = T.playfairSquare('A');
+  var sq1 = T.playfairSquare(key1 === undefined ? 'EXAMPLE' : key1);
+  var sq2 = T.playfairSquare(key2 === undefined ? 'KEYWORD' : key2);
+  var t = String(s).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  if (t.length % 2) throw new Error('Bad four-square input \u2014 need letter pairs, saw ' + t.length);
+  var out = '';
+  for (var i = 0; i < t.length; i += 2) {
+    var ic = sq1.pos[t.charAt(i)]; var id = sq2.pos[t.charAt(i + 1)];
+    if (ic === undefined || id === undefined) throw new Error('Bad four-square input \u2014 A-Z only');
+    var rc = (ic / 5) | 0, cc = ic % 5, rd = (id / 5) | 0, cd = id % 5;
+    out += plain.seq[rc * 5 + cd] + plain.seq[rd * 5 + cc];
+  }
+  return out;
+};
+T.fourSquareCipher = function (s, opts) { var o = opts || {}; var k1 = o.key1 === undefined ? 'EXAMPLE' : o.key1; var k2 = o.key2 === undefined ? 'KEYWORD' : o.key2; if ((o.mode || 'encode') === 'decode') return T.fourSquareDecode(s, k1, k2); return T.fourSquareEncode(s, k1, k2); };
 /* Columnar cores: keyword-ordered columns (stable for duplicate letters), no padding, uneven columns handled, code points preserved. */
 T.columnarOrder = function (key) {
   var k = String(key === undefined ? 'ZEBRAS' : key).toUpperCase().replace(/[^A-Z]/g, '');
