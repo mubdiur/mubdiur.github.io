@@ -5387,6 +5387,8 @@ T.xmlToYAML = function (s) { return T.jsonToYAML(JSON.stringify(T.xmlToJsonValue
 /* Duration calculator: one signed duration per line, summed. Each line takes
    jammed or spaced unit groups (1h30m, 2 days 4 hours), colon times (1:30:00,
    12:30) or bare seconds; leading - subtracts, # lines and blanks skip.
+   An @instant line (epoch or date string) anchors the cursor: the next
+   @instant adds the gap between them, so date ranges mix with durations.
    Months read as 30 days and years as 365 days. Totals show s/min/h plus
    ms under a minute and days past a day. Unknown units and bad clocks throw
    with the offending line number. */
@@ -5422,7 +5424,7 @@ T.durationCalc = function (s) {
   }
   var raw = String(s === undefined || s === null ? '' : s);
   var rows = raw.split(/\r?\n/);
-  var out = [], total = 0, count = 0;
+  var out = [], total = 0, count = 0, anchor = null;
   for (var n = 0; n < rows.length; n++) {
     var line = rows[n].trim();
     if (!line || line.charAt(0) === '#') continue;
@@ -5430,12 +5432,24 @@ T.durationCalc = function (s) {
     var sig = /^\s*([+-])\s*(.*)$/.exec(line);
     if (sig) { sign = sig[1] === '-' ? -1 : 1; body = sig[2]; }
     if (!body) throw new Error('Line ' + ln + ': sign with no duration');
+    if (body.charAt(0) === '@') {
+      var when = T.parseDateValue(body.slice(1), ln).getTime();
+      if (anchor === null) { anchor = when; out.push(line + ' (anchor)'); }
+      else {
+        var gap = sign * (when - anchor);
+        anchor = when;
+        total += gap;
+        out.push(line + ' = ' + fmt(gap / 1000) + 's');
+      }
+      count++;
+      continue;
+    }
     var ms = sign * parseTerm(body, ln);
     total += ms;
     count++;
     out.push(line + ' = ' + fmt(ms / 1000) + 's');
   }
-  if (!count) throw new Error('Paste durations first \u2014 one per line, e.g. 1h30m');
+  if (!count) throw new Error('Paste durations first \u2014 one per line, e.g. 1h30m or @2024-06-10');
   var segs = [];
   if (Math.abs(total) < 60000) segs.push(fmt(total) + 'ms');
   segs.push(fmt(total / 1000) + 's', fmt(total / 60000) + 'min', fmt(total / 3600000) + 'h');
@@ -5519,18 +5533,21 @@ T.jsonlStats = function (s) {
    string); a lone date compares against now. Reports the signed exact total
    plus a calendar-accurate year/month/day split on the UTC calendar.
    Unknown dates throw with the offending line number. */
-T.dateDiff = function (s) {
-  function parseDate(t, ln) {
-    t = t.trim();
-    if (/^-?\d+(\.\d+)?$/.test(t)) {
-      var n = parseFloat(t);
-      var digits = t.replace(/[-.]/g, '').replace(/^0+/, '').length || 1;
-      return new Date(digits > 10 ? n : n * 1000);
-    }
-    var ms = Date.parse(t);
-    if (isNaN(ms)) throw new Error('Line ' + ln + ': Unrecognized date \u2014 try 2024-06-10 or 1718035200');
-    return new Date(ms);
+/* Shared loose date value: epoch seconds-or-milliseconds (digit-count
+   heuristic) or any Date.parse string. Powers dateDiff plus the @instant
+   lines of durationCalc; unknown input throws with the line number. */
+T.parseDateValue = function (t, ln) {
+  t = String(t === undefined || t === null ? '' : t).trim();
+  if (/^-?\d+(\.\d+)?$/.test(t)) {
+    var n = parseFloat(t);
+    var digits = t.replace(/[-.]/g, '').replace(/^0+/, '').length || 1;
+    return new Date(digits > 10 ? n : n * 1000);
   }
+  var ms = Date.parse(t);
+  if (isNaN(ms)) throw new Error('Line ' + ln + ': Unrecognized date \u2014 try 2024-06-10 or 1718035200');
+  return new Date(ms);
+};
+T.dateDiff = function (s) {
   function dim(y, m) { return new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); }
   function tod(d) { return d.getUTCHours() * 3600000 + d.getUTCMinutes() * 60000 + d.getUTCSeconds() * 1000 + d.getUTCMilliseconds(); }
   var raw = String(s === undefined || s === null ? '' : s);
@@ -5539,7 +5556,7 @@ T.dateDiff = function (s) {
   for (var n = 0; n < rows.length; n++) {
     if (!rows[n].trim()) continue;
     if (dates.length >= 2) throw new Error('Line ' + (n + 1) + ': expected at most two dates \u2014 extra input');
-    dates.push(parseDate(rows[n], n + 1));
+    dates.push(T.parseDateValue(rows[n], n + 1));
   }
   if (!dates.length) throw new Error('Paste one or two dates \u2014 one date compares against now');
   var a = dates[0], b = dates.length > 1 ? dates[1] : new Date();
