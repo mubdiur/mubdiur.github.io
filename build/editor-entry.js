@@ -9,8 +9,8 @@ import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirro
 import { syntaxHighlighting, defaultHighlightStyle, indentOnInput, bracketMatching, foldGutter } from '@codemirror/language';
 import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap, completeFromList } from '@codemirror/autocomplete';
 import { searchKeymap, highlightSelectionMatches } from '@codemirror/search';
-import { javascript } from '@codemirror/lang-javascript';
-import { python } from '@codemirror/lang-python';
+import { javascript, javascriptLanguage } from '@codemirror/lang-javascript';
+import { python, pythonLanguage } from '@codemirror/lang-python';
 import { java, javaLanguage } from '@codemirror/lang-java';
 import { cpp, cppLanguage } from '@codemirror/lang-cpp';
 import { rust, rustLanguage } from '@codemirror/lang-rust';
@@ -291,12 +291,14 @@ const CPP_WORDS = ['auto','bool','break','case','catch','char','char8_t','char16
 const JAVA_WORDS = ['abstract','assert','boolean','break','byte','case','catch','char','class','const','continue','default','do','double','else','enum','extends','final','finally','float','for','goto','if','implements','import','instanceof','int','interface','long','native','new','package','permits','private','protected','public','record','return','sealed','short','static','strictfp','super','switch','synchronized','this','throw','throws','transient','try','var','void','volatile','when','while','yield','true','false','null','String','System','out','println','print'];
 const RUST_WORDS = ['as','async','await','break','const','continue','crate','dyn','else','enum','extern','false','fn','for','if','impl','in','let','loop','match','mod','move','mut','pub','ref','return','self','Self','static','struct','super','trait','true','type','union','unsafe','use','where','while','try','yield','String','str','Vec','vec','Option','Some','None','Result','Ok','Err','println','print','format','panic','assert','derive','Clone','Debug','Copy','Default','todo','unimplemented'];
 const CS_WORDS = ['abstract','as','async','await','base','bool','break','byte','case','catch','char','checked','class','const','continue','decimal','default','delegate','do','double','else','enum','event','explicit','extern','false','finally','fixed','float','for','foreach','goto','if','implicit','in','int','interface','internal','is','lock','long','namespace','nameof','new','null','object','operator','out','override','params','private','protected','public','readonly','record','ref','return','sbyte','sealed','short','sizeof','stackalloc','static','string','struct','switch','this','throw','true','try','typeof','uint','ulong','unchecked','unsafe','ushort','using','virtual','void','volatile','when','while','var','dynamic','get','set','with','init','file','nint','nuint','Task','Console','WriteLine','List','Dictionary'];
+const JS_WORDS = ['break','case','catch','class','const','continue','debugger','default','delete','do','else','export','extends','false','finally','for','function','if','import','in','instanceof','let','new','null','return','super','switch','this','throw','true','try','typeof','var','void','while','with','yield','async','await','static','get','set','of','from','as','console','window','document','Array','Object','String','Number','Boolean','Math','JSON','Promise','Map','Set','Date','RegExp','Error','require','module','exports','process','Buffer','setTimeout','setInterval','fetch'];
+const PY_WORDS = ['False','None','True','and','as','assert','async','await','break','class','continue','def','del','elif','else','except','finally','for','from','global','if','import','in','is','lambda','nonlocal','not','or','pass','raise','return','try','while','with','yield','print','len','range','str','int','float','list','dict','set','tuple','bool','open','input','enumerate','zip','map','filter','sorted','reversed','sum','min','max','abs','round','super','self','init','name','main'];
 const GO_WORDS = ['break','case','chan','const','continue','default','defer','else','fallthrough','for','func','go','goto','if','import','interface','map','package','range','return','select','struct','switch','type','var','true','false','nil','iota','string','int','int8','int16','int32','int64','uint','uint8','uint16','uint32','uint64','uintptr','float32','float64','complex64','complex128','bool','byte','rune','error','any','make','new','len','cap','append','copy','delete','panic','recover','print','println','close','clear','min','max'];
 
 function langFor(id) {
   switch (id) {
-    case 'js': return javascript();
-    case 'py': return python();
+    case 'js': return [javascript(), javascriptLanguage.data.of({ autocomplete: keywords(JS_WORDS) })];
+    case 'py': return [python(), pythonLanguage.data.of({ autocomplete: keywords(PY_WORDS) })];
     case 'c':
     case 'cpp': return [cpp(), cppLanguage.data.of({ autocomplete: keywords(CPP_WORDS) })];
     case 'cs': return [csharp(), csharpLanguage.data.of({ autocomplete: keywords(CS_WORDS) })];
