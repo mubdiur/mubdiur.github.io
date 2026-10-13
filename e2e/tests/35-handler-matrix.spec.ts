@@ -45,6 +45,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('json-minifier', 'bad json throws', mustThrow(() => TOOLS['json-minifier'].handler('not json')));
     push('json-to-csv', 'happy', TOOLS['json-to-csv'].handler('[{"a":1,"b":2},{"a":3}]').includes('a,b'));
     push('csv-to-json', 'happy', JSON.parse(TOOLS['csv-to-json'].handler('name,age\nAda,30')).length === 1);
+    push('csv-to-json', 'auto semicolon', JSON.parse(TOOLS['csv-to-json'].handler('name;age\nAda;30'))[0].age === '30');
+    push('csv-to-json', 'explicit delimiter', JSON.parse(TOOLS['csv-to-json'].handler('a,b\n1,2', { delimiter: 'comma' }))[0].a === '1');
     push('csv-delimiter-sniffer', 'semicolon', TOOLS['csv-delimiter-sniffer'].handler('a;b\nc;d').indexOf('Delimiter: Semicolon (;)') === 0);
     push('csv-delimiter-sniffer', 'comma', TOOLS['csv-delimiter-sniffer'].handler('a,b\nc,d').indexOf('Delimiter: Comma (,)') === 0);
     push('csv-delimiter-sniffer', 'empty throws', mustThrow(() => TOOLS['csv-delimiter-sniffer'].handler('   ')));

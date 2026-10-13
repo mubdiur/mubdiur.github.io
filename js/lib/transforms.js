@@ -13,7 +13,8 @@ var T = {};
  * never trims cell content (whitespace is data).
  * Returns array of rows (arrays of strings).
  */
-T.parseCSV = function (s) {
+T.parseCSV = function (s, delim) {
+  var d = delim || ',';
   var text = s.charCodeAt(0) === 0xFEFF ? s.slice(1) : s;
   var rows = [];
   var row = [];
@@ -31,7 +32,7 @@ T.parseCSV = function (s) {
       cur += ch; i++; continue;
     }
     if (ch === '"' && cur === '') { inQuotes = true; sawAny = true; i++; continue; }
-    if (ch === ',') { row.push(cur); cur = ''; sawAny = true; i++; continue; }
+    if (ch === d) { row.push(cur); cur = ''; sawAny = true; i++; continue; }
     if (ch === '\r') {
       if (text.charAt(i + 1) === '\n') i++;
       row.push(cur); rows.push(row);
@@ -47,8 +48,16 @@ T.parseCSV = function (s) {
   return rows;
 };
 
-T.csvToJSON = function (s) {
-  var rows = T.parseCSV(s);
+T.csvToJSON = function (s, opts) {
+  var o = opts || {};
+  var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
+  var d = Object.prototype.hasOwnProperty.call(DELIMS, o.delimiter) ? DELIMS[o.delimiter] : null;
+  if (d === null) {
+    var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
+    var samp = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; }).slice(0, 10);
+    d = T.detectDelimChar(samp) || ',';
+  }
+  var rows = T.parseCSV(s, d);
   if (!rows.length) throw new Error('CSV is empty');
   var seen = {};
   var headers = rows[0].map(function (h) {
@@ -1975,19 +1984,13 @@ T.csvToMarkdown = function (s, opts) {
   return [mdRow(head), sep].concat(body.map(mdRow)).join('\n');
 };
 
-/* CSV delimiter sniffer: quote-aware scoring over comma/semicolon/tab/pipe.
-   Samples up to 10 non-empty lines; the winner splits every sampled line
-   into the same field count greater than one. Ties and single-column input
-   report honestly instead of guessing. */
-T.csvSniffDelim = function (s) {
-  var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
-  var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
-  if (!lines.length) throw new Error('Paste delimited rows first \u2014 one record per line');
-  var sample = lines.slice(0, 10);
+/* Delimiter scoring core: quote-aware field counts per candidate over the
+   sampled lines. Shared by the sniffer report and auto-delimiter parsing. */
+T.scoreDelims = function (sample) {
   var cands = [
     { name: 'Comma (,)', ch: ',' },
     { name: 'Semicolon (;)', ch: ';' },
-    { name: 'Tab', ch: '\t' },
+    { name: 'Tab', ch: '	' },
     { name: 'Pipe (|)', ch: '|' }
   ];
   function countFields(line, d) {
@@ -2004,11 +2007,26 @@ T.csvSniffDelim = function (s) {
     }
     return n;
   }
-  var scored = cands.map(function (c) {
+  return cands.map(function (c) {
     var counts = sample.map(function (ln) { return countFields(ln, c.ch); });
     var same = counts.every(function (x) { return x === counts[0]; });
-    return { name: c.name, cols: counts[0], same: same };
+    return { name: c.name, ch: c.ch, cols: counts[0], same: same };
   });
+};
+/* Unambiguous winner character, or null on ties and single-column input. */
+T.detectDelimChar = function (sample) {
+  var winners = T.scoreDelims(sample).filter(function (r) { return r.same && r.cols > 1; });
+  return winners.length === 1 ? winners[0].ch : null;
+};/* CSV delimiter sniffer: quote-aware scoring over comma/semicolon/tab/pipe.
+   Samples up to 10 non-empty lines; the winner splits every sampled line
+   into the same field count greater than one. Ties and single-column input
+   report honestly instead of guessing. */
+T.csvSniffDelim = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
+  var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
+  if (!lines.length) throw new Error('Paste delimited rows first \u2014 one record per line');
+  var sample = lines.slice(0, 10);
+  var scored = T.scoreDelims(sample);
   var winners = scored.filter(function (r) { return r.same && r.cols > 1; });
   var best = winners.length === 1 ? winners[0] : null;
   var out = [];

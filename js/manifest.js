@@ -180,8 +180,9 @@ window.TOOLMANIFEST = [
   { slug: 'jwt-debugger', name: 'JWT Debugger', desc: 'Decode and inspect JWT tokens — human-readable claims, expiry badges, HS256 signature verification via the WebAssembly HMAC core', category: 'network', tags: ['jwt', 'token', 'auth'], icon: 'lock', template: 'custom' },
 
   // ── Converters ──────────────────────────────────────────
-  { slug: 'csv-to-json', name: 'CSV → JSON', desc: 'RFC 4180-exact CSV parsing: quoted commas, escaped quotes ("") and newlines inside quotes, CRLF, BOM', category: 'converters', tags: ['csv', 'json', 'convert'], icon: 'filespreadsheet', template: 'transform',
-    handler: function (s) { return Transforms.csvToJSON(s); } },
+  { slug: 'csv-to-json', name: 'CSV → JSON', desc: 'RFC 4180-exact CSV parsing: quoted commas, escaped quotes ("") and newlines inside quotes, CRLF, BOM, auto delimiter', category: 'converters', tags: ['csv', 'json', 'convert'], icon: 'filespreadsheet', template: 'transform',
+    handler: function (s, opts) { return Transforms.csvToJSON(s, opts); },
+    params: [{ key: 'delimiter', label: 'Delimiter', type: 'select', default: 'auto', options: [{ value: 'auto', label: 'Auto' }, { value: 'comma', label: 'Comma (,)' }, { value: 'semicolon', label: 'Semicolon (;)' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe (|)' }] }] },
   { slug: 'csv-delimiter-sniffer', name: 'CSV Delimiter Sniffer', desc: 'Detect the delimiter in pasted rows \u2014 quote-aware scoring over comma, semicolon, tab and pipe, with a consistency report', category: 'converters', tags: ['csv', 'delimiter', 'detect'], icon: 'filespreadsheet', template: 'transform',
     placeholder: 'name;city\nAda;Lovelace',
     handler: function (s) { return Transforms.csvSniffDelim(s); } },
