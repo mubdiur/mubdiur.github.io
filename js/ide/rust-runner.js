@@ -253,7 +253,7 @@ self.onmessage = async (e) => {
       running = false;
       self.postMessage({ type: 'err', text: '\n[terminated: execution exceeded ' + Math.round(RUN_TIMEOUT / 1000) + 's — check for infinite loops]\n' });
       self.postMessage({ type: 'exit', text: '', code: null, terminated: true });
-      try { self.close(); } catch (ex) {}
+      try { self.close(); } catch {}
     }, RUN_TIMEOUT);
     let result;
     try {
@@ -264,7 +264,6 @@ self.onmessage = async (e) => {
     }
     clearTimeout(timer);
     running = false;
-    const out = (result.stdout || '') + (result.stderr ? '\n' + result.stderr : '');
     if (result.ok) {
       if (result.stdout) self.postMessage({ type: 'out', text: result.stdout });
       if (result.stderr) self.postMessage({ type: 'err', text: result.stderr });

@@ -14,10 +14,10 @@ function favClean(arr) {
 function favLoad() {
   try {
     return favClean(JSON.parse(localStorage.getItem('mub.favtools.v1') || '[]'));
-  } catch (e) { return []; }
+  } catch { return []; }
 }
 function favSave(list) {
-  try { localStorage.setItem('mub.favtools.v1', JSON.stringify(list)); } catch (e) {}
+  try { localStorage.setItem('mub.favtools.v1', JSON.stringify(list)); } catch {}
 }
 function favHas(list, slug) { return list.indexOf(slug) >= 0; }
 function favToggle(list, slug) {
@@ -79,7 +79,7 @@ function renderTools() {
     rd.onload = function () {
       var arr;
       try { arr = JSON.parse(rd.result); }
-      catch (e) { ioStatus.textContent = 'Import failed \u2014 not valid JSON'; return; }
+      catch { ioStatus.textContent = 'Import failed \u2014 not valid JSON'; return; }
       if (!Array.isArray(arr)) { ioStatus.textContent = 'Import failed \u2014 expected a JSON array of tool slugs'; return; }
       var clean = favClean(arr);
       if (!clean.length) { ioStatus.textContent = 'Import failed \u2014 no known tool slugs found'; return; }

@@ -53,7 +53,6 @@ var runBtn = null;
 var stdinRow = null;
 var stdinInput = null;
 var stdinSend = null;
-var stdinWaiting = false;
 var stdinSupported = true;
 var runningLang = null;
 var runStart = 0;
@@ -72,7 +71,7 @@ function loadState() {
         });
       }
     }
-  } catch (e) {}
+  } catch {}
   LANGUAGES.forEach(function (l) {
     if (typeof state.code[l.id] !== 'string') state.code[l.id] = l.sample;
   });
@@ -83,7 +82,7 @@ function saveState() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function () {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {
-      if (e && e.name === 'QuotaExceededError') { try { localStorage.removeItem(STORE_KEY); } catch (_) {} }
+      if (e && e.name === 'QuotaExceededError') { try { localStorage.removeItem(STORE_KEY); } catch {} }
     }
   }, 300);
 }
@@ -99,8 +98,8 @@ function getWorker(lang) {
   if (!def) throw new Error('Unknown language: ' + lang);
   var entry = workers[lang];
   if (entry && entry.alive) return entry.w;
-  if (entry && entry.w) { try { entry.w.terminate(); } catch (e) {} }
-  var w = new Worker(RUNNER_DIR + def.runner + '?v=12', { type: def.module ? 'module' : 'classic' });
+  if (entry && entry.w) { try { entry.w.terminate(); } catch {} }
+  var w = new Worker(RUNNER_DIR + def.runner + '?v=13', { type: def.module ? 'module' : 'classic' });
   w.__lang = lang;
   var scriptLoaded = false;
   w.addEventListener('message', function (e) {
@@ -128,7 +127,7 @@ function getWorker(lang) {
 function ensureWorkerPreload(lang) {
   var entry = workers[lang];
   if (entry && entry.alive) return entry.w;
-  try { return getWorker(lang); } catch (e) { return null; }
+  try { return getWorker(lang); } catch { return null; }
 }
 
 function syncRunButton() {
@@ -145,7 +144,7 @@ function syncRunButton() {
     // understand {type:'init'} will start fetching; others will simply
     // be created and will load on the first real Run — either way the
     // user can press Run immediately and see live status.
-    if (!workers[lang]) { try { ensureWorkerPreload(lang); } catch (e) {} }
+    if (!workers[lang]) { try { ensureWorkerPreload(lang); } catch {} }
     runBtn.disabled = false;
     runBtn.title = 'Run (Ctrl+Enter)';
     return;
@@ -219,7 +218,7 @@ function armWatchdog(ms) {
     var entry = workers[runningLang];
     if (entry && entry.alive) {
       appendOutput('\n[terminated: no response for ' + Math.round(ms / 1000) + 's — check for infinite loops]\n', true);
-      try { entry.w.terminate(); } catch (e) {}
+      try { entry.w.terminate(); } catch {}
       markDead(runningLang);
       finishRun(null, true);
     }
@@ -251,16 +250,13 @@ function appendOutput(text, isErr) {
 function clearOutput() {
   if (outputEl) outputEl.innerHTML = '';
   if (stdinRow) stdinRow.classList.remove('waiting');
-  stdinWaiting = false;
 }
 
 function finishRun(code, terminated) {
-  var was = runningLang;
   runningLang = null;
   watchdogGen++;
   clearTimeout(watchdog);
   if (stdinRow) stdinRow.classList.remove('waiting');
-  stdinWaiting = false;
   if (runBtn) {
     runBtn.innerHTML = '<span class="ide-run-glyph">▶</span> Run';
   }
@@ -283,7 +279,7 @@ function stopRun() {
   var entry = workers[lang];
   watchdogGen++;
   clearTimeout(watchdog);
-  if (entry && entry.alive) { try { entry.w.terminate(); } catch (e) {} }
+  if (entry && entry.alive) { try { entry.w.terminate(); } catch {} }
   markDead(lang);
   finishRun(null, true);
   setStatus('stopped');
@@ -312,7 +308,7 @@ function runCode() {
      (no 'worker-loaded' message received), terminate it and recreate.
      Dead workers silently swallow posted messages. */
   if (entry && entry.alive && !entry.scriptLoaded) {
-    try { entry.w.terminate(); } catch (e) {}
+    try { entry.w.terminate(); } catch {}
     markDead(lang);
   }
   var w = getWorker(lang);
@@ -337,7 +333,6 @@ function runCode() {
 
 function onStdinRequest() {
   if (!runningLang) return;
-  stdinWaiting = true;
   stdinRow.classList.add('waiting');
   setStatus('awaiting input — type in the box below');
   armWatchdog(STDIN_WAIT_MS);
@@ -348,7 +343,6 @@ function deliverStdin() {
   if (!runningLang) return;
   var line = String(stdinInput.value);
   stdinInput.value = '';
-  stdinWaiting = false;
   stdinRow.classList.remove('waiting');
   var entry = workers[runningLang];
   if (!entry || !entry.alive) return;
@@ -537,9 +531,9 @@ function renderIde() {
           editor.view.contentDOM.setAttribute('aria-label', 'Code editor (' + state.lang + ')');
         }
       }
-    } catch (e) {}
+    } catch {}
     // Clicking the wrapper should focus the editor (covers dead-zone clicks)
-    try { editorWrap.addEventListener('click', function () { if (editor) editor.focus(); }); } catch (e) {}
+    try { editorWrap.addEventListener('click', function () { if (editor) editor.focus(); }); } catch {}
     vendorState['js'] = 'ready';
     if (state.lang !== 'js' && (!vendorState[state.lang] || vendorState[state.lang] === 'idle')) { vendorState[state.lang] = 'loading'; ensureWorkerPreload(state.lang); }
     syncRunButton();
@@ -547,8 +541,8 @@ function renderIde() {
     if (vs0 === 'loading') setStatus('Loading ' + langDef(state.lang).name + '…');
     else setStatus(langDef(state.lang).name + ' — press Run (Ctrl+Enter)');
     // Focus after paint; also retry after fonts-loading guard clears
-    setTimeout(function () { try { editor.focus(); } catch (e) {} }, 50);
-    setTimeout(function () { try { editor.focus(); } catch (e) {} }, 600);
+    setTimeout(function () { try { editor.focus(); } catch {} }, 50);
+    setTimeout(function () { try { editor.focus(); } catch {} }, 600);
   }).catch(function (err) {
     editorWrap.appendChild(App.el('div', { class: 'not-found', html: '<span class="nf-sub">Editor failed to load: ' + App.esc(err.message || err) + '</span><button class="btn-primary-sm" style="margin-top:0.75rem" onclick="location.reload()">Retry</button>' }));
     setStatus('editor failed — click Retry');
@@ -575,17 +569,16 @@ function renderIde() {
     clearTimeout(saveTimer);
     watchdogGen++;
     clearTimeout(watchdog);
-    Object.keys(workers).forEach(function (k) { try { workers[k].w.terminate(); } catch (e) {} });
+    Object.keys(workers).forEach(function (k) { try { workers[k].w.terminate(); } catch {} });
     workers = {};
-    if (editor && editor.destroy) { try { editor.destroy(); } catch (e) {} }
+    if (editor && editor.destroy) { try { editor.destroy(); } catch {} }
     editor = null;
     runningLang = null;
-    stdinWaiting = false;
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {}
   });
   window.addEventListener('beforeunload', function () {
     if (editor) state.code[state.lang] = editor.getValue();
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {}
   });
 
   return root;

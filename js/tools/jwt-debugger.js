@@ -144,7 +144,7 @@ App.registerTool('jwt-debugger', {
       if (!rawPayload) { claimsEl.style.display = 'none'; return; }
       var now = Math.floor(Date.now() / 1000);
       var fmtTime = function (epoch) {
-        try { return new Date(epoch * 1000).toLocaleString(); } catch (e) { return String(epoch); }
+        try { return new Date(epoch * 1000).toLocaleString(); } catch { return String(epoch); }
       };
       var rows = [];
       ['iss', 'sub', 'aud'].forEach(function (k) {

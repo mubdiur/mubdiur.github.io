@@ -125,7 +125,7 @@ self.addEventListener('message', function (e) {
     running = false;
     post('err', '\n[terminated: execution exceeded ' + Math.round(RUN_TIMEOUT / 1000) + 's — check for infinite loops]\n');
     post('exit', '', { code: null, terminated: true });
-    try { self.close(); } catch (e) {}
+    try { self.close(); } catch {}
   }, RUN_TIMEOUT);
 
   ensureEngine().then(function (eng) {

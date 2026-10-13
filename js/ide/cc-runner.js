@@ -109,7 +109,7 @@ self.addEventListener('message', function (e) {
     clearTimeout(compileTimer);
     post('err', '\n[terminated: execution exceeded ' + Math.round(RUN_TIMEOUT / 1000) + 's — check for infinite loops]\n');
     post('exit', '', { code: null, terminated: true });
-    try { self.close(); } catch (e) {}
+    try { self.close(); } catch {}
   }, RUN_TIMEOUT + COMPILE_TIMEOUT);
 
   compileTimer = setTimeout(function () {
@@ -118,7 +118,7 @@ self.addEventListener('message', function (e) {
     running = false;
     clearTimeout(timer);
     post('exit', '', { code: null, terminated: true });
-    try { self.close(); } catch (e) {}
+    try { self.close(); } catch {}
   }, COMPILE_TIMEOUT);
 
   var fileName = lang === 'cpp' ? 'main.cpp' : 'main.c';
@@ -152,7 +152,7 @@ self.addEventListener('message', function (e) {
         running = false;
         post('err', '\n[terminated: execution exceeded ' + Math.round(RUN_TIMEOUT/1000) + 's — check for infinite loops]\n');
         post('exit','',{code:null, terminated:true});
-        try { self.close(); } catch (e) {}
+        try { self.close(); } catch {}
       }, RUN_TIMEOUT);
       return runWasi(res.module, [fileName], [['main.c', new TextEncoder().encode(code)]], stdinText);
     }).then(function (out) {

@@ -222,7 +222,7 @@ window.TOOLMANIFEST = [
     handler: function (s) {
       var d;
       try { d = new DOMParser().parseFromString(s, 'text/xml'); }
-      catch (e) { throw new Error('Invalid XML'); }
+      catch { throw new Error('Invalid XML'); }
       var perr = d.getElementsByTagName('parsererror');
       if (perr.length) throw new Error('Invalid XML: ' + ((perr[0].textContent || '').replace(/\s+/g, ' ').slice(0, 120)));
       function walk(el) {

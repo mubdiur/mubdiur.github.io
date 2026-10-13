@@ -69,7 +69,7 @@ function armBudget(ms) {
     if (!running) return;
     post('err', '\n[terminated: execution exceeded ' + Math.round((ms || PENDING_TIMEOUT) / 1000) + 's — check for infinite loops]\n');
     post('exit', '', { code: null, terminated: true });
-    try { self.close(); } catch (e) {}
+    try { self.close(); } catch {}
   }, ms || PENDING_TIMEOUT);
 }
 
@@ -195,7 +195,7 @@ function stringify(v) {
       }
       return val;
     }, 2);
-  } catch (e) { return String(v); }
+  } catch { return String(v); }
 }
 function fmtArgs(args) {
   return Array.prototype.map.call(args, function (a) { return stringify(a); }).join(' ');
@@ -246,7 +246,7 @@ Buffer.prototype.equals = function (o) {
   return true;
 };
 
-/* ── in-memory fs ── */
+/* ── in-memory vfs (backs relative require) ── */
 var vfs = { '/': { type: 'dir' } };
 function vfsNormalize(p) {
   var raw = String(p).replace(/\\/g, '/');
@@ -271,44 +271,7 @@ function vfsResolve(p) {
   }
   return node;
 }
-function vfsParentDir(p) {
-  var norm = vfsNormalize(p);
-  var parts = norm.split('/').filter(Boolean);
-  var node = vfs['/'];
-  for (var i = 0; i < parts.length - 1; i++) {
-    if (!node.children) node.children = {};
-    if (!node.children[parts[i]]) node.children[parts[i]] = { type: 'dir', children: {} };
-    node = node.children[parts[i]];
-  }
-  return node;
-}
-var fs = {
-  writeFileSync: function (p, data) {
-    var dir = vfsParentDir(p);
-    var parts = String(p).split('/').filter(Boolean);
-    dir.children[parts[parts.length - 1]] = { type: 'file', data: new Uint8Array(data instanceof Uint8Array ? data : new TextEncoder().encode(String(data))) };
-  },
-  readFileSync: function (p, enc) {
-    var f = vfsResolve(p);
-    if (!f || f.type !== 'file') throw new Error('ENOENT: no such file or directory, open \'' + p + '\'');
-    var text = new TextDecoder().decode(f.data);
-    return enc === 'utf8' ? text : (enc === 'buffer' ? f.data : text);
-  },
-  existsSync: function (p) { return !!vfsResolve(p); },
-  mkdirSync: function (p) { vfsParentDir(p + '/x'); },
-  readdirSync: function (p) {
-    var d = vfsResolve(p);
-    if (!d || d.type !== 'dir') throw new Error('ENOTDIR: not a directory, scandir \'' + p + '\'');
-    return Object.keys(d.children || {});
-  },
-  statSync: function (p) {
-    var f = vfsResolve(p);
-    if (!f) throw new Error('ENOENT: no such file or directory, stat \'' + p + '\'');
-    return { isFile: function () { return f.type === 'file'; }, isDirectory: function () { return f.type === 'dir'; }, size: f.data ? f.data.length : 0 };
-  }
-};
 
-/* ── builtin modules ── */
 var builtins = {
   path: {
     basename: function (p, ext) {
@@ -448,10 +411,10 @@ self.addEventListener('message', function (e) {
   var intervals = 0;
   var intervalSet = new Set();
   function clearLiveInterval(id) {
-    if (!id || !intervalSet.has(id)) { timers.delete(id); try { clearInterval(id); } catch (e) {} return; }
+    if (!id || !intervalSet.has(id)) { timers.delete(id); try { clearInterval(id); } catch {} return; }
     intervalSet.delete(id);
     timers.delete(id);
-    try { clearInterval(id); } catch (e) {}
+    try { clearInterval(id); } catch {}
     intervals = Math.max(0, intervals - 1);
     if (pending === 0 && stdinHold === 0 && intervals === 0) finish();
   }
@@ -495,8 +458,8 @@ self.addEventListener('message', function (e) {
       if (!id) return;
       if (intervalSet.has(id)) { clearLiveInterval(id); return; }
       var native = timeoutMap.get(id);
-      if (native !== undefined) { try { clearTimeout(native); } catch (e) {} timeoutMap.delete(id); timers.delete(id); pending = Math.max(0, pending - 1); return; }
-      try { clearTimeout(id); } catch (e) {}
+      if (native !== undefined) { try { clearTimeout(native); } catch {} timeoutMap.delete(id); timers.delete(id); pending = Math.max(0, pending - 1); return; }
+      try { clearTimeout(id); } catch {}
     },
     clearInterval: function (id) { clearLiveInterval(id); },
     queueMicrotask: function (fn) { queueMicrotask(fn); },
@@ -523,7 +486,7 @@ self.addEventListener('message', function (e) {
     var code2 = exitRequested === null ? 0 : exitRequested;
     post('exit', '', { code: code2 });
     // hard-stop the worker shortly after exit so stray loops can't keep it alive
-    setTimeout(function () { try { self.close(); } catch (e) {} }, 50);
+    setTimeout(function () { try { self.close(); } catch {} }, 50);
   }
 
   try {

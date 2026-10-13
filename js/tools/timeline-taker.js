@@ -130,7 +130,7 @@ App.registerTool('timeline-taker', {
           var c = clean.find(function (x) { return x.id === e.id; });
           if (c) e.state = 'saved';
         });
-      } catch (err) {
+      } catch {
         /* storage unavailable */
       }
     }
@@ -147,7 +147,7 @@ App.registerTool('timeline-taker', {
         var raw = localStorage.getItem(STORAGE_KEY);
         if (raw) entries = JSON.parse(raw).map(function (e) { return Object.assign({}, e, { state: 'saved' }); });
         else entries = [];
-      } catch (err) {
+      } catch {
         entries = [];
       }
       renderTable();
@@ -440,7 +440,7 @@ App.registerTool('timeline-taker', {
       pushHistory();
       try {
         localStorage.removeItem(STORAGE_KEY);
-      } catch (err) {
+      } catch {
         /* ignore */
       }
       entries = [];
@@ -561,7 +561,7 @@ App.registerTool('timeline-taker', {
         var parsed = JSON.parse(raw);
         entries = parsed.map(function (e) { return Object.assign({}, e, { state: 'saved' }); });
       }
-    } catch (err) {
+    } catch {
       /* corrupt storage — start fresh */
     }
     loaded = true;

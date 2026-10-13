@@ -21,7 +21,7 @@ try {
   if (typeof self !== 'undefined') {
     self.IDECache = { fetch: cachedFetch, bytes: cachedBytes, gunzip, CACHE_NAME };
   }
-} catch (e) {}
+} catch {}
 
 /* ── legacy worker helper (deprecated) ──
    Kept only for external URLs that may still import it; the IDE's
@@ -37,18 +37,18 @@ export function runWorker(workerUrl, payload) {
   });
   w.addEventListener('error', (e) => {
     const h = handlers.err || handlers.error;
-    if (h) { try { h({ text: String(e.message || e) }); } catch (err) {} }
+    if (h) { try { h({ text: String(e.message || e) }); } catch {} }
   });
   w.postMessage(payload);
   return {
     on(type, fn) { handlers[type] = fn; },
-    post(m) { try { w.postMessage(m); } catch (e) {} },
+    post(m) { try { w.postMessage(m); } catch {} },
     terminate() {
       if (done) return;
       done = true;
-      try { w.terminate(); } catch (e) {}
+      try { w.terminate(); } catch {}
       const h = handlers.exit;
-      if (h) { try { h({ text: '', code: null, terminated: true }); } catch (err) {} }
+      if (h) { try { h({ text: '', code: null, terminated: true }); } catch {} }
     }
   };
 }
@@ -57,4 +57,4 @@ try {
   if (typeof self !== 'undefined' && !self.IDERun) {
     self.IDERun = { worker: runWorker };
   }
-} catch (e) {}
+} catch {}

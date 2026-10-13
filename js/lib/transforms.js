@@ -1240,7 +1240,7 @@ T.harSummary = function (s, opts) {
   if (!raw.trim()) throw new Error('Paste HAR JSON first - export it from the DevTools Network tab');
   var doc;
   try { doc = JSON.parse(raw); }
-  catch (e) { throw new Error('Invalid HAR - paste DevTools HAR JSON (an object with log.entries)'); }
+  catch { throw new Error('Invalid HAR - paste DevTools HAR JSON (an object with log.entries)'); }
   var entries = (doc && doc.log && Array.isArray(doc.log.entries)) ? doc.log.entries
     : (doc && Array.isArray(doc.entries)) ? doc.entries
     : Array.isArray(doc) ? doc : null;
@@ -1318,7 +1318,7 @@ T.parseUA = function (s) {
    absolute-URL decompose with decoded query table or JSON view. */
 T.parseURL = function (s, opts) {
   var u;
-  try { u = new URL(s.trim()); } catch (e) { throw new Error('Enter a valid absolute URL (include https://)'); }
+  try { u = new URL(s.trim()); } catch { throw new Error('Enter a valid absolute URL (include https://)'); }
   var params = [];
   u.searchParams.forEach(function (v, k) { params.push([k, v]); });
   if (opts && opts.view === 'json') {
@@ -1605,7 +1605,7 @@ T._stripHex = function (s) {
   if (h.charAt(0) === '0' && (h.charAt(1) === 'x' || h.charAt(1) === 'X')) h = h.slice(2);
   return h.replace(/[:\-]/g, '');
 }
-T.base64Encode = function (s) { try { return btoa(T._bytesToBinaryString(T._utf8Bytes(s))); } catch (e) { throw new Error('Failed to encode as Base64'); } };
+T.base64Encode = function (s) { try { return btoa(T._bytesToBinaryString(T._utf8Bytes(s))); } catch { throw new Error('Failed to encode as Base64'); } };
 T.base64Decode = function (s) {
   try {
     var t = unquote(s).replace(/\s/g, '');
@@ -1614,10 +1614,10 @@ T.base64Decode = function (s) {
     t = t.replace(/-/g, '+').replace(/_/g, '/');
     while (t.length % 4 !== 0) t += '=';
     return new TextDecoder().decode(Uint8Array.from(atob(t), function (c) { return c.charCodeAt(0); }));
-  } catch (e) { throw new Error('Invalid Base64 input'); }
+  } catch { throw new Error('Invalid Base64 input'); }
 };
 T.urlEncode = function (s) { return encodeURIComponent(s); };
-T.urlDecode = function (s) { try { return decodeURIComponent(s); } catch (e) { throw new Error('Invalid URL encoding'); } };
+T.urlDecode = function (s) { try { return decodeURIComponent(s); } catch { throw new Error('Invalid URL encoding'); } };
 T.htmlEncode = function (s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); };
 T.htmlDecode = function (s) {
   var map = { amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", '#x27': "'", '#x2F': '/', nbsp: '\u00A0', copy: '\u00A9', reg: '\u00AE', trade: '\u2122', hellip: '\u2026', mdash: '\u2014', ndash: '\u2013', laquo: '\u00AB', raquo: '\u00BB', deg: '\u00B0', euro: '\u20AC', pound: '\u00A3', yen: '\u00A5', times: '\u00D7', divide: '\u00F7' };

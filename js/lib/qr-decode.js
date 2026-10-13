@@ -122,8 +122,6 @@ var NUM_BLK = { L: [0, 1, 1, 1, 1, 1, 2], M: [0, 1, 1, 1, 2, 2, 4], Q: [0, 1, 1,
 function rawCodewords(v) { var r = (16 * v + 128) * v + 64; if (v >= 2) { var na = Math.floor(v / 7) + 2; r -= (25 * na - 10) * na - 55; } return Math.floor(r / 8); }
 function blockInfo(v, ecl) { var ec = ECC_LEN[ecl][v], nbl = NUM_BLK[ecl][v], raw = rawCodewords(v); var nShort = nbl - raw % nbl; var shortLen = Math.floor(raw / nbl) - ec; return { ec: ec, nbl: nbl, raw: raw, nShort: nShort, shortLen: shortLen, dataLen: raw - ec * nbl }; }
 var ALIGN = { 1: [], 2: [6, 18], 3: [6, 22], 4: [6, 26], 5: [6, 30], 6: [6, 34] };
-var ECLV = [1, 0, 3, 2];
-var ECLN = ["M", "L", "H", "Q"];
 /* BCH(15,5) format check over GF(2), generator 0x537. */
 function fmtRemainder(w) {
   var g = 1335, v = w, deg = 0, t = v;
@@ -231,7 +229,7 @@ function parseData(bytes) {
       var raw = [];
       for (k = 0; k < count; k++) { if (pos + 8 > bits.length) throw new Error("QR truncated in byte run"); raw.push(parseInt(take(8), 2)); }
       try { out += decodeURIComponent(raw.map(function (b) { return "%" + ("0" + b.toString(16)).slice(-2); }).join("")); }
-      catch (e) {
+      catch {
         var s2 = "";
         for (k = 0; k < raw.length; k++) s2 += String.fromCharCode(raw[k]);
         out += s2;
@@ -248,7 +246,7 @@ function rot90(g, dim) {
 function decodeMatrix(bits, dim) {
   var v = (dim - 17) / 4;
   if (dim < 21 || v !== Math.floor(v) || v < 1 || v > 6) throw new Error("QR size " + dim + " is not a supported version (v1-v6)");
-  var rot, grid = bits.slice(), r, fmt, data, ecl, mask, bytes, spec, per, nbl, total, bi, k, blocks, dc, b;
+  var grid = bits.slice(), r, fmt, data, ecl, mask, bytes, spec, nbl, total, k, blocks, dc, b;
   for (r = 0; r < 4; r++) {
     if (r > 0) grid = rot90(grid, dim);
     fmt = fmtDecode(readFormatBits(grid, dim, true));
@@ -393,7 +391,7 @@ function decodeBox(bin, w, h) {
       for (yy = -1; yy <= 1; yy++) for (xx = -1; xx <= 1; xx++) { var qx = sx + xx, qy = sy + yy; if (qx < 0 || qy < 0 || qx >= w || qy >= h) continue; votes += bin[qy * w + qx]; cnt++; }
       grid[gy * dim + gx] = votes * 2 >= cnt ? 1 : 0;
     }
-    try { return decodeMatrix(grid, dim); } catch (e) {}
+    try { return decodeMatrix(grid, dim); } catch {}
   }
   throw new Error("No QR code found");
 }
@@ -422,8 +420,8 @@ function decode(px) {
     }
     grid[j * dim + i] = votes * 2 >= cnt ? 1 : 0;
   }
-  try { return decodeMatrix(grid, dim); } catch (e) { return decodeBox(bin, w, h); }
-  } catch (e) { return decodeBox(bin, w, h); }
+  try { return decodeMatrix(grid, dim); } catch { return decodeBox(bin, w, h); }
+  } catch { return decodeBox(bin, w, h); }
 }
 window.QrDecode = { decode: decode, decodeMatrix: decodeMatrix, rsEncode: rsEncode, rsCorrect: rsCorrect, fmtDecode: fmtDecode };
 })();

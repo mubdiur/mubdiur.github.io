@@ -9,8 +9,6 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-import { cachedBytes } from './cache.js';
-
 /* Confirm to the IDE that this worker script loaded successfully */
 console.log('[cs-runner] script loaded');
 self.postMessage({ type: 'worker-loaded' });
@@ -79,7 +77,7 @@ function wrapFetchForProgress() {
           }
           return pump();
         },
-        cancel: function () { try { reader.cancel(); } catch (e) {} }
+        cancel: function () { try { reader.cancel(); } catch {} }
       });
       return new Response(stream, { status: res.status, statusText: res.statusText, headers: res.headers });
     });
@@ -122,7 +120,7 @@ self.addEventListener('message', function (e) {
     running = false;
     post('err', '\n[terminated: execution exceeded ' + Math.round(RUN_TIMEOUT / 1000) + 's — check for infinite loops]\n');
     post('exit', '', { code: null, terminated: true });
-    try { self.close(); } catch (ex) {}
+    try { self.close(); } catch {}
   }, RUN_TIMEOUT);
 
   ensureRuntime().then(function (host) {
@@ -130,7 +128,7 @@ self.addEventListener('message', function (e) {
     var json = host.CompileAndRun(code);
     clearTimeout(timer);
     var res;
-    try { res = JSON.parse(json); } catch (ex) { res = { out: '', err: json }; }
+    try { res = JSON.parse(json); } catch { res = { out: '', err: json }; }
     if (res.out) post('out', res.out);
     if (res.err) {
       post('err', res.err);

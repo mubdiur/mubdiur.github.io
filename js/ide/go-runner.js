@@ -10,7 +10,7 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-import { cachedGunzip, cachedBytes } from './cache.js';
+import { cachedGunzip } from './cache.js';
 
 /* Confirm to the IDE that this worker script loaded successfully */
 console.log('[go-runner] script loaded');
@@ -136,7 +136,7 @@ function runGo(js, onOut, onErr, onDone) {
   var blob = new Blob([wrap], { type: 'application/javascript' });
   var url = URL.createObjectURL(blob);
   var w = new Worker(url);
-  function revokeUrl() { try { URL.revokeObjectURL(url); } catch (e) {} }
+  function revokeUrl() { try { URL.revokeObjectURL(url); } catch {} }
   var done = false;
   var quietTimer = null;
   function finish(code) {
@@ -173,7 +173,7 @@ self.addEventListener('message', function (e) {
   var timer = setTimeout(function () {
     if (!running) return;
     running = false;
-    if (runWorker) { try { runWorker.terminate(); } catch (ex) {} runWorker = null; }
+    if (runWorker) { try { runWorker.terminate(); } catch {} runWorker = null; }
     post('err', '\n[terminated: execution exceeded ' + Math.round(RUN_TIMEOUT / 1000) + 's — check for infinite loops]\n');
     post('exit', '', { code: null, terminated: true });
   }, RUN_TIMEOUT);

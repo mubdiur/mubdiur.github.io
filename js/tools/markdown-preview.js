@@ -105,7 +105,7 @@ App.registerTool('markdown-preview', {
     function handleChange(value) {
       if (value.trim()) {
         try { preview.innerHTML = mdToHtml(value); }
-        catch (e) { preview.innerHTML = '<p class="text-xs text-red-400">Error rendering markdown</p>'; }
+        catch { preview.innerHTML = '<p class="text-xs text-red-400">Error rendering markdown</p>'; }
       } else {
         preview.innerHTML = '<span class="text-muted-foreground/30 text-xs">Preview will appear here</span>';
       }

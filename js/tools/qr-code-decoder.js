@@ -27,7 +27,7 @@ var outputBox = App.el("div");
 var meta = "";
 var hint = App.el("div", { class: "qr-hint", text: "Straight-on screenshots work best \u00b7 versions 1\u20136 \u00b7 kanji/ECI not decoded" });
 function revoke() {
-if (url) { try { URL.revokeObjectURL(url); } catch (e) {} url = null; }
+if (url) { try { URL.revokeObjectURL(url); } catch {} url = null; }
 }
 function render() {
 statusNode.textContent = status === "idle" ? "No image yet — decoded text appears here." : status === "scanning" ? "Scanning…" : status === "done" ? meta : "";

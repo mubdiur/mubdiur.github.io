@@ -130,15 +130,6 @@ App.registerTool('search-visualizer', {
       render();
     }
 
-    function clear() {
-      running = false;
-      done = false;
-      found = null;
-      highlighted = [];
-      message = '';
-      render();
-    }
-
     function render() {
       runBtn.disabled = running;
 

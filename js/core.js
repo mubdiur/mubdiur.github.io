@@ -7,7 +7,7 @@
 
 var App = {
   icons: {},
-  TOOL_VERSION: '45',
+  TOOL_VERSION: '46',
 
   /* ── DOM helpers ── */
   SVG_TAGS: ['svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'text', 'g', 'defs', 'marker', 'pattern', 'use', 'ellipse', 'tspan'],
@@ -33,7 +33,7 @@ var App = {
         } else if (k === 'dataset') {
           for (var d in v) node.dataset[d] = v[d];
         } else {
-          try { node.setAttribute(k, v); } catch (e) { node[k] = v; }
+          try { node.setAttribute(k, v); } catch { node[k] = v; }
         }
       }
       firstChildIdx = 2;
@@ -161,7 +161,7 @@ var App = {
     App.intervals.forEach(clearInterval);
     App.rafs.forEach(cancelAnimationFrame);
     App.listeners.forEach(function (l) { l[0].removeEventListener(l[1], l[2], l[3]); });
-    App.onCleanup.forEach(function (fn) { try { fn(); } catch (e) {} });
+    App.onCleanup.forEach(function (fn) { try { fn(); } catch {} });
     App.timers = []; App.intervals = []; App.rafs = [];
     App.listeners = []; App.onCleanup = [];
   },
@@ -191,10 +191,10 @@ var App = {
       a.download = filename;
       document.body.appendChild(a);
       a.click();
-      App.timer(function () { try { URL.revokeObjectURL(url); a.remove(); } catch (e) {} }, 700);
+      App.timer(function () { try { URL.revokeObjectURL(url); a.remove(); } catch {} }, 700);
     } catch (e) {
       var msg = (e && e.message) || String(e);
-      try { console.error('download failed:', msg); } catch (_) {}
+      try { console.error('download failed:', msg); } catch {}
     }
   },
   sleep: function (ms) { return new Promise(function (r) { App.timer(r, ms); }); },
@@ -204,7 +204,7 @@ var App = {
     var t = 0;
     return function () {
       var args = arguments, self = this;
-      if (t) { try { clearTimeout(t); } catch (e) {} }
+      if (t) { try { clearTimeout(t); } catch {} }
       App.clearTimer(t);
       t = App.timer(function () { fn.apply(self, args); }, ms || 120);
     };
@@ -235,7 +235,7 @@ var App = {
       s.setAttribute('data-tool', slug);
       s.src = 'js/tools/' + slug + '.js?v=' + App.TOOL_VERSION;
       s.onload = function () { if (App.tools[slug]) App.tools[slug]._loaded = true; resolve(); };
-      s.onerror = function () { try { s.remove(); } catch (e) {} reject(new Error('Failed to load tool: ' + slug)); };
+      s.onerror = function () { try { s.remove(); } catch {} reject(new Error('Failed to load tool: ' + slug)); };
       document.head.appendChild(s);
     });
   },
@@ -287,7 +287,7 @@ var App = {
       }
       else if (path === '/ide' || path.indexOf('/ide') === 0) pageTitle = 'In-Browser IDE — ' + baseTitle;
       if (document.title !== pageTitle) document.title = pageTitle;
-    } catch (e) {}
+    } catch {}
     main.innerHTML = '';
     var footerEl = document.getElementById('site-footer');
     if (footerEl) footerEl.style.display = (path === '/ide' || path.indexOf('/ide') === 0) ? 'none' : '';
@@ -432,7 +432,7 @@ var App = {
   recentToolsMax: 6,
   getRecentTools: function () {
     var slugs = [];
-    try { slugs = JSON.parse(localStorage.getItem(App.recentToolsKey) || '[]'); } catch (e) { slugs = []; }
+    try { slugs = JSON.parse(localStorage.getItem(App.recentToolsKey) || '[]'); } catch { slugs = []; }
     if (!Array.isArray(slugs)) return [];
     var known = {};
     TOOLMANIFEST.forEach(function (t) { known[t.slug] = t; });
@@ -443,14 +443,14 @@ var App = {
   recordRecentTool: function (slug) {
     if (typeof slug !== 'string' || !slug) return;
     var slugs = [];
-    try { slugs = JSON.parse(localStorage.getItem(App.recentToolsKey) || '[]'); } catch (e) { slugs = []; }
+    try { slugs = JSON.parse(localStorage.getItem(App.recentToolsKey) || '[]'); } catch { slugs = []; }
     if (!Array.isArray(slugs)) slugs = [];
     slugs = [slug].concat(slugs.filter(function (s) { return s !== slug; })).slice(0, App.recentToolsMax);
-    try { localStorage.setItem(App.recentToolsKey, JSON.stringify(slugs)); } catch (e) {}
+    try { localStorage.setItem(App.recentToolsKey, JSON.stringify(slugs)); } catch {}
   },
   getFavSlugs: function () {
     var arr = [];
-    try { arr = JSON.parse(localStorage.getItem('mub.favtools.v1') || '[]'); } catch (e) { arr = []; }
+    try { arr = JSON.parse(localStorage.getItem('mub.favtools.v1') || '[]'); } catch { arr = []; }
     if (!Array.isArray(arr)) return [];
     var known = {};
     TOOLMANIFEST.forEach(function (t) { known[t.slug] = true; });
@@ -652,7 +652,7 @@ function fallbackCopy(text) {
   ta.style.opacity = '0';
   document.body.appendChild(ta);
   ta.select();
-  try { document.execCommand('copy'); } catch (e) {}
+  try { document.execCommand('copy'); } catch {}
   ta.remove();
 }
 
@@ -695,7 +695,7 @@ window.addEventListener('DOMContentLoaded', function () {
             App.el('button', { class: 'btn-copy', type: 'button', text: 'Dismiss', onclick: function () { var n = document.getElementById('sw-update-toast'); if (n) n.parentNode.removeChild(n); } }));
           document.body.appendChild(bar);
         });
-      } catch (e) {}
+      } catch {}
     });
   }
 });

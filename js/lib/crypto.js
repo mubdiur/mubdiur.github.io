@@ -40,7 +40,7 @@ T.hexToBase64 = function (hex) {
   var bytes = new Uint8Array(h.length / 2);
   for (var i = 0; i < h.length; i += 2) bytes[i / 2] = parseInt(h.slice(i, i + 2), 16);
   try { return btoa(T._bytesToBinaryString(bytes)); }
-  catch (e) { throw new Error('Failed to encode as Base64'); }
+  catch { throw new Error('Failed to encode as Base64'); }
 };
 T.sriHash = function (s, algo) {
   if (!String(s).trim()) throw new Error('Enter text to hash');
@@ -65,7 +65,7 @@ T.pemToBytes = function (pem) {
   var body = m[2].replace(/\s/g, '');
   var bin;
   try { bin = atob(body); }
-  catch (e) { throw new Error('Invalid PEM body (not valid Base64)'); }
+  catch { throw new Error('Invalid PEM body (not valid Base64)'); }
   if (!bin.length) throw new Error('PEM block holds no data');
   if (bin.length > 2 * 1024 * 1024) throw new Error('DER input too large (max 2 MB)');
   var bytes = new Uint8Array(bin.length);
@@ -99,12 +99,12 @@ T.jwtDecode = function (token) {
     var h = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(T._base64UrlToStandard(parts[0])), function (c) { return c.charCodeAt(0); })));
     var p = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(T._base64UrlToStandard(parts[1])), function (c) { return c.charCodeAt(0); })));
     return { header: JSON.stringify(h, null, 2), payload: JSON.stringify(p, null, 2), signature: parts[2], rawHeader: h, rawPayload: p };
-  } catch (e) { throw new Error('Invalid JWT - could not decode header/payload'); }
+  } catch { throw new Error('Invalid JWT - could not decode header/payload'); }
 };
 /** UTF-8 string → unpadded base64url (RFC 7515 §2). */
 T.base64UrlEncodeStr = function (s) {
   try { return btoa(T._bytesToBinaryString(T._utf8Bytes(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
-  catch (e) { throw new Error('Failed to encode payload'); }
+  catch { throw new Error('Failed to encode payload'); }
 };
 /** Byte array → unpadded base64url. */
 T.base64UrlEncodeBytes = function (bytes) {
@@ -112,7 +112,7 @@ T.base64UrlEncodeBytes = function (bytes) {
   var CHUNK = 0x8000;
   for (var i = 0; i < bytes.length; i += CHUNK) bin += String.fromCharCode.apply(null, bytes.slice(i, i + CHUNK));
   try { return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
-  catch (e) { throw new Error('Failed to encode signature'); }
+  catch { throw new Error('Failed to encode signature'); }
 };
 /**
  * Sign a JWT (HS256) through the WebAssembly HMAC core. `rawPayload`
@@ -124,7 +124,7 @@ T.jwtSign = function (rawPayload, secret, expires) {
   if (!secret) throw new Error('Enter a secret key');
   var payload;
   try { payload = JSON.parse(String(rawPayload)); }
-  catch (e) { throw new Error('Invalid JSON payload'); }
+  catch { throw new Error('Invalid JSON payload'); }
   if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('Payload must be a JSON object');
   var WINDOWS = { '1h': 3600, '24h': 86400, '7d': 604800, '30d': 2592000 };
   if (expires && expires !== 'none' && payload.exp === undefined) {

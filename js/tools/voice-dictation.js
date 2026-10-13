@@ -93,7 +93,7 @@ App.registerTool('voice-dictation', {
     function pipAlive() {
       try {
         return !!(pipWin && !pipWin.closed && pipTa && pipWin.document);
-      } catch (ePip) { return false; }
+      } catch { return false; }
     }
 
     /* ── status ── */
@@ -126,16 +126,16 @@ App.registerTool('voice-dictation', {
       try {
         if (ta.value) localStorage.setItem(DRAFT_KEY, ta.value);
         else localStorage.removeItem(DRAFT_KEY);
-      } catch (eD) {}
+      } catch {}
     }
     function loadDraft() {
-      try { return localStorage.getItem(DRAFT_KEY) || ''; } catch (eL) { return ''; }
+      try { return localStorage.getItem(DRAFT_KEY) || ''; } catch { return ''; }
     }
     /* Option checkboxes persist alongside the draft. */
     var OPT_KEY = 'mub.dictation.opts.v1';
     var goalWords = 0;
     function saveOpts() {
-      try { localStorage.setItem(OPT_KEY, JSON.stringify({ interim: !!showInterim, restart: !!autoRestart, commands: !!voiceCommands, smart: !!smartFormat, goal: goalWords || 0 })); } catch (eO) {}
+      try { localStorage.setItem(OPT_KEY, JSON.stringify({ interim: !!showInterim, restart: !!autoRestart, commands: !!voiceCommands, smart: !!smartFormat, goal: goalWords || 0 })); } catch {}
     }
     function loadOpts() {
       try {
@@ -147,7 +147,7 @@ App.registerTool('voice-dictation', {
           smartFormat = o.smart !== false;
           goalWords = Math.max(0, Math.floor(Number(o.goal) || 0));
         }
-      } catch (eP) {}
+      } catch {}
     }
 
     var optInterim = App.el('input', { type: 'checkbox', checked: 'checked', 'aria-label': 'Show interim results' });
@@ -173,13 +173,13 @@ App.registerTool('voice-dictation', {
           pipDot.className = dot.className;
           pipStatusText.textContent = msg;
           paintStartButton(pipStartBtn, live);
-        } catch (eS) {}
+        } catch {}
       }
     }
 
     function setInterim(t) {
       interimEl.textContent = t;
-      if (pipAlive()) { try { pipInterim.textContent = t; } catch (eI) {} }
+      if (pipAlive()) { try { pipInterim.textContent = t; } catch {} }
     }
 
     function updateStats() {
@@ -196,7 +196,7 @@ App.registerTool('voice-dictation', {
       copyBtn.disabled = empty;
       dlBtn.disabled = empty;
       clearBtn.disabled = empty;
-      if (pipAlive()) { try { pipCopyBtn.disabled = empty; } catch (eB) {} }
+      if (pipAlive()) { try { pipCopyBtn.disabled = empty; } catch {} }
     }
 
     function showError(msg) {
@@ -207,7 +207,7 @@ App.registerTool('voice-dictation', {
     function readSel(el) {
       try {
         if (el && typeof el.selectionStart === 'number') return { s: el.selectionStart, e: el.selectionEnd };
-      } catch (eR) {}
+      } catch {}
       return null;
     }
 
@@ -232,7 +232,7 @@ App.registerTool('voice-dictation', {
 
     function refreshHints() {
       updateSelHintEl(ta, selHint);
-      if (pipAlive()) { try { updateSelHintEl(pipTa, pipSelHint); } catch (eH) {} }
+      if (pipAlive()) { try { updateSelHintEl(pipTa, pipSelHint); } catch {} }
     }
 
     function livePos(el, w, tag) {
@@ -241,7 +241,7 @@ App.registerTool('voice-dictation', {
             (w.document.activeElement === el || el.selectionEnd !== el.selectionStart)) {
           return { el: el, tag: tag, s: el.selectionStart, e: el.selectionEnd };
         }
-      } catch (eL) {}
+      } catch {}
       return null;
     }
 
@@ -251,8 +251,8 @@ App.registerTool('voice-dictation', {
       var main = livePos(ta, window, 'main');
       var pip = pipAlive() ? livePos(pipTa, pipWin, 'pip') : null;
       var focused = null;
-      try { if (window.document.activeElement === ta) focused = main; } catch (eF1) {}
-      try { if (pipAlive() && pipWin.document.activeElement === pipTa) focused = pip; } catch (eF2) {}
+      try { if (window.document.activeElement === ta) focused = main; } catch {}
+      try { if (pipAlive() && pipWin.document.activeElement === pipTa) focused = pip; } catch {}
       if (focused) return focused;
       var first = activeTag === 'pip' ? pip : main;
       var second = activeTag === 'pip' ? main : pip;
@@ -272,7 +272,7 @@ App.registerTool('voice-dictation', {
 
     function placeCaretEl(pos, caret) {
       lastRange = { tag: pos.tag, s: caret, e: caret };
-      try { pos.el.setSelectionRange(caret, caret); } catch (eC) {}
+      try { pos.el.setSelectionRange(caret, caret); } catch {}
     }
 
     /** Mirror a mutation into the other box. The event source is the writer,
@@ -283,16 +283,16 @@ App.registerTool('voice-dictation', {
       var other = el === ta ? (pipAlive() ? pipTa : null) : ta;
       if (!other || other.value === el.value) return;
       var os = readSel(other);
-      try { other.value = el.value; } catch (eM) { return; }
+      try { other.value = el.value; } catch { return; }
       if (os) {
         try {
           other.setSelectionRange(Math.min(os.s, other.value.length), Math.min(os.e, other.value.length));
-        } catch (eM2) {}
+        } catch {}
       }
     }
 
     function scrollBottom(el) {
-      try { el.scrollTop = el.scrollHeight; } catch (eSc) {}
+      try { el.scrollTop = el.scrollHeight; } catch {}
     }
 
     function afterEdit(pos, caret) {
@@ -422,9 +422,9 @@ App.registerTool('voice-dictation', {
         btn.innerHTML = '';
         btn.appendChild(App.icon('check', '', 12));
         btn.appendChild(App.el('span', { text: 'Copied' }));
-        App.timer(function () { try { btn.innerHTML = orig; } catch (eT) {} }, 1500);
-        if (label) { try { btn.setAttribute('aria-label', label); } catch (eA) {} }
-      } catch (eF) {}
+        App.timer(function () { try { btn.innerHTML = orig; } catch {} }, 1500);
+        if (label) { try { btn.setAttribute('aria-label', label); } catch {} }
+      } catch {}
     }
 
     function pipCopyText(btn) {
@@ -436,7 +436,7 @@ App.registerTool('voice-dictation', {
           nc.writeText(ta.value).then(done, function () { pipFallbackCopy(); done(); });
           return true;
         }
-      } catch (eN) {}
+      } catch {}
       pipFallbackCopy();
       done();
       return true;
@@ -453,14 +453,14 @@ App.registerTool('voice-dictation', {
         area.select();
         d.execCommand('copy');
         area.remove();
-      } catch (eFc) {}
+      } catch {}
     }
 
     function copyAll(btn, fromPip) {
       if (!ta.value) {
         var msg = wantListening ? 'Listening… (nothing to copy yet)' : 'Nothing to copy yet — dictate or type first';
         statusText.textContent = msg;
-        if (pipAlive()) { try { pipStatusText.textContent = msg; } catch (eCm) {} }
+        if (pipAlive()) { try { pipStatusText.textContent = msg; } catch {} }
         return false;
       }
       if (fromPip && pipAlive()) pipCopyText(btn);
@@ -483,7 +483,7 @@ App.registerTool('voice-dictation', {
       for (i = 0; i < res.length; i++) {
         try {
           c = typeof res[i].confidence === 'number' ? res[i].confidence : (i === 0 ? 0.5 : 0);
-        } catch (eB) { c = i === 0 ? 0.5 : 0; }
+        } catch { c = i === 0 ? 0.5 : 0; }
         if (c >= bestConf) { bestConf = c; best = res[i].transcript; }
       }
       return best || (res[0] && res[0].transcript) || '';
@@ -508,7 +508,7 @@ App.registerTool('voice-dictation', {
         var finals = [];
         var partials = [];
         var i, res, txt, key, len;
-        try { len = ev.results.length; } catch (eRn) { len = 0; }
+        try { len = ev.results.length; } catch { len = 0; }
         if (len <= maxSeen) { seenFinal = {}; maxSeen = -1; } // session reset: list shrank, re-index from 0
         for (i = 0; i < len; i++) {
           res = ev.results[i];
@@ -576,7 +576,7 @@ App.registerTool('voice-dictation', {
           App.timer(function () {
             restartPending = false;
             if (!wantListening) return;
-            try { rec.start(); } catch (eRt) { /* already started — next onend retries */ }
+            try { rec.start(); } catch { /* already started — next onend retries */ }
           }, 120);
         }
       };
@@ -593,7 +593,7 @@ App.registerTool('voice-dictation', {
       try {
         if (w.document.activeElement !== el) el.focus();
         if (saved && saved.e !== saved.s) el.setSelectionRange(saved.s, saved.e);
-      } catch (eFx) {}
+      } catch {}
       if (saved) lastRange = { tag: tag, s: saved.s, e: saved.e };
       refreshHints();
     }
@@ -620,21 +620,21 @@ App.registerTool('voice-dictation', {
       sessionStart = 0;
       timerEl.textContent = '';
       setInterim('');
-      try { if (rec) rec.stop(); } catch (eSp) {}
+      try { if (rec) rec.stop(); } catch {}
       setStatus(false, msg || (ta.value ? 'Stopped — transcript kept' : 'Idle — press Start and speak'));
     }
 
     function clearAll(focusAfter) {
       ta.value = '';
-      try { localStorage.removeItem(DRAFT_KEY); } catch (eDc) {}
-      if (pipAlive()) { try { pipTa.value = ''; } catch (eCl) {} }
+      try { localStorage.removeItem(DRAFT_KEY); } catch {}
+      if (pipAlive()) { try { pipTa.value = ''; } catch {} }
       setInterim('');
       lastRange = null;
       showError('');
       updateStats();
       refreshHints();
       if (focusAfter !== false) {
-        try { (activeTag === 'pip' && pipAlive() ? pipTa : ta).focus(); } catch (eCf) {}
+        try { (activeTag === 'pip' && pipAlive() ? pipTa : ta).focus(); } catch {}
       }
     }
 
@@ -647,7 +647,7 @@ App.registerTool('voice-dictation', {
     }
 
     function openPip() {
-      if (pipAlive()) { try { pipWin.focus(); } catch (ePf) {} return; }
+      if (pipAlive()) { try { pipWin.focus(); } catch {} return; }
       var DPIP = window.documentPictureInPicture;
       if (!DPIP || !DPIP.requestWindow) {
         showError('Pop-out needs Chrome or Edge 116+. Your browser has no Document Picture-in-Picture support.');
@@ -674,7 +674,7 @@ App.registerTool('voice-dictation', {
       buildPip(w);
       activeTag = 'pip';
       updatePipToggle();
-      try { if (pipTa) pipTa.focus(); } catch (eGf) {}
+      try { if (pipTa) pipTa.focus(); } catch {}
     }
 
     function onPipClosed() {
@@ -704,9 +704,9 @@ App.registerTool('voice-dictation', {
       pipCopyBtn.disabled = !ta.value;
       pipCopyBtn.addEventListener('click', function () { copyAll(pipCopyBtn, true); });
       var pipClearBtn = App.el('button', { type: 'button', class: 'vd-btn' }, App.icon('rotate-ccw', '', 12), App.el('span', { text: 'Clear' }));
-      pipClearBtn.addEventListener('click', function () { activeTag = 'pip'; clearAll(false); try { pipTa.focus(); } catch (ePc) {} });
+      pipClearBtn.addEventListener('click', function () { activeTag = 'pip'; clearAll(false); try { pipTa.focus(); } catch {} });
       var pipCloseBtn = App.el('button', { type: 'button', class: 'vd-btn' }, App.icon('x', '', 12), App.el('span', { text: 'Pop-in' }));
-      pipCloseBtn.addEventListener('click', function () { try { pipWin.close(); } catch (ePz) {} });
+      pipCloseBtn.addEventListener('click', function () { try { pipWin.close(); } catch {} });
 
       pipTa = App.el('textarea', {
         class: 'vd-input', rows: '12', spellcheck: 'true',
@@ -720,7 +720,7 @@ App.registerTool('voice-dictation', {
 
       pipTa.addEventListener('input', function () {
         activeTag = 'pip';
-        try { ta.value = pipTa.value; } catch (ePi) {}
+        try { ta.value = pipTa.value; } catch {}
         trackRangeEl(pipTa, 'pip');
         updateStats();
       });
@@ -745,7 +745,7 @@ App.registerTool('voice-dictation', {
     }
 
     function closePip() {
-      if (pipWin && !pipWin.closed) { try { pipWin.close(); } catch (eCp) {} }
+      if (pipWin && !pipWin.closed) { try { pipWin.close(); } catch {} }
       onPipClosed();
     }
 
@@ -796,7 +796,7 @@ App.registerTool('voice-dictation', {
         if (e.target === boxEl && typeof boxEl.selectionStart === 'number' && boxEl.selectionEnd !== boxEl.selectionStart) return;
         var sel = w.getSelection();
         if (sel && !sel.isCollapsed && containerEl.contains(sel.anchorNode)) return;
-      } catch (err) {}
+      } catch {}
       if (!ta.value) return;
       e.preventDefault();
       if (boxEl === pipTa) copyAll(pipCopyBtn, true);
@@ -807,7 +807,7 @@ App.registerTool('voice-dictation', {
     App.onUnmount(function () {
       saveDraft();
       wantListening = false;
-      try { if (rec) rec.abort(); } catch (eU) {}
+      try { if (rec) rec.abort(); } catch {}
       closePip();
     });
 

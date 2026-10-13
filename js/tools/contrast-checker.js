@@ -68,7 +68,7 @@ App.registerTool('contrast-checker', {
         var aaSmall = ratio >= 4.5;
         var aaaSmall = ratio >= 7;
         return { ratio: ratio.toFixed(2), aaLarge: aaLarge, aaSmall: aaSmall, aaaSmall: aaaSmall, aaa: aaaSmall };
-      } catch (e) { return null; }
+      } catch { return null; }
     }
 
     function render() {

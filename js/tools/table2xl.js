@@ -48,7 +48,7 @@ function cleanText(element) {
   noiseSelectors.forEach(function (sel) {
     try {
       clone.querySelectorAll(sel).forEach(function (el) { el.remove(); });
-    } catch (e) {
+    } catch {
       /* selector may not match — ignore */
     }
   });
@@ -187,7 +187,6 @@ App.registerTool('table2xl', {
     var view = 'ascii';
     var tableHtml = '';
     var ascii = '';
-    var error = null;
     var copied = null;
     var asciiPre = null;
     var htmlDiv = null;
@@ -234,7 +233,6 @@ App.registerTool('table2xl', {
 
       tableHtml = out.outerHTML;
       ascii = generateAscii(out);
-      error = null;
       errorBanner.classList.add('hidden');
       resultsWrap.classList.remove('hidden');
       asciiPre.textContent = ascii;
@@ -242,7 +240,6 @@ App.registerTool('table2xl', {
     }
 
     function showError(msg) {
-      error = msg;
       errorBanner.textContent = msg;
       errorBanner.classList.remove('hidden');
     }
@@ -263,7 +260,7 @@ App.registerTool('table2xl', {
         } else {
           navigator.clipboard.writeText(ascii).then(ok).catch(function () { /* clipboard unavailable */ });
         }
-      } catch (e) {
+      } catch {
         /* clipboard unavailable */
       }
     }
@@ -274,7 +271,7 @@ App.registerTool('table2xl', {
         navigator.clipboard.writeText(ascii).then(function () {
           setCopied('ascii');
         }).catch(function () { /* clipboard unavailable */ });
-      } catch (e) {
+      } catch {
         /* clipboard unavailable */
       }
     }
