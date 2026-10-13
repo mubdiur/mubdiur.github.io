@@ -367,6 +367,8 @@ console.log('-- text / formats --');
   ok(TOOLS['csv-pivot-table'].handler(_pv, {}).indexOf(',q1,q2') === 0, 'pivot count defaults');
   ok(TOOLS['csv-pivot-table'].handler(_pv, { row: 'dept', col: 'q', value: 'sales', agg: 'avg' }).indexOf('eng,10,20') >= 0, 'pivot avg');
   ok(TOOLS['csv-pivot-table'].handler('d;q;s\ne;q1;10', { row: 'd', col: 'q', value: 's', agg: 'sum' }) === ';q1\ne;10', 'pivot auto semicolon');
+  ok(TOOLS['csv-pivot-table'].handler(_pv, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', totals: 'true' }) === ',q1,q2,Total\neng,10,20,30\nops,5,,5\nTotal,15,20,35', 'pivot totals');
+  ok(TOOLS['csv-pivot-table'].handler(_pv, { agg: 'count', totals: true }) === ',q1,q2,Total\neng,1,1,2\nops,1,,1\nTotal,2,1,3', 'pivot totals bool');
   ok(TOOLS['csv-delimiter-sniffer'].handler('a;b,c\nd;e,f').indexOf('ambiguous') >= 0, 'sniffer tie reports honest');
   ok(TOOLS['csv-delimiter-sniffer'].handler('plain').indexOf('none detected') >= 0, 'sniffer single column');
 }

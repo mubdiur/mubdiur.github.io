@@ -65,6 +65,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('csv-pivot-table', 'agg avg', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'avg' }).includes('eng,10,20'));
     push('csv-pivot-table', 'unknown col throws', mustThrow(() => TOOLS['csv-pivot-table'].handler(PV, { row: 'nope', col: 'q', agg: 'count' })));
     push('csv-pivot-table', 'empty throws', mustThrow(() => TOOLS['csv-pivot-table'].handler('   ', {})));
+    push('csv-pivot-table', 'totals', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', totals: 'true' }).includes('Total,15,20,35'));
     push('csv-transposer', 'empty throws', mustThrow(() => TOOLS['csv-transposer'].handler('   ', {})));
     push('csv-delimiter-sniffer', 'empty throws', mustThrow(() => TOOLS['csv-delimiter-sniffer'].handler('   ')));
     push('yaml-to-json', 'happy', JSON.parse(TOOLS['yaml-to-json'].handler('a: 1\nb: hello')).a === 1);

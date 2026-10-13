@@ -968,14 +968,32 @@ T.csvPivot = function (s, opts) {
   function cell(v) {
     return (v.indexOf(d) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0 || v.indexOf('\r') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
   }
-  var head = [''].concat(colKeys).map(cell).join(d);
-  var grid = [head];
-  rowKeys.forEach(function (rk) {
-    var line = [rk].concat(colKeys.map(function (ck) {
+  var matrix = rowKeys.map(function (rk) {
+    return colKeys.map(function (ck) {
       return has(cells[rk], ck) ? aggVals(cells[rk][ck]) : '';
-    })).map(cell).join(d);
-    grid.push(line);
+    });
   });
+  function marginSum(vals) {
+    var t = 0, any = false;
+    vals.forEach(function (v) { var n = Number(v); if (v !== '' && isFinite(n)) { t += n; any = true; } });
+    return any ? trimNum(t) : '';
+  }
+  var headKeys = colKeys.slice(), totalRow = null;
+  if (o.totals === true || o.totals === 'true') {
+    headKeys.push('Total');
+    var colTotals = colKeys.map(function (_, c) {
+      return marginSum(matrix.map(function (row) { return row[c]; }));
+    });
+    matrix.forEach(function (row) { row.push(marginSum(row)); });
+    var grand = marginSum(colTotals);
+    colTotals.push(grand === '' ? '' : grand);
+    totalRow = colTotals;
+  }
+  var grid = [[''].concat(headKeys).map(cell).join(d)];
+  rowKeys.forEach(function (rk, r) {
+    grid.push([rk].concat(matrix[r]).map(cell).join(d));
+  });
+  if (totalRow) grid.push(['Total'].concat(totalRow).map(cell).join(d));
   return grid.join('\n');
 };
 
