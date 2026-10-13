@@ -3139,6 +3139,10 @@ T.tomlToJSON = function (s) {
   });
   return JSON.stringify(root, null, 2);
 };
+/* TOML to YAML: parse once with the TOML core, emit with the canonical
+   JSON-to-YAML emitter, so quoting stays single-sourced (bool-like strings
+   stay quoted, tables become maps, [[arrays]] become sequences). */
+T.tomlToYAML = function (s) { return T.jsonToYAML(T.tomlToJSON(s)); };
 T.jsonDiff = function (a, b) {
   var oa = JSON.parse(a), ob = JSON.parse(b);
   var diffs = [];

@@ -302,6 +302,9 @@ window.TOOLMANIFEST = [
     handler: function (s) { return Transforms.jsonToTOML(s); } },
   { slug: 'toml-to-json', name: 'TOML → JSON', desc: 'Convert TOML to JSON', category: 'converters', tags: ['toml', 'json', 'convert'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.tomlToJSON(s); } },
+  { slug: 'toml-to-yaml', name: 'TOML → YAML', desc: 'Convert TOML configs to YAML \u2014 tables become maps, [[arrays]] become sequences, bool-like strings stay quoted', category: 'converters', tags: ['toml', 'yaml', 'convert'], icon: 'filetype', template: 'transform',
+    placeholder: '[server]\nhost = "example.com"\nport = 8080',
+    handler: function (s) { return Transforms.tomlToYAML(s); } },
   { slug: 'markdown-table-generator', name: 'Markdown Table Generator', desc: 'CSV rows to GitHub-flavored Markdown tables — optional header, alignment, auto delimiter', category: 'converters', tags: ['markdown', 'table', 'csv'], icon: 'filespreadsheet', template: 'transform',
     handler: function (s, opts) { return Transforms.csvToMarkdown(s, opts); },
     params: [
