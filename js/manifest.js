@@ -437,6 +437,10 @@ window.TOOLMANIFEST = [
   { slug: 'xml-minifier', name: 'XML Minifier', desc: 'Minify XML \u2014 comments stripped, whitespace collapsed, CDATA/PIs/doctype and quoted attributes pass through untouched', category: 'code', tags: ['xml', 'minify', 'compress'], icon: 'code2', template: 'transform',
     placeholder: '<root>\n  <a>1</a>\n  <!-- note -->\n</root>',
     handler: function (s) { return Transforms.xmlMinify(s); } },
+  { slug: 'toml-formatter', name: 'TOML Formatter', desc: 'Format TOML \u2014 canonical spacing, trimmed headers, validator included, scalars keep exact text', category: 'code', tags: ['toml', 'format', 'beautify'], icon: 'code2', template: 'transform',
+    placeholder: 'a=1\n[t]\nb=[1,2]',
+    handler: function (s) { return Transforms.tomlFormat(s); } },
+
   { slug: 'html-formatter', name: 'HTML Formatter', desc: 'Beautify and indent HTML — comment/doctype aware, void elements never gain children, script/style/pre content preserved byte-for-byte', category: 'code', tags: ['html', 'format', 'beautify'], icon: 'code2', template: 'transform',
     handler: function (s) { return Transforms.htmlFormat(s); } },
   { slug: 'html-minifier', name: 'HTML Minifier', desc: 'Minify HTML \u2014 comments stripped, whitespace collapsed, script/style/pre pass through untouched', category: 'code', tags: ['html', 'minify'], icon: 'code2', template: 'transform',

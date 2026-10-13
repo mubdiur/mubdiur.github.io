@@ -113,6 +113,9 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('json-to-toml', 'array throws', mustThrow(() => TOOLS['json-to-toml'].handler('[1]')));
     push('toml-to-json', 'happy', TOOLS['toml-to-json'].handler('a = 1').includes('"a": 1'));
     push('toml-to-json', 'dup throws', mustThrow(() => TOOLS['toml-to-json'].handler('a = 1\na = 2')));
+    push('toml-formatter', 'basic', TOOLS['toml-formatter'].handler('a=1') === 'a = 1');
+    push('toml-formatter', 'dup throws', mustThrow(() => TOOLS['toml-formatter'].handler('a = 1\na = 2')));
+
     push('toml-to-yaml', 'happy', TOOLS['toml-to-yaml'].handler('a = 1') === 'a: 1');
     push('toml-to-yaml', 'empty throws', mustThrow(() => TOOLS['toml-to-yaml'].handler('')));
     push('yaml-to-toml', 'happy', TOOLS['yaml-to-toml'].handler('a: 1') === 'a = 1');

@@ -598,6 +598,12 @@ console.log('-- json to toml --');
   var tj = TOOLS['toml-to-json'].handler('[db]\nhost = "h"\n[[srv]]\nip = "a"');
   ok(tj === '{\n  "db": {\n    "host": "h"\n  },\n  "srv": [\n    {\n      "ip": "a"\n    }\n  ]\n}', 'toml tables decode');
   ok(TOOLS['toml-to-json'].handler('a = 1') === T.tomlToJSON('a = 1'), 'toml-to-json delegates to Transforms');
+  ok(T.tomlFormat('a=1') === 'a = 1', 'toml-format basic');
+  ok(T.tomlFormat('[t]\na=[1,2]') === '[t]\na = [1, 2]', 'toml-format array spacing');
+  ok(T.tomlFormat('d = 1979-05-27') === 'd = 1979-05-27', 'toml-format datetime verbatim');
+  ok(T.tomlFormat(T.tomlFormat('[t]\na=[1,2]')) === T.tomlFormat('[t]\na=[1,2]'), 'toml-format idempotent');
+  ok(TOOLS['toml-formatter'].handler.toString().indexOf('tomlFormat') >= 0, 'toml-formatter delegates');
+
   ok(TOOLS['toml-to-yaml'].handler('[db]\nhost = "h"\n[[srv]]\nip = "a"') === 'db:\n  host: h\nsrv:\n  - ip: a', 'toml-to-yaml tables + array-tables');
   ok(TOOLS['toml-to-yaml'].handler('s = "true"\nn = 42') === 's: "true"\nn: 42', 'toml-to-yaml quotes bool-like strings');
   ok(TOOLS['toml-to-yaml'].handler('a = 1') === T.tomlToYAML('a = 1'), 'toml-to-yaml delegates to Transforms');

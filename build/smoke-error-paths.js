@@ -115,6 +115,11 @@ mustThrow(() => T.tomlToJSON('   '), 'tomlToJSON empty');
 mustThrow(() => T.tomlToJSON('[a]\n[a]'), 'tomlToJSON dup table');
 mustThrow(() => T.tomlToJSON('a = 1\na = 2'), 'tomlToJSON dup key');
 mustThrow(() => T.tomlToJSON('v = nan'), 'tomlToJSON nan');
+mustThrow(() => T.tomlFormat(''), 'tomlFormat empty');
+mustThrow(() => T.tomlFormat('a = 1\na = 2'), 'tomlFormat dup key');
+mustThrow(() => TOOLS['toml-formatter'].handler('[a'), 'toml-formatter unclosed');
+mustNotThrow(() => T.tomlFormat('# just a comment'), 'tomlFormat comment only');
+
 mustNotThrow(() => T.tomlToJSON('a = 1'), 'tomlToJSON good');
 mustThrow(() => TOOLS['toml-to-json'].handler(''), 'toml-to-json empty');
 mustThrow(() => T.tomlToYAML('   '), 'tomlToYAML empty');

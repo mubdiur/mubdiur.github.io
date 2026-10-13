@@ -88,6 +88,8 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'sql-formatter': { good: 'select * from t', expectInOutput: /SELECT/i },
   'json-to-toml': { good: '{"a":1}', expectInOutput: /a = 1/ },
   'toml-to-json': { good: 'a = 1', expectInOutput: /"a": 1/ },
+  'toml-formatter': { good: 'a=1', expectInOutput: /a = 1/ },
+
   'toml-to-yaml': { good: 'a = 1', expectInOutput: /a: 1/ },
   'yaml-to-toml': { good: 'a: 1', expectInOutput: /a = 1/ },
   'user-agent-parser': { good: 'Mozilla/5.0 (Windows NT 10.0) Chrome/139.0.0.0', expectInOutput: /Browser:.*Chrome/ },

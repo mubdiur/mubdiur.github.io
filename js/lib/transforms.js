@@ -3180,6 +3180,136 @@ T.jsonToTOML = function (s) {
   return lines.join('\n');
 };
 
+/* TOML formatter: validate with the TOML core, then canonicalize
+   whitespace without touching scalar text, so datetimes, numbers and
+   strings keep their exact spelling. Spacing around top-level equals
+   signs and after commas becomes canonical, table headers trim inside
+   the brackets, comments reattach after one space, blank lines and
+   pure comment lines pass through byte-identical. Triple-quoted spans
+   are tracked across lines and never rewritten inside. */
+T.tomlFormat = function (s) {
+  var text = String(s === undefined || s === null ? '' : s);
+  if (!text.trim()) throw new Error('Paste TOML first \u2014 tables, keys or comments');
+  T.tomlToJSON(text);
+  function skipQuoted(str, i) {
+    var q = str.charAt(i);
+    var basic = q === '"';
+    if (str.charAt(i + 1) === q && str.charAt(i + 2) === q) {
+      var j = i + 3;
+      while (j < str.length) {
+        if (basic && str.charAt(j) === '\\') { j += 2; continue; }
+        if (str.charAt(j) === q && str.charAt(j + 1) === q && str.charAt(j + 2) === q) return j + 3;
+        j++;
+      }
+      return str.length;
+    }
+    var k = i + 1;
+    while (k < str.length) {
+      if (basic && str.charAt(k) === '\\') { k += 2; continue; }
+      if (str.charAt(k) === q) return k + 1;
+      k++;
+    }
+    return str.length;
+  }
+  function splitComment(code) {
+    for (var i = 0; i < code.length; i++) {
+      var ch = code.charAt(i);
+      if (ch === '"' || ch === '\'') { i = skipQuoted(code, i) - 1; continue; }
+      if (ch === '#') return [code.slice(0, i), code.slice(i)];
+    }
+    return [code, ''];
+  }
+  function commaSpace(code) {
+    var out = '';
+    for (var i = 0; i < code.length; i++) {
+      var ch = code.charAt(i);
+      if (ch === '"' || ch === '\'') { var e = skipQuoted(code, i); out += code.slice(i, e); i = e - 1; continue; }
+      if (ch === ',') {
+        out += ',';
+        var j = i + 1;
+        while (code.charAt(j) === ' ' || code.charAt(j) === '\t') j++;
+        if (j < code.length) out += ' ';
+        i = j - 1;
+        continue;
+      }
+      out += ch;
+    }
+    return out;
+  }
+  function findEq(code) {
+    var depth = 0;
+    for (var i = 0; i < code.length; i++) {
+      var ch = code.charAt(i);
+      if (ch === '"' || ch === '\'') { i = skipQuoted(code, i) - 1; continue; }
+      if (ch === '[' || ch === '{') depth++;
+      else if (ch === ']' || ch === '}') depth--;
+      else if (ch === '=' && depth === 0) return i;
+    }
+    return -1;
+  }
+  function detectTriple(ln) {
+    for (var i = 0; i < ln.length; i++) {
+      var ch = ln.charAt(i);
+      if (ch !== '"' && ch !== '\'') continue;
+      if (ln.charAt(i + 1) === ch && ln.charAt(i + 2) === ch) {
+        var q3 = ch + ch + ch, basic = ch === '"', j = i + 3, closed = false;
+        while (j < ln.length) {
+          if (basic && ln.charAt(j) === '\\') { j += 2; continue; }
+          if (ln.slice(j, j + 3) === q3) { closed = true; break; }
+          j++;
+        }
+        if (!closed) return q3;
+        i = j + 2;
+        continue;
+      }
+      i = skipQuoted(ln, i) - 1;
+    }
+    return null;
+  }
+  function tripleEnd(ln, q3) {
+    var basic = q3.charAt(0) === '"';
+    for (var j = 0; j < ln.length; j++) {
+      if (basic && ln.charAt(j) === '\\') { j++; continue; }
+      if (ln.slice(j, j + 3) === q3) return j;
+    }
+    return -1;
+  }
+  function fmtTail(tail) {
+    var tc = splitComment(tail);
+    var code = commaSpace(tc[0]).replace(/^\s+/, '').replace(/\s+$/, '');
+    return code + (tc[1] ? (code ? ' ' : '') + tc[1] : '');
+  }
+  var lines = text.split(/\r?\n/);
+  var triple = null, out = [];
+  for (var n = 0; n < lines.length; n++) {
+    var ln = lines[n];
+    if (triple) {
+      var at = tripleEnd(ln, triple);
+      if (at < 0) { out.push(ln); continue; }
+      var tail = ln.slice(at + 3);
+      out.push(ln.slice(0, at + 3) + fmtTail(tail));
+      triple = detectTriple(tail);
+      continue;
+    }
+    var sc = splitComment(ln);
+    var code = sc[0], comment = sc[1];
+    if (!code.trim()) { out.push(ln); continue; }
+    var t = code.trim(), done;
+    if (t.charAt(0) === '[') {
+      var dbl = t.slice(0, 2) === '[[';
+      var inner = dbl ? t.slice(2, -2) : t.slice(1, -1);
+      done = (dbl ? '[[' : '[') + inner.trim() + (dbl ? ']]' : ']');
+    } else {
+      var eq = findEq(code);
+      if (eq < 0) done = commaSpace(code).replace(/\s+$/, '');
+      else done = code.slice(0, eq).trim() + ' = ' + commaSpace(code.slice(eq + 1)).replace(/^\s+/, '').replace(/\s+$/, '');
+    }
+    out.push(done + (comment ? ' ' + comment : ''));
+    triple = detectTriple(code);
+  }
+  return out.join('\n');
+};
+
 /* TOML to JSON (round trip for the TOML emitter above). */
 T.tomlToJSON = function (s) {
   var text = String(s === undefined || s === null ? '' : s);
