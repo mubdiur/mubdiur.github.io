@@ -90,27 +90,28 @@ async function ensureEngine() {
       };
 
       post('status', fileLabel('rustc', 0, 0));
-      var rustcBytes = await cachedGunzip('./vendor/rust/rustc.wasm.gz', function (loaded, total) {
+      /* Parallel downloads: rustc + sysroot fetch concurrently. */
+      var rustcPromise = cachedGunzip('./vendor/rust/rustc.wasm.gz', function (loaded, total) {
         if (loaded === -1) {
           post('status', 'Decompressing rustc…');
         } else {
           post('status', fileLabel('rustc', loaded, total));
         }
       });
-      post('status', 'Compiling rustc WASM module…');
-      rustcModule = await WebAssembly.compile(rustcBytes);
-      post('status', rustcModule ? 'rustc WASM ready' : 'rustc WASM ready');
-
-      post('status', fileLabel('sysroot', 0, 0));
-      var bundleBytes = await cachedGunzip('./vendor/rust/sysroot-wasip1.bundle.gz', function (loaded, total) {
+      var bundlePromise = cachedGunzip('./vendor/rust/sysroot-wasip1.bundle.gz', function (loaded, total) {
         if (loaded === -1) {
           post('status', 'Decompressing sysroot…');
         } else {
           post('status', fileLabel('sysroot', loaded, total));
         }
       });
+      var rustcBytes = await rustcPromise;
+      post('status', 'Compiling rustc WASM module…');
+      var compilePromise = WebAssembly.compile(rustcBytes);
+      var bundleBytes = await bundlePromise;
       post('status', 'Parsing sysroot bundle…');
       stdSysroot = parseBundle(bundleBytes);
+      rustcModule = await compilePromise;
       post('status', 'rustc ready');
       return true;
     })();

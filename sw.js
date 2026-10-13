@@ -22,7 +22,7 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-var SW_VERSION = 'v142';
+var SW_VERSION = 'v143';
 var STATIC_CACHE = 'mub-static-' + SW_VERSION;
 var RUNTIME_CACHE = 'mub-runtime-v1';
 
@@ -44,7 +44,7 @@ var SHELL = [
   'js/pages/home.js?v=30',
   'js/pages/tools.js?v=27',
   'js/pages/tool.js?v=26',
-  'js/ide/ide.js?v=14',
+  'js/ide/ide.js?v=15',
   'js/tools/transform.js?v=35',
   'js/tools/generator.js?v=30',
   'js/ide/vendor/editor.js?v=15',

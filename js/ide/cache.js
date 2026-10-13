@@ -122,8 +122,15 @@ export async function cachedBytesProgress(url, onProgress) {
   const res = await fetch(url);
   if (!res.ok) throw new Error('HTTP ' + res.status + ' — ' + url);
   const total = Number(res.headers.get('content-length')) || 0;
+  if (!total) {
+    const buf = await res.arrayBuffer();
+    if (onProgress) onProgress(buf.byteLength, buf.byteLength);
+    const bytes = new Uint8Array(buf);
+    try { const c = await openCache(); await c.put(url, new Response(bytes)); } catch (e) {}
+    return bytes;
+  }
   const reader = res.body && res.body.getReader ? res.body.getReader() : null;
-  if (!reader || !total) {
+  if (!reader) {
     const buf = await res.arrayBuffer();
     if (onProgress) onProgress(buf.byteLength, buf.byteLength);
     const bytes = new Uint8Array(buf);

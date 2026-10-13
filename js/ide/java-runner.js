@@ -44,10 +44,12 @@ function ensureEngine() {
   if (!enginePromise) {
     enginePromise = (async function () {
       post('status', 'Starting Java VM…');
-      var javac = await import('./vendor/199xvm/javac.js');
-      var shim = await cachedBytes('./vendor/199xvm/bundle.bin');
-
-      var wasmBytes = await cachedBytes('./vendor/199xvm/jvm_core.wasm');
+      var javacPromise = import('./vendor/199xvm/javac.js');
+      var shimPromise = cachedBytes('./vendor/199xvm/bundle.bin');
+      var wasmPromise = cachedBytes('./vendor/199xvm/jvm_core.wasm');
+      var javac = await javacPromise;
+      var shim = await shimPromise;
+      var wasmBytes = await wasmPromise;
       var instRef = { current: null };
       var imports = {
         env: {

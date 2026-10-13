@@ -100,7 +100,7 @@ function getWorker(lang) {
   var entry = workers[lang];
   if (entry && entry.alive) return entry.w;
   if (entry && entry.w) { try { entry.w.terminate(); } catch (e) {} }
-  var w = new Worker(RUNNER_DIR + def.runner + '?v=9', { type: def.module ? 'module' : 'classic' });
+  var w = new Worker(RUNNER_DIR + def.runner + '?v=10', { type: def.module ? 'module' : 'classic' });
   w.__lang = lang;
   var scriptLoaded = false;
   w.addEventListener('message', function (e) {
