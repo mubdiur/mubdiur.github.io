@@ -76,6 +76,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'password-entropy': { good: 'correct horse', expectInOutput: /Entropy/i },
   'csv-to-json': { good: 'name,age\nAda,30', expectInOutput: /Ada/ },
   'csv-to-xml': { good: 'name,age\nAda,30', expectInOutput: /<name>Ada/ },
+  'ini-to-xml': { good: '[server]\nhost = example.com', expectInOutput: /<host>/ },
   'ascii-table': { good: 'name,age\nAda,30', expectInOutput: /\+---/ },
 
   'yaml-to-json': { good: 'a: 1\nb: hello', expectInOutput: /"a": 1/ },
