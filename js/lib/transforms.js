@@ -5191,5 +5191,59 @@ T.redactPII = function (s, opts) {
   }
   return out + '\n\nRedacted: ' + plural(ce, 'email', 'emails') + ', ' + plural(cp, 'phone', 'phones') + ', ' + plural(ci, 'IP', 'IPs') + ', ' + plural(cc, 'card', 'cards');
 };
+/* INI to JSON: sections map to objects, pre-section keys stay top-level.
+   Full-line ; and # comments plus blanks skip; inline semicolons are data.
+   Duplicate keys throw with line numbers; repeat sections merge. Prototype
+   pollution keys are refused, mirroring the TOML parser guard. */
+T.iniToJSON = function (s) {
+  var text = String(s === undefined || s === null ? '' : s);
+  if (!text.trim()) throw new Error('Paste INI first');
+  function bad(ln, msg) { throw new Error('Line ' + ln + ': ' + msg); }
+  function forbid(k, ln) {
+    if (k === '__proto__' || k === 'constructor' || k === 'prototype') bad(ln, 'Forbidden key ' + '"' + k + '"');
+  }
+  function unquote(v) {
+    if (v.length >= 2) {
+      var q0 = v.charAt(0), q1 = v.charAt(v.length - 1);
+      if ((q0 === '"' && q1 === '"') || (q0 === String.fromCharCode(39) && q1 === String.fromCharCode(39))) return v.slice(1, -1);
+    }
+    return v;
+  }
+  var obj = {};
+  var cur = obj, curName = '';
+  var count = 0;
+  var lines = text.split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    var ln = i + 1;
+    var line = lines[i];
+    if (line.charAt(line.length - 1) === '\r') line = line.slice(0, -1);
+    var t = line.trim();
+    if (t === '' || t.charAt(0) === ';' || t.charAt(0) === '#') continue;
+    if (t.charAt(0) === '[') {
+      if (t.charAt(t.length - 1) !== ']') bad(ln, 'Unterminated section header');
+      var name = t.slice(1, -1).trim();
+      if (!name) bad(ln, 'Empty section name');
+      forbid(name, ln);
+      if (!Object.prototype.hasOwnProperty.call(obj, name)) obj[name] = {};
+      var tgt = obj[name];
+      if (tgt === null || typeof tgt !== 'object' || Array.isArray(tgt)) bad(ln, 'Section clashes with key ' + '"' + name + '"');
+      cur = tgt;
+      curName = name;
+      continue;
+    }
+    var eq = t.indexOf('=');
+    var col = t.indexOf(':');
+    var sep = eq >= 0 && col >= 0 ? Math.min(eq, col) : Math.max(eq, col);
+    if (sep < 0) bad(ln, 'Expected KEY=value' + (curName ? ' in [' + curName + ']' : ''));
+    var key = t.slice(0, sep).trim();
+    if (!key) bad(ln, 'Empty key');
+    forbid(key, ln);
+    if (Object.prototype.hasOwnProperty.call(cur, key)) bad(ln, 'Duplicate key ' + '"' + key + '"' + (curName ? ' in [' + curName + ']' : ''));
+    cur[key] = unquote(t.slice(sep + 1).trim());
+    count++;
+  }
+  if (!count) throw new Error('No keys found - need KEY=value lines');
+  return JSON.stringify(obj, null, 2);
+};
 window.Transforms = T;
 })();
