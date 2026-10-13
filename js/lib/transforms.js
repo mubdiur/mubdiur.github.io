@@ -1981,6 +1981,26 @@ function base58ToBytes(s) {
 }
 T.base58Bytes = function (s) { return new Uint8Array(base58ToBytes(s)); };
 /* Ascii85 encode: UTF-8 bytes to printable Base85 (4 bytes to 5 chars, all-zero groups squeeze to z, final partial groups emit length-matched prefixes). */
+/* Quoted-Printable encode: RFC 2045 email-safe text (printables pass, = and non-ASCII become =XX, trailing blanks hardened, lines soft-wrapped at 76 cols). */
+T.quotedPrintableEncode = function (s) {
+  function encLine(line) {
+    var bs = new TextEncoder().encode(line);
+    var out = '', col = 0;
+    function emit(tok) {
+      if (col + tok.length > 76) { out += '=\n'; col = 0; }
+      out += tok; col += tok.length;
+    }
+    for (var i = 0; i < bs.length; i++) {
+      var b = bs[i], last = (i === bs.length - 1);
+      if (b === 61) emit('=3D');
+      else if (b === 9 || b === 32) emit(last ? (b === 9 ? '=09' : '=20') : String.fromCharCode(b));
+      else if ((b >= 33 && b <= 60) || (b >= 62 && b <= 126)) emit(String.fromCharCode(b));
+      else { var h = b.toString(16).toUpperCase(); emit('=' + (h.length < 2 ? '0' + h : h)); }
+    }
+    return out;
+  }
+  return String(s).split(/\r\n|\r|\n/).map(encLine).join('\n');
+};
 T.ascii85Encode = function (s) {
   var bytes = new TextEncoder().encode(String(s));
   var out = '';

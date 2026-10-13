@@ -536,6 +536,8 @@ window.TOOLMANIFEST = [
   { slug: 'chmod-converter', name: 'Chmod Converter', desc: 'Convert between octal (755) and symbolic (rwxr-xr-x) Unix permissions', category: 'code', tags: ['chmod', 'permissions', 'unix'], icon: 'terminal', template: 'transform',
     placeholder: '755',
     handler: function (s) { return Transforms.chmodConvert(s); } },
+  { slug: 'quoted-printable-encode', name: 'Quoted-Printable Encode', desc: 'Encode text to quoted-printable \u2014 =XX escapes, trailing blanks hardened, lines soft-wrapped at 76 cols', category: 'encoding', tags: ['quoted-printable', 'email', 'mime', 'encode'], icon: 'binary', template: 'transform',
+    handler: function (s) { return Transforms.quotedPrintableEncode(s); } },
   { slug: 'ascii85-encode', name: 'Ascii85 Encode', desc: 'Encode text to Ascii85 (Base85) \u2014 4 bytes become 5 printable chars, zero groups squeeze to z, compact for embedding', category: 'encoding', tags: ['ascii85', 'base85', 'encode'], icon: 'binary', template: 'transform',
     handler: function (s) { return Transforms.ascii85Encode(s); } },
   { slug: 'ascii85-decode', name: 'Ascii85 Decode', desc: 'Decode Ascii85 (Base85) back to text \u2014 whitespace skipped, z expands, truncated groups and overflows rejected', category: 'encoding', tags: ['ascii85', 'base85', 'decode'], icon: 'binary', template: 'transform',
