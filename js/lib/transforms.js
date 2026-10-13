@@ -15,7 +15,8 @@ var T = {};
  */
 T.parseCSV = function (s, delim) {
   var d = delim || ',';
-  var text = s.charCodeAt(0) === 0xFEFF ? s.slice(1) : s;
+  var text = String(s === undefined || s === null ? '' : s);
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
   var rows = [];
   var row = [];
   var cur = '';
@@ -1089,7 +1090,7 @@ T.csvProfile = function (s, opts) {
   var out = (d === ';' ? ';' : ',');
   function cell(v) {
     v = String(v === undefined || v === null ? '' : v);
-    return (v.indexOf(out) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    return (v.indexOf(out) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0 || v.indexOf('\r') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
   }
   function isInt(v) { return /^[+-]?\d+$/.test(v.trim()); }
   function isNum(v) { var x = Number(v); return v.trim() !== '' && isFinite(x); }
@@ -1140,7 +1141,7 @@ T.csvDupes = function (s, opts) {
   var out = (d === ';' ? ';' : ',');
   function cell(v) {
     v = String(v === undefined || v === null ? '' : v);
-    return (v.indexOf(out) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    return (v.indexOf(out) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0 || v.indexOf('\r') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
   }
   var heads = rows[0], body = rows.slice(1), idx = [];
   var keyRaw = String(o.key === undefined || o.key === null ? '' : o.key).trim();
@@ -1193,7 +1194,7 @@ T.csvDiff = function (aText, bText, keyName) {
   if (ki < 0) throw new Error('Unknown key column \u2018' + kn + '\u2019 \u2014 headers: ' + ha.join(', '));
   function cell(v) {
     v = String(v === undefined || v === null ? '' : v);
-    return (v.indexOf(',') >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    return (v.indexOf(',') >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0 || v.indexOf('\r') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
   }
   function keyed(side, name) {
     var map = Object.create(null), order = [];
@@ -1244,7 +1245,7 @@ T.csvSample = function (s, opts) {
   var out = (d === ';' ? ';' : ',');
   function cell(v) {
     v = String(v === undefined || v === null ? '' : v);
-    return (v.indexOf(out) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    return (v.indexOf(out) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0 || v.indexOf('\r') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
   }
   var seedStr = String(o.seed === undefined || o.seed === null ? '' : o.seed);
   if (!seedStr) seedStr = '0';
@@ -1300,7 +1301,7 @@ T.csvChecksum = function (s, opts) {
   var out = (d === ';' ? ';' : ',');
   function cell(v) {
     v = String(v === undefined || v === null ? '' : v);
-    return (v.indexOf(out) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    return (v.indexOf(out) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0 || v.indexOf('\r') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
   }
   var grid = [heads.concat([col]).map(cell).join(out)];
   rows.slice(1).forEach(function (r) {
