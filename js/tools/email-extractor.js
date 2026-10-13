@@ -95,6 +95,10 @@ App.registerTool('email-extractor', {
       App.icon('copy', '', 12), App.el('span', { text: 'Copy All' }));
     copyBtn.addEventListener('click', function () { App.copy(output, copyBtn); });
 
+    var dlBtn = App.el('button', { type: 'button', class: btnSecondary, disabled: true },
+      App.icon('download', '', 12), App.el('span', { text: 'Download' }));
+    dlBtn.addEventListener('click', function () { if (output) App.download('emails.txt', output, 'text/plain;charset=utf-8'); });
+
     var clearBtn = App.el('button', { type: 'button', class: btnSecondary },
       App.icon('eraser', '', 12), App.el('span', { text: 'Clear' }));
     clearBtn.addEventListener('click', clear);
@@ -105,7 +109,7 @@ App.registerTool('email-extractor', {
     sortChk.addEventListener('change', function () { sort = sortChk.checked; });
 
     var controls = App.el('div', { class: 'flex flex-wrap items-center gap-2' },
-      containsInput, formatSel, submitBtn, copyBtn, clearBtn,
+      containsInput, formatSel, submitBtn, copyBtn, dlBtn, clearBtn,
       App.el('label', { class: 'ee-check-label' }, lowercaseChk, App.el('span', { text: 'Lowercase' })),
       App.el('label', { class: 'ee-check-label' }, sortChk, App.el('span', { text: 'Sort A → Z' })));
 
@@ -164,6 +168,7 @@ App.registerTool('email-extractor', {
           App.el('pre', { class: 'overflow-auto whitespace-pre-wrap break-all font-mono text-sm ee-out-pre', text: output })));
       }
       copyBtn.disabled = !output;
+      dlBtn.disabled = !output;
       renderDiff();
     }
 
@@ -227,6 +232,12 @@ App.registerTool('email-extractor', {
           App.copy(diff.onlyA.concat(diff.onlyB).concat(diff.both).join('\n'), copyDiffBtn);
         });
         diffBtnRow.appendChild(copyDiffBtn);
+        var dlDiffBtn = App.el('button', { type: 'button', class: btnSecondary },
+          App.icon('download', '', 12), App.el('span', { text: 'Download' }));
+        dlDiffBtn.addEventListener('click', function () {
+          App.download('email-diff.txt', 'Only in A:\n' + (diff.onlyA.join('\n') || '(none)') + '\n\nOnly in B:\n' + (diff.onlyB.join('\n') || '(none)') + '\n\nIn both:\n' + (diff.both.join('\n') || '(none)') + '\n', 'text/plain;charset=utf-8');
+        });
+        diffBtnRow.appendChild(dlDiffBtn);
       }
 
       diffStatusLine.innerHTML = '';
