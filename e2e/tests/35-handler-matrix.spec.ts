@@ -149,6 +149,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('toml-to-xml', 'dup throws', mustThrow(() => TOOLS['toml-to-xml'].handler('a = 1\na = 2')));
     push('toml-to-markdown', 'happy', TOOLS['toml-to-markdown'].handler('a = 1', {}).indexOf('| 1 |') >= 0);
     push('toml-to-markdown', 'dup throws', mustThrow(() => TOOLS['toml-to-markdown'].handler('a = 1\na = 2', {})));
+    push('toml-to-csv', 'happy', TOOLS['toml-to-csv'].handler('a = 1', {}) === 'a\n1');
+    push('toml-to-csv', 'dup throws', mustThrow(() => TOOLS['toml-to-csv'].handler('a = 1\na = 2', {})));
     push('yaml-to-xml', 'empty throws', mustThrow(() => TOOLS['yaml-to-xml'].handler('')));
     push('yaml-to-markdown', 'happy', TOOLS['yaml-to-markdown'].handler('a: 1', {}).indexOf('| 1 |') >= 0);
     push('yaml-to-markdown', 'scalar throws', mustThrow(() => TOOLS['yaml-to-markdown'].handler('- 1', {})));

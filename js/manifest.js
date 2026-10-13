@@ -363,6 +363,10 @@ window.TOOLMANIFEST = [
     placeholder: '[server]\nport = 8080',
     handler: function (s, opts) { return Transforms.tomlToMarkdown(s, opts); },
     params: [{ key: 'align', label: 'Align', type: 'select', default: 'left', options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }] }, { key: 'nested', label: 'Nested objects', type: 'select', default: 'flatten', options: [{ value: 'flatten', label: 'Flatten (a.b)' }, { value: 'stringify', label: 'Stringify JSON' }] }] },
+  { slug: 'toml-to-csv', name: 'TOML \u2192 CSV', desc: 'Convert TOML configs to CSV \u2014 tables flatten to dotted columns, single row, shared dependency-free parser', category: 'converters', tags: ['toml', 'csv', 'convert'], icon: 'filespreadsheet', template: 'transform',
+    placeholder: '[server]\nport = 8080',
+    handler: function (s, opts) { return Transforms.tomlToCSV(s, opts); },
+    params: [{ key: 'delimiter', label: 'Delimiter', type: 'select', default: 'comma', options: [{ value: 'comma', label: 'Comma (,)' }, { value: 'semicolon', label: 'Semicolon (;)' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe (|)' }] }, { key: 'nested', label: 'Nested objects', type: 'select', default: 'flatten', options: [{ value: 'flatten', label: 'Flatten (a.b)' }, { value: 'stringify', label: 'Stringify JSON' }] }] },
   { slug: 'markdown-table-generator', name: 'Markdown Table Generator', desc: 'CSV rows to GitHub-flavored Markdown tables — optional header, alignment, auto delimiter', category: 'converters', tags: ['markdown', 'table', 'csv'], icon: 'filespreadsheet', template: 'transform',
     handler: function (s, opts) { return Transforms.csvToMarkdown(s, opts); },
     params: [
