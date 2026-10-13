@@ -6117,6 +6117,8 @@ T.iniToXML = function (s) { return T.jsonToXML(T.iniToJSON(s)); };
 /* ENV to XML: parse once with the dotenv core (export prefixes, line-numbered key errors), emit with the canonical JSON-to-XML emitter. */
 T.envToXML = function (s) { return T.jsonToXML(T.envToJSON(s)); };
 /* JSONL to XML: validate one JSON value per line (line-numbered errors), emit the doc array with the canonical JSON-to-XML emitter (docs repeat as siblings). */
+/* JSONL to Schema: validate one JSON value per line (line-numbered errors), infer the doc array with the canonical JSON-to-Schema core (mixed shapes merge to anyOf). */
+T.jsonlToSchema = function (s, opts) { return T.jsonToSchema(T.jsonlToJSON(s), opts); };
 T.jsonlToXML = function (s) { return T.jsonToXML(T.jsonlToJSON(s)); };
 /* JSONL to YAML: validate one JSON value per line (line-numbered errors), emit the doc array with the canonical JSON-to-YAML emitter (docs as sequences). */
 T.jsonlToYAML = function (s) { return T.jsonToYAML(T.jsonlToJSON(s)); };

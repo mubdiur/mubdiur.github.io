@@ -159,6 +159,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('env-to-schema', 'bad throws', mustThrow(() => TOOLS['env-to-schema'].handler('1BAD=x')));
     push('markdown-to-schema', 'happy', TOOLS['markdown-to-schema'].handler('| a |\n|---|\n| 1 |').indexOf('integer') >= 0);
     push('markdown-to-schema', 'no table throws', mustThrow(() => TOOLS['markdown-to-schema'].handler('no table')));
+    push('jsonl-to-schema', 'happy', TOOLS['jsonl-to-schema'].handler('{\u0022a\u0022:1}').indexOf('integer') >= 0);
+    push('jsonl-to-schema', 'bad line throws', mustThrow(() => TOOLS['jsonl-to-schema'].handler('{\u0022a\u0022:1}\nBAD')));
     push('toml-to-json', 'happy', TOOLS['toml-to-json'].handler('a = 1').includes('"a": 1'));
     push('toml-to-json', 'dup throws', mustThrow(() => TOOLS['toml-to-json'].handler('a = 1\na = 2')));
     push('xml-to-toml', 'happy', TOOLS['xml-to-toml'].handler('<r><a>1</a></r>').includes('a = '));

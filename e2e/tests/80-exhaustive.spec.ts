@@ -23,6 +23,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'ini-to-schema': { good: '[s]\na = 1', expectInOutput: /required/ },
   'env-to-schema': { good: 'A=1', expectInOutput: /required/ },
   'markdown-to-schema': { good: '| a |\n|---|\n| 1 |', expectInOutput: /integer/ },
+  'jsonl-to-schema': { good: '{\u0022a\u0022:1}', expectInOutput: /integer/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },
   'json-escape': { good: 'a"b', expectInOutput: /\\"/ },
   'json-unescape': { good: 'a\\"b', expectInOutput: /a"b/ },
