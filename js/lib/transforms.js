@@ -6064,6 +6064,8 @@ T.envToXML = function (s) { return T.jsonToXML(T.envToJSON(s)); };
 T.jsonlToXML = function (s) { return T.jsonToXML(T.jsonlToJSON(s)); };
 /* JSONL to YAML: validate one JSON value per line (line-numbered errors), emit the doc array with the canonical JSON-to-YAML emitter (docs as sequences). */
 T.jsonlToYAML = function (s) { return T.jsonToYAML(T.jsonlToJSON(s)); };
+/* Markdown table to XML: pipe table to CSV rows, CSV rows to header-keyed records, records to sibling XML elements (delimiter shared). */
+T.markdownToXML = function (s, opts) { return T.jsonToXML(T.csvToJSON(T.markdownToCSV(s, opts), opts)); };
 
 /* Duration calculator: one signed duration per line, summed. Each line takes
    jammed or spaced unit groups (1h30m, 2 days 4 hours), colon times (1:30:00,
