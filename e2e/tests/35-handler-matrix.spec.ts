@@ -47,6 +47,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('csv-to-json', 'happy', JSON.parse(TOOLS['csv-to-json'].handler('name,age\nAda,30')).length === 1);
     push('csv-to-json', 'auto semicolon', JSON.parse(TOOLS['csv-to-json'].handler('name;age\nAda;30'))[0].age === '30');
     push('csv-to-json', 'explicit delimiter', JSON.parse(TOOLS['csv-to-json'].handler('a,b\n1,2', { delimiter: 'comma' }))[0].a === '1');
+    push('csv-to-xml', 'happy', TOOLS['csv-to-xml'].handler('name,age\nAda,30', {}).indexOf('<name>Ada</name>') >= 0);
+    push('csv-to-xml', 'empty throws', mustThrow(() => TOOLS['csv-to-xml'].handler('', {})));
     push('csv-delimiter-sniffer', 'semicolon', TOOLS['csv-delimiter-sniffer'].handler('a;b\nc;d').indexOf('Delimiter: Semicolon (;)') === 0);
     push('csv-delimiter-sniffer', 'comma', TOOLS['csv-delimiter-sniffer'].handler('a,b\nc,d').indexOf('Delimiter: Comma (,)') === 0);
     push('csv-transposer', 'square', TOOLS['csv-transposer'].handler('a,b\nc,d', {}) === 'a,c\nb,d');

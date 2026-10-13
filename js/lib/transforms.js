@@ -6052,6 +6052,8 @@ T.xmlToTOML = function (s) { return T.jsonToTOML(T.xmlToJsonDoc(s)); };
 T.yamlToXML = function (s) { if (!String(s).trim()) throw new Error('Enter YAML to convert'); return T.jsonToXML(T.yamlToJSON(s)); };
 /* TOML to XML: parse once with the TOML core, emit with the canonical JSON-to-XML emitter (tables nest, arrays repeat as siblings). */
 T.tomlToXML = function (s) { return T.jsonToXML(T.tomlToJSON(s)); };
+/* CSV to XML: parse once with the RFC 4180 CSV core (auto delimiter, headers as keys), emit with the canonical JSON-to-XML emitter (rows repeat as siblings). */
+T.csvToXML = function (s, opts) { return T.jsonToXML(T.csvToJSON(s, opts)); };
 
 /* Duration calculator: one signed duration per line, summed. Each line takes
    jammed or spaced unit groups (1h30m, 2 days 4 hours), colon times (1:30:00,
