@@ -277,7 +277,7 @@ window.TOOLMANIFEST = [
   { slug: 'morse-code-player', name: 'Morse Code Player', desc: 'Hear Morse code — WPM timing, dit/dah timeline, prosigns', category: 'encoding', tags: ['morse', 'audio', 'player'], icon: 'code2', template: 'custom' },
   { slug: 'jwt-generator', name: 'JWT Generator', desc: 'Sign HS256 JSON Web Tokens — payload object, masked secret, configurable expiry', category: 'crypto', tags: ['jwt', 'token', 'auth'], icon: 'key', template: 'transform', wasm: true,
     placeholder: '{"sub":"123","name":"Ada"}',
-    handler: function (s, opts) { return Transforms.jwtSign(s, (opts && opts.secret) || '', (opts && opts.expires) || 'none'); },
+    handler: function (s, opts) { return Transforms.jwtSignOpts(s, opts); },
     params: [
       { key: 'secret', label: 'Secret', type: 'password', default: 'secret' },
       { key: 'expires', label: 'Expires', type: 'select', default: 'none', options: [{ value: 'none', label: 'Never' }, { value: '1h', label: '1 hour' }, { value: '24h', label: '24 hours' }, { value: '7d', label: '7 days' }, { value: '30d', label: '30 days' }] }

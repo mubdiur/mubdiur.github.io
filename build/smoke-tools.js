@@ -438,7 +438,9 @@ console.log('-- json to toml --');
     ok(h256 === require('crypto').createHmac('sha256', 'k').update('hello').digest('hex'), 'hmac wires key+message sha256');
     var h1 = TOOLS['hmac-generator'].handler('hello', { key: 'k', algorithm: 'SHA-1' });
     ok(h1 === require('crypto').createHmac('sha1', 'k').update('hello').digest('hex') && h1.length === 40, 'hmac wires key+message sha1');
-    ok(TOOLS['hmac-generator'].handler('hello', { key: 'k1' }) !== TOOLS['hmac-generator'].handler('hello', { key: 'k2' }), 'hmac key changes output'); }
+    ok(TOOLS['hmac-generator'].handler('hello', { key: 'k1' }) !== TOOLS['hmac-generator'].handler('hello', { key: 'k2' }), 'hmac key changes output');
+    ok(TOOLS['jwt-generator'].handler.toString().indexOf('jwtSignOpts') >= 0, 'jwt delegates opts');
+    ok(TOOLS['jwt-generator'].handler('{"sub":"1"}', { secret: 's', expires: 'none' }) === T.jwtSign('{"sub":"1"}', 's', 'none'), 'jwt delegates vector'); }
   ok(T.hexToBase64('616263') === 'YWJj', 'hexToBase64 abc vector');
   ok(T.hexToBase64('deadbeef') === Buffer.from('deadbeef', 'hex').toString('base64'), 'hexToBase64 matches Buffer');
   { global.Core = { sha384Hex: function () { return require('crypto').createHash('sha384').update('abc').digest('hex'); }, sha512Hex: function () { return '00'; }, sha256Hex: function () { return '00'; } };

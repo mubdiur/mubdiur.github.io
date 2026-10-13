@@ -128,4 +128,8 @@ T.jwtSign = function (rawPayload, secret, expires) {
   for (var i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.slice(i, i + 2), 16));
   return signingInput + '.' + T.base64UrlEncodeBytes(bytes);
 };
+/* JWT UI contract: payload input plus secret/expires options. Moved from the manifest so shell UI delegates to this single source. */
+T.jwtSignOpts = function (s, opts) {
+  return T.jwtSign(s, (opts && opts.secret) || '', (opts && opts.expires) || 'none');
+};
 })();
