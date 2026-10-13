@@ -266,6 +266,9 @@ test('handler matrix via page.evaluate — every option, success + error', async
     const MAN = (window as any).TOOLMANIFEST as any[];
     function topSlug(q: string): string { return MAN.map(function (t: any) { return { s: t.slug as string, r: APP.toolMatchScore(t, q) as number }; }).sort(function (a: any, b: any) { return b.r - a.r; })[0].s; }
     push('palette-rank', 'slug exact wins', APP.toolMatchScore(TOOLS['sha384-hash'], 'sha384-hash') > APP.toolMatchScore(TOOLS['sha512-hash'], 'sha384-hash'));
+    push('palette-rank', 'transposition tolerated', APP.fuzzyScore('jtw', 'jwt-verifier') > 0);
+    push('palette-rank', 'transposition below straight', APP.fuzzyScore('jtw', 'jwt-verifier') < APP.fuzzyScore('jwt', 'jwt-verifier'));
+    push('palette-rank', 'garbage still misses', APP.fuzzyScore('zzzqqq', 'jwt-verifier') === -1);
     push('palette-rank', 'slug prefix tops', topSlug('sha384') === 'sha384-hash');
     push('palette-rank', 'exact slug tops', topSlug('totp-generator') === 'totp-generator');
     push('palette-rank', 'ties break shorter-first', (function () { var rs = MAN.map(function (t: any) { return { l: (t.slug as string).length, r: APP.toolMatchScore(t, 'json') as number }; }).filter(function (x: any) { return x.r > 0; }).sort(function (a: any, b: any) { return b.r - a.r || a.l - b.l; }); for (var k = 1; k < rs.length; k++) { if (rs[k].r === rs[k - 1].r && rs[k].l < rs[k - 1].l) return false; } return rs.length > 3; })());

@@ -87,18 +87,30 @@ var App = {
       var atBoundary = exact === 0 || /[\s\-_.//]/.test(t.charAt(exact - 1));
       return 1000 - exact * 2 - (atBoundary ? 0 : 10) - Math.floor(t.length / 16);
     }
-    var score = 0, ti = 0, streak = 0;
-    for (var qi = 0; qi < q.length; qi++) {
-      var ch = q.charAt(qi);
-      if (ch === ' ') continue;
-      var found = t.indexOf(ch, ti);
-      if (found === -1) return -1;
-      if (found === ti && qi > 0) { streak++; score += 8 + streak * 2; }
-      else { streak = 0; score += 1; }
-      if (found === 0 || /[\s\-_.//]/.test(t.charAt(found - 1))) score += 6;
-      ti = found + 1;
+    function sub(q) {
+      var score = 0, ti = 0, streak = 0;
+      for (var qi = 0; qi < q.length; qi++) {
+        var ch = q.charAt(qi);
+        if (ch === ' ') continue;
+        var found = t.indexOf(ch, ti);
+        if (found === -1) return -1;
+        if (found === ti && qi > 0) { streak++; score += 8 + streak * 2; }
+        else { streak = 0; score += 1; }
+        if (found === 0 || /[\s\-_.//]/.test(t.charAt(found - 1))) score += 6;
+        ti = found + 1;
+      }
+
+      return score;
     }
-    return score;
+    var straight = sub(q);
+    if (straight >= 0) return straight;
+    var bestSwap = -1;
+    for (var si = 0; si + 1 < q.length; si++) {
+      var alt = q.slice(0, si) + q.charAt(si + 1) + q.charAt(si) + q.slice(si + 2);
+      var r = sub(alt);
+      if (r > bestSwap) bestSwap = r;
+    }
+    return bestSwap >= 0 ? Math.max(bestSwap - 15, 1) : -1;
   },
 
   /** Slug-first fuzzy score across a tool's searchable fields. */
