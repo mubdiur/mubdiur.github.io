@@ -120,6 +120,17 @@ App.registerTool('voice-dictation', {
     var selHint = App.el('div', { class: 'vd-sel', style: 'display:none' });
     var metaEl = App.el('div', { class: 'vd-meta' });
     var errBox = App.el('div', { class: 'vd-err', style: 'display:none' });
+    /* Draft autosave: a reload or route switch never eats dictation. */
+    var DRAFT_KEY = 'mub.dictation.v1';
+    function saveDraft() {
+      try {
+        if (ta.value) localStorage.setItem(DRAFT_KEY, ta.value);
+        else localStorage.removeItem(DRAFT_KEY);
+      } catch (eD) {}
+    }
+    function loadDraft() {
+      try { return localStorage.getItem(DRAFT_KEY) || ''; } catch (eL) { return ''; }
+    }
 
     var optInterim = App.el('input', { type: 'checkbox', checked: 'checked', 'aria-label': 'Show interim results' });
     var optRestart = App.el('input', { type: 'checkbox', checked: 'checked', 'aria-label': 'Auto-restart on pause' });
@@ -267,6 +278,7 @@ App.registerTool('voice-dictation', {
       placeCaretEl(pos, Math.max(0, caret));
       updateStats();
       refreshHints();
+      saveDraft();
     }
 
     function capitalizeChunk(t) {
@@ -591,6 +603,7 @@ App.registerTool('voice-dictation', {
 
     function clearAll(focusAfter) {
       ta.value = '';
+      try { localStorage.removeItem(DRAFT_KEY); } catch (eDc) {}
       if (pipAlive()) { try { pipTa.value = ''; } catch (eCl) {} }
       setInterim('');
       lastRange = null;
@@ -723,6 +736,7 @@ App.registerTool('voice-dictation', {
       if (ta.value) App.download('dictation.txt', ta.value, 'text/plain;charset=utf-8');
     });
     clearBtn.addEventListener('click', function () { activeTag = 'main'; clearAll(true); });
+    ta.addEventListener('input', App.debounce(function () { saveDraft(); }, 300));
     pipBtn.addEventListener('click', openPip);
 
     App.on(ta, 'input', function () { activeTag = 'main'; trackRangeEl(ta, 'main'); mirrorFrom(ta); updateStats(); });
@@ -760,6 +774,7 @@ App.registerTool('voice-dictation', {
     App.on(document, 'keydown', function (e) { copyKeyHandler(e, root, ta, window); });
 
     App.onUnmount(function () {
+      saveDraft();
       wantListening = false;
       try { if (rec) rec.abort(); } catch (eU) {}
       closePip();
@@ -796,7 +811,9 @@ App.registerTool('voice-dictation', {
       setStatus(false, 'Unsupported — use Chrome or Edge (HTTPS/localhost)');
       showError('SpeechRecognition is not available in this browser. Use Chrome or Edge over HTTPS (or localhost). Typing + Ctrl+C copy still work.');
     } else {
-      setStatus(false, 'Idle — press Start and speak');
+      var draft = loadDraft();
+      if (draft) { ta.value = draft; updateStats(); refreshHints(); }
+      setStatus(false, draft ? 'Recovered unsent transcript — press Start to continue' : 'Idle — press Start and speak');
     }
     updatePipToggle();
     updateStats();
