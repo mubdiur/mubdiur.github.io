@@ -17,6 +17,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'json-diff': { good: '{"a":1}', expectInOutput: /→|No differences/ },
   'json-to-xml': { good: '{"a":1}', expectInOutput: /<root>/ },
     'csv-to-schema': { good: 'name,age\nAda,36', expectInOutput: /integer/ },
+  'yaml-to-schema': { good: 'a: 1', expectInOutput: /integer/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },
   'json-escape': { good: 'a"b', expectInOutput: /\\"/ },
   'json-unescape': { good: 'a\\"b', expectInOutput: /a"b/ },
