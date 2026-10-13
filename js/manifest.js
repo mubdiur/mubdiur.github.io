@@ -284,7 +284,7 @@ window.TOOLMANIFEST = [
     ] },
   { slug: 'sri-generator', name: 'SRI Hash Generator', desc: 'Subresource Integrity hashes — SHA-384/512/256 via the WebAssembly core', category: 'crypto', tags: ['sri', 'hash', 'integrity'], icon: 'hash', template: 'transform', wasm: true,
     placeholder: 'console.log(1)',
-    handler: function (s, opts) { return Transforms.sriHash(s, (opts && opts.algorithm) || 'SHA-384'); },
+    handler: function (s, opts) { return Transforms.sriHashOpts(s, opts); },
     params: [{ key: 'algorithm', label: 'Algorithm', type: 'select', default: 'SHA-384', options: [{ value: 'SHA-384', label: 'SHA-384' }, { value: 'SHA-512', label: 'SHA-512' }, { value: 'SHA-256', label: 'SHA-256' }] }] },
   { slug: 'pem-inspector', name: 'PEM Inspector', desc: 'Inspect PEM blocks — label, DER length, ASN.1 tree via the WebAssembly core', category: 'crypto', tags: ['pem', 'der', 'asn1', 'certificate'], icon: 'lock', template: 'transform', wasm: true,
     placeholder: '-----BEGIN CERTIFICATE-----\nMAICAQE=\n-----END CERTIFICATE-----',

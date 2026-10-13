@@ -446,7 +446,8 @@ console.log('-- json to toml --');
   { global.Core = { sha384Hex: function () { return require('crypto').createHash('sha384').update('abc').digest('hex'); }, sha512Hex: function () { return '00'; }, sha256Hex: function () { return '00'; } };
     var want = 'sha384-' + Buffer.from(require('crypto').createHash('sha384').update('abc').digest()).toString('base64');
     ok(T.sriHash('abc', 'SHA-384') === want, 'sriHash sha384 token matches node crypto');
-    ok(TOOLS['sri-generator'].handler.toString().indexOf('sriHash') >= 0, 'sri manifest delegates to Transforms'); }
+    ok(TOOLS['sri-generator'].handler.toString().indexOf('sriHashOpts') >= 0, 'sri delegates opts');
+    ok(TOOLS['sri-generator'].handler('abc') === T.sriHash('abc', 'SHA-384'), 'sri default sha384'); }
   { global.Core = global.Core || {}; global.Core.sha384Hex = function (s) { return require('crypto').createHash('sha384').update(String(s)).digest('hex'); };
     ok(TOOLS['sha384-hash'].handler('abc') === require('crypto').createHash('sha384').update('abc').digest('hex'), 'sha384 wires Transforms/Core vector');
     ok(TOOLS['sha384-hash'].handler('abc').length === 96, 'sha384 hex length 96');

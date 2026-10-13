@@ -47,6 +47,10 @@ T.sriHash = function (s, algo) {
   var tag = a === 'SHA-384' ? 'sha384' : a === 'SHA-512' ? 'sha512' : 'sha256';
   return tag + '-' + T.hexToBase64(hex);
 };
+/* SRI UI contract: text input plus algorithm option. Moved from the manifest for single source. */
+T.sriHashOpts = function (s, opts) {
+  return T.sriHash(s, (opts && opts.algorithm) || 'SHA-384');
+};
 T.pemToBytes = function (pem) {
   var text = String(pem);
   if (!text.trim()) throw new Error('Paste a PEM block');
