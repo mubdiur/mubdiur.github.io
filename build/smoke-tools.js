@@ -1215,6 +1215,11 @@ console.log('-- rot --');
   ok(TOOLS['caesar-cipher'].handler('Hello', { shift: '13' }) === TOOLS['rot13'].handler('Hello'), 'caesar thirteen matches rot13');
   ok(TOOLS['caesar-cipher'].handler('Hello, World!') === TOOLS['caesar-cipher'].handler('Hello, World!', { shift: '3' }), 'caesar default shift');
   ok(TOOLS['caesar-cipher'].handler('abc', { shift: '27' }) === TOOLS['caesar-cipher'].handler('abc', { shift: '1' }), 'caesar shift wraps');
+  ok(TOOLS['vigenere-cipher'].handler('ATTACKATDAWN', { key: 'LEMON' }) === 'LXFOPVEFRNHR', 'vigenere vector');
+  ok(TOOLS['vigenere-cipher'].handler('LXFOPVEFRNHR', { key: 'LEMON', mode: 'decode' }) === 'ATTACKATDAWN', 'vigenere roundtrip');
+  ok(TOOLS['vigenere-cipher'].handler('Attack at dawn!', { key: 'lemon' }) === 'Lxfopv ef rnhr!', 'vigenere case kept');
+  ok(TOOLS['vigenere-cipher'].handler('ABC', { key: 'L3M0N!' }) === TOOLS['vigenere-cipher'].handler('ABC', { key: 'LMN' }), 'vigenere key cleaned');
+  ok(TOOLS['vigenere-cipher'].handler('ABC', { key: 'A' }) === 'ABC', 'vigenere A-shift identity');
   ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
   ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }
