@@ -74,6 +74,10 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('csv-duplicate-finder', 'key col', TOOLS['csv-duplicate-finder'].handler('e,p\na@x,pro\na@x,free', { key: 'e' }).includes('2,a@x'));
     push('csv-duplicate-finder', 'none found', TOOLS['csv-duplicate-finder'].handler('a\n1\n2', {}) === 'No duplicates found');
     push('csv-duplicate-finder', 'empty throws', mustThrow(() => TOOLS['csv-duplicate-finder'].handler('   ', {})));
+    push('csv-diff', 'changed+added', TOOLS['csv-diff'].handler('id,p\n1,pro\n2,free', { datasetB: 'id,p\n1,pro\n2,team\n3,free' }).includes('changed,2'));
+    push('csv-diff', 'same', TOOLS['csv-diff'].handler('id,p\n1,pro', { datasetB: 'id,p\n1,pro' }) === 'No differences found');
+    push('csv-diff', 'empty throws', mustThrow(() => TOOLS['csv-diff'].handler('   ', {})));
+    push('csv-diff', 'headers differ', mustThrow(() => TOOLS['csv-diff'].handler('a\n1', { datasetB: 'b\n1' })));
     push('csv-pivot-table', 'totals', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', totals: 'true' }).includes('Total,15,20,35'));
     push('csv-pivot-table', 'sort row-total', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', sort: 'row-total' }) === ',q1,q2\neng,10,20\nops,5,');
     push('csv-pivot-table', 'sort col-total', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', sort: 'col-total' }) === ',q2,q1\neng,20,10\nops,,5');
@@ -315,7 +319,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
   if (failed.length) console.log('failed handlers:', JSON.stringify(failed, null, 2));
   expect(failed, `handler matrix failures:\n` + JSON.stringify(failed, null, 2)).toEqual([]);
   expect((result as any[]).length, 'handler matrix must cover all tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
-  // Full manifest is 135 (csv-duplicate-finder added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
+  // Full manifest is 136 (csv-diff added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
-  expect(manifest, 'TOOLMANIFEST must be 135').toBe(135);
+  expect(manifest, 'TOOLMANIFEST must be 136').toBe(136);
 });

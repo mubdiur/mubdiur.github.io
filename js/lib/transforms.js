@@ -1130,6 +1130,63 @@ T.csvDupes = function (s, opts) {
   return [head].concat(grid).join('\n');
 };
 
+/* CSV diff: compare dataset A (input) against dataset B (option) row by
+   row on a key column. Each side auto-detects its delimiter; headers must
+   match and keys must be unique. Output is status plus key plus details. */
+T.csvDiff = function (aText, bText, keyName) {
+  function parseSide(text, name) {
+    var raw = String(text === undefined || text === null ? '' : text).replace(/^\uFEFF/, '');
+    var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
+    if (!lines.length) throw new Error(name + ' is empty \u2014 paste delimited rows with a header row');
+    var d = T.detectDelimChar(lines.slice(0, 10)) || ',';
+    var rows = T.parseCSV(text, d);
+    if (rows.length < 2) throw new Error(name + ' needs a header row plus at least one data row');
+    return { heads: rows[0], body: rows.slice(1) };
+  }
+  var A = parseSide(aText, 'Dataset A'), B = parseSide(bText, 'Dataset B');
+  var ha = A.heads.map(function (h) { return String(h).trim(); });
+  var hb = B.heads.map(function (h) { return String(h).trim(); });
+  if (ha.join('\u0000') !== hb.join('\u0000')) throw new Error('Headers differ \u2014 A: ' + ha.join(', ') + ' vs B: ' + hb.join(', '));
+  var kn = String(keyName === undefined || keyName === null ? '' : keyName).trim() || ha[0];
+  var ki = ha.indexOf(kn);
+  if (ki < 0) throw new Error('Unknown key column \u2018' + kn + '\u2019 \u2014 headers: ' + ha.join(', '));
+  function cell(v) {
+    v = String(v === undefined || v === null ? '' : v);
+    return (v.indexOf(',') >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  function keyed(side, name) {
+    var map = Object.create(null), order = [];
+    side.body.forEach(function (r, i) {
+      var k = ki < r.length ? r[ki] : '';
+      if (Object.prototype.hasOwnProperty.call(map, k)) throw new Error(name + ' has a duplicate key \u2018' + k + '\u2019 (row ' + (i + 2) + ')');
+      map[k] = r;
+      order.push(k);
+    });
+    return { map: map, order: order };
+  }
+  var ka = keyed(A, 'Dataset A'), kb = keyed(B, 'Dataset B');
+  var seen = Object.create(null), out = [];
+  ka.order.forEach(function (k) {
+    seen[k] = 1;
+    if (!Object.prototype.hasOwnProperty.call(kb.map, k)) { out.push(['removed', k, '']); return; }
+    var ra = ka.map[k], rb = kb.map[k], diffs = [];
+    ha.forEach(function (h, c) {
+      var va = c < ra.length ? ra[c] : '', vb = c < rb.length ? rb[c] : '';
+      if (va !== vb && c !== ki) diffs.push(h + ': ' + va + ' -> ' + vb);
+    });
+    if (diffs.length) out.push(['changed', k, diffs.join('; ')]);
+  });
+  kb.order.forEach(function (k) {
+    if (!Object.prototype.hasOwnProperty.call(seen, k)) out.push(['added', k, '']);
+  });
+  if (!out.length) return 'No differences found';
+  return ['status' + ',' + 'key' + ',' + 'details'].concat(out.map(function (r) { return r.map(cell).join(','); })).join('\n');
+};
+T.csvDiffOpts = function (s, opts) {
+  var o = opts || {};
+  return T.csvDiff(s, o.datasetB, o.key);
+};
+
 /* HAR inspector: DevTools HAR JSON becomes a timing summary -
    per-request method/status/ms/size lines plus totals and failure count. */
 T.harSummary = function (s, opts) {

@@ -96,6 +96,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'csv-pivot-table': { good: 'dept,q,sales\neng,q1,10\nops,q1,5', expectInOutput: /,q1/ },
   'csv-column-profiler': { good: 'a,b\n1,x\n2,y', expectInOutput: /column,type,filled/ },
   'csv-duplicate-finder': { good: 'e,p\na@x,pro\nb@x,free\na@x,pro', expectInOutput: /count,e,p/ },
+  'csv-diff': { good: 'id,p\n1,pro', expectInOutput: /status,key,details|No differences found/ },
   'xml-to-json': { good: '<root><a>1</a></root>', bad: '<root><unclosed>', expectInOutput: /"a": "1"/, expectError: /Invalid XML/ },
   'css-formatter': { good: 'a{color:red}', expectInOutput: /color:\s*red/ },
   'levenshtein-distance': { good: 'kitten', expectInOutput: /Distance: 3/ },
@@ -134,8 +135,8 @@ async function sweepTransformChunk(page: any, chunk: number) {
     if (!f) continue;
     const params: any[] = tool.params || [];
     // For diff tools that need a second document, fill the compare textarea
-    const needsCompare = (tool.slug === 'json-diff' || tool.slug === 'text-diff' || tool.slug === 'levenshtein-distance' || tool.slug === 'matrix-calculator');
-    const compareValue = tool.slug === 'json-diff' ? '{"a":2}' : tool.slug === 'levenshtein-distance' ? 'sitting' : tool.slug === 'matrix-calculator' ? '5 6\n7 8' : 'a\nc';
+    const needsCompare = (tool.slug === 'json-diff' || tool.slug === 'text-diff' || tool.slug === 'levenshtein-distance' || tool.slug === 'matrix-calculator' || tool.slug === 'csv-diff');
+    const compareValue = tool.slug === 'json-diff' ? '{"a":2}' : tool.slug === 'levenshtein-distance' ? 'sitting' : tool.slug === 'matrix-calculator' ? '5 6\n7 8' : tool.slug === 'csv-diff' ? 'id,p\n1,team\n3,free' : 'a\nc';
 
     // build cartesian: for each param with options, try every option
     // We cap to 2 values per param to stay fast but still cover switch logic.
@@ -143,7 +144,7 @@ async function sweepTransformChunk(page: any, chunk: number) {
     // pre-fill compare value for diff tools so handler sees it before first good fill
     if (needsCompare) {
       await page.waitForTimeout(500);
-      const sel = tool.slug === 'json-diff' ? '[aria-label="Compare with (JSON)"]' : tool.slug === 'levenshtein-distance' ? '[aria-label="Compare with (text)"]' : tool.slug === 'matrix-calculator' ? '[aria-label="Matrix B"]' : '[aria-label="Compare with"]';
+      const sel = tool.slug === 'json-diff' ? '[aria-label="Compare with (JSON)"]' : tool.slug === 'levenshtein-distance' ? '[aria-label="Compare with (text)"]' : tool.slug === 'matrix-calculator' ? '[aria-label="Matrix B"]' : tool.slug === 'csv-diff' ? '[aria-label="Dataset B"]' : '[aria-label="Compare with"]';
       const compareBox = page.locator(sel).first();
       await expect(compareBox, `${tool.slug} compare box`).toBeVisible({ timeout: 8000 });
       await compareBox.fill(compareValue);
