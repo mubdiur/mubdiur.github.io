@@ -6077,6 +6077,8 @@ T.xmlToMarkdown = function (s, opts) { var v = T.xmlToJsonValue(s); var ks = Obj
 T.iniToMarkdown = function (s, opts) { return T.jsonlToMarkdown(JSON.stringify(JSON.parse(T.iniToJSON(s))), opts); };
 /* ENV to Markdown: parse dotenv to one flat object, bridge through one compact JSON line, emit pipe tables with the canonical JSONL-to-Markdown core. */
 T.envToMarkdown = function (s, opts) { return T.jsonlToMarkdown(JSON.stringify(JSON.parse(T.envToJSON(s))), opts); };
+/* ENV to CSV: parse once with the dotenv core (export prefixes, line-numbered key errors), emit with the canonical JSON-to-CSV core (keys become columns, single row). */
+T.envToCSV = function (s, opts) { return T.jsonToCSV(T.envToJSON(s), opts); };
 /* TOML to Markdown: parse tables to one object, bridge through one compact JSON line, emit pipe tables with the canonical JSONL-to-Markdown core (nested tables flatten to dotted columns). */
 T.tomlToMarkdown = function (s, opts) { return T.jsonlToMarkdown(JSON.stringify(JSON.parse(T.tomlToJSON(s))), opts); };
 /* TOML to CSV: parse once with the TOML core (line-numbered errors), emit with the canonical JSON-to-CSV core (tables flatten to dotted columns, delimiter shared). */
