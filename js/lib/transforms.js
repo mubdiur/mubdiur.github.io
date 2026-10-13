@@ -4788,5 +4788,211 @@ T.tzConvert = function (input, fromZone, toZone) {
     toText: fmt(utc, to), toZone: to, toOffset: gmt(oT)
   };
 };
+/* JSON Schema validator (draft-7 flavor, local subset). Supports $ref
+   to local "#/..." pointers (never the network), integer-aware types,
+   enum/const, string length+pattern, numeric bounds in boolean and
+   numeric exclusive forms, single/tuple items, uniqueItems, contains,
+   properties/patternProperties/required/additionalProperties,
+   allOf/anyOf/oneOf/not and array- or schema-form dependencies.
+   if/then/else and remote $refs are intentionally unsupported. */
+function schemaDeepEqual(a, b) {
+  if (a === b) return true;
+  if (typeof a !== typeof b || a === null || b === null) return false;
+  if (typeof a !== 'object') return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) return false;
+    for (var i = 0; i < a.length; i++) { if (!schemaDeepEqual(a[i], b[i])) return false; }
+    return true;
+  }
+  var ka = Object.keys(a), kb = Object.keys(b);
+  if (ka.length !== kb.length) return false;
+  for (var j = 0; j < ka.length; j++) {
+    if (!Object.prototype.hasOwnProperty.call(b, ka[j])) return false;
+    if (!schemaDeepEqual(a[ka[j]], b[ka[j]])) return false;
+  }
+  return true;
+}
+function schemaTypeName(v) {
+  if (v === null) return 'null';
+  if (Array.isArray(v)) return 'array';
+  if (typeof v === 'number') return (isFinite(v) && Math.floor(v) === v) ? 'integer' : 'number';
+  return typeof v;
+}
+function schemaTypeOk(v, want) {
+  switch (want) {
+    case 'null': return v === null;
+    case 'array': return Array.isArray(v);
+    case 'integer': return typeof v === 'number' && isFinite(v) && Math.floor(v) === v;
+    case 'number': return typeof v === 'number' && isFinite(v);
+    case 'string': return typeof v === 'string';
+    case 'boolean': return typeof v === 'boolean';
+    case 'object': return v !== null && typeof v === 'object' && !Array.isArray(v);
+    default: throw new Error('Unknown type "' + want + '" in schema — want string, number, integer, boolean, object, array or null');
+  }
+}
+function schemaPath(base, key) {
+  if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key)) return base + '.' + key;
+  return base + '[' + JSON.stringify(key) + ']';
+}
+function schemaResolveRef(ref, root, path) {
+  if (ref === '#') return root;
+  if (typeof ref !== 'string' || ref.slice(0, 2) !== '#/') throw new Error('Only local refs ("#/...") are supported — ref "' + ref + '" at ' + path + ' would need the network');
+  var parts = ref.slice(2).split('/');
+  var cur = root;
+  for (var i = 0; i < parts.length; i++) {
+    var key = parts[i].replace(/~1/g, '/').replace(/~0/g, '~');
+    if (cur === null || typeof cur !== 'object' || !(key in Object(cur))) throw new Error('Unresolvable ref "' + ref + '" at ' + path);
+    cur = cur[key];
+  }
+  return cur;
+}
+function schemaCheck(v, sch, path, root, errs, depth) {
+  if (depth > 100) throw new Error('Schema too deeply nested at ' + path + ' (possible $ref cycle)');
+  if (errs.length > 200) return;
+  if (sch === true) return;
+  if (sch === false) { errs.push(path + ': forbidden by a false schema'); return; }
+  if (sch === null || typeof sch !== 'object' || Array.isArray(sch)) throw new Error('Schema at ' + path + ' must be an object, true or false');
+  if (typeof sch.$ref === 'string') {
+    schemaCheck(v, schemaResolveRef(sch.$ref, root, path), path, root, errs, depth + 1);
+    return;
+  }
+  function err(msg) { errs.push(path + ': ' + msg); }
+  function subPasses(sub) {
+    var tmp = [];
+    schemaCheck(v, sub, path, root, tmp, depth + 1);
+    return tmp.length === 0;
+  }
+  var i, k;
+  if (sch.type !== undefined) {
+    var wants = Array.isArray(sch.type) ? sch.type : [sch.type];
+    var hit = false;
+    for (i = 0; i < wants.length; i++) { if (schemaTypeOk(v, wants[i])) { hit = true; break; } }
+    if (!hit) { err('expected ' + wants.join(' or ') + ', got ' + schemaTypeName(v)); return; }
+  }
+  if (Array.isArray(sch.enum) && !sch.enum.some(function (e) { return schemaDeepEqual(e, v); })) err('not one of the allowed values');
+  if (Object.prototype.hasOwnProperty.call(sch, 'const') && !schemaDeepEqual(sch.const, v)) err('does not equal the required constant');
+  if (typeof v === 'string') {
+    if (sch.minLength !== undefined && v.length < sch.minLength) err('shorter than minLength ' + sch.minLength);
+    if (sch.maxLength !== undefined && v.length > sch.maxLength) err('longer than maxLength ' + sch.maxLength);
+    if (sch.pattern !== undefined) {
+      var re;
+      try { re = new RegExp(sch.pattern); }
+      catch (e) { throw new Error('Invalid pattern "' + sch.pattern + '" at ' + path); }
+      if (!re.test(v)) err('does not match pattern ' + sch.pattern);
+    }
+  }
+  if (typeof v === 'number') {
+    if (sch.minimum !== undefined && v < sch.minimum) err('below minimum ' + sch.minimum);
+    if (sch.maximum !== undefined && v > sch.maximum) err('above maximum ' + sch.maximum);
+    var exMin = sch.exclusiveMinimum, exMax = sch.exclusiveMaximum;
+    if (exMin === true && sch.minimum !== undefined && v <= sch.minimum) err('not above exclusive minimum ' + sch.minimum);
+    else if (typeof exMin === 'number' && v <= exMin) err('not above exclusive minimum ' + exMin);
+    if (exMax === true && sch.maximum !== undefined && v >= sch.maximum) err('not below exclusive maximum ' + sch.maximum);
+    else if (typeof exMax === 'number' && v >= exMax) err('not below exclusive maximum ' + exMax);
+  }
+  if (Array.isArray(v)) {
+    if (sch.minItems !== undefined && v.length < sch.minItems) err('fewer than minItems ' + sch.minItems);
+    if (sch.maxItems !== undefined && v.length > sch.maxItems) err('more than maxItems ' + sch.maxItems);
+    if (sch.uniqueItems) {
+      var dup = null;
+      for (i = 0; i < v.length && !dup; i++) {
+        for (var q = i + 1; q < v.length; q++) {
+          if (schemaDeepEqual(v[i], v[q])) { dup = 'items are not unique (indices ' + i + ' and ' + q + ')'; break; }
+        }
+      }
+      if (dup) err(dup);
+    }
+    if (sch.items !== undefined) {
+      if (Array.isArray(sch.items)) {
+        for (i = 0; i < v.length; i++) {
+          var sub = i < sch.items.length ? sch.items[i] : sch.additionalItems;
+          if (sub === undefined || sub === true) continue;
+          if (sub === false) { err('extra item at index ' + i + ' is forbidden'); continue; }
+          schemaCheck(v[i], sub, path + '[' + i + ']', root, errs, depth + 1);
+        }
+      } else {
+        for (i = 0; i < v.length; i++) schemaCheck(v[i], sch.items, path + '[' + i + ']', root, errs, depth + 1);
+      }
+    }
+    if (sch.contains !== undefined && sch.contains !== true) {
+      var found = false;
+      for (i = 0; i < v.length && !found; i++) {
+        var probe = [];
+        schemaCheck(v[i], sch.contains, path + '[' + i + ']', root, probe, depth + 1);
+        if (!probe.length) found = true;
+      }
+      if (!found) err('no item matches contains');
+    }
+  }
+  if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
+    var keys = Object.keys(v);
+    if (sch.minProperties !== undefined && keys.length < sch.minProperties) err('fewer than minProperties ' + sch.minProperties);
+    if (sch.maxProperties !== undefined && keys.length > sch.maxProperties) err('more than maxProperties ' + sch.maxProperties);
+    if (Array.isArray(sch.required)) {
+      sch.required.forEach(function (rk) {
+        if (!Object.prototype.hasOwnProperty.call(v, rk)) err('missing required property "' + rk + '"');
+      });
+    }
+    var props = (sch.properties && typeof sch.properties === 'object') ? sch.properties : {};
+    var pats = (sch.patternProperties && typeof sch.patternProperties === 'object') ? sch.patternProperties : {};
+    var extraOpen = sch.additionalProperties === undefined || sch.additionalProperties === true;
+    keys.forEach(function (key) {
+      var kp = schemaPath(path, key);
+      var named = Object.prototype.hasOwnProperty.call(props, key);
+      if (named) schemaCheck(v[key], props[key], kp, root, errs, depth + 1);
+      var patHit = false;
+      for (var pk in pats) {
+        if (!Object.prototype.hasOwnProperty.call(pats, pk)) continue;
+        var rx;
+        try { rx = new RegExp(pk); }
+        catch (e) { throw new Error('Invalid patternProperty "' + pk + '" at ' + path); }
+        if (rx.test(key)) { schemaCheck(v[key], pats[pk], kp, root, errs, depth + 1); patHit = true; }
+      }
+      if (!named && !patHit && !extraOpen) {
+        if (sch.additionalProperties === false) err('unexpected property "' + key + '"');
+        else schemaCheck(v[key], sch.additionalProperties, kp, root, errs, depth + 1);
+      }
+    });
+  }
+  if (Array.isArray(sch.allOf)) sch.allOf.forEach(function (sub) { schemaCheck(v, sub, path, root, errs, depth + 1); });
+  if (Array.isArray(sch.anyOf) && !sch.anyOf.some(subPasses)) err('matches none of anyOf');
+  if (Array.isArray(sch.oneOf)) {
+    var count = 0;
+    sch.oneOf.forEach(function (sub) { if (subPasses(sub)) count++; });
+    if (count !== 1) err('matches ' + count + ' of oneOf (want exactly 1)');
+  }
+  if (sch.not !== undefined && subPasses(sch.not)) err('matches the forbidden not schema');
+  if (sch.dependencies && typeof sch.dependencies === 'object') {
+    Object.keys(sch.dependencies).forEach(function (dk) {
+      if (v === null || typeof v !== 'object' || Array.isArray(v)) return;
+      if (!Object.prototype.hasOwnProperty.call(v, dk)) return;
+      var dep = sch.dependencies[dk];
+      if (Array.isArray(dep)) {
+        dep.forEach(function (need) {
+          if (!Object.prototype.hasOwnProperty.call(v, need)) err('property "' + dk + '" needs missing property "' + need + '"');
+        });
+      } else if (dep && typeof dep === 'object') {
+        schemaCheck(v, dep, path, root, errs, depth + 1);
+      }
+    });
+  }
+}
+T.jsonSchemaValidate = function (instText, schemaText) {
+  var iv = T.validateJSON(String(instText === undefined || instText === null ? '' : instText));
+  if (!iv.valid) throw new Error('Instance is not valid JSON: ' + (iv.error || 'parse error'));
+  var sv = T.validateJSON(String(schemaText === undefined || schemaText === null ? '' : schemaText));
+  if (!sv.valid) throw new Error('Schema is not valid JSON: ' + (sv.error || 'parse error'));
+  var schema = sv.data;
+  if (schema !== true && schema !== false && (schema === null || typeof schema !== 'object' || Array.isArray(schema))) {
+    throw new Error('Schema must be an object, true or false');
+  }
+  var errs = [];
+  schemaCheck(iv.data, schema, '$', schema, errs, 0);
+  if (!errs.length) return 'Valid — the instance conforms to the schema';
+  var shown = errs.slice(0, 50);
+  if (errs.length > 50) shown.push('… and ' + (errs.length - 50) + ' more errors (first 50 shown)');
+  return shown.join('\n');
+};
 window.Transforms = T;
 })();
