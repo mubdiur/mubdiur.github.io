@@ -57,6 +57,16 @@ App.registerTool('timezone-converter', {
     var runBtn = App.el('button', { class: 'btn-run', type: 'button', text: 'Convert' });
     var nowBtn = App.el('button', { class: 'btn-ghost-sm', type: 'button' }, App.el('span', { text: 'Now' }));
     var swapBtn = App.el('button', { class: 'btn-ghost-sm', type: 'button' }, App.el('span', { text: 'Swap zones' }));
+    var presetRow = App.el('div', { class: 'tz-row' });
+    [['PT \u2192 ET', 'America/Los_Angeles', 'America/New_York'], ['ET \u2192 PT', 'America/New_York', 'America/Los_Angeles'], ['Local \u2192 UTC', null, 'UTC'], ['UTC \u2192 Local', 'UTC', null]].forEach(function (pp) {
+      var pb = App.el('button', { class: 'btn-ghost-sm', type: 'button', title: 'Convert ' + pp[0] }, App.el('span', { text: pp[0] }));
+      pb.addEventListener('click', function () {
+        fromInput.value = pp[1] === null ? localZone() : pp[1];
+        toInput.value = pp[2] === null ? localZone() : pp[2];
+        run();
+      });
+      presetRow.appendChild(pb);
+    });
     var clearBtn = App.clearButton(clearAll);
     var status = App.el('div', { class: 'tz-status', role: 'status', text: 'Pick any IANA zone — type or choose from the list.' });
     var out = App.el('div', {});
@@ -112,6 +122,7 @@ App.registerTool('timezone-converter', {
         App.el('div', {}, App.el('label', { class: 'tz-flabel', text: 'Date and time' }), dtInput),
         App.el('div', {}, App.el('label', { class: 'tz-flabel', text: 'From zone' }), fromInput),
         App.el('div', {}, App.el('label', { class: 'tz-flabel', text: 'To zone' }), toInput)),
+      presetRow,
       App.el('div', { class: 'tz-row' }, runBtn, nowBtn, swapBtn, clearBtn),
       status, out,
       App.el('div', { class: 'tz-hint', text: 'Fall-back repeat hours resolve to the first occurrence; spring-forward gaps land on the nearest valid minute. Offsets print per-instant, so DST never lies.' })));
