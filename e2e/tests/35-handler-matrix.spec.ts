@@ -189,6 +189,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('markdown-to-csv', 'no table throws', mustThrow(() => TOOLS['markdown-to-csv'].handler('hello', {})));
     push('markdown-to-xml', 'happy', TOOLS['markdown-to-xml'].handler('| a | b |\n|---|---|\n| 1 | 2 |', {}).indexOf('<a>1</a>') >= 0);
     push('markdown-to-xml', 'no table throws', mustThrow(() => TOOLS['markdown-to-xml'].handler('hello', {})));
+    push('markdown-to-json', 'happy', JSON.parse(TOOLS['markdown-to-json'].handler('| a |\n|---|\n| 1 |', {}))[0].a === '1');
+    push('markdown-to-json', 'empty throws', mustThrow(() => TOOLS['markdown-to-json'].handler('', {})));
 
     push('xml-formatter', 'inline', TOOLS['xml-formatter'].handler('<r><a>1</a></r>', {}).includes('<a>1</a>'));
     push('xml-formatter', 'tab indent', TOOLS['xml-formatter'].handler('<r><a>1</a></r>', { indent: 'tab' }).includes('\t<a>1</a>'));

@@ -383,6 +383,10 @@ window.TOOLMANIFEST = [
     handler: function (s, opts) { return Transforms.markdownToXML(s, opts); },
     params: [{ key: 'delimiter', label: 'Delimiter', type: 'select', default: 'comma', options: [{ value: 'comma', label: 'Comma' }, { value: 'semicolon', label: 'Semicolon' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe' }] }, { key: 'headers', label: 'Headers', type: 'select', default: 'keep', options: [{ value: 'keep', label: 'Keep' }, { value: 'drop', label: 'Drop' }] }] },
 
+  { slug: 'markdown-to-json', name: 'Markdown \u2192 JSON', desc: 'Convert GitHub pipe tables to JSON \u2014 header cells become keys, rows become records, delimiter shared', category: 'converters', tags: ['markdown', 'json', 'table', 'convert'], icon: 'filetype', template: 'transform',
+    placeholder: '| a | b |\n|---|---|\n| 1 | 2 |',
+    handler: function (s, opts) { return Transforms.markdownToJSON(s, opts); },
+    params: [{ key: 'delimiter', label: 'Delimiter', type: 'select', default: 'comma', options: [{ value: 'comma', label: 'Comma' }, { value: 'semicolon', label: 'Semicolon' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe' }] }, { key: 'headers', label: 'Headers', type: 'select', default: 'keep', options: [{ value: 'keep', label: 'Keep' }, { value: 'drop', label: 'Drop' }] }] },
   { slug: 'env-to-json', name: '.env → JSON', desc: 'Convert dotenv files to JSON — export prefixes, empty values, comments kept', category: 'converters', tags: ['env', 'dotenv', 'json'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.envToJSON(s); } },
   { slug: 'env-to-xml', name: 'ENV \u2192 XML', desc: 'Convert dotenv files to XML \u2014 keys become elements, export prefixes stripped, shared dependency-free parser', category: 'converters', tags: ['env', 'dotenv', 'xml', 'convert'], icon: 'filetype', template: 'transform',

@@ -30,6 +30,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'markdown-table-generator': { good: 'a,b\n1,2', expectInOutput: /\| a \| b \|/ },
   'markdown-to-csv': { good: '| a | b |\n|---|---|\n| 1 | 2 |', expectInOutput: /a,b/ },
   'markdown-to-xml': { good: '| a | b |\n|---|---|\n| 1 | 2 |', expectInOutput: /<a>1/ },
+  'markdown-to-json': { good: '| a |\n|---|\n| 1 |', expectInOutput: /a/ },
 
   'jsonl-to-markdown': { good: '{"a":1}' + '\n' + '{"a":2}', expectInOutput: /\| a \|/ },
 
