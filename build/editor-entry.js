@@ -14,9 +14,8 @@ import { python } from '@codemirror/lang-python';
 import { java, javaLanguage } from '@codemirror/lang-java';
 import { cpp, cppLanguage } from '@codemirror/lang-cpp';
 import { rust, rustLanguage } from '@codemirror/lang-rust';
-import { StreamLanguage } from '@codemirror/language';
-import { csharp } from '@codemirror/legacy-modes/mode/clike';
-import { go } from '@codemirror/legacy-modes/mode/go';
+import { csharp, csharpLanguage } from '@replit/codemirror-lang-csharp';
+import { go, goLanguage } from '@codemirror/lang-go';
 import { HighlightStyle } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
 
@@ -300,15 +299,9 @@ function langFor(id) {
     case 'py': return python();
     case 'c':
     case 'cpp': return [cpp(), cppLanguage.data.of({ autocomplete: keywords(CPP_WORDS) })];
-    case 'cs': {
-      const csLang = StreamLanguage.define(csharp);
-      return [csLang, csLang.data.of({ autocomplete: keywords(CS_WORDS) })];
-    }
+    case 'cs': return [csharp(), csharpLanguage.data.of({ autocomplete: keywords(CS_WORDS) })];
     case 'java': return [java(), javaLanguage.data.of({ autocomplete: keywords(JAVA_WORDS) })];
-    case 'go': {
-      const goLang = StreamLanguage.define(go);
-      return [goLang, goLang.data.of({ autocomplete: keywords(GO_WORDS) })];
-    }
+    case 'go': return [go(), goLanguage.data.of({ autocomplete: keywords(GO_WORDS) })];
     case 'rs': return [rust(), rustLanguage.data.of({ autocomplete: keywords(RUST_WORDS) })];
     default: return [];
   }
