@@ -4637,5 +4637,50 @@ T.fibonacci = function (raw) {
 T.fibonacciOpts = function (opts) {
   return T.fibonacci((opts && opts.terms) || "10");
 };
+/* Loan amortization — fixed-rate schedule simulated to the cent.
+   Returns { payment, months, totalPaid, totalInterest, yearly, rows }.
+   yearly = [{ year, principal, interest, balance }]; rows = monthly
+   [month, payment, principal, interest, balance] as CSV-ready strings.
+   Pure math: the loan-calculator custom tool only formats this. */
+T.loanSchedule = function (principal, ratePct, years) {
+  var P = Number(principal), R = Number(ratePct), Y = Number(years);
+  if (!(P > 0) || !isFinite(P)) throw new Error('Principal must be a number above 0');
+  if (P > 1e12) throw new Error('Principal is capped at 1,000,000,000,000');
+  if (!(R >= 0) || !isFinite(R)) throw new Error('Rate must be 0 or higher');
+  if (R > 100) throw new Error('A rate above 100% is not a loan');
+  if (!isFinite(Y) || Y !== Math.floor(Y) || !(Y >= 1)) throw new Error('Term must be a whole number of years, 1 or more');
+  if (Y > 50) throw new Error('Term is capped at 50 years');
+  function r2(x) { return Math.round(x * 100) / 100; }
+  var n = Y * 12, r = R / 100 / 12;
+  var pay = r === 0 ? P / n : P * r / (1 - Math.pow(1 + r, -n));
+  pay = r2(pay);
+  var bal = P, totalInt = 0, month = 0;
+  var rows = [], yearly = [], yP = 0, yI = 0;
+  while (bal > 0 && month < n + 600) {
+    month++;
+    var interest = r2(bal * r);
+    var princ = r2(pay - interest);
+    var thisPay = pay;
+    if (month >= n || princ >= bal) {
+      princ = r2(bal);
+      thisPay = r2(princ + interest);
+      bal = 0;
+    } else {
+      if (!(princ > 0)) throw new Error('Payment does not cover the monthly interest');
+      bal = r2(bal - princ);
+    }
+    totalInt = r2(totalInt + interest);
+    yP = r2(yP + princ);
+    yI = r2(yI + interest);
+    rows.push([month, thisPay.toFixed(2), princ.toFixed(2), interest.toFixed(2), bal.toFixed(2)]);
+    if (month % 12 === 0 || bal === 0) {
+      yearly.push({ year: Math.ceil(month / 12), principal: yP, interest: yI, balance: bal });
+      yP = 0;
+      yI = 0;
+    }
+  }
+  if (bal > 0) throw new Error('Schedule did not converge — check the inputs');
+  return { payment: pay, months: month, totalPaid: r2(P + totalInt), totalInterest: totalInt, yearly: yearly, rows: rows };
+};
 window.Transforms = T;
 })();

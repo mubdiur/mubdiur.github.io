@@ -375,6 +375,7 @@ window.TOOLMANIFEST = [
   { slug: 'statistics-calculator', name: 'Statistics Calculator', desc: 'Mean, median, mode, range — Welford one-pass variance (numerically stable), population AND sample stddev', category: 'math', tags: ['stats', 'mean', 'median', 'stddev'], icon: 'sigma', template: 'transform',
     handler: function (s) { return Transforms.describeStats(s); } },
   { slug: 'unit-converter', name: 'Unit Converter', desc: 'Convert between common units — length, mass, temperature, data', category: 'math', tags: ['units', 'convert', 'length', 'mass', 'temperature'], icon: 'ruler', template: 'custom' },
+  { slug: 'loan-calculator', name: 'Loan Calculator', desc: 'Fixed-rate loan math — monthly payment, total interest, yearly schedule plus a full monthly CSV', category: 'math', tags: ['loan', 'mortgage', 'amortization', 'interest', 'finance'], icon: 'calculator', template: 'custom' },
   { slug: 'number-to-words', name: 'Number to Words', desc: 'Convert numbers to English word representation', category: 'math', tags: ['number', 'words'], icon: 'calculator', template: 'transform',
     handler: function (s) { return Transforms.numberToWordsText(s); } },
 
