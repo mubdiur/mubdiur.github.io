@@ -5021,5 +5021,31 @@ T.fitDimensions = function (w, h, max) {
   var k = M / Math.max(W, H);
   return { w: Math.max(1, Math.round(W * k)), h: Math.max(1, Math.round(H * k)), scaled: true };
 };
+/* CSV normalizer: any supported delimiter in, canonical comma+LF out.
+   BOM stripped, CRLF folded, blank records dropped, ragged rows padded
+   to the widest row, minimal RFC 4180 quoting on emit. */
+T.csvNormalize = function (s, opts) {
+  var o = opts || {};
+  var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
+  var d = Object.prototype.hasOwnProperty.call(DELIMS, o.delimiter) ? DELIMS[o.delimiter] : null;
+  var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
+  var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
+  if (!lines.length) throw new Error('Paste delimited rows first \u2014 one record per line');
+  if (d === null) d = T.detectDelimChar(lines.slice(0, 10)) || ',';
+  var rows = T.parseCSV(raw, d);
+  var trim = o.trim === true || o.trim === 'true';
+  if (trim) rows = rows.map(function (r) { return r.map(function (c) { return c.trim(); }); });
+  rows = rows.filter(function (r) { return !r.every(function (c) { return c === ''; }); });
+  if (!rows.length) throw new Error('Paste delimited rows first \u2014 one record per line');
+  var cols = rows.reduce(function (m, r) { return Math.max(m, r.length); }, 0);
+  function cell(v) {
+    v = String(v === undefined || v === null ? '' : v);
+    return (v.indexOf(',') >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0 || v.indexOf('\r') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  return rows.map(function (r) {
+    while (r.length < cols) r.push('');
+    return r.map(cell).join(',');
+  }).join('\n');
+};
 window.Transforms = T;
 })();
