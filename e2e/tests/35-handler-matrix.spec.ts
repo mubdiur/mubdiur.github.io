@@ -199,6 +199,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('bacon-cipher', 'bad group throws', mustThrow(() => TOOLS['bacon-cipher'].handler('ABA', { mode: 'decode' })));
     push('rail-fence-cipher', 'happy', TOOLS['rail-fence-cipher'].handler('WEAREDISCOVEREDFLEEATONCE', { rails: '3' }) === 'WECRLTEERDSOEEFEAOCAIVDEN');
     push('rail-fence-cipher', 'bad rails throws', mustThrow(() => TOOLS['rail-fence-cipher'].handler('ABC', { rails: '1' })));
+    push('playfair-cipher', 'happy', TOOLS['playfair-cipher'].handler('HIDETHEGOLDINTHETREESTUMP', { key: 'PLAYFAIR EXAMPLE' }) === 'BMODZBXDNABEKUDMUIXMMOUVIF');
+    push('playfair-cipher', 'bad key throws', mustThrow(() => TOOLS['playfair-cipher'].handler('ABC', { key: '' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

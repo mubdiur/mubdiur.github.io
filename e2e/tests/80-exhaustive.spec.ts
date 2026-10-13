@@ -43,6 +43,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'atbash-cipher': { good: 'Hello', expectInOutput: /Svool/ },
   'bacon-cipher': { good: 'ABC', expectInOutput: /AAAAA/ },
   'rail-fence-cipher': { good: 'WEAREDISCOVEREDFLEEATONCE', expectInOutput: /WECRLTE/ },
+  'playfair-cipher': { good: 'HIDETHEGOLDINTHETREESTUMP', expectInOutput: /BMODZB/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },

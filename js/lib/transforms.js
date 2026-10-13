@@ -1998,6 +1998,56 @@ T.railFenceDecode = function (s, rails) {
   return out.join('');
 };
 T.railFenceCipher = function (s, opts) { var o = opts || {}; var R = o.rails === undefined ? '3' : o.rails; if ((o.mode || 'encode') === 'decode') return T.railFenceDecode(s, R); return T.railFenceEncode(s, R); };
+/* Playfair cores: 5x5 square (I/J merged), filler X (Q for X) between doubles, J mapped to I, non-letters stripped. */
+T.playfairSquare = function (key) {
+  var k = String(key === undefined ? 'PLAYFAIR EXAMPLE' : key).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  if (!k) throw new Error('Enter a letter key \u2014 A-Z builds the 5x5 square');
+  var seen = {}; var seq = [];
+  var full = k + 'ABCDEFGHIKLMNOPQRSTUVWXYZ';
+  for (var i = 0; i < full.length; i++) { var c = full.charAt(i); if (!seen[c]) { seen[c] = 1; seq.push(c); } }
+  var pos = {}; for (var j = 0; j < seq.length; j++) pos[seq[j]] = j;
+  return { seq: seq, pos: pos };
+};
+T.playfairPrepare = function (s) {
+  var t = String(s).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  var out = ''; var i = 0;
+  while (i < t.length) {
+    var a = t.charAt(i);
+    if (i + 1 >= t.length) { out += a + (a === 'X' ? 'Q' : 'X'); i++; }
+    else { var b = t.charAt(i + 1); if (a === b) { out += a + (a === 'X' ? 'Q' : 'X'); i++; } else { out += a + b; i += 2; } }
+  }
+  return out;
+};
+T.playfairEncode = function (s, key) {
+  var sq = T.playfairSquare(key);
+  var prep = T.playfairPrepare(s);
+  if (!prep) return '';
+  var out = '';
+  for (var i = 0; i < prep.length; i += 2) {
+    var ia = sq.pos[prep.charAt(i)]; var ib = sq.pos[prep.charAt(i + 1)];
+    var ra = (ia / 5) | 0, ca = ia % 5, rb = (ib / 5) | 0, cb = ib % 5;
+    if (ra === rb) out += sq.seq[ra * 5 + (ca + 1) % 5] + sq.seq[rb * 5 + (cb + 1) % 5];
+    else if (ca === cb) out += sq.seq[((ra + 1) % 5) * 5 + ca] + sq.seq[((rb + 1) % 5) * 5 + cb];
+    else out += sq.seq[ra * 5 + cb] + sq.seq[rb * 5 + ca];
+  }
+  return out;
+};
+T.playfairDecode = function (s, key) {
+  var sq = T.playfairSquare(key);
+  var t = String(s).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  if (t.length % 2) throw new Error('Bad Playfair input \u2014 need letter pairs, saw ' + t.length);
+  var out = '';
+  for (var i = 0; i < t.length; i += 2) {
+    var ia = sq.pos[t.charAt(i)]; var ib = sq.pos[t.charAt(i + 1)];
+    if (ia === undefined || ib === undefined) throw new Error('Bad Playfair input \u2014 A-Z only');
+    var ra = (ia / 5) | 0, ca = ia % 5, rb = (ib / 5) | 0, cb = ib % 5;
+    if (ra === rb) out += sq.seq[ra * 5 + (ca + 4) % 5] + sq.seq[rb * 5 + (cb + 4) % 5];
+    else if (ca === cb) out += sq.seq[((ra + 4) % 5) * 5 + ca] + sq.seq[((rb + 4) % 5) * 5 + cb];
+    else out += sq.seq[ra * 5 + cb] + sq.seq[rb * 5 + ca];
+  }
+  return out;
+};
+T.playfairCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'PLAYFAIR EXAMPLE' : o.key; if ((o.mode || 'encode') === 'decode') return T.playfairDecode(s, k); return T.playfairEncode(s, k); };
 T.base32Encode = function (s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var bytes = new TextEncoder().encode(s);
