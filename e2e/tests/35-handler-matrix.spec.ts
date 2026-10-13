@@ -125,6 +125,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('toml-to-yaml', 'empty throws', mustThrow(() => TOOLS['toml-to-yaml'].handler('')));
     push('yaml-to-toml', 'happy', TOOLS['yaml-to-toml'].handler('a: 1') === 'a = 1');
     push('yaml-to-xml', 'happy', TOOLS['yaml-to-xml'].handler('a: 1').indexOf('<a>1</a>') >= 0);
+    push('toml-to-xml', 'happy', TOOLS['toml-to-xml'].handler('a = 1').indexOf('<a>1</a>') >= 0);
+    push('toml-to-xml', 'dup throws', mustThrow(() => TOOLS['toml-to-xml'].handler('a = 1\na = 2')));
     push('yaml-to-xml', 'empty throws', mustThrow(() => TOOLS['yaml-to-xml'].handler('')));
     push('yaml-to-toml', 'flow seq', TOOLS['yaml-to-toml'].handler('ports: [80, 443]').indexOf('ports = [80, 443]') >= 0);
     push('yaml-to-toml', 'null throws', mustThrow(() => TOOLS['yaml-to-toml'].handler('a:')));

@@ -95,6 +95,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'toml-to-yaml': { good: 'a = 1', expectInOutput: /a: 1/ },
   'yaml-to-toml': { good: 'a: 1', expectInOutput: /a = 1/ },
   'yaml-to-xml': { good: 'a: 1', expectInOutput: /<a>1/ },
+  'toml-to-xml': { good: 'a = 1', expectInOutput: /<a>1/ },
   'user-agent-parser': { good: 'Mozilla/5.0 (Windows NT 10.0) Chrome/139.0.0.0', expectInOutput: /Browser:.*Chrome/ },
   'sql-minifier': { good: 'select  *  -- c\nfrom t', expectInOutput: /select \* from t/i },
   'uuid-v4-validate': { good: '550e8400-e29b-41d4-a716-446655440000', expectInOutput: /valid|✓/i },
