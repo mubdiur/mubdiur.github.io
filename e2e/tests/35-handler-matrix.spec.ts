@@ -60,6 +60,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('env-to-markdown', 'no equals throws', mustThrow(() => TOOLS['env-to-markdown'].handler('NOEQUALS', {})));
     push('env-to-csv', 'happy', TOOLS['env-to-csv'].handler('A=1', {}) === 'A\n1');
     push('env-to-csv', 'no equals throws', mustThrow(() => TOOLS['env-to-csv'].handler('NOEQUALS', {})));
+    push('env-to-toml', 'happy', TOOLS['env-to-toml'].handler('A=1') === 'A = "1"');
+    push('env-to-toml', 'no equals throws', mustThrow(() => TOOLS['env-to-toml'].handler('NOEQUALS')));
     push('csv-to-xml', 'empty throws', mustThrow(() => TOOLS['csv-to-xml'].handler('', {})));
     push('csv-to-toml', 'happy', TOOLS['csv-to-toml'].handler('name,age\nAda,30', {}).indexOf('[[docs]]') >= 0);
     push('csv-to-toml', 'empty throws', mustThrow(() => TOOLS['csv-to-toml'].handler('', {})));
