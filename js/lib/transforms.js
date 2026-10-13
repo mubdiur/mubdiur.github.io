@@ -2407,6 +2407,10 @@ T.jsonDiff = function (a, b) {
   compare(oa, ob, 'root');
   return diffs.length ? diffs.join('\n') : 'No differences found';
 };
+/* JSON-diff UI contract: main input plus compareTo option (default empty object). Moved from the manifest so shell UI delegates to this single source. */
+T.jsonDiffOpts = function (s, opts) {
+  return T.jsonDiff(s, (opts && opts.compareTo) || '{}');
+};
 /* HTML pretty-printer (moved verbatim from the manifest handler):
    comment/doctype aware, void elements never gain children,
    script/style/pre content preserved byte-for-byte. */
@@ -3486,6 +3490,10 @@ T.jsonPath = function (json, path) {
   }
   if (current.length === 1) return JSON.stringify(current[0], null, 2);
   return JSON.stringify(current, null, 2);
+};
+/* JSONPath UI contract: main input plus path option with root default. Moved from manifest for single source. */
+T.jsonPathOpts = function (s, opts) {
+  return T.jsonPath(s, (opts && opts.path) || String.fromCharCode(36));
 };
 T.passwordEntropy = function (s) {
   var text = String(s === undefined ? '' : (s === null ? '' : s));
