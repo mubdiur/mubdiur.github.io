@@ -366,6 +366,9 @@ console.log('-- text / formats --');
   ok(TOOLS['har-inspector'].handler(_har, { filter: 'zzz' }).indexOf('no requests match') >= 0, 'har empty filter');
   ok(TOOLS['csv-pivot-table'].handler.toString().indexOf('csvPivot') >= 0, 'pivot delegates single source');
   ok(TOOLS['csv-column-profiler'].handler.toString().indexOf('csvProfile') >= 0, 'profiler delegates single source');
+  ok(TOOLS['csv-duplicate-finder'].handler.toString().indexOf('csvDupes') >= 0, 'dupes delegates single source');
+  ok(TOOLS['csv-duplicate-finder'].handler('e,p\na@x,pro\nb@x,free\na@x,pro', {}) === 'count,e,p\n2,a@x,pro', 'dupes whole row');
+  ok((function(){ try { TOOLS['csv-duplicate-finder'].handler('   ', {}); return false; } catch (e) { return true; } })(), 'dupes empty throws');
   ok(TOOLS['csv-column-profiler'].handler('a,b\n1,x\n2,y', {}) === 'column,type,filled,empty,distinct,min,max\na,integer,2,0,2,1,2\nb,string,2,0,2,x,y', 'profiler types');
   ok((function(){ try { TOOLS['csv-column-profiler'].handler('   ', {}); return false; } catch (e) { return true; } })(), 'profiler empty throws');
 

@@ -1083,6 +1083,53 @@ T.csvProfile = function (s, opts) {
   return ['column' + out + 'type' + out + 'filled' + out + 'empty' + out + 'distinct' + out + 'min' + out + 'max'].concat(grid).join('\n');
 };
 
+/* CSV duplicate finder: group rows by key columns (or the whole row when
+   key is empty), keep groups seen more than once, sort by count desc.
+   Output is count plus key columns; throws when input is empty. */
+T.csvDupes = function (s, opts) {
+  var o = opts || {};
+  var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
+  var d = Object.prototype.hasOwnProperty.call(DELIMS, o.delimiter) ? DELIMS[o.delimiter] : null;
+  var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
+  var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
+  if (!lines.length) throw new Error('Paste delimited rows first \u2014 one record per line, first row headers');
+  if (d === null) d = T.detectDelimChar(lines.slice(0, 10)) || ',';
+  var rows = T.parseCSV(s, d);
+  if (rows.length < 2) throw new Error('Need a header row plus at least one data row');
+  var out = (d === ';' ? ';' : ',');
+  function cell(v) {
+    v = String(v === undefined || v === null ? '' : v);
+    return (v.indexOf(out) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  var heads = rows[0], body = rows.slice(1), idx = [];
+  var keyRaw = String(o.key === undefined || o.key === null ? '' : o.key).trim();
+  if (keyRaw) {
+    keyRaw.split(',').forEach(function (nm) {
+      nm = nm.trim();
+      if (!nm) return;
+      var ix = heads.indexOf(nm);
+      if (ix < 0) throw new Error('Unknown key column \u2018' + nm + '\u2019 \u2014 headers: ' + heads.join(', '));
+      if (idx.indexOf(ix) < 0) idx.push(ix);
+    });
+    if (!idx.length) throw new Error('Pick at least one key column \u2014 headers: ' + heads.join(', '));
+  } else {
+    idx = heads.map(function (_, i) { return i; });
+  }
+  var order = [], groups = Object.create(null);
+  body.forEach(function (r) {
+    var k = idx.map(function (c) { return c < r.length ? r[c] : ''; });
+    var id = JSON.stringify(k);
+    if (!Object.prototype.hasOwnProperty.call(groups, id)) { groups[id] = { key: k, n: 0 }; order.push(id); }
+    groups[id].n++;
+  });
+  var dupes = order.map(function (id) { return groups[id]; }).filter(function (g) { return g.n > 1; });
+  if (!dupes.length) return 'No duplicates found';
+  dupes.sort(function (a, b) { return b.n - a.n || (a.key.join('\u0000') < b.key.join('\u0000') ? -1 : 1); });
+  var head = ['count'].concat(idx.map(function (c) { return heads[c]; })).map(cell).join(out);
+  var grid = dupes.map(function (g) { return [String(g.n)].concat(g.key).map(cell).join(out); });
+  return [head].concat(grid).join('\n');
+};
+
 /* HAR inspector: DevTools HAR JSON becomes a timing summary -
    per-request method/status/ms/size lines plus totals and failure count. */
 T.harSummary = function (s, opts) {
