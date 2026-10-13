@@ -1980,6 +1980,21 @@ function base58ToBytes(s) {
   return out;
 }
 T.base58Bytes = function (s) { return new Uint8Array(base58ToBytes(s)); };
+/* Ascii85 encode: UTF-8 bytes to printable Base85 (4 bytes to 5 chars, all-zero groups squeeze to z, final partial groups emit length-matched prefixes). */
+T.ascii85Encode = function (s) {
+  var bytes = new TextEncoder().encode(String(s));
+  var out = '';
+  for (var i = 0; i < bytes.length; i += 4) {
+    var n = Math.min(4, bytes.length - i);
+    var v = 0;
+    for (var j = 0; j < 4; j++) v = v * 256 + (j < n ? bytes[i + j] : 0);
+    if (n === 4 && v === 0) { out += 'z'; continue; }
+    var chunk = '';
+    for (var k = 0; k < 5; k++) { chunk = String.fromCharCode(33 + v % 85) + chunk; v = Math.floor(v / 85); }
+    out += chunk.slice(0, n + 1);
+  }
+  return out;
+};
 T.base58Encode = function (s) {
   var bytes = new TextEncoder().encode(String(s));  var zeros = 0;
   while (zeros < bytes.length && bytes[zeros] === 0) zeros++;

@@ -536,6 +536,8 @@ window.TOOLMANIFEST = [
   { slug: 'chmod-converter', name: 'Chmod Converter', desc: 'Convert between octal (755) and symbolic (rwxr-xr-x) Unix permissions', category: 'code', tags: ['chmod', 'permissions', 'unix'], icon: 'terminal', template: 'transform',
     placeholder: '755',
     handler: function (s) { return Transforms.chmodConvert(s); } },
+  { slug: 'ascii85-encode', name: 'Ascii85 Encode', desc: 'Encode text to Ascii85 (Base85) \u2014 4 bytes become 5 printable chars, zero groups squeeze to z, compact for embedding', category: 'encoding', tags: ['ascii85', 'base85', 'encode'], icon: 'binary', template: 'transform',
+    handler: function (s) { return Transforms.ascii85Encode(s); } },
   { slug: 'base58-encode', name: 'Base58 Encode', desc: 'Encode text to Base58 (Bitcoin alphabet)', category: 'encoding', tags: ['base58', 'encode'], icon: 'binary', template: 'transform',
     handler: function (s) { return Transforms.base58Encode(s); } },
   { slug: 'base58-decode', name: 'Base58 Decode', desc: 'Decode Base58 back to text', category: 'encoding', tags: ['base58', 'decode'], icon: 'binary', template: 'transform',
