@@ -117,11 +117,10 @@ async function assertOutput(page: any, re: RegExp, slug: string) {
 }
 
 // ── every transform: try every param option, submit good+sad paths ──
-test('exhaustive: every transform × every option × success+error', async ({ page }) => {
-  test.setTimeout(120000); // 129 tools x real DOM + debounce waits exceed the 30s default
+async function sweepTransformChunk(page: any, chunk: number) {
   await page.goto('/');
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST);
-  const transforms = manifest.filter(m => m.template === 'transform');
+  const transforms = manifest.filter(m => m.template === 'transform').filter((_, i) => i % 3 === chunk);
   for (const tool of transforms) {
     const f = (TRANSFORM_FIXTURES as any)[tool.slug];
     expect(f, `missing TRANSFORM_FIXTURES for ${tool.slug} — add a fixture, not a skip`).toBeTruthy();
@@ -171,7 +170,13 @@ test('exhaustive: every transform × every option × success+error', async ({ pa
       await input.fill(f.good);
     }
   }
-});
+}
+
+for (const chunk of [0, 1, 2]) {
+  test('exhaustive transforms part ' + (chunk + 1) + '/3: every option x success+error', async ({ page }) => {
+    await sweepTransformChunk(page, chunk);
+  });
+}
 
 // ── every generator × every option ──
 test('exhaustive: every generator × every option', async ({ page }) => {
