@@ -5441,5 +5441,77 @@ T.durationCalc = function (s) {
   out.push('Total = ' + segs.join(' = '));
   return out.join('\n');
 };
+/* JSONL stats: one JSON value per line. Reports the row count, a row-type
+   histogram and per-key coverage across object rows with numeric min/max/mean,
+   string distinct counts and boolean true/false splits. Blank lines skip;
+   bad rows throw with the offending line number. */
+T.jsonlStats = function (s) {
+  function r4(n) { return String(Math.round(n * 10000) / 10000); }
+  function pct(a, b) { return String(Math.round(a / b * 1000) / 10); }
+  function typeOf(x) {
+    if (x === null) return 'null';
+    if (Array.isArray(x)) return 'array';
+    return typeof x;
+  }
+  var raw = String(s === undefined || s === null ? '' : s);
+  var lines = raw.split(/\r?\n/);
+  var docs = [];
+  for (var n = 0; n < lines.length; n++) {
+    if (!lines[n].trim()) continue;
+    var v = T.validateJSON(lines[n]);
+    if (!v.valid) throw new Error('Line ' + (n + 1) + ': ' + (v.error || 'Invalid JSON'));
+    docs.push(v.data);
+  }
+  if (!docs.length) throw new Error('Paste JSONL first \u2014 one JSON value per line');
+  var total = docs.length, th = {}, thOrder = [], keys = {}, keyOrder = [];
+  var i, k, d;
+  for (i = 0; i < total; i++) {
+    var t = typeOf(docs[i]);
+    if (!th[t]) { th[t] = 0; thOrder.push(t); }
+    th[t]++;
+    d = docs[i];
+    if (d !== null && typeof d === 'object' && !Array.isArray(d)) {
+      for (k in d) {
+        if (!Object.prototype.hasOwnProperty.call(d, k)) continue;
+        var e = keys[k];
+        if (!e) { e = keys[k] = { present: 0, types: {}, tOrder: [], nums: null, strs: null, bt: 0, bf: 0, nulls: 0 }; keyOrder.push(k); }
+        e.present++;
+        var vt = typeOf(d[k]);
+        if (!e.types[vt]) { e.types[vt] = 0; e.tOrder.push(vt); }
+        e.types[vt]++;
+        if (vt === 'number') {
+          if (!e.nums) e.nums = { n: 0, sum: 0, min: 0, max: 0 };
+          var q = e.nums, x = d[k];
+          if (!q.n) { q.min = x; q.max = x; }
+          else { if (x < q.min) q.min = x; if (x > q.max) q.max = x; }
+          q.n++; q.sum += x;
+        } else if (vt === 'string') {
+          if (!e.strs) e.strs = { n: 0, seen: {}, distinct: 0, capped: false };
+          var g = e.strs, sv = d[k];
+          g.n++;
+          if (!g.capped && !Object.prototype.hasOwnProperty.call(g.seen, sv)) {
+            g.seen[sv] = 1; g.distinct++;
+            if (g.distinct >= 5000) g.capped = true;
+          }
+        } else if (vt === 'boolean') { if (d[k]) e.bt++; else e.bf++; }
+        else if (vt === 'null') e.nulls++;
+      }
+    }
+  }
+  var out = ['rows = ' + total];
+  out.push('row types: ' + thOrder.map(function (x) { return x + ' x' + th[x]; }).join(', '));
+  keyOrder.sort(function (a, b) { return keys[b].present - keys[a].present; });
+  for (i = 0; i < keyOrder.length; i++) {
+    k = keyOrder[i];
+    var en = keys[k];
+    var segs = ['key ' + JSON.stringify(k) + ': ' + en.present + '/' + total + ' (' + pct(en.present, total) + '%)', en.tOrder.join('+')];
+    if (en.nums) segs.push('n=' + en.nums.n + ' min=' + r4(en.nums.min) + ' max=' + r4(en.nums.max) + ' mean=' + r4(en.nums.sum / en.nums.n));
+    if (en.strs) segs.push('n=' + en.strs.n + ' distinct=' + en.strs.distinct + (en.strs.capped ? '+' : ''));
+    if (en.bt + en.bf) segs.push('true=' + en.bt + ' false=' + en.bf);
+    if (en.nulls) segs.push('nulls=' + en.nulls);
+    out.push(segs.join(' | '));
+  }
+  return out.join('\n');
+};
 window.Transforms = T;
 })();
