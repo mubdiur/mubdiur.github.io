@@ -79,8 +79,13 @@ App.registerTool('jwt-debugger', {
       App.icon('shield-check', '', 14), App.el('span', { text: 'Verify signature' }));
     verifyBtn.addEventListener('click', verify);
     var verdictEl = App.el('div', { class: 'verdict' });
+    function exportName() {
+      var tag = (rawPayload && rawPayload.iss) || (rawHeader && rawHeader.kid) || '';
+      tag = String(tag).replace(/[^a-z0-9._-]+/gi, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+      return tag ? 'jwt-' + tag + '.json' : 'jwt-debugger-output.json';
+    }
     var exportBtn = App.downloadButton(function () {
-      App.download('jwt-debugger-output.json', JSON.stringify({ token: token.trim(), header: rawHeader, payload: rawPayload, signature: signature, verification: verdict }, null, 2), 'application/json');
+      App.download(exportName(), JSON.stringify({ token: token.trim(), header: rawHeader, payload: rawPayload, signature: signature, verification: verdict }, null, 2), 'application/json');
     });
     exportBtn.disabled = true;
     var verifyRow = App.el('div', { class: 'verify-row' }, secretInput, verifyBtn, exportBtn);
