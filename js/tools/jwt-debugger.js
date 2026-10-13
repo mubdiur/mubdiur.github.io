@@ -77,7 +77,11 @@ App.registerTool('jwt-debugger', {
       App.icon('shield-check', '', 14), App.el('span', { text: 'Verify signature' }));
     verifyBtn.addEventListener('click', verify);
     var verdictEl = App.el('div', { class: 'verdict' });
-    var verifyRow = App.el('div', { class: 'verify-row' }, secretInput, verifyBtn);
+    var exportBtn = App.downloadButton(function () {
+      App.download('jwt-debugger-output.json', JSON.stringify({ token: token.trim(), header: rawHeader, payload: rawPayload, signature: signature }, null, 2), 'application/json');
+    });
+    exportBtn.disabled = true;
+    var verifyRow = App.el('div', { class: 'verify-row' }, secretInput, verifyBtn, exportBtn);
 
     /** Fixed-length comparison so timing doesn't leak how many hex chars matched. */
     function signaturesEqual(a, b) {
@@ -180,6 +184,7 @@ App.registerTool('jwt-debugger', {
     }
 
     function update() {
+      exportBtn.disabled = !rawHeader;
       headerPre.textContent = header;
       payloadPre.textContent = payload;
       signaturePre.textContent = signature;
