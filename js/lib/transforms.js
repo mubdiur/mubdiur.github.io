@@ -1273,7 +1273,45 @@ T.csvSample = function (s, opts) {
   return grid.join('\n');
 };
 
+/* FNV-1a 32-bit hex (8 lowercase digits) - shared row-hash helper. */
+T.fnv1aHex = function (str) {
+  var h = 2166136261;
+  str = String(str);
+  for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return ('0000000' + (h >>> 0).toString(16)).slice(-8);
+};
+
+/* CSV checksum column: append an FNV-1a hex hash of each row so edits,
+   dupes and join keys are visible at a glance. Ragged rows pad short;
+   throws when input is empty or the hash column name already exists. */
+T.csvChecksum = function (s, opts) {
+  var o = opts || {};
+  var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
+  var d = Object.prototype.hasOwnProperty.call(DELIMS, o.delimiter) ? DELIMS[o.delimiter] : null;
+  var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
+  var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
+  if (!lines.length) throw new Error('Paste delimited rows first \u2014 one record per line, first row headers');
+  if (d === null) d = T.detectDelimChar(lines.slice(0, 10)) || ',';
+  var rows = T.parseCSV(s, d);
+  if (rows.length < 2) throw new Error('Need a header row plus at least one data row');
+  var col = String(o.column === undefined || o.column === null ? '' : o.column).trim() || 'row_hash';
+  var heads = rows[0];
+  if (heads.indexOf(col) >= 0) throw new Error('Column \u2018' + col + '\u2019 already exists \u2014 pick another hash column name');
+  var out = (d === ';' ? ';' : ',');
+  function cell(v) {
+    v = String(v === undefined || v === null ? '' : v);
+    return (v.indexOf(out) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  var grid = [heads.concat([col]).map(cell).join(out)];
+  rows.slice(1).forEach(function (r) {
+    var cells = heads.map(function (_, c) { return c < r.length ? r[c] : ''; });
+    grid.push(cells.concat([T.fnv1aHex(cells.join('\u0000'))]).map(cell).join(out));
+  });
+  return grid.join('\n');
+};
+
 /* HAR inspector: DevTools HAR JSON becomes a timing summary -
+
    per-request method/status/ms/size lines plus totals and failure count. */
 T.harSummary = function (s, opts) {
   var o = opts || {};
