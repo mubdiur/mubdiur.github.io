@@ -28,7 +28,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'text-diff': { good: 'a\nb', expectInOutput: /(\+ c|\{\+c\+\})/ },
   'matrix-calculator': { good: '1 2\n3 4', expectInOutput: /-2/ },
   'markdown-table-generator': { good: 'a,b\n1,2', expectInOutput: /\| a \| b \|/ },
-  'xml-formatter': { good: '<r><a>1</a></r>', expectInOutput: /<a>1<\/a>/ },
+  'xml-formatter': { good: '<r><a>1</a></r>', expectInOutput: /<a>1<\/a>/, bad: '<a>AT&T</a>', expectError: /Bare &/ },
   'xml-minifier': { good: '<r>  <a>1</a>  <!-- x --></r>', expectInOutput: /<r><a>1<\/a><\/r>/ },
   'readability-analyzer': { good: 'The cat sat on the mat. It was happy.', expectInOutput: /Flesch Reading Ease/ },
   'env-to-json': { good: 'A=1\nB=hello', bad: 'NOEQUALS', expectInOutput: /hello/, expectError: /has no/ },

@@ -910,6 +910,13 @@ console.log('-- xml formatter --');
   ok(TOOLS['xml-minifier'].handler('<root>\n  <a>1</a>\n  <!-- x -->\n</root>') === '<root><a>1</a></root>', 'xml-min strips comments');
   ok(TOOLS['xml-minifier'].handler('<a title="x  y"  >t</a>') === '<a title="x  y">t</a>', 'xml-min tightens tags, keeps quoted spaces');
   ok(TOOLS['xml-minifier'].handler('<r><![CDATA[  x  ]]></r>') === '<r><![CDATA[  x  ]]></r>', 'xml-min cdata untouched');
+  var threwAmp = false; try { T.xmlMinify('<a>AT&T</a>'); } catch (e) { threwAmp = /Bare &/.test(e.message); }
+  ok(threwAmp, 'xml-min rejects bare amp with position');
+  threwAmp = false; try { T.xmlFormat('<a>&#0;</a>', {}); } catch (e) { threwAmp = /Bad character reference/.test(e.message); }
+  ok(threwAmp, 'xml-format rejects bad char ref');
+  ok(T.xmlMinify('<a>A &amp; B</a>') === '<a>A &amp; B</a>', 'xml-min keeps valid entities');
+  ok(T.xmlMinify('<a><!-- x&y --></a>') === '<a></a>', 'xml-min bare amp in comment stays literal');
+
   ok(TOOLS['xml-minifier'].handler('<a>t</a>') === T.xmlMinify('<a>t</a>'), 'xml-minifier delegates to Transforms');
   ok(T.xmlFormat(TOOLS['xml-minifier'].handler('<root><a>1</a></root>')) === T.xmlFormat('<root><a>1</a></root>'), 'xml-min keeps format equivalence');
   ok((function(){ try { T.xmlFormat('a < b', {}); return ''; } catch (e) { return e.message; } })().indexOf('Bare') === 0, 'xmlFormat rejects bare lt');

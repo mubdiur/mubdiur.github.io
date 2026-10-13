@@ -274,6 +274,12 @@ mustThrow(() => T.xmlMinify('<a></b>'), 'xmlMinify mismatch');
 mustThrow(() => T.xmlMinify('<a>'), 'xmlMinify unclosed');
 mustThrow(() => T.xmlFormat('a < b', {}), 'xmlFormat bare lt');
 mustThrow(() => T.xmlMinify('a < b'), 'xmlMinify bare lt');
+mustThrow(() => T.xmlFormat('<a>AT&T</a>', {}), 'xmlFormat bare amp');
+mustThrow(() => T.xmlMinify('<a title=\'x&y\'>t</a>'), 'xmlMinify bare amp in attr');
+mustThrow(() => T.xmlFormat('<a>&#xD800;</a>', {}), 'xmlFormat surrogate ref');
+mustNotThrow(() => T.xmlMinify('<a>&lt;&gt;&quot;&apos;&#65;&#x41;</a>'), 'xmlMinify all valid refs');
+mustNotThrow(() => T.xmlFormat('<r><![CDATA[a&b]]></r>', {}), 'xmlFormat cdata amp literal');
+
 mustThrow(() => T.xmlMinify('   '), 'xmlMinify empty');
 mustNotThrow(() => T.xmlMinify('<a>t</a>'), 'xmlMinify good');
 mustThrow(() => TOOLS['xml-minifier'].handler(''), 'xml-minifier empty');

@@ -3678,6 +3678,33 @@ T.sqlMinify = function (s) {
   return out;
 };
 
+/* Shared XML strictness: bare-& scan over tokenizer output, matching
+   the entity rules of the XML parser (xmlParseTree). Text and tag
+   tokens may only carry well-formed entities (&amp; &lt; &#65; &#x41
+   style, code point 1..1114111 excluding surrogates); comments, CDATA,
+   PIs and declarations stay literal. */
+T.xmlBareAmp = function (toks, text) {
+  var ent = /^&([A-Za-z][A-Za-z0-9]*|#[0-9]+|#x[0-9A-Fa-f]+);/;
+  var at = 0;
+  for (var k = 0; k < toks.length; k++) {
+    var tk = toks[k];
+    if (tk.charAt(0) !== '<' || (tk.charAt(1) !== '?' && tk.charAt(1) !== '!')) {
+      for (var i = 0; i < tk.length; i++) {
+        if (tk.charAt(i) !== '&') continue;
+        var m = ent.exec(tk.slice(i));
+        if (!m) throw new Error('Bare & near ' + JSON.stringify(text.slice(at + i, at + i + 16)) + ' \u2014 escape it as &amp;');
+        var body = m[1];
+        if (body.charAt(0) === '#') {
+          var hex = body.charAt(1) === 'x';
+          var cp = parseInt(hex ? body.slice(2) : body.slice(1), hex ? 16 : 10);
+          if (!isFinite(cp) || cp < 1 || cp > 1114111 || (cp >= 55296 && cp <= 57343)) throw new Error('Bad character reference &' + body + ';');
+        }
+      }
+    }
+    at += tk.length;
+  }
+};
+
 /* XML pretty-printer: comment/CDATA/PI/doctype aware tokenizer, elements
    holding only text stay inline, blank inter-tag text drops, mismatched or
    unclosed tags throw with position context. */
@@ -3695,6 +3722,8 @@ T.xmlFormat = function (s, opts) {
   var tkAt = 0, tkCi = 0;
   while (tkCi < toks.length && text.slice(tkAt, tkAt + toks[tkCi].length) === toks[tkCi]) { tkAt += toks[tkCi].length; tkCi++; }
   if (tkAt !== text.length) throw new Error('Bare "<" near ' + JSON.stringify(text.slice(tkAt, tkAt + 16)) + ' \u2014 escape it as &lt;');
+  T.xmlBareAmp(toks, text);
+
   function isText(t) { return t.charAt(0) !== '<'; }
   function tagName(t) { var m = /^<\/?([A-Za-z_][\w:.-]*)/.exec(t); return m ? m[1] : null; }
   function isClose(t) { return t.charAt(0) === '<' && t.charAt(1) === '/'; }
@@ -3747,6 +3776,8 @@ T.xmlMinify = function (s) {
   var tkAt = 0, tkCi = 0;
   while (tkCi < toks.length && text.slice(tkAt, tkAt + toks[tkCi].length) === toks[tkCi]) { tkAt += toks[tkCi].length; tkCi++; }
   if (tkAt !== text.length) throw new Error('Bare "<" near ' + JSON.stringify(text.slice(tkAt, tkAt + 16)) + ' \u2014 escape it as &lt;');
+  T.xmlBareAmp(toks, text);
+
   function isText(t) { return t.charAt(0) !== '<'; }
   function tagName(t) { var m = /^<\/?([A-Za-z_][\w:.-]*)/.exec(t); return m ? m[1] : null; }
   function isClose(t) { return t.charAt(0) === '<' && t.charAt(1) === '/'; }
