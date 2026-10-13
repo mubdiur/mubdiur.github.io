@@ -2225,21 +2225,8 @@ T.cssFormat = function (s, opts) {
   var mode = (typeof opts === "string") ? opts : ((opts && opts.mode) || "beautify");
 
       if (mode === 'minify') {
-        var out = '', inStr = false, q = '', inCom = false;
-        for (var i = 0; i < s.length; i++) {
-          var c = s.charAt(i), nx = s.charAt(i + 1);
-          if (inCom) { if (c === '*' && nx === '/') { inCom = false; i++; } continue; }
-          if (inStr) {
-            out += c;
-            if (c === '\\' && i + 1 < s.length) { out += s.charAt(i + 1); i++; }
-            else if (c === q) inStr = false;
-            continue;
-          }
-          if (c === '/' && nx === '*') { inCom = true; i++; continue; }
-          if (c === '"' || c === "'") { inStr = true; q = c; out += c; continue; }
-          out += c;
-        }
-        return out.replace(/\s+/g, ' ').replace(/\s*([{};:,>+~])\s*/g, '$1').replace(/;}/g, '}').trim();
+        if (!s || !String(s).trim()) return '';
+        return T.cssMinify(s);
       }
       /* beautify: string/comment-aware, brace depth + paren depth tracked */
       var lines = [], buf = '', depth = 0, parens = 0, si = false, sq = '', ci = false;
@@ -2272,6 +2259,153 @@ T.cssFormat = function (s, opts) {
       flush();
       return lines.join('\n').trim();
     };
+/* CSS minifier — string-aware, comment-stripping, calc-aware.
+   The old cssFormat minify branch broke calc() combinations
+   (spaces around + and - are syntactically required there) and
+   collapsed descendant+pseudo selectors ("div :hover" became
+   "div:hover"). Both cssFormat minify mode and the css-minifier
+   tool delegate here — one shared core, no duplicated logic.
+   Zero-unit collapsing is intentionally omitted: "0%" can be a
+   keyframe selector, and values cannot be told from selectors
+   without a full parser. */
+T.cssMinify = function (s) {
+  var src = String(s === undefined || s === null ? '' : s);
+  if (!src.trim()) throw new Error('Paste CSS to minify first — the Formatter beautifies, this shrinks');
+  if (src.indexOf(' ') >= 0) throw new Error('NUL bytes are not valid CSS input');
+  var keeps = [];
+  function stash(str) { keeps.push(str); return ' ' + (keeps.length - 1) + ' '; }
+  var WS = ' \t\n\r\f\v\u00a0\u2028\u2029';
+  var DROP_NEXT = '{};:,>+~)]}!(';
+  var DROP_PREV = '{(;:,>+~([!';
+  var IDENT = /[a-zA-Z0-9_@%]/;
+  var i, j, k, p, t, c, d;
+  var noStr = '';
+  for (i = 0; i < src.length; i++) {
+    c = src.charAt(i);
+    if (c === '"' || c === "'") {
+      var acc = c;
+      j = i + 1;
+      while (j < src.length) {
+        d = src.charAt(j);
+        acc += d;
+        if (d === '\\' && j + 1 < src.length) { acc += src.charAt(j + 1); j += 2; continue; }
+        j++;
+        if (d === c) break;
+      }
+      noStr += stash(acc);
+      i = j - 1;
+      continue;
+    }
+    noStr += c;
+  }
+  var noCom = noStr.replace(/\/\*[\s\S]*?\*\//g, '');
+  function minMath(inner) {
+    return inner.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
+      .replace(/\s*([*,/])\s*/g, '$1')
+      .replace(/([0-9a-zA-Z\]%)])\s*([+-])\s*/g, '$1 $2 ')
+      .replace(/ {2,}/g, ' ').replace(/^ | $/g, '');
+  }
+  var low = noCom.toLowerCase();
+  var NAMES = ['calc(', 'clamp(', 'min(', 'max('];
+  var body = '';
+  k = 0;
+  while (k < noCom.length) {
+    var fname = null;
+    for (t = 0; t < NAMES.length; t++) {
+      if (low.slice(k, k + NAMES[t].length) === NAMES[t]) {
+        var pc = k > 0 ? noCom.charAt(k - 1) : '(';
+        if (!/[a-zA-Z0-9_-]/.test(pc)) { fname = NAMES[t]; break; }
+      }
+    }
+    if (!fname) { body += noCom.charAt(k); k++; continue; }
+    var dep = 0, e = k, closed = false;
+    while (e < noCom.length) {
+      var ec = noCom.charAt(e);
+      if (ec === '(') dep++;
+      else if (ec === ')') { dep--; if (!dep) { closed = true; break; } }
+      e++;
+    }
+    if (closed) {
+      body += stash(noCom.slice(k, k + fname.length) + minMath(noCom.slice(k + fname.length, e)) + ')');
+      k = e + 1;
+    } else {
+      body += noCom.charAt(k);
+      k++;
+    }
+  }
+  function prevCh(res) { return res.length ? res.charAt(res.length - 1) : ''; }
+  var res = '', depth = 0, pend = false;
+  for (p = 0; p < body.length; p++) {
+    var ch = body.charAt(p);
+    if (ch === '{') { res += '{'; depth++; pend = false; continue; }
+    if (ch === '}') { res = res.replace(/;+$/, ''); res += '}'; depth = Math.max(0, depth - 1); pend = false; continue; }
+    if (ch === ' ') {
+      var end = body.indexOf(' ', p + 1);
+      var span = end < 0 ? body.slice(p) : body.slice(p, end + 1);
+      if (pend) {
+        pend = false;
+        var pvA = prevCh(res);
+        if (IDENT.test(pvA || '')) { res += ' '; }
+        else {
+          var nxA = end < 0 ? '' : body.charAt(end + 1);
+          var dN = nxA !== '' && DROP_NEXT.indexOf(nxA) >= 0 && !(depth === 0 && nxA === ':');
+          var dP = pvA !== '' && pvA !== ' ' && DROP_PREV.indexOf(pvA) >= 0 && !(depth === 0 && pvA === ':');
+          if (!dN && !dP) res += ' ';
+        }
+      }
+      res += span;
+      if (end < 0) break;
+      p = end;
+      continue;
+    }
+    if (WS.indexOf(ch) >= 0) { pend = true; continue; }
+    if (pend) {
+      pend = false;
+      var pvB = prevCh(res);
+      var drop = false;
+      if (DROP_NEXT.indexOf(ch) >= 0) drop = !(depth === 0 && ch === ':');
+      else if (pvB !== '' && DROP_PREV.indexOf(pvB) >= 0) drop = !(depth === 0 && pvB === ':');
+      if (!drop) res += ' ';
+    }
+    if (ch === ';') {
+      var last = prevCh(res);
+      if (last === '{' || last === ';') continue;
+      res += ';';
+      continue;
+    }
+    if (ch === '#' && depth > 0) {
+      var hex = body.slice(p + 1, p + 7);
+      if (/^[0-9a-fA-F]{6}$/.test(hex) && !/[0-9a-fA-F]/.test(body.charAt(p + 7) || '')) {
+        var r1 = hex.charAt(0), r2 = hex.charAt(2), r3 = hex.charAt(4);
+        var pc2 = prevCh(res);
+        if ((pc2 === ':' || pc2 === ',' || pc2 === ' ') &&
+            r1.toLowerCase() === hex.charAt(1).toLowerCase() &&
+            r2.toLowerCase() === hex.charAt(3).toLowerCase() &&
+            r3.toLowerCase() === hex.charAt(5).toLowerCase()) {
+          res += '#' + r1 + r2 + r3;
+          p += 6;
+          continue;
+        }
+      }
+      res += ch;
+      continue;
+    }
+    if (ch === '0' && depth > 0) {
+      var pc3 = prevCh(res);
+      if ((pc3 === ':' || pc3 === ',' || pc3 === '(' || pc3 === ' ') &&
+          body.charAt(p + 1) === '.' && /[0-9]/.test(body.charAt(p + 2) || '')) {
+        continue;
+      }
+      res += ch;
+      continue;
+    }
+    res += ch;
+  }
+  res = res.replace(/;}/g, '}').replace(/^\s+|\s+$/g, '');
+  var done = res.replace(/ (\d+) /g, function (mm, n) { return keeps[+n]; });
+  if (!done) throw new Error('Nothing left to minify — input was comments or whitespace');
+  return done;
+};
 T.jsMinify = function (s) {
   if (!s || !s.trim()) throw new Error('Enter JavaScript to minify');
   var text = s;

@@ -394,6 +394,8 @@ window.TOOLMANIFEST = [
   { slug: 'css-formatter', name: 'CSS Formatter', desc: 'Beautify minified CSS or minify it — comments and quoted strings preserved', category: 'code', tags: ['css', 'format', 'minify', 'beautify'], icon: 'code2', template: 'transform',
     handler: function (s, opts) { return Transforms.cssFormat(s, opts); },
     params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'beautify', options: [{ value: 'beautify', label: 'Beautify' }, { value: 'minify', label: 'Minify' }] }] },
+  { slug: 'css-minifier', name: 'CSS Minifier', desc: 'Minify CSS — calc-aware space surgery, comments stripped, hex shortened, quoted strings never touched', category: 'code', tags: ['css', 'minify', 'compress'], icon: 'code2', template: 'transform',
+    handler: function (s) { return Transforms.cssMinify(s); } },
   { slug: 'javascript-minifier', name: 'JavaScript Minifier', desc: 'Minify JavaScript — strips comments and collapses whitespace; strings, template literals and regex literals pass through untouched', category: 'code', tags: ['js', 'minify', 'javascript'], icon: 'code2', template: 'transform',
     handler: function (s) { return Transforms.jsMinify(s); } },
   { slug: 'json-to-typescript', name: 'JSON → TypeScript', desc: 'Generate TypeScript interfaces from JSON — nested types, arrays, nulls and root arrays handled', category: 'code', tags: ['json', 'typescript', 'interface', 'types'], icon: 'code2', template: 'transform',
