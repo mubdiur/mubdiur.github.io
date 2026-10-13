@@ -5047,5 +5047,79 @@ T.csvNormalize = function (s, opts) {
     return r.map(cell).join(',');
   }).join('\n');
 };
+/* JSONL sorter: one-JSON-per-line docs sorted by key fields (or the whole
+   doc when key is empty). Blank lines skip; failures carry the line number.
+   Type-aware compare - numbers numeric, date strings chronological, other
+   strings lexicographic, objects by canonical form; ties keep input order. */
+T.jsonlSort = function (s, opts) {
+  var o = opts || {};
+  var raw = String(s === undefined || s === null ? '' : s);
+  var lines = raw.split(/\r?\n/);
+  var docs = [];
+  for (var n = 0; n < lines.length; n++) {
+    if (!lines[n].trim()) continue;
+    var v = T.validateJSON(lines[n]);
+    if (!v.valid) throw new Error('Line ' + (n + 1) + ': ' + (v.error || 'Invalid JSON'));
+    docs.push({ d: v.data, i: docs.length });
+  }
+  if (!docs.length) throw new Error('Paste JSONL first \u2014 one JSON value per line');
+  function canon(x) {
+    if (x !== null && typeof x === 'object') {
+      if (Array.isArray(x)) return '[' + x.map(canon).join(',') + ']';
+      return '{' + Object.keys(x).sort().map(function (k) { return JSON.stringify(k) + ':' + canon(x[k]); }).join(',') + '}';
+    }
+    return JSON.stringify(x);
+  }
+  var fields = String(o.key === undefined || o.key === null ? '' : o.key).split(',').map(function (k) { return k.trim(); }).filter(Boolean);
+  function isNumStr(x) { return typeof x === 'string' && x.trim() !== '' && isFinite(Number(x)); }
+  function rank(x) {
+    if (x === null || x === undefined) return 0;
+    var t = typeof x;
+    if (t === 'boolean') return 1;
+    if (t === 'number') return 2;
+    if (t === 'string') return 3;
+    return 4;
+  }
+  function cmpVals(a, b) {
+    if (a === undefined) a = null;
+    if (b === undefined) b = null;
+    if (a === null && b === null) return 0;
+    if (a === null) return -1;
+    if (b === null) return 1;
+    if (typeof a === 'number' && typeof b === 'number') return a - b;
+    if (typeof a === 'boolean' && typeof b === 'boolean') return a === b ? 0 : (a ? 1 : -1);
+    if (typeof a === 'string' && typeof b === 'string') {
+      if (isNumStr(a) && isNumStr(b)) return Number(a) - Number(b);
+      var da = Date.parse(a), db = Date.parse(b);
+      if (isFinite(da) && isFinite(db)) return da - db;
+      return a < b ? -1 : a > b ? 1 : 0;
+    }
+    if (Array.isArray(a) && Array.isArray(b)) {
+      for (var k = 0; k < Math.min(a.length, b.length); k++) {
+        var c = cmpVals(a[k], b[k]);
+        if (c !== 0) return c;
+      }
+      return a.length - b.length;
+    }
+    var ra = rank(a), rb = rank(b);
+    if (ra !== rb) return ra - rb;
+    var ca = canon(a), cb = canon(b);
+    return ca < cb ? -1 : ca > cb ? 1 : 0;
+  }
+  docs.forEach(function (e) {
+    var d = e.d;
+    if (!fields.length) { e.k = d; return; }
+    if (d === null || typeof d !== 'object' || Array.isArray(d)) throw new Error('Key fields need JSON objects \u2014 got ' + canon(d).slice(0, 40));
+    var sub = fields.map(function (k) { return Object.prototype.hasOwnProperty.call(d, k) ? d[k] : null; });
+    e.k = sub.length === 1 ? sub[0] : sub;
+  });
+  var desc = String(o.order || 'asc') === 'desc';
+  docs.sort(function (x, y) {
+    var c = cmpVals(x.k, y.k);
+    if (c !== 0) return desc ? -c : c;
+    return x.i - y.i;
+  });
+  return docs.map(function (e) { return JSON.stringify(e.d); }).join('\n');
+};
 window.Transforms = T;
 })();

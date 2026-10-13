@@ -238,6 +238,10 @@ window.TOOLMANIFEST = [
     downloadExt: 'csv',
     handler: function (s, opts) { return Transforms.jsonlDupes(s, opts); },
     params: [{ key: 'key', label: 'Key fields (comma names, blank = whole doc)', type: 'text', default: '' }] },
+  { slug: 'jsonl-sorter', name: 'JSONL Sorter', desc: 'Sort newline-delimited JSON \u2014 by key fields or the whole doc, numeric and date aware, stable', category: 'converters', tags: ['jsonl', 'json', 'sort', 'ndjson'], icon: 'filetype', template: 'transform',
+    placeholder: '{"n":"b"}\n{"n":"a"}',
+    handler: function (s, opts) { return Transforms.jsonlSort(s, opts); },
+    params: [{ key: 'key', label: 'Sort keys (comma names, blank = whole doc)', type: 'text', default: '' }, { key: 'order', label: 'Order', type: 'select', default: 'asc', options: [{ value: 'asc', label: 'Ascending' }, { value: 'desc', label: 'Descending' }] }] },
   { slug: 'xml-to-json', name: 'XML → JSON', desc: 'Convert XML (SOAP, RSS, configs) to JSON via the native DOMParser — attributes as @-keys, repeats as arrays', category: 'converters', tags: ['xml', 'json', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
     handler: function (s) {
       var d;
