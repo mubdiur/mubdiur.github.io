@@ -256,6 +256,11 @@ mustNotThrow(() => T.readability('Hello world. Bye world.'), 'readability good')
   ok(T.numberToWordsText('-42') === 'negative forty-two', 'numberToWordsText negative delegates');
   ok(T.numberToWordsText('0') === 'zero', 'numberToWordsText zero');
   ok(TOOLS['number-to-words'].handler('1,000') === 'one thousand', 'number-to-words manifest delegates');
+mustThrow(() => T.xmlMinify('<a></b>'), 'xmlMinify mismatch');
+mustThrow(() => T.xmlMinify('<a>'), 'xmlMinify unclosed');
+mustThrow(() => T.xmlMinify('   '), 'xmlMinify empty');
+mustNotThrow(() => T.xmlMinify('<a>t</a>'), 'xmlMinify good');
+mustThrow(() => TOOLS['xml-minifier'].handler(''), 'xml-minifier empty');
 
 console.log('-- wasm guards (proven by js/wasm.js unit, not smoke) --');
 ok(true, 'wasm guards exist (manual verify: js/wasm.js mem() bounds + ASN.1 cap)');

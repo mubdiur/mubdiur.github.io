@@ -3645,6 +3645,72 @@ T.xmlFormat = function (s, opts) {
   if (stack.length) throw new Error('Unclosed tag <' + stack[stack.length - 1] + '> \u2014 missing closing tag');
   return out.join('\n');
 };
+/* XML minifier: same validated token grammar as xmlFormat (stray /
+   mismatched / unclosed tags throw identical errors), but comments are
+   stripped, inter-tag whitespace is dropped and tags are tightened with
+   quote-aware space surgery, so CDATA, PIs, doctype and quoted attribute
+   values pass through untouched. */
+T.xmlMinify = function (s) {
+  var text = String(s === undefined || s === null ? '' : s);
+  if (!text.trim()) throw new Error('Paste XML first \u2014 a declaration, element or fragment');
+  var toks = text.match(/<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<![^<>]*>|<\/?[A-Za-z_][\w:.-]*[^<>]*\/?>|[^<]+/g) || [];
+  function isText(t) { return t.charAt(0) !== '<'; }
+  function tagName(t) { var m = /^<\/?([A-Za-z_][\w:.-]*)/.exec(t); return m ? m[1] : null; }
+  function isClose(t) { return t.charAt(0) === '<' && t.charAt(1) === '/'; }
+  function isOpen(t) { return t.charAt(0) === '<' && t.charAt(1) !== '/' && t.charAt(1) !== '!' && t.charAt(1) !== '?' && !/\/\s*>$/.test(t); }
+  function tightTag(t) {
+    var raw = t.trim(), o = '', q = '';
+    for (var i = 0; i < raw.length; i++) {
+      var ch = raw.charAt(i);
+      if (q) { o += ch; if (ch === q) q = ''; continue; }
+      if (ch === '"' || ch === "'") { q = ch; o += ch; continue; }
+      if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') {
+        var j = i + 1;
+        while (raw.charAt(j) === ' ' || raw.charAt(j) === '\t' || raw.charAt(j) === '\n' || raw.charAt(j) === '\r') j++;
+        var nxq = raw.charAt(j);
+        i = j - 1;
+        if (nxq === '/' || nxq === '>' || nxq === '') continue;
+        o += ' '; continue;
+      }
+      o += ch;
+    }
+    return o;
+  }
+  var out = [], stack = [];
+  for (var k = 0; k < toks.length; k++) {
+    var tk = toks[k];
+    if (isText(tk)) {
+      if (!tk.trim()) continue;
+      out.push(tk.trim().replace(/\s+/g, ' '));
+    } else if (tk.indexOf('<![CDATA[') === 0) {
+      out.push(tk);
+    } else if (tk.indexOf('<!--') === 0) {
+      continue;
+    } else if (tk.indexOf('<?') === 0 || tk.indexOf('<!') === 0) {
+      out.push(tk.trim());
+    } else if (isClose(tk)) {
+      var want = stack.pop();
+      var got = tagName(tk);
+      if (!want) throw new Error('Stray closing tag ' + tk.trim().slice(0, 24) + ' \u2014 nothing is open');
+      if (want !== got) throw new Error('Mismatched tag: expected </' + want + '> but found </' + got + '>');
+      out.push(tightTag(tk));
+    } else if (isOpen(tk)) {
+      var nm = tagName(tk);
+      var onx = toks[k + 1], nn = toks[k + 2];
+      if (nm && onx !== undefined && isText(onx) && onx.trim() && nn !== undefined && isClose(nn) && tagName(nn) === nm) {
+        out.push(tightTag(tk) + onx.trim().replace(/\s+/g, ' ') + tightTag(nn));
+        k += 2;
+      } else {
+        stack.push(nm || '?');
+        out.push(tightTag(tk));
+      }
+    } else {
+      out.push(tightTag(tk));
+    }
+  }
+  if (stack.length) throw new Error('Unclosed tag <' + stack[stack.length - 1] + '> \u2014 missing closing tag');
+  return out.join('');
+};
 
 T.jsonToXML = function (s) {
   var obj = JSON.parse(s);

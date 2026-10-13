@@ -897,6 +897,11 @@ console.log('-- morse timeline --');
 console.log('-- xml formatter --');
 {
   var x1 = TOOLS['xml-formatter'].handler('<r><a>1</a></r>', {});
+  ok(TOOLS['xml-minifier'].handler('<root>\n  <a>1</a>\n  <!-- x -->\n</root>') === '<root><a>1</a></root>', 'xml-min strips comments');
+  ok(TOOLS['xml-minifier'].handler('<a title="x  y"  >t</a>') === '<a title="x  y">t</a>', 'xml-min tightens tags, keeps quoted spaces');
+  ok(TOOLS['xml-minifier'].handler('<r><![CDATA[  x  ]]></r>') === '<r><![CDATA[  x  ]]></r>', 'xml-min cdata untouched');
+  ok(TOOLS['xml-minifier'].handler('<a>t</a>') === T.xmlMinify('<a>t</a>'), 'xml-minifier delegates to Transforms');
+  ok(T.xmlFormat(TOOLS['xml-minifier'].handler('<root><a>1</a></root>')) === T.xmlFormat('<root><a>1</a></root>'), 'xml-min keeps format equivalence');
   ok(x1 === '<r>\n  <a>1</a>\n</r>', 'xml formatter inline text');
   var x2 = TOOLS['xml-formatter'].handler('<r><![CDATA[<x>]]></r>', { indent: 'tab' });
   ok(x2.indexOf('<![CDATA[<x>]]>') >= 0, 'xml CDATA verbatim');
