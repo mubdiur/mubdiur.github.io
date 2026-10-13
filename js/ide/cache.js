@@ -16,10 +16,24 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-export const CACHE_NAME = 'mub-ide-v1';
+/* Bump CACHE_VERSION whenever a vendored engine payload changes — payloads
+   are cached under bare URLs, so only a new cache name retires stale bytes.
+   openCache purges older mub-ide-v<N> caches best-effort on first use. */
+export const CACHE_VERSION = 1;
+export const CACHE_NAME = 'mub-ide-v' + CACHE_VERSION;
+var purgedOld = false;
+function purgeOldCaches() {
+  return caches.keys().then(function (names) {
+    return Promise.all(names.map(function (n) {
+      if (/^mub-ide-v\d+$/.test(n) && n !== CACHE_NAME) return caches.delete(n);
+      return null;
+    }));
+  }).catch(function () {});
+}
 const DECOMP_PREFIX = 'decompressed:';
 
 function openCache() {
+  if (!purgedOld) { purgedOld = true; purgeOldCaches(); }
   return caches.open(CACHE_NAME);
 }
 
