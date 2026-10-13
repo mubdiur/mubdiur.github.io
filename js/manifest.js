@@ -249,6 +249,13 @@ window.TOOLMANIFEST = [
   { slug: 'jsonl-stats', name: 'JSONL Stats', desc: 'Profile newline-delimited JSON, row count, per-key coverage, numeric ranges and distinct counts', category: 'converters', tags: ['jsonl','json','stats','profile','ndjson'], icon: 'filetype', template: 'transform',
     placeholder: '{"a":1}' + '\n' + '{"a":2}',
     handler: function (s) { return Transforms.jsonlStats(s); } },
+  { slug: 'jsonl-to-csv', name: 'JSONL to CSV', desc: 'Convert newline-delimited JSON to CSV, rows validated per line, quoting and delimiters via the shared JSON core', category: 'converters', tags: ['jsonl','json','csv','convert','ndjson'], icon: 'filespreadsheet', template: 'transform',
+    placeholder: '{"a":1}' + '\n' + '{"a":2}',
+    handler: function (s, opts) { return Transforms.jsonlToCSV(s, opts); },
+    params: [
+      { key: 'delimiter', label: 'Delimiter', type: 'select', default: 'comma', options: [{ value: 'comma', label: 'Comma (,)' }, { value: 'semicolon', label: 'Semicolon (;)' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe (|)' }] },
+      { key: 'nested', label: 'Nested objects', type: 'select', default: 'flatten', options: [{ value: 'flatten', label: 'Flatten (a.b)' }, { value: 'stringify', label: 'Stringify JSON' }] }
+    ] },
   { slug: 'xml-to-json', name: 'XML → JSON', desc: 'Convert XML (SOAP, RSS, configs) to JSON via the shared dependency-free parser \u2014 attributes as @-keys, repeats as arrays', category: 'converters', tags: ['xml', 'json', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.xmlToJsonDoc(s); } },
   { slug: 'xml-to-yaml', name: 'XML → YAML', desc: 'Convert XML (SOAP, RSS, configs) to YAML \u2014 attributes as @-keys, repeats as sequences, shared dependency-free parser', category: 'converters', tags: ['xml', 'yaml', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',

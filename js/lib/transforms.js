@@ -5561,5 +5561,21 @@ T.dateDiff = function (s) {
     '\nTotal = ' + sign + Math.floor(abs / 86400000) + 'd = ' + sign + Math.floor(abs / 3600000) + 'h = ' + sign + Math.floor(abs / 60000) + 'min = ' + sign + Math.floor(abs / 1000) + 's' +
     '\nCalendar = ' + sign + parts.join(' ');
 };
+/* JSONL to CSV: one JSON value per line becomes CSV rows. Each row is
+   validated with its line number, then emission delegates to the shared
+   jsonToCSV core so quoting, delimiters and nesting stay single-sourced. */
+T.jsonlToCSV = function (s, opts) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  var lines = raw.split(/\r?\n/);
+  var docs = [];
+  for (var n = 0; n < lines.length; n++) {
+    if (!lines[n].trim()) continue;
+    var v = T.validateJSON(lines[n]);
+    if (!v.valid) throw new Error('Line ' + (n + 1) + ': ' + (v.error || 'Invalid JSON'));
+    docs.push(v.data);
+  }
+  if (!docs.length) throw new Error('Paste JSONL first \u2014 one JSON value per line');
+  return T.jsonToCSV(JSON.stringify(docs), opts);
+};
 window.Transforms = T;
 })();
