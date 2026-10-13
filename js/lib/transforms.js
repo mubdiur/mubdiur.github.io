@@ -2819,6 +2819,56 @@ T.jsonlToMarkdown = function (s, opts) {
   return [mdRow(head), sep].concat(body).join('\n');
 };
 
+/* Markdown table to CSV: a GitHub-flavored pipe table becomes delimited
+   rows with minimal RFC 4180 quoting. Finds the first run of lines
+   starting with | (surrounding prose ignored), requires the --- separator
+   second, unescapes escaped pipes, pads ragged rows. */
+T.markdownToCSV = function (s, opts) {
+  var o = opts || {};
+  var DELIMS = { comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
+  var d = DELIMS[o.delimiter] || ',';
+  var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
+  var lines = raw.split(/\r?\n/);
+  var start = -1;
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].trim().charAt(0) === '|') { start = i; break; }
+  }
+  if (start < 0) throw new Error('No Markdown table found \u2014 start a line with | and follow the header with a | --- | row');
+  var end = start;
+  while (end < lines.length && lines[end].trim().charAt(0) === '|') end++;
+  function splitRow(ln) {
+    var t = ln.trim();
+    if (t.charAt(0) === '|') t = t.slice(1);
+    if (t.charAt(t.length - 1) === '|') t = t.slice(0, -1);
+    var cells = [], cur = '';
+    for (var k = 0; k < t.length; k++) {
+      var ch = t.charAt(k), nx = t.charAt(k + 1);
+      if (ch === '\\' && (nx === '|' || nx === '\\')) { cur += nx; k++; continue; }
+      if (ch === '|') { cells.push(cur); cur = ''; continue; }
+      cur += ch;
+    }
+    cells.push(cur);
+    return cells.map(function (c) { return c.trim(); });
+  }
+  var rows = lines.slice(start, end).map(splitRow);
+  if (rows.length < 2) throw new Error('Table needs a separator row \u2014 e.g. | --- | --- | right under the header');
+  var sep = rows[1];
+  var sepOk = sep.length > 0 && sep.filter(function (c) { return /^:?-+:?$/.test(c); }).length === sep.length;
+  if (!sepOk) throw new Error('Second row must be the separator \u2014 cells like --- or :---: only, got ' + JSON.stringify(rows[1].join(' | ')));
+  var head = rows[0], body = rows.slice(2);
+  if (!head.length || head.every(function (c) { return c === ''; })) throw new Error('Header row holds no cells \u2014 add column names between the pipes');
+  var width = head.length;
+  for (var b = 0; b < body.length; b++) width = Math.max(width, body[b].length);
+  function pad(r) { while (r.length < width) r.push(''); return r; }
+  function cell(v) {
+    return (v.indexOf(d) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0 || v.indexOf('\r') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  var out = (o.headers === 'drop' ? [] : [pad(head).map(cell).join(d)]);
+  for (var r = 0; r < body.length; r++) out.push(pad(body[r]).map(cell).join(d));
+  if (!out.length) throw new Error('Table holds no data rows \u2014 add rows or keep the header');
+  return out.join('\n');
+};
+
 /* CSV rows to GitHub-flavored Markdown table: records split by the shared
    RFC 4180 parser (quoted commas, escaped quotes, multiline records),
    auto delimiter, optional header row, per-table alignment. Cells trim for

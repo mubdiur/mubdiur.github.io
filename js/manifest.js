@@ -332,6 +332,13 @@ window.TOOLMANIFEST = [
       { key: 'style', label: 'Style', type: 'select', default: 'ascii', options: [{ value: 'ascii', label: 'ASCII' }, { value: 'unicode', label: 'Unicode box' }] }
     ] },
 
+  { slug: 'markdown-to-csv', name: 'Markdown Table to CSV', desc: 'GitHub pipe tables to CSV \u2014 separator-aware, escaped pipes, ragged pad, delimiter options', category: 'converters', tags: ['markdown', 'table', 'csv'], icon: 'filespreadsheet', template: 'transform',
+    handler: function (s, opts) { return Transforms.markdownToCSV(s, opts); },
+    params: [
+      { key: 'delimiter', label: 'Delimiter', type: 'select', default: 'comma', options: [{ value: 'comma', label: 'Comma' }, { value: 'semicolon', label: 'Semicolon' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe' }] },
+      { key: 'headers', label: 'Headers', type: 'select', default: 'keep', options: [{ value: 'keep', label: 'Keep' }, { value: 'drop', label: 'Drop' }] }
+    ] },
+
   { slug: 'env-to-json', name: '.env → JSON', desc: 'Convert dotenv files to JSON — export prefixes, empty values, comments kept', category: 'converters', tags: ['env', 'dotenv', 'json'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.envToJSON(s); } },
   { slug: 'ini-to-json', name: 'INI → JSON', desc: 'Convert INI config to JSON \u2014 sections as objects, duplicate keys and bad headers carry line numbers', category: 'converters', tags: ['ini', 'json', 'convert', 'config'], icon: 'filetype', template: 'transform',

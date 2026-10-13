@@ -449,6 +449,11 @@ console.log('-- text / formats --');
   ok(JSON.parse(TOOLS['csv-to-json'].handler('a,b,c\n1,2'))[0].c === '', 'csv-to-json short row still pads');
   ok(JSON.parse(TOOLS['csv-to-json'].handler('(extra_2)\n1,2'))[0]['(extra_2)_2'] === '2', 'csv-to-json extra name dedups against headers');
   ok(TOOLS['markdown-table-generator'].handler('a,b\n1,2', {}).indexOf('| a | b |') >= 0, 'mdtable basic vector');
+  ok(T.markdownToCSV('| a | b |\n|---|---|\n| 1 | 2 |') === 'a,b\n1,2', 'md-to-csv basic');
+  ok(T.markdownToCSV(T.csvToMarkdown('a,b\n1,2', {})) === 'a,b\n1,2', 'md-csv round trip');
+  ok(T.markdownToCSV('| a |\n| --- |\n| 1 |', {headers:'drop'}) === '1', 'md-to-csv drop headers');
+  ok(TOOLS['markdown-to-csv'].handler.toString().indexOf('markdownToCSV') >= 0, 'md-to-csv delegates');
+
   ok(TOOLS['ascii-table'].handler('a,b\n1,22') === '+---+----+\n| a | b  |\n+---+----+\n| 1 | 22 |\n+---+----+', 'ascii-table ascii style');
   ok(TOOLS['ascii-table'].handler('a,b\n1,22', {style:'unicode'}) === '\u250c\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2510\n\u2502 a \u2502 b  \u2502\n\u251c\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2524\n\u2502 1 \u2502 22 \u2502\n\u2514\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2518', 'ascii-table unicode style');
   ok(TOOLS['ascii-table'].handler('a,b\n1,22', {header:'none', align:'right'}).indexOf('Column 1') >= 0, 'ascii-table header none labels');

@@ -149,6 +149,9 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('jsonl-to-markdown', 'line number throws', mustThrow(() => TOOLS['jsonl-to-markdown'].handler('ok', {})));
 
     push('markdown-table-generator', 'empty throws', mustThrow(() => TOOLS['markdown-table-generator'].handler('   ', {})));
+    push('markdown-to-csv', 'basic', TOOLS['markdown-to-csv'].handler('| a | b |\n|---|---|\n| 1 | 2 |', {}).includes('a,b'));
+    push('markdown-to-csv', 'no table throws', mustThrow(() => TOOLS['markdown-to-csv'].handler('hello', {})));
+
     push('xml-formatter', 'inline', TOOLS['xml-formatter'].handler('<r><a>1</a></r>', {}).includes('<a>1</a>'));
     push('xml-formatter', 'tab indent', TOOLS['xml-formatter'].handler('<r><a>1</a></r>', { indent: 'tab' }).includes('\t<a>1</a>'));
     push('xml-formatter', 'mismatch throws', mustThrow(() => TOOLS['xml-formatter'].handler('<a><b></a>', {})));
