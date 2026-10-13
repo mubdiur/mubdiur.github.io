@@ -4994,5 +4994,21 @@ T.jsonSchemaValidate = function (instText, schemaText) {
   if (errs.length > 50) shown.push('… and ' + (errs.length - 50) + ' more errors (first 50 shown)');
   return shown.join('\n');
 };
+/* Stopwatch display format: milliseconds to HH:MM:SS.cs
+   (centiseconds), clamped at zero. Single source for the stopwatch
+   tool face, lap splits and countdown readouts. */
+T.formatStopwatch = function (ms) {
+  if (ms === '' || ms === null || ms === undefined) throw new Error('Give milliseconds as a number');
+  var t = Number(ms);
+  if (!isFinite(t)) throw new Error('Give milliseconds as a number');
+  if (t < 0) t = 0;
+  t = Math.floor(t);
+  function p2(n) { return (n < 10 ? '0' : '') + n; }
+  var cs = Math.floor((t % 1000) / 10);
+  var s = Math.floor(t / 1000) % 60;
+  var m = Math.floor(t / 60000) % 60;
+  var h = Math.floor(t / 3600000);
+  return (h < 10 ? '0' + h : '' + h) + ':' + p2(m) + ':' + p2(s) + '.' + p2(cs);
+};
 window.Transforms = T;
 })();

@@ -278,6 +278,7 @@ window.TOOLMANIFEST = [
     placeholder: '*/5 * * * *',
     handler: function (s) { return Transforms.cronExplain(s); } },
   { slug: 'timezone-converter', name: 'Timezone Converter', desc: 'Convert wall-clock time across IANA zones — exact UTC instant plus per-zone offsets, DST correct', category: 'formatters', tags: ['timezone', 'time', 'convert', 'dst', 'utc'], icon: 'clock', template: 'custom' },
+  { slug: 'stopwatch', name: 'Stopwatch / Countdown', desc: 'Count-up stopwatch with lap splits plus a countdown with a synthesized finish beep — pause-safe, centisecond display', category: 'formatters', tags: ['stopwatch', 'timer', 'countdown', 'laps'], icon: 'clock', template: 'custom' },
   { slug: 'cron-builder', name: 'Cron Builder', desc: 'Plan cron schedules visually — presets plus per-field inputs, plain-words breakdown, next 5 runs, 7x24 fire grid', category: 'formatters', tags: ['cron', 'schedule', 'builder', 'time'], icon: 'clock', template: 'custom' },
   { slug: 'readability-analyzer', name: 'Readability Analyzer', desc: 'Flesch Reading Ease and grade level — sentence stats, hardest words flagged', category: 'text', tags: ['readability', 'flesch', 'text'], icon: 'textsearch', template: 'transform',
     handler: function (s) { return Transforms.readability(s); } },
