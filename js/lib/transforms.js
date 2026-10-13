@@ -5121,5 +5121,75 @@ T.jsonlSort = function (s, opts) {
   });
   return docs.map(function (e) { return JSON.stringify(e.d); }).join('\n');
 };
+/* PII redactor: mask emails, phone numbers, IP addresses and Luhn-checked
+   card numbers in place with labeled tokens, then append a redaction count.
+   Order matters - emails, IPs and cards first so the broad phone pattern
+   never bites a fragment; digit/dot neighbors veto phone and IP matches.
+   Fresh RegExp copies dodge the shared /g lastIndex hazard. */
+T.redactPII = function (s, opts) {
+  var o = opts || {};
+  var raw = String(s === undefined || s === null ? '' : s);
+  if (!raw.trim()) throw new Error('Paste text first \u2014 emails, phone numbers, IPs or card numbers to redact');
+  function on(v, fb) {
+    if (v === undefined || v === null || v === '') return fb;
+    return v === true || v === 'true' || v === 'on' || v === '1';
+  }
+  var useEmail = on(o.email, true), usePhone = on(o.phone, true);
+  var useIP = on(o.ip, true), useCard = on(o.card, true);
+  var ce = 0, cp = 0, ci = 0, cc = 0;
+  var out = raw;
+  function isDigit(ch) { return ch >= '0' && ch <= '9'; }
+  function luhn(ds) {
+    var sum = 0, dbl = false;
+    for (var i = ds.length - 1; i >= 0; i--) {
+      var d = ds.charCodeAt(i) - 48;
+      if (d < 0 || d > 9) return false;
+      if (dbl) { d *= 2; if (d > 9) d -= 9; }
+      sum += d;
+      dbl = !dbl;
+    }
+    return ds.length >= 13 && ds.length <= 19 && sum % 10 === 0;
+  }
+  function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+  if (useEmail) {
+    var emailRe = new RegExp(EMAIL_RE.source, 'g');
+    out = out.replace(emailRe, function () { ce++; return '[EMAIL]'; });
+  }
+  if (useIP) {
+    var ipRe = new RegExp(IP_RE.source, 'g');
+    out = out.replace(ipRe, function (m, off, full) {
+      var before = off > 0 ? full.charAt(off - 1) : '';
+      var after = off + m.length < full.length ? full.charAt(off + m.length) : '';
+      var beforePrev = off >= 2 ? full.charAt(off - 2) : '';
+      var afterNext = off + m.length + 1 < full.length ? full.charAt(off + m.length + 1) : '';
+      if (isDigit(before) || isDigit(after)) return m;
+      if (before === '.' && isDigit(beforePrev)) return m;
+      if (after === '.' && isDigit(afterNext)) return m;
+      var valid = m.split('.').every(function (n) { return parseInt(n, 10) >= 0 && parseInt(n, 10) <= 255; });
+      if (!valid) return m;
+      ci++;
+      return '[IP]';
+    });
+  }
+  if (useCard) {
+    var cardRe = /\b\d(?:[ -]?\d){12,18}\b/g;
+    out = out.replace(cardRe, function (m) {
+      if (!luhn(m.replace(/[ -]/g, ''))) return m;
+      cc++;
+      return '[CARD]';
+    });
+  }
+  if (usePhone) {
+    var phoneRe = new RegExp(PHONE_RE.source, 'g');
+    out = out.replace(phoneRe, function (m, off, full) {
+      var before = off > 0 ? full.charAt(off - 1) : '';
+      var after = off + m.length < full.length ? full.charAt(off + m.length) : '';
+      if (isDigit(before) || isDigit(after)) return m;
+      cp++;
+      return '[PHONE]';
+    });
+  }
+  return out + '\n\nRedacted: ' + plural(ce, 'email', 'emails') + ', ' + plural(cp, 'phone', 'phones') + ', ' + plural(ci, 'IP', 'IPs') + ', ' + plural(cc, 'card', 'cards');
+};
 window.Transforms = T;
 })();
