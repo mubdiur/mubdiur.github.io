@@ -408,6 +408,12 @@ console.log('-- text / formats --');
   ok((function(){ try { TOOLS['date-difference'].handler('nope'); return false; } catch (e) { return /Line 1/.test(e.message); } })(), 'datediff bad date carries line');
   ok((function(){ try { TOOLS['date-difference'].handler('   '); return false; } catch (e) { return true; } })(), 'datediff empty throws');
   ok(TOOLS['jsonl-to-csv'].handler.toString().indexOf('jsonlToCSV') >= 0, 'jcsv delegates single source');
+  ok(T.jsonlToMarkdown('{"a":1}' + '\n' + '{"a":2}') === '| a |' + '\n' + '|---|' + '\n' + '| 1 |' + '\n' + '| 2 |', 'jsonl-md basic');
+  ok(T.jsonlToMarkdown('{"a":1,"n":{"x":5}}' + '\n' + '{"b":2}') === '| a | n.x | b |' + '\n' + '|---|---|---|' + '\n' + '| 1 | 5 |  |' + '\n' + '|  |  | 2 |', 'jsonl-md union flatten');
+  ok(T.jsonlToMarkdown('{"n":{"x":5}}', {nested:'stringify'}) === '| n |' + '\n' + '|---|' + '\n' + '| {"x":5} |', 'jsonl-md stringify');
+  ok(T.jsonlToMarkdown('{"a":1}', {align:'center'}).indexOf(':center:') >= 0, 'jsonl-md center');
+  ok(TOOLS['jsonl-to-markdown'].handler.toString().indexOf('jsonlToMarkdown') >= 0, 'jsonl-md delegates');
+
   ok(TOOLS['jsonl-to-csv'].handler('{"a":1}' + '\n' + '{"a":2}', {}) === 'a\n1\n2', 'jcsv rows vector');
   ok(TOOLS['jsonl-to-csv'].handler('{"b":"y,z"}', {}) === 'b\n"y,z"', 'jcsv quoting via shared core');
   ok((function(){ try { TOOLS['jsonl-to-csv'].handler('{"a":1}' + '\n' + 'nope', {}); return false; } catch (e) { return /Line 2/.test(e.message); } })(), 'jcsv bad line carries number');

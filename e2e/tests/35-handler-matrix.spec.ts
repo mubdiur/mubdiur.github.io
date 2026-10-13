@@ -145,6 +145,9 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('markdown-table-generator', 'basic', TOOLS['markdown-table-generator'].handler('a,b\n1,2', {}).includes('| a | b |'));
     push('markdown-table-generator', 'auto semicolon', TOOLS['markdown-table-generator'].handler('a;b\n1;2', {}).includes('| a | b |'));
     push('markdown-table-generator', 'center', TOOLS['markdown-table-generator'].handler('a,b\n1,2', { align: 'center' }).includes(':center:'));
+    push('jsonl-to-markdown', 'happy', TOOLS['jsonl-to-markdown'].handler('{"a":1}' + '\n' + '{"a":2}', {}).includes('| a |'));
+    push('jsonl-to-markdown', 'line number throws', mustThrow(() => TOOLS['jsonl-to-markdown'].handler('ok', {})));
+
     push('markdown-table-generator', 'empty throws', mustThrow(() => TOOLS['markdown-table-generator'].handler('   ', {})));
     push('xml-formatter', 'inline', TOOLS['xml-formatter'].handler('<r><a>1</a></r>', {}).includes('<a>1</a>'));
     push('xml-formatter', 'tab indent', TOOLS['xml-formatter'].handler('<r><a>1</a></r>', { indent: 'tab' }).includes('\t<a>1</a>'));

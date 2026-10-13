@@ -249,6 +249,13 @@ window.TOOLMANIFEST = [
   { slug: 'jsonl-stats', name: 'JSONL Stats', desc: 'Profile newline-delimited JSON, row count, per-key coverage, numeric ranges and distinct counts', category: 'converters', tags: ['jsonl','json','stats','profile','ndjson'], icon: 'filetype', template: 'transform',
     placeholder: '{"a":1}' + '\n' + '{"a":2}',
     handler: function (s) { return Transforms.jsonlStats(s); } },
+  { slug: 'jsonl-to-markdown', name: 'JSONL to Markdown', desc: 'JSON lines to GitHub Markdown tables \u2014 unioned columns, dotted nesting, per-line errors', category: 'converters', tags: ['jsonl', 'markdown', 'table'], icon: 'filespreadsheet', template: 'transform',
+    handler: function (s, opts) { return Transforms.jsonlToMarkdown(s, opts); },
+    params: [
+      { key: 'align', label: 'Align', type: 'select', default: 'left', options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }] },
+      { key: 'nested', label: 'Nested objects', type: 'select', default: 'flatten', options: [{ value: 'flatten', label: 'Flatten (a.b)' }, { value: 'stringify', label: 'Stringify JSON' }] }
+    ] },
+
   { slug: 'jsonl-to-csv', name: 'JSONL to CSV', desc: 'Convert newline-delimited JSON to CSV, rows validated per line, quoting and delimiters via the shared JSON core', category: 'converters', tags: ['jsonl','json','csv','convert','ndjson'], icon: 'filespreadsheet', template: 'transform',
     placeholder: '{"a":1}' + '\n' + '{"a":2}',
     handler: function (s, opts) { return Transforms.jsonlToCSV(s, opts); },

@@ -2774,6 +2774,51 @@ T.jsonToCSV = function (s, opts) {
   }
   return [headers.join(d)].concat(rows.map(function (r) { return headers.map(function (h) { return cell(r[h] === undefined ? '' : r[h]); }).join(d); })).join('\n');
 };
+/* JSONL to Markdown table: one JSON object per line becomes a
+   GitHub-flavored Markdown table. Keys union in first-seen order,
+   nested objects flatten to dotted paths (or stringify via opt),
+   missing cells stay blank, bad lines carry line numbers. */
+T.jsonlToMarkdown = function (s, opts) {
+  var o = opts || {};
+  var raw = String(s === undefined || s === null ? '' : s);
+  var lines = raw.split(/\r?\n/);
+  var docs = [];
+  for (var n = 0; n < lines.length; n++) {
+    if (!lines[n].trim()) continue;
+    var v = T.validateJSON(lines[n]);
+    if (!v.valid) throw new Error('Line ' + (n + 1) + ': ' + (v.error || 'Invalid JSON'));
+    docs.push(v.data);
+  }
+  if (!docs.length) throw new Error('Paste JSONL first \u2014 one JSON object per line');
+  if (!docs.every(function (r) { return r !== null && typeof r === 'object' && !Array.isArray(r); })) throw new Error('JSONL must hold objects \u2014 values like 1 or [1] have no columns');
+  var flatten = o.nested !== 'stringify';
+  function leaf(val) {
+    if (val === null || val === undefined) return '';
+    if (typeof val === 'object') return JSON.stringify(val);
+    return String(val);
+  }
+  function flat(obj, prefix, out) {
+    Object.keys(obj).forEach(function (k) {
+      var val = obj[k];
+      var key = prefix ? prefix + '.' + k : k;
+      if (flatten && val !== null && typeof val === 'object' && !Array.isArray(val)) flat(val, key, out);
+      else out[key] = leaf(val);
+    });
+    return out;
+  }
+  var rows = docs.map(function (r) { return flat(r, '', {}); });
+  var headers = [];
+  rows.forEach(function (r) { Object.keys(r).forEach(function (k) { if (headers.indexOf(k) < 0) headers.push(k); }); });
+  if (!headers.length) throw new Error('No columns found \u2014 objects hold no keys');
+  var align = o.align === 'center' ? ':center:' : (o.align === 'right' ? '---:' : '---');
+  function esc(c) { return c.replace(/\|/g, '\\|').replace(/\n/g, ' '); }
+  function mdRow(r) { return '| ' + r.join(' | ') + ' |'; }
+  var head = headers.map(esc);
+  var sep = '|' + headers.map(function () { return align; }).join('|') + '|';
+  var body = rows.map(function (r) { return mdRow(headers.map(function (h) { return esc(r[h] === undefined ? '' : r[h]); })); });
+  return [mdRow(head), sep].concat(body).join('\n');
+};
+
 /* CSV rows to GitHub-flavored Markdown table: records split by the shared
    RFC 4180 parser (quoted commas, escaped quotes, multiline records),
    auto delimiter, optional header row, per-table alignment. Cells trim for
