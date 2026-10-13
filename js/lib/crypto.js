@@ -14,6 +14,12 @@ T.sha384 = function (s) { return Core.sha384Hex(s); };
 T.sha512 = function (s) { return Core.sha512Hex(s); };
 T.hmacSha256 = function (key, message) { return Core.hmacHex(key, message, 1); };
 T.hmacSha1 = function (key, message) { return Core.hmacHex(key, message, 0); };
+/* HMAC UI contract: message input plus key/algorithm options. Moved from the manifest for single source. */
+T.hmacOpts = function (s, opts) {
+  var key = (opts && opts.key) || 'secret';
+  var alg = (opts && opts.algorithm) || 'SHA-256';
+  return alg === 'SHA-1' ? T.hmacSha1(key, s) : T.hmacSha256(key, s);
+};
 T.md5 = function (s) { return Core.md5Hex(s); };
 T.crc32 = function (s) { return Core.crc32Hex(s); };
 T.hashBytes = function (slug, bytes) {

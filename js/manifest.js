@@ -167,11 +167,7 @@ window.TOOLMANIFEST = [
     fileHash: true,
     handler: function (s) { return Transforms.sha384(s); } },
   { slug: 'hmac-generator', name: 'HMAC Generator', desc: 'Generate HMAC with SHA-256 or SHA-1 — WebAssembly core', category: 'crypto', tags: ['hmac', 'mac', 'auth'], icon: 'key', template: 'transform', wasm: true,
-    handler: function (s, opts) {
-      var key = (opts && opts.key) || 'secret';
-      var alg = (opts && opts.algorithm) || 'SHA-256';
-      return alg === 'SHA-1' ? Transforms.hmacSha1(key, s) : Transforms.hmacSha256(key, s);
-    },
+    handler: function (s, opts) { return Transforms.hmacOpts(s, opts); },
     params: [
       { key: 'key', label: 'Secret Key', type: 'password', default: 'secret' },
       { key: 'algorithm', label: 'Algorithm', type: 'select', default: 'SHA-256', options: [{ value: 'SHA-256', label: 'SHA-256' }, { value: 'SHA-1', label: 'SHA-1' }] }
