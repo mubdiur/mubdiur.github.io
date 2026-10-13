@@ -131,6 +131,22 @@ App.registerTool('voice-dictation', {
     function loadDraft() {
       try { return localStorage.getItem(DRAFT_KEY) || ''; } catch (eL) { return ''; }
     }
+    /* Option checkboxes persist alongside the draft. */
+    var OPT_KEY = 'mub.dictation.opts.v1';
+    function saveOpts() {
+      try { localStorage.setItem(OPT_KEY, JSON.stringify({ interim: !!showInterim, restart: !!autoRestart, commands: !!voiceCommands, smart: !!smartFormat })); } catch (eO) {}
+    }
+    function loadOpts() {
+      try {
+        var o = JSON.parse(localStorage.getItem(OPT_KEY) || 'null');
+        if (o && typeof o === 'object') {
+          showInterim = o.interim !== false;
+          autoRestart = o.restart !== false;
+          voiceCommands = o.commands !== false;
+          smartFormat = o.smart !== false;
+        }
+      } catch (eP) {}
+    }
 
     var optInterim = App.el('input', { type: 'checkbox', checked: 'checked', 'aria-label': 'Show interim results' });
     var optRestart = App.el('input', { type: 'checkbox', checked: 'checked', 'aria-label': 'Auto-restart on pause' });
@@ -747,10 +763,16 @@ App.registerTool('voice-dictation', {
     App.on(optInterim, 'change', function () {
       showInterim = !!optInterim.checked;
       if (!showInterim) setInterim('');
+      saveOpts();
     });
-    App.on(optRestart, 'change', function () { autoRestart = !!optRestart.checked; });
-    App.on(optCommands, 'change', function () { voiceCommands = !!optCommands.checked; });
-    App.on(optSmart, 'change', function () { smartFormat = !!optSmart.checked; });
+    App.on(optRestart, 'change', function () { autoRestart = !!optRestart.checked; saveOpts(); });
+    App.on(optCommands, 'change', function () { voiceCommands = !!optCommands.checked; saveOpts(); });
+    App.on(optSmart, 'change', function () { smartFormat = !!optSmart.checked; saveOpts(); });
+    loadOpts();
+    optInterim.checked = showInterim;
+    optRestart.checked = autoRestart;
+    optCommands.checked = voiceCommands;
+    optSmart.checked = smartFormat;
     App.interval(tickTimer, 500);
 
     /* Ctrl+C / Cmd+C copies the whole transcript.
