@@ -48,6 +48,30 @@ T.parseCSV = function (s, delim) {
   return rows;
 };
 
+/* CSV transpose: rows become columns. Ragged rows pad short,
+   delimiter auto-detects (or explicit opt), output re-quoted RFC 4180. */
+T.csvTranspose = function (s, opts) {
+  var o = opts || {};
+  var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
+  var d = Object.prototype.hasOwnProperty.call(DELIMS, o.delimiter) ? DELIMS[o.delimiter] : null;
+  var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
+  var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
+  if (!lines.length) throw new Error('Paste delimited rows first \u2014 one record per line');
+  if (d === null) d = T.detectDelimChar(lines.slice(0, 10)) || ',';
+  var rows = T.parseCSV(s, d);
+  var cols = rows.reduce(function (m, r) { return Math.max(m, r.length); }, 0);
+  function cell(v) {
+    return (v.indexOf(d) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0 || v.indexOf('\r') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  var grid = [];
+  for (var c = 0; c < cols; c++) {
+    var line = [];
+    for (var r = 0; r < rows.length; r++) line.push(cell(c < rows[r].length ? rows[r][c] : ''));
+    grid.push(line.join(d));
+  }
+  return grid.join('\n');
+};
+
 T.csvToJSON = function (s, opts) {
   var o = opts || {};
   var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };

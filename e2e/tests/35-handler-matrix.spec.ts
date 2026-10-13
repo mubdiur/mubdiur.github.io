@@ -49,6 +49,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('csv-to-json', 'explicit delimiter', JSON.parse(TOOLS['csv-to-json'].handler('a,b\n1,2', { delimiter: 'comma' }))[0].a === '1');
     push('csv-delimiter-sniffer', 'semicolon', TOOLS['csv-delimiter-sniffer'].handler('a;b\nc;d').indexOf('Delimiter: Semicolon (;)') === 0);
     push('csv-delimiter-sniffer', 'comma', TOOLS['csv-delimiter-sniffer'].handler('a,b\nc,d').indexOf('Delimiter: Comma (,)') === 0);
+    push('csv-transposer', 'square', TOOLS['csv-transposer'].handler('a,b\nc,d', {}) === 'a,c\nb,d');
+    push('csv-transposer', 'empty throws', mustThrow(() => TOOLS['csv-transposer'].handler('   ', {})));
     push('csv-delimiter-sniffer', 'empty throws', mustThrow(() => TOOLS['csv-delimiter-sniffer'].handler('   ')));
     push('yaml-to-json', 'happy', JSON.parse(TOOLS['yaml-to-json'].handler('a: 1\nb: hello')).a === 1);
     push('yaml-to-json', 'nested roundtrip', JSON.parse(TOOLS['yaml-to-json'].handler(TOOLS['json-to-yaml'].handler('{"a":1,"nest":{"k":true}}'))).nest.k === true);
@@ -279,7 +281,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
   if (failed.length) console.log('failed handlers:', JSON.stringify(failed, null, 2));
   expect(failed, `handler matrix failures:\n` + JSON.stringify(failed, null, 2)).toEqual([]);
   expect((result as any[]).length, 'handler matrix must cover all tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
-  // Full manifest is 129 (csv-delimiter-sniffer added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
+  // Full manifest is 130 (csv-transposer added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
-  expect(manifest, 'TOOLMANIFEST must be 129').toBe(129);
+  expect(manifest, 'TOOLMANIFEST must be 130').toBe(130);
 });

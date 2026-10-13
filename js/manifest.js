@@ -186,6 +186,10 @@ window.TOOLMANIFEST = [
   { slug: 'csv-delimiter-sniffer', name: 'CSV Delimiter Sniffer', desc: 'Detect the delimiter in pasted rows \u2014 quote-aware scoring over comma, semicolon, tab and pipe, with a consistency report', category: 'converters', tags: ['csv', 'delimiter', 'detect'], icon: 'filespreadsheet', template: 'transform',
     placeholder: 'name;city\nAda;Lovelace',
     handler: function (s) { return Transforms.csvSniffDelim(s); } },
+  { slug: 'csv-transposer', name: 'CSV Transposer', desc: 'Flip rows and columns in delimited data \u2014 auto delimiter, ragged rows padded, output re-quoted', category: 'converters', tags: ['csv', 'transpose', 'rows', 'columns'], icon: 'filespreadsheet', template: 'transform',
+    placeholder: 'name;city\nAda;Lovelace',
+    handler: function (s, opts) { return Transforms.csvTranspose(s, opts); },
+    params: [{ key: 'delimiter', label: 'Delimiter', type: 'select', default: 'auto', options: [{ value: 'auto', label: 'Auto' }, { value: 'comma', label: 'Comma (,)' }, { value: 'semicolon', label: 'Semicolon (;)' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe (|)' }] }] },
   { slug: 'xml-to-json', name: 'XML → JSON', desc: 'Convert XML (SOAP, RSS, configs) to JSON via the native DOMParser — attributes as @-keys, repeats as arrays', category: 'converters', tags: ['xml', 'json', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
     handler: function (s) {
       var d;
