@@ -2576,8 +2576,10 @@ T.jsonToCSV = function (s, opts) {
   }
   return [headers.join(d)].concat(rows.map(function (r) { return headers.map(function (h) { return cell(r[h] === undefined ? '' : r[h]); }).join(d); })).join('\n');
 };
-/* CSV rows to GitHub-flavored Markdown table: quote-aware split,
-   auto delimiter, optional header row, per-table alignment. */
+/* CSV rows to GitHub-flavored Markdown table: records split by the shared
+   RFC 4180 parser (quoted commas, escaped quotes, multiline records),
+   auto delimiter, optional header row, per-table alignment. Cells trim for
+   table source; GFM renders padded cells identically. */
 T.csvToMarkdown = function (s, opts) {
   var o = opts || {};
   var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
@@ -2586,23 +2588,10 @@ T.csvToMarkdown = function (s, opts) {
   var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
   if (!lines.length) throw new Error('Paste rows first \u2014 one record per line, values separated by commas, tabs or pipes');
   if (d === null) d = T.detectDelimChar(lines.slice(0, 10)) || ',';
-  function splitRow(line) {
-    var cells = [], cur = '', q = false;
-    for (var i = 0; i < line.length; i++) {
-      var ch = line.charAt(i);
-      if (q) {
-        if (ch === '"') {
-          if (line.charAt(i + 1) === '"') { cur += '"'; i++; }
-          else q = false;
-        } else cur += ch;
-      } else if (ch === '"' && cur === '') q = true;
-      else if (ch === d) { cells.push(cur); cur = ''; }
-      else cur += ch;
-    }
-    cells.push(cur);
-    return cells.map(function (c) { return c.trim(); });
-  }
-  var rows = lines.map(splitRow);
+  var rows = T.parseCSV(raw, d).filter(function (r) {
+    return !r.every(function (c) { return c.trim() === ''; });
+  }).map(function (r) { return r.map(function (c) { return c.trim(); }); });
+  if (!rows.length) throw new Error('Paste rows first \u2014 one record per line, values separated by commas, tabs or pipes');
   var cols = rows.reduce(function (m, r) { return Math.max(m, r.length); }, 0);
   rows = rows.map(function (r) { while (r.length < cols) r.push(''); return r; });
   var useHeader = o.header !== 'none';
