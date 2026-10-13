@@ -256,6 +256,15 @@ window.TOOLMANIFEST = [
       { key: 'delimiter', label: 'Delimiter', type: 'select', default: 'comma', options: [{ value: 'comma', label: 'Comma (,)' }, { value: 'semicolon', label: 'Semicolon (;)' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe (|)' }] },
       { key: 'nested', label: 'Nested objects', type: 'select', default: 'flatten', options: [{ value: 'flatten', label: 'Flatten (a.b)' }, { value: 'stringify', label: 'Stringify JSON' }] }
     ] },
+  { slug: 'jsonl-pivot', name: 'JSONL Pivot', desc: 'Group newline-delimited JSON by a key field and aggregate per group, count, sum, average, min or max', category: 'converters', tags: ['jsonl','json','pivot','group','aggregate','ndjson'], icon: 'filespreadsheet', template: 'transform',
+    placeholder: '{"m":"a","v":1}' + '\n' + '{"m":"b","v":2}',
+    handler: function (s, opts) { return Transforms.jsonlPivot(s, opts); },
+    downloadExt: 'csv',
+    params: [
+      { key: 'key', label: 'Group by field (blank = whole doc)', type: 'text', default: '' },
+      { key: 'value', label: 'Value field (blank = count rows)', type: 'text', default: '' },
+      { key: 'agg', label: 'Aggregate', type: 'select', default: 'count', options: [{ value: 'count', label: 'Count' }, { value: 'sum', label: 'Sum' }, { value: 'avg', label: 'Average' }, { value: 'min', label: 'Min' }, { value: 'max', label: 'Max' }] }
+    ] },
   { slug: 'xml-to-json', name: 'XML → JSON', desc: 'Convert XML (SOAP, RSS, configs) to JSON via the shared dependency-free parser \u2014 attributes as @-keys, repeats as arrays', category: 'converters', tags: ['xml', 'json', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.xmlToJsonDoc(s); } },
   { slug: 'xml-to-yaml', name: 'XML → YAML', desc: 'Convert XML (SOAP, RSS, configs) to YAML \u2014 attributes as @-keys, repeats as sequences, shared dependency-free parser', category: 'converters', tags: ['xml', 'yaml', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',

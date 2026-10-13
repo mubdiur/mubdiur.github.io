@@ -68,6 +68,74 @@ T.jsonlToJSON = function (s) {
   return JSON.stringify(docs, null, 2);
 };
 
+/* Canonical JSON form: objects emit sorted keys, so field order never
+   splits a group or a sort tie. Shared by the JSONL group/sort/pivot cores. */
+T.canonJSON = function (x) {
+  if (x !== null && typeof x === 'object') {
+    if (Array.isArray(x)) return '[' + x.map(T.canonJSON).join(',') + ']';
+    return '{' + Object.keys(x).sort().map(function (k) { return JSON.stringify(k) + ':' + T.canonJSON(x[k]); }).join(',') + '}';
+  }
+  return JSON.stringify(x);
+};
+
+/* JSONL pivot: group one-JSON-per-line docs by a key field (blank key groups
+   the whole doc) and aggregate a numeric field per group - count, sum, avg,
+   min or max. Groups keep first-seen order; key/value fields on non-object
+   docs throw with the line number. */
+T.jsonlPivot = function (s, opts) {
+  var o = opts || {};
+  var raw = String(s === undefined || s === null ? '' : s);
+  var lines = raw.split(/\r?\n/);
+  var docs = [];
+  for (var n = 0; n < lines.length; n++) {
+    if (!lines[n].trim()) continue;
+    var v = T.validateJSON(lines[n]);
+    if (!v.valid) throw new Error('Line ' + (n + 1) + ': ' + (v.error || 'Invalid JSON'));
+    docs.push({ d: v.data, ln: n + 1 });
+  }
+  if (!docs.length) throw new Error('Paste JSONL first \u2014 one JSON value per line');
+  var key = String(o.key === undefined || o.key === null ? '' : o.key).trim();
+  var val = String(o.value === undefined || o.value === null ? '' : o.value).trim();
+  var agg = String(o.agg || 'count');
+  if (['count', 'sum', 'avg', 'min', 'max'].indexOf(agg) < 0) agg = 'count';
+  if (agg !== 'count' && !val) throw new Error('Pick the value field to aggregate \u2014 sum, avg, min and max need a numeric field');
+  function trimNum(x) {
+    if (!isFinite(x)) return '';
+    return String(Math.round(x * 1e10) / 1e10);
+  }
+  var order = [], groups = Object.create(null);
+  docs.forEach(function (e) {
+    var d = e.d, f, disp;
+    if (agg !== 'count' && (d === null || typeof d !== 'object' || Array.isArray(d))) throw new Error('Line ' + e.ln + ': value fields need JSON objects \u2014 got ' + T.canonJSON(d).slice(0, 40));
+    if (!key) { f = d; disp = T.canonJSON(d); }
+    else {
+      if (d === null || typeof d !== 'object' || Array.isArray(d)) throw new Error('Line ' + e.ln + ': key fields need JSON objects \u2014 got ' + T.canonJSON(d).slice(0, 40));
+      f = Object.prototype.hasOwnProperty.call(d, key) ? d[key] : null;
+      disp = (f !== null && typeof f === 'object') ? T.canonJSON(f) : String(f);
+    }
+    var gk = T.canonJSON(f);
+    if (!Object.prototype.hasOwnProperty.call(groups, gk)) { groups[gk] = { disp: disp, n: 0, nums: [] }; order.push(gk); }
+    var g = groups[gk];
+    g.n++;
+    if (agg !== 'count' && Object.prototype.hasOwnProperty.call(d, val)) {
+      var x = Number(d[val]);
+      if (isFinite(x)) g.nums.push(x);
+    }
+  });
+  function aggVals(g) {
+    if (agg === 'count') return String(g.n);
+    if (!g.nums.length) return '';
+    if (agg === 'min') return trimNum(Math.min.apply(null, g.nums));
+    if (agg === 'max') return trimNum(Math.max.apply(null, g.nums));
+    var sum = g.nums.reduce(function (a, b) { return a + b; }, 0);
+    return trimNum(agg === 'avg' ? sum / g.nums.length : sum);
+  }
+  function cell(q) {
+    return (q.indexOf(',') >= 0 || q.indexOf('"') >= 0 || q.indexOf('\n') >= 0 || q.indexOf('\r') >= 0) ? '"' + q.replace(/"/g, '""') + '"' : q;
+  }
+  return [agg + ',key'].concat(order.map(function (gk) { return aggVals(groups[gk]) + ',' + cell(groups[gk].disp); })).join('\n');
+};
+
 /* JSONL duplicate finder: group one-JSON-per-line docs by key fields
    (or the whole doc when key is empty), keep repeats, sort by count desc.
    Docs canonicalize with sorted keys so field order never splits a group. */
@@ -83,23 +151,16 @@ T.jsonlDupes = function (s, opts) {
     docs.push(v.data);
   }
   if (!docs.length) throw new Error('Paste JSONL first \u2014 one JSON value per line');
-  function canon(x) {
-    if (x !== null && typeof x === 'object') {
-      if (Array.isArray(x)) return '[' + x.map(canon).join(',') + ']';
-      return '{' + Object.keys(x).sort().map(function (k) { return JSON.stringify(k) + ':' + canon(x[k]); }).join(',') + '}';
-    }
-    return JSON.stringify(x);
-  }
   var fields = String(o.key === undefined || o.key === null ? '' : o.key).split(',').map(function (k) { return k.trim(); }).filter(Boolean);
   var order = [], groups = Object.create(null);
   docs.forEach(function (d) {
     var sub = d;
     if (fields.length) {
-      if (d === null || typeof d !== 'object' || Array.isArray(d)) throw new Error('Key fields need JSON objects \u2014 got ' + canon(d).slice(0, 40));
+      if (d === null || typeof d !== 'object' || Array.isArray(d)) throw new Error('Key fields need JSON objects \u2014 got ' + T.canonJSON(d).slice(0, 40));
       sub = {};
       fields.forEach(function (k) { sub[k] = Object.prototype.hasOwnProperty.call(d, k) ? d[k] : null; });
     }
-    var id = canon(sub);
+    var id = T.canonJSON(sub);
     if (!Object.prototype.hasOwnProperty.call(groups, id)) { groups[id] = { key: id, n: 0 }; order.push(id); }
     groups[id].n++;
   });
@@ -5055,13 +5116,6 @@ T.jsonlSort = function (s, opts) {
     docs.push({ d: v.data, i: docs.length });
   }
   if (!docs.length) throw new Error('Paste JSONL first \u2014 one JSON value per line');
-  function canon(x) {
-    if (x !== null && typeof x === 'object') {
-      if (Array.isArray(x)) return '[' + x.map(canon).join(',') + ']';
-      return '{' + Object.keys(x).sort().map(function (k) { return JSON.stringify(k) + ':' + canon(x[k]); }).join(',') + '}';
-    }
-    return JSON.stringify(x);
-  }
   var fields = String(o.key === undefined || o.key === null ? '' : o.key).split(',').map(function (k) { return k.trim(); }).filter(Boolean);
   function isNumStr(x) { return typeof x === 'string' && x.trim() !== '' && isFinite(Number(x)); }
   function rank(x) {
@@ -5095,13 +5149,13 @@ T.jsonlSort = function (s, opts) {
     }
     var ra = rank(a), rb = rank(b);
     if (ra !== rb) return ra - rb;
-    var ca = canon(a), cb = canon(b);
+    var ca = T.canonJSON(a), cb = T.canonJSON(b);
     return ca < cb ? -1 : ca > cb ? 1 : 0;
   }
   docs.forEach(function (e) {
     var d = e.d;
     if (!fields.length) { e.k = d; return; }
-    if (d === null || typeof d !== 'object' || Array.isArray(d)) throw new Error('Key fields need JSON objects \u2014 got ' + canon(d).slice(0, 40));
+    if (d === null || typeof d !== 'object' || Array.isArray(d)) throw new Error('Key fields need JSON objects \u2014 got ' + T.canonJSON(d).slice(0, 40));
     var sub = fields.map(function (k) { return Object.prototype.hasOwnProperty.call(d, k) ? d[k] : null; });
     e.k = sub.length === 1 ? sub[0] : sub;
   });
