@@ -319,6 +319,9 @@ window.TOOLMANIFEST = [
   { slug: 'yaml-to-toml', name: 'YAML → TOML', desc: 'Convert YAML configs to TOML \u2014 maps become tables, sequences stay arrays, flow styles included', category: 'converters', tags: ['yaml', 'toml', 'convert'], icon: 'filetype', template: 'transform',
     placeholder: 'server:\n  host: "example.com"\n  port: 8080',
     handler: function (s) { return Transforms.yamlToTOML(s); } },
+  { slug: 'yaml-to-xml', name: 'YAML \u2192 XML', desc: 'Convert YAML configs to XML \u2014 maps nest, sequences repeat as siblings, shared dependency-free emitter', category: 'converters', tags: ['yaml', 'xml', 'convert'], icon: 'filetype', template: 'transform',
+    placeholder: 'server:\n  host: example.com\n  port: 8080',
+    handler: function (s) { return Transforms.yamlToXML(s); } },
   { slug: 'markdown-table-generator', name: 'Markdown Table Generator', desc: 'CSV rows to GitHub-flavored Markdown tables — optional header, alignment, auto delimiter', category: 'converters', tags: ['markdown', 'table', 'csv'], icon: 'filespreadsheet', template: 'transform',
     handler: function (s, opts) { return Transforms.csvToMarkdown(s, opts); },
     params: [

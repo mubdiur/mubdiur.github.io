@@ -6048,6 +6048,8 @@ T.xmlToYAML = function (s) { return T.jsonToYAML(JSON.stringify(T.xmlToJsonValue
    emit with the canonical JSON-to-TOML emitter (attributes as @-keys,
    repeats as arrays, empty elements as empty strings). */
 T.xmlToTOML = function (s) { return T.jsonToTOML(T.xmlToJsonDoc(s)); };
+/* YAML to XML: parse once with the YAML core, emit with the canonical JSON-to-XML emitter (maps nest, sequences repeat as siblings, nulls self-close). */
+T.yamlToXML = function (s) { if (!String(s).trim()) throw new Error('Enter YAML to convert'); return T.jsonToXML(T.yamlToJSON(s)); };
 
 /* Duration calculator: one signed duration per line, summed. Each line takes
    jammed or spaced unit groups (1h30m, 2 days 4 hours), colon times (1:30:00,
