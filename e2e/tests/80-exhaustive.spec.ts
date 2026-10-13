@@ -34,6 +34,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'ascii85-encode': { good: 'Man ', expectInOutput: /9jqo/ },
   'ascii85-decode': { good: '9jqo^', expectInOutput: /Man / },
   'quoted-printable-encode': { good: 'a=b', expectInOutput: /=3D/ },
+  'quoted-printable-decode': { good: 'a=3Db', expectInOutput: /a=b/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },
   'json-escape': { good: 'a"b', expectInOutput: /\\"/ },

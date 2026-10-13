@@ -2001,6 +2001,27 @@ T.quotedPrintableEncode = function (s) {
   }
   return String(s).split(/\r\n|\r|\n/).map(encLine).join('\n');
 };
+/* Quoted-Printable decode: pasted quotes stripped, soft breaks folded, =XX hex required (dangling or bad escapes rejected with positions), bytes as UTF-8. */
+T.quotedPrintableDecode = function (s) {
+  var t = unquote(s);
+  if (!t.trim()) throw new Error('Enter quoted-printable input');
+  var body = t.replace(/=\r\n|=\n|=\r/g, '');
+  var bytes = [];
+  for (var i = 0; i < body.length; i++) {
+    var ch = body.charAt(i);
+    if (ch !== '=') {
+      var code = body.charCodeAt(i);
+      if (code < 128) bytes.push(code);
+      else { var eb = new TextEncoder().encode(ch); for (var k = 0; k < eb.length; k++) bytes.push(eb[k]); }
+      continue;
+    }
+    var hex = body.slice(i + 1, i + 3);
+    if (!/^[0-9A-Fa-f]{2}$/.test(hex)) throw new Error('Bad = escape at position ' + (i + 1) + ' \u2014 need two hex digits');
+    bytes.push(parseInt(hex, 16));
+    i += 2;
+  }
+  return new TextDecoder().decode(new Uint8Array(bytes));
+};
 T.ascii85Encode = function (s) {
   var bytes = new TextEncoder().encode(String(s));
   var out = '';
