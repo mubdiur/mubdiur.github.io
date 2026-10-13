@@ -1995,6 +1995,34 @@ T.ascii85Encode = function (s) {
   }
   return out;
 };
+/* Ascii85 decode: pasted quotes stripped, whitespace skipped, lone z expands to four zero bytes, final short groups pad with u, overflows and stray characters rejected with positions. */
+T.ascii85Decode = function (s) {
+  var clean = unquote(s).replace(/\s/g, '');
+  if (!clean) throw new Error('Enter Ascii85 input');
+  var out = [], group = [];
+  function pushGroup(g, n) {
+    var v = 0;
+    for (var i = 0; i < 5; i++) v = v * 85 + (i < g.length ? g[i] : 84);
+    if (v > 4294967295) throw new Error('Ascii85 overflow \u2014 group exceeds 4 bytes');
+    var b = [Math.floor(v / 16777216) % 256, Math.floor(v / 65536) % 256, Math.floor(v / 256) % 256, v % 256];
+    for (var k = 0; k < n; k++) out.push(b[k]);
+  }
+  for (var p = 0; p < clean.length; p++) {
+    var ch = clean.charAt(p);
+    if (ch === 'z') {
+      if (group.length) throw new Error('Stray z at position ' + (p + 1) + ' \u2014 z must stand alone as a full group');
+      out.push(0, 0, 0, 0);
+      continue;
+    }
+    var code = clean.charCodeAt(p);
+    if (code < 33 || code > 117) throw new Error('Invalid Ascii85 character: ' + ch);
+    group.push(code - 33);
+    if (group.length === 5) { pushGroup(group, 4); group = []; }
+  }
+  if (group.length === 1) throw new Error('Trailing lone character \u2014 final groups need 2 to 4 chars');
+  if (group.length) pushGroup(group, group.length - 1);
+  return new TextDecoder().decode(new Uint8Array(out));
+};
 T.base58Encode = function (s) {
   var bytes = new TextEncoder().encode(String(s));  var zeros = 0;
   while (zeros < bytes.length && bytes[zeros] === 0) zeros++;

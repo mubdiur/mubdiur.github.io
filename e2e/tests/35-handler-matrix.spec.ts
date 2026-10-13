@@ -177,6 +177,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('markdown-to-jsonl', 'no table throws', mustThrow(() => TOOLS['markdown-to-jsonl'].handler('no table')));
     push('ascii85-encode', 'happy', TOOLS['ascii85-encode'].handler('Man ') === '9jqo^');
     push('ascii85-encode', 'empty fine', TOOLS['ascii85-encode'].handler('') === '');
+    push('ascii85-decode', 'happy', TOOLS['ascii85-decode'].handler('9jqo^') === 'Man ');
+    push('ascii85-decode', 'bad throws', mustThrow(() => TOOLS['ascii85-decode'].handler('~~~~~')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);
     push('json-to-jsonl', 'bad throws', mustThrow(() => TOOLS['json-to-jsonl'].handler('not json')));
     push('toml-to-json', 'happy', TOOLS['toml-to-json'].handler('a = 1').includes('"a": 1'));
