@@ -67,6 +67,47 @@ T.jsonlToJSON = function (s) {
   return JSON.stringify(docs, null, 2);
 };
 
+/* JSONL duplicate finder: group one-JSON-per-line docs by key fields
+   (or the whole doc when key is empty), keep repeats, sort by count desc.
+   Docs canonicalize with sorted keys so field order never splits a group. */
+T.jsonlDupes = function (s, opts) {
+  var o = opts || {};
+  var raw = String(s === undefined || s === null ? '' : s);
+  var lines = raw.split(/\r?\n/);
+  var docs = [];
+  for (var n = 0; n < lines.length; n++) {
+    if (!lines[n].trim()) continue;
+    var v = T.validateJSON(lines[n]);
+    if (!v.valid) throw new Error('Line ' + (n + 1) + ': ' + (v.error || 'Invalid JSON'));
+    docs.push(v.data);
+  }
+  if (!docs.length) throw new Error('Paste JSONL first \u2014 one JSON value per line');
+  function canon(x) {
+    if (x !== null && typeof x === 'object') {
+      if (Array.isArray(x)) return '[' + x.map(canon).join(',') + ']';
+      return '{' + Object.keys(x).sort().map(function (k) { return JSON.stringify(k) + ':' + canon(x[k]); }).join(',') + '}';
+    }
+    return JSON.stringify(x);
+  }
+  var fields = String(o.key === undefined || o.key === null ? '' : o.key).split(',').map(function (k) { return k.trim(); }).filter(Boolean);
+  var order = [], groups = Object.create(null);
+  docs.forEach(function (d) {
+    var sub = d;
+    if (fields.length) {
+      if (d === null || typeof d !== 'object' || Array.isArray(d)) throw new Error('Key fields need JSON objects \u2014 got ' + canon(d).slice(0, 40));
+      sub = {};
+      fields.forEach(function (k) { sub[k] = Object.prototype.hasOwnProperty.call(d, k) ? d[k] : null; });
+    }
+    var id = canon(sub);
+    if (!Object.prototype.hasOwnProperty.call(groups, id)) { groups[id] = { key: id, n: 0 }; order.push(id); }
+    groups[id].n++;
+  });
+  var dupes = order.map(function (id) { return groups[id]; }).filter(function (g) { return g.n > 1; });
+  if (!dupes.length) return 'No duplicates found';
+  dupes.sort(function (a, b) { return b.n - a.n || (a.key < b.key ? -1 : 1); });
+  return ['count,key'].concat(dupes.map(function (g) { return g.n + ',' + JSON.stringify(g.key); })).join('\n');
+};
+
 T.csvTranspose = function (s, opts) {
   var o = opts || {};
   var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };

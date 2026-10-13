@@ -218,6 +218,11 @@ window.TOOLMANIFEST = [
   { slug: 'jsonl-to-json', name: 'JSONL → JSON', desc: 'Convert newline-delimited JSON to a JSON array \u2014 blank lines skipped, failures carry line numbers', category: 'converters', tags: ['jsonl', 'json', 'ndjson', 'lines'], icon: 'filetype', template: 'transform',
     placeholder: '{"a":1}\n{"b":2}',
     handler: function (s) { return Transforms.jsonlToJSON(s); } },
+  { slug: 'jsonl-duplicate-finder', name: 'JSONL Duplicate Finder', desc: 'Find repeated docs in newline JSON \u2014 group by key fields or the whole doc, sorted by count', category: 'converters', tags: ['jsonl', 'json', 'duplicates', 'dedupe', 'ndjson'], icon: 'filetype', template: 'transform',
+    placeholder: '{"email":"a@x.test"}\n{"email":"b@x.test"}\n{"email":"a@x.test"}',
+    downloadExt: 'csv',
+    handler: function (s, opts) { return Transforms.jsonlDupes(s, opts); },
+    params: [{ key: 'key', label: 'Key fields (comma names, blank = whole doc)', type: 'text', default: '' }] },
   { slug: 'xml-to-json', name: 'XML → JSON', desc: 'Convert XML (SOAP, RSS, configs) to JSON via the native DOMParser — attributes as @-keys, repeats as arrays', category: 'converters', tags: ['xml', 'json', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
     handler: function (s) {
       var d;
