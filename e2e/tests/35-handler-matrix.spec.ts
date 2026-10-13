@@ -50,6 +50,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('csv-to-xml', 'happy', TOOLS['csv-to-xml'].handler('name,age\nAda,30', {}).indexOf('<name>Ada</name>') >= 0);
     push('ini-to-xml', 'happy', TOOLS['ini-to-xml'].handler('[server]\nhost = example.com').indexOf('<host>example.com</host>') >= 0);
     push('ini-to-xml', 'dup throws', mustThrow(() => TOOLS['ini-to-xml'].handler('[s]\nk = 1\nk = 2')));
+    push('ini-to-markdown', 'happy', TOOLS['ini-to-markdown'].handler('[server]\nhost = h', {}).indexOf('| h |') >= 0);
+    push('ini-to-markdown', 'dup throws', mustThrow(() => TOOLS['ini-to-markdown'].handler('[s]\nk = 1\nk = 2', {})));
     push('env-to-xml', 'happy', TOOLS['env-to-xml'].handler('A=1\nB=hello').indexOf('<A>1</A>') >= 0);
     push('env-to-xml', 'no equals throws', mustThrow(() => TOOLS['env-to-xml'].handler('NOEQUALS')));
     push('csv-to-xml', 'empty throws', mustThrow(() => TOOLS['csv-to-xml'].handler('', {})));

@@ -261,6 +261,9 @@ mustThrow(() => T.csvToMarkdown('   \n  ', {}), 'csvToMarkdown empty');mustNotTh
 mustThrow(() => T.iniToXML('   '), 'iniToXML empty');
 mustThrow(() => T.iniToXML('[s]\nk = 1\nk = 2'), 'iniToXML dup key');
 mustNotThrow(() => T.iniToXML('[s]\nk = v'), 'iniToXML good');
+mustThrow(() => T.iniToMarkdown('', {}), 'iniToMarkdown empty');
+mustThrow(() => T.iniToMarkdown('[s]\nk = 1\nk = 2', {}), 'iniToMarkdown dup key');
+mustNotThrow(() => T.iniToMarkdown('[s]\nk = v', {}), 'iniToMarkdown good');
 mustThrow(() => T.csvToXML('', {}), 'csvToXML empty');
 mustNotThrow(() => T.csvToXML('a,b\n1,2', {}), 'csvToXML good');
 mustNotThrow(() => T.csvToXML('name;age\nAda;30', {}), 'csvToXML auto delim good');
