@@ -6054,6 +6054,8 @@ T.yamlToXML = function (s) { if (!String(s).trim()) throw new Error('Enter YAML 
 T.tomlToXML = function (s) { return T.jsonToXML(T.tomlToJSON(s)); };
 /* CSV to XML: parse once with the RFC 4180 CSV core (auto delimiter, headers as keys), emit with the canonical JSON-to-XML emitter (rows repeat as siblings). */
 T.csvToXML = function (s, opts) { return T.jsonToXML(T.csvToJSON(s, opts)); };
+/* CSV to YAML: parse once with the RFC 4180 CSV core (auto delimiter, headers as keys), emit with the canonical JSON-to-YAML emitter (rows as sequences). */
+T.csvToYAML = function (s, opts) { return T.jsonToYAML(T.csvToJSON(s, opts)); };
 /* XML to CSV: parse once with the shared XML parser, unwrap the first repeating group to rows (single records stay one row), emit with the canonical JSON-to-CSV core. */
 T.xmlToCSV = function (s, opts) { var v = T.xmlToJsonValue(s); var ks = Object.keys(v); var root = v[ks[0]]; var rows; if (Array.isArray(root)) rows = root; else if (root !== null && typeof root === 'object') { var found = null; Object.keys(root).forEach(function (k) { if (!found && Array.isArray(root[k])) found = root[k]; }); rows = found || [root]; } else throw new Error('XML has no tabular rows \u2014 need repeating elements'); return T.jsonToCSV(JSON.stringify(rows), opts); };
 /* INI to XML: parse once with the INI core (sections as objects, line-numbered errors), emit with the canonical JSON-to-XML emitter. */
