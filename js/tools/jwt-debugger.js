@@ -39,6 +39,8 @@ App.registerTool('jwt-debugger', {
     var header = '', payload = '', signature = '';
     var rawHeader = null, rawPayload = null;
     var error = null;
+    /* Last verification outcome — stamped into the JSON export. */
+    var verdict = null;
 
     var outputBox = App.el('div');
     var textarea = App.el('textarea', {
@@ -78,7 +80,7 @@ App.registerTool('jwt-debugger', {
     verifyBtn.addEventListener('click', verify);
     var verdictEl = App.el('div', { class: 'verdict' });
     var exportBtn = App.downloadButton(function () {
-      App.download('jwt-debugger-output.json', JSON.stringify({ token: token.trim(), header: rawHeader, payload: rawPayload, signature: signature }, null, 2), 'application/json');
+      App.download('jwt-debugger-output.json', JSON.stringify({ token: token.trim(), header: rawHeader, payload: rawPayload, signature: signature, verification: verdict }, null, 2), 'application/json');
     });
     exportBtn.disabled = true;
     var verifyRow = App.el('div', { class: 'verify-row' }, secretInput, verifyBtn, exportBtn);
@@ -106,6 +108,7 @@ App.registerTool('jwt-debugger', {
     }
 
     function setVerdict(ok, text) {
+      verdict = { ok: !!ok, message: String(text || '') };
       verdictEl.textContent = text;
       verdictEl.style.color = ok ? 'var(--ctp-green)' : 'var(--ctp-red)';
     }
@@ -167,6 +170,7 @@ App.registerTool('jwt-debugger', {
     }
 
     function decode() {
+      verdict = null;
       if (!token.trim()) { resetOutputs(); update(); return; }
       try {
         var result = Transforms.jwtDecode(token.trim());
@@ -196,6 +200,7 @@ App.registerTool('jwt-debugger', {
     }
 
     function clear() {
+      verdict = null;
       token = '';
       textarea.value = '';
       resetOutputs();
