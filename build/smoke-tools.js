@@ -1270,6 +1270,11 @@ console.log('-- rot --');
   ok(TOOLS['hill-cipher'].handler(TOOLS['hill-cipher'].handler('HELLOWORLD', { ka: '3', kb: '3', kc: '2', kd: '5' }), { ka: '3', kb: '3', kc: '2', kd: '5', mode: 'decode' }) === 'HELLOWORLD', 'hill roundtrip');
   ok(TOOLS['hill-cipher'].handler('HELLO', { ka: '3', kb: '3', kc: '2', kd: '5' }).length === 6, 'hill odd pads');
   ok(TOOLS['hill-cipher'].handler.toString().indexOf('hillCipher') >= 0, 'hill delegates');
+  ok(TOOLS['straddling-checkerboard'].handler('AB', { key: 'A' }) === '23', 'straddle vector');
+  ok(TOOLS['straddling-checkerboard'].handler('900', { key: 'A', mode: 'decode' }) === 'HI', 'straddle decode');
+  ok(TOOLS['straddling-checkerboard'].handler(TOOLS['straddling-checkerboard'].handler('HELLOWORLD', { key: 'KEYWORD' }), { key: 'KEYWORD', mode: 'decode' }) === 'HELLOWORLD', 'straddle roundtrip');
+  ok(TOOLS['straddling-checkerboard'].handler('HELLO', { key: 'A' }).length === 8, 'straddle shortens frequent');
+  ok(TOOLS['straddling-checkerboard'].handler.toString().indexOf('straddleCipher') >= 0, 'straddle delegates');
   ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
   ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }

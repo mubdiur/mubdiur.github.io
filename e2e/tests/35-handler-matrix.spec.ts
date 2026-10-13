@@ -213,6 +213,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('two-square-cipher', 'bad key throws', mustThrow(() => TOOLS['two-square-cipher'].handler('AB', { key1: '', key2: 'A' })));
     push('hill-cipher', 'happy', TOOLS['hill-cipher'].handler('HELP', { ka: '3', kb: '3', kc: '2', kd: '5' }) === 'HIAT');
     push('hill-cipher', 'bad matrix throws', mustThrow(() => TOOLS['hill-cipher'].handler('AB', { ka: '2', kb: '4', kc: '2', kd: '4' })));
+    push('straddling-checkerboard', 'happy', TOOLS['straddling-checkerboard'].handler('AB', { key: 'A' }) === '23');
+    push('straddling-checkerboard', 'blank cell throws', mustThrow(() => TOOLS['straddling-checkerboard'].handler('10', { key: 'A', mode: 'decode' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

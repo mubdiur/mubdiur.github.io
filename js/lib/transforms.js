@@ -2209,6 +2209,44 @@ T.hillDecode = function (s, a, b, c, d) {
   return out;
 };
 T.hillCipher = function (s, opts) { var o = opts || {}; var a = o.ka === undefined ? 3 : o.ka, b = o.kb === undefined ? 3 : o.kb, c = o.kc === undefined ? 2 : o.kc, d = o.kd === undefined ? 5 : o.kd; if ((o.mode || 'encode') === 'decode') return T.hillDecode(s, a, b, c, d); return T.hillEncode(s, a, b, c, d); };
+/* Straddling checkerboard cores: 8 frequent letters take 1 digit (2-9), rest take row 0/1 plus column; 10/11 are blank and rejected. */
+T.straddleBoard = function (key) {
+  var k = String(key === undefined ? 'KEYWORD' : key).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!k) throw new Error('Enter a letter key \u2014 A-Z builds the board');
+  var seen = {}; var seq = [];
+  var full = k + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (var i = 0; i < full.length; i++) { var c = full.charAt(i); if (!seen[c]) { seen[c] = 1; seq.push(c); } }
+  var r0 = seq.slice(0, 8), r1 = seq.slice(8, 18), r2 = seq.slice(18, 26);
+  var enc = {}, dec = {};
+  for (i = 0; i < 8; i++) { enc[r0[i]] = String(i + 2); dec[String(i + 2)] = r0[i]; }
+  for (i = 0; i < 10; i++) { enc[r1[i]] = '0' + i; dec['0' + i] = r1[i]; }
+  for (i = 0; i < 8; i++) { enc[r2[i]] = '1' + (i + 2); dec['1' + (i + 2)] = r2[i]; }
+  return { enc: enc, dec: dec };
+};
+T.straddleEncode = function (s, key) {
+  var b = T.straddleBoard(key);
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var out = '';
+  for (var i = 0; i < t.length; i++) out += b.enc[t.charAt(i)];
+  return out;
+};
+T.straddleDecode = function (s, key) {
+  var b = T.straddleBoard(key);
+  var t = String(s).replace(/[^0-9]/g, '');
+  var out = ''; var i = 0;
+  while (i < t.length) {
+    var c = t.charAt(i);
+    if (c === '0' || c === '1') {
+      if (i + 1 >= t.length) throw new Error('Bad checkerboard input \u2014 truncated row ' + c);
+      var code = c + t.charAt(i + 1);
+      if (!b.dec[code]) throw new Error('Bad checkerboard input \u2014 blank cell ' + code);
+      out += b.dec[code]; i += 2;
+    } else { out += b.dec[c]; i++; }
+  }
+  return out;
+};
+T.straddleCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'KEYWORD' : o.key; if ((o.mode || 'encode') === 'decode') return T.straddleDecode(s, k); return T.straddleEncode(s, k); };
 /* Columnar cores: keyword-ordered columns (stable for duplicate letters), no padding, uneven columns handled, code points preserved. */
 T.columnarOrder = function (key) {
   var k = String(key === undefined ? 'ZEBRAS' : key).toUpperCase().replace(/[^A-Z]/g, '');
