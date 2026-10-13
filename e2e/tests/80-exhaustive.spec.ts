@@ -36,6 +36,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'quoted-printable-encode': { good: 'a=b', expectInOutput: /=3D/ },
   'quoted-printable-decode': { good: 'a=3Db', expectInOutput: /a=b/ },
   'punycode-encode': { good: 'm\u00fcnchen.de', expectInOutput: /xn--/ },
+  'utf7-encode': { good: 'a+b', expectInOutput: /\+-/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },

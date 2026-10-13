@@ -536,6 +536,8 @@ window.TOOLMANIFEST = [
   { slug: 'chmod-converter', name: 'Chmod Converter', desc: 'Convert between octal (755) and symbolic (rwxr-xr-x) Unix permissions', category: 'code', tags: ['chmod', 'permissions', 'unix'], icon: 'terminal', template: 'transform',
     placeholder: '755',
     handler: function (s) { return Transforms.chmodConvert(s); } },
+  { slug: 'utf7-encode', name: 'UTF-7 Encode', desc: 'Encode text to UTF-7 mail-safe ASCII \u2014 printables pass, + escapes, other runs shift to Base64', category: 'encoding', tags: ['utf-7', 'utf7', 'email', 'imap', 'encode'], icon: 'binary', template: 'transform',
+    handler: function (s) { return Transforms.utf7Encode(s); } },
   { slug: 'punycode-encode', name: 'Punycode Encode', desc: 'Encode internationalized hostnames to Punycode \u2014 umlauts, CJK and emoji become xn-- labels, ASCII passes through', category: 'encoding', tags: ['punycode', 'idna', 'hostname', 'encode'], icon: 'globe', template: 'transform',
     placeholder: 'm\u00fcnchen.de',
     handler: function (s) { return Transforms.punycodeEncode(s); } },

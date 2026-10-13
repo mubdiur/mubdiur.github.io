@@ -1983,6 +1983,38 @@ T.base58Bytes = function (s) { return new Uint8Array(base58ToBytes(s)); };
 /* Ascii85 encode: UTF-8 bytes to printable Base85 (4 bytes to 5 chars, all-zero groups squeeze to z, final partial groups emit length-matched prefixes). */
 /* Quoted-Printable encode: RFC 2045 email-safe text (printables pass, = and non-ASCII become =XX, trailing blanks hardened, lines soft-wrapped at 76 cols). */
 /* Punycode encode: RFC 3492 Bootstring for internationalized hostnames (per-label xn--, ASCII passes through, case folds, lone surrogates become U+FFFD). */
+/* UTF-7 encode: RFC 2152 mail-safe text (printable ASCII passes, + escapes to +-, runs of other units shift to modified Base64 over UTF-16BE). */
+T.utf7Encode = function (s) {
+  var str = String(s);
+  if (!str) return '';
+  var B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  var out = '', run = [];
+  function flush() {
+    if (!run.length) return;
+    var acc = 0, nbits = 0, enc = '';
+    for (var i = 0; i < run.length; i++) {
+      var u = run[i];
+      var hi = (u >> 8) & 255, lo = u & 255, b;
+      for (var k = 0; k < 2; k++) {
+        b = k ? lo : hi;
+        acc = (acc << 8) | b;
+        nbits += 8;
+        while (nbits >= 6) { nbits -= 6; enc += B64.charAt((acc >> nbits) & 63); }
+      }
+    }
+    if (nbits) enc += B64.charAt((acc << (6 - nbits)) & 63);
+    out += '+' + enc + '-';
+    run = [];
+  }
+  for (var p = 0; p < str.length; p++) {
+    var c = str.charCodeAt(p);
+    if (c === 43) { flush(); out += '+-'; }
+    else if (c === 9 || c === 10 || c === 13 || (c >= 32 && c <= 126)) { flush(); out += str.charAt(p); }
+    else run.push(c);
+  }
+  flush();
+  return out;
+};
 T.punycodeEncode = function (s) {
   var str = String(s);
   if (!str.trim()) return '';
