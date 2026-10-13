@@ -538,6 +538,8 @@ window.TOOLMANIFEST = [
     handler: function (s) { return Transforms.chmodConvert(s); } },
   { slug: 'utf7-encode', name: 'UTF-7 Encode', desc: 'Encode text to UTF-7 mail-safe ASCII \u2014 printables pass, + escapes, other runs shift to Base64', category: 'encoding', tags: ['utf-7', 'utf7', 'email', 'imap', 'encode'], icon: 'binary', template: 'transform',
     handler: function (s) { return Transforms.utf7Encode(s); } },
+  { slug: 'utf7-decode', name: 'UTF-7 Decode', desc: 'Decode UTF-7 back to text \u2014 shifted runs restored, bad shifts and pad bits pinpointed', category: 'encoding', tags: ['utf-7', 'utf7', 'email', 'imap', 'decode'], icon: 'binary', template: 'transform',
+    handler: function (s) { return Transforms.utf7Decode(s); } },
   { slug: 'punycode-encode', name: 'Punycode Encode', desc: 'Encode internationalized hostnames to Punycode \u2014 umlauts, CJK and emoji become xn-- labels, ASCII passes through', category: 'encoding', tags: ['punycode', 'idna', 'hostname', 'encode'], icon: 'globe', template: 'transform',
     placeholder: 'm\u00fcnchen.de',
     handler: function (s) { return Transforms.punycodeEncode(s); } },

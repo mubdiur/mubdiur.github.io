@@ -2015,6 +2015,34 @@ T.utf7Encode = function (s) {
   flush();
   return out;
 };
+/* UTF-7 decode: pasted quotes stripped, +- folds to +, shifted runs decoded as UTF-16BE with zero-pad-bit and bad-shift guards. */
+T.utf7Decode = function (s) {
+  var str = unquote(s);
+  if (!str.trim()) throw new Error('Enter UTF-7 input');
+  var B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  var out = '';
+  for (var p = 0; p < str.length; p++) {
+    var ch = str.charAt(p);
+    if (ch !== '+') { out += ch; continue; }
+    if (str.charAt(p + 1) === '-') { out += '+'; p++; continue; }
+    var e = p + 1;
+    while (e < str.length && B64.indexOf(str.charAt(e)) >= 0) e++;
+    if (e >= str.length || str.charAt(e) !== '-') throw new Error('Bad shift at position ' + (p + 1) + ' \u2014 need Base64 then -');
+    var chunk = str.slice(p + 1, e);
+    if (chunk.length % 4 === 1) throw new Error('Bad Base64 length at position ' + (p + 1));
+    var bytes = [], acc = 0, nbits = 0;
+    for (var i = 0; i < chunk.length; i++) {
+      acc = (acc << 6) | B64.indexOf(chunk.charAt(i));
+      nbits += 6;
+      if (nbits >= 8) { nbits -= 8; bytes.push((acc >> nbits) & 255); }
+    }
+    if (nbits && (acc & ((1 << nbits) - 1))) throw new Error('Non-zero pad bits at position ' + (p + 1));
+    if (bytes.length % 2) throw new Error('Odd byte count at position ' + (p + 1));
+    for (var k = 0; k < bytes.length; k += 2) out += String.fromCharCode(bytes[k] * 256 + bytes[k + 1]);
+    p = e;
+  }
+  return out;
+};
 T.punycodeEncode = function (s) {
   var str = String(s);
   if (!str.trim()) return '';
