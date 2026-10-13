@@ -7,15 +7,15 @@ import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLi
 import { EditorState, Compartment, StateField, StateEffect, RangeSetBuilder } from '@codemirror/state';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { syntaxHighlighting, defaultHighlightStyle, indentOnInput, bracketMatching, foldGutter } from '@codemirror/language';
-import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
+import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap, completeFromList } from '@codemirror/autocomplete';
 import { searchKeymap, highlightSelectionMatches } from '@codemirror/search';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
-import { java } from '@codemirror/lang-java';
-import { cpp } from '@codemirror/lang-cpp';
-import { rust } from '@codemirror/lang-rust';
+import { java, javaLanguage } from '@codemirror/lang-java';
+import { cpp, cppLanguage } from '@codemirror/lang-cpp';
+import { rust, rustLanguage } from '@codemirror/lang-rust';
 import { StreamLanguage } from '@codemirror/language';
-import { clike } from '@codemirror/legacy-modes/mode/clike';
+import { csharp } from '@codemirror/legacy-modes/mode/clike';
 import { go } from '@codemirror/legacy-modes/mode/go';
 import { HighlightStyle } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
@@ -279,20 +279,40 @@ const syntax = HighlightStyle.define([
   { tag: tags.changed, color: '#ffd866' },
 ]);
 
+/* Keyword completion for the languages whose packages ship no
+   completion source (cpp/java/rust) and the legacy stream modes
+   (csharp/go). javascript()/python() bundle their own sources.
+   StreamLanguage instances expose .data, so each source only fires
+   while its language is active. */
+function keywords(list) {
+  return completeFromList(list.map(function (w) { return { label: w, type: 'keyword' }; }));
+}
+
+const CPP_WORDS = ['auto','bool','break','case','catch','char','char8_t','char16_t','char32_t','class','const','consteval','constexpr','constinit','continue','co_await','co_return','co_yield','concept','decltype','default','delete','do','double','else','enum','explicit','export','extern','false','final','float','for','friend','goto','if','inline','int','long','mutable','namespace','new','noexcept','nullptr','operator','override','private','protected','public','register','requires','return','short','signed','sizeof','static','static_assert','static_cast','struct','switch','template','this','thread_local','throw','true','try','typedef','typeid','typename','union','unsigned','using','virtual','void','volatile','wchar_t','while','and','or','not','size_t','string','vector','map','cout','cin','endl','include','define','pragma'];
+const JAVA_WORDS = ['abstract','assert','boolean','break','byte','case','catch','char','class','const','continue','default','do','double','else','enum','extends','final','finally','float','for','goto','if','implements','import','instanceof','int','interface','long','native','new','package','permits','private','protected','public','record','return','sealed','short','static','strictfp','super','switch','synchronized','this','throw','throws','transient','try','var','void','volatile','when','while','yield','true','false','null','String','System','out','println','print'];
+const RUST_WORDS = ['as','async','await','break','const','continue','crate','dyn','else','enum','extern','false','fn','for','if','impl','in','let','loop','match','mod','move','mut','pub','ref','return','self','Self','static','struct','super','trait','true','type','union','unsafe','use','where','while','try','yield','String','str','Vec','vec','Option','Some','None','Result','Ok','Err','println','print','format','panic','assert','derive','Clone','Debug','Copy','Default','todo','unimplemented'];
+const CS_WORDS = ['abstract','as','async','await','base','bool','break','byte','case','catch','char','checked','class','const','continue','decimal','default','delegate','do','double','else','enum','event','explicit','extern','false','finally','fixed','float','for','foreach','goto','if','implicit','in','int','interface','internal','is','lock','long','namespace','nameof','new','null','object','operator','out','override','params','private','protected','public','readonly','record','ref','return','sbyte','sealed','short','sizeof','stackalloc','static','string','struct','switch','this','throw','true','try','typeof','uint','ulong','unchecked','unsafe','ushort','using','virtual','void','volatile','when','while','var','dynamic','get','set','with','init','file','nint','nuint','Task','Console','WriteLine','List','Dictionary'];
+const GO_WORDS = ['break','case','chan','const','continue','default','defer','else','fallthrough','for','func','go','goto','if','import','interface','map','package','range','return','select','struct','switch','type','var','true','false','nil','iota','string','int','int8','int16','int32','int64','uint','uint8','uint16','uint32','uint64','uintptr','float32','float64','complex64','complex128','bool','byte','rune','error','any','make','new','len','cap','append','copy','delete','panic','recover','print','println','close','clear','min','max'];
+
 function langFor(id) {
   switch (id) {
     case 'js': return javascript();
     case 'py': return python();
     case 'c':
-    case 'cpp': return cpp();
-    case 'cs': return StreamLanguage.define(clike({ name: 'text/x-csharp' }));
-    case 'java': return java();
-    case 'go': return StreamLanguage.define(go);
-    case 'rs': return rust();
+    case 'cpp': return [cpp(), cppLanguage.data.of({ autocomplete: keywords(CPP_WORDS) })];
+    case 'cs': {
+      const csLang = StreamLanguage.define(csharp);
+      return [csLang, csLang.data.of({ autocomplete: keywords(CS_WORDS) })];
+    }
+    case 'java': return [java(), javaLanguage.data.of({ autocomplete: keywords(JAVA_WORDS) })];
+    case 'go': {
+      const goLang = StreamLanguage.define(go);
+      return [goLang, goLang.data.of({ autocomplete: keywords(GO_WORDS) })];
+    }
+    case 'rs': return [rust(), rustLanguage.data.of({ autocomplete: keywords(RUST_WORDS) })];
     default: return [];
   }
 }
-
 export function createIdeEditor(parent, opts) {
   opts = opts || {};
   const langCompartment = new Compartment();

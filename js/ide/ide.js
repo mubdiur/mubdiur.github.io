@@ -506,7 +506,7 @@ function renderIde() {
   root.appendChild(App.el('div', { class: 'ide-main' }, editorWrap, panel));
 
   // Robust import: try relative first (works for file:// and sub-paths), fall back to absolute
-  var editorUrls = ['js/ide/vendor/editor.js?v=15', '/js/ide/vendor/editor.js?v=15'];
+  var editorUrls = ['js/ide/vendor/editor.js?v=16', '/js/ide/vendor/editor.js?v=16'];
   function tryImportEditor(i) {
     if (i >= editorUrls.length) throw new Error('Editor failed to load: all import paths failed');
     return import(editorUrls[i]).catch(function (e) {
