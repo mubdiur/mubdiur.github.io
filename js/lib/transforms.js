@@ -6168,6 +6168,8 @@ T.tomlToMarkdown = function (s, opts) { return T.jsonlToMarkdown(JSON.stringify(
 T.tomlToSchema = function (s, opts) { return T.jsonToSchema(T.tomlToJSON(s), opts); };
 T.tomlToCSV = function (s, opts) { return T.jsonToCSV(T.tomlToJSON(s), opts); };
 /* YAML to Markdown: parse to maps or sequences (line-numbered errors), unwrap sequences to one compact JSON line each, emit pipe tables with the canonical JSONL-to-Markdown core. */
+/* YAML to JSONL: maps or sequences to CSV rows with the shared YAML core, one compact object per line with the CSV-to-JSONL core (line-numbered errors, delimiter shared). */
+T.yamlToJSONL = function (s, opts) { return T.csvToJSONL(T.yamlToCSV(s, opts), opts); };
 T.yamlToMarkdown = function (s, opts) { if (!String(s).trim()) throw new Error('Enter YAML to convert'); var v = JSON.parse(T.yamlToJSON(s)); var docs = Array.isArray(v) ? v : [v]; if (!docs.length) throw new Error('YAML has no tabular rows \u2014 need maps with keys'); for (var i = 0; i < docs.length; i++) { var d = docs[i]; if (d === null || typeof d !== 'object' || Array.isArray(d)) throw new Error('YAML has no tabular rows \u2014 need maps with keys'); } return T.jsonlToMarkdown(docs.map(function (r) { return JSON.stringify(r); }).join('\n'), opts); };
 /* YAML to CSV: parse once with the YAML core (line-numbered errors), emit with the canonical JSON-to-CSV core (sequences become rows, nested flatten, delimiter shared). */
 /* YAML to Schema: parse once with the shared YAML core (line-numbered errors), infer with the canonical JSON-to-Schema core so nested types and required keys stay single-sourced. */

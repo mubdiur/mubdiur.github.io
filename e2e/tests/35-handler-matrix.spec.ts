@@ -165,6 +165,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('csv-to-jsonl', 'empty throws', mustThrow(() => TOOLS['csv-to-jsonl'].handler('   ')));
     push('xml-to-jsonl', 'happy', TOOLS['xml-to-jsonl'].handler('<r><a>1</a></r>').split('\n').length === 1);
     push('xml-to-jsonl', 'mismatch throws', mustThrow(() => TOOLS['xml-to-jsonl'].handler('<a><b>')));
+    push('yaml-to-jsonl', 'happy', TOOLS['yaml-to-jsonl'].handler('a: 1').split('\n').length === 1);
+    push('yaml-to-jsonl', 'dup throws', mustThrow(() => TOOLS['yaml-to-jsonl'].handler('a: 1\na: 2')));
     push('toml-to-json', 'happy', TOOLS['toml-to-json'].handler('a = 1').includes('"a": 1'));
     push('toml-to-json', 'dup throws', mustThrow(() => TOOLS['toml-to-json'].handler('a = 1\na = 2')));
     push('xml-to-toml', 'happy', TOOLS['xml-to-toml'].handler('<r><a>1</a></r>').includes('a = '));
