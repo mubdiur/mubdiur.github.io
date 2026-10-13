@@ -181,11 +181,17 @@ function renderTools() {
       });
       return;
     }
-    var scored = TOOLMANIFEST
-      .map(function (t) { return { tool: t, s: q ? App.toolMatchScore(t, q) : 0 }; })
-      .filter(function (x) { return (!state.cat || x.tool.category === state.cat) && (!q || x.s > 0); })
-      .sort(function (a, b) { return b.s - a.s || a.tool.slug.length - b.tool.slug.length; });
-    var filtered = scored.map(function (x) { return x.tool; });
+    /* Search ranking shares the palette scorer, favorite/recent boosts
+       included, so both surfaces always agree. Category-only browsing
+       keeps its short-slug-first order. */
+    var filtered;
+    if (q) {
+      filtered = App.rankedTools(q, TOOLMANIFEST.length).filter(function (t) { return !state.cat || t.category === state.cat; });
+    } else {
+      filtered = TOOLMANIFEST
+        .filter(function (t) { return !state.cat || t.category === state.cat; })
+        .sort(function (a, b) { return a.slug.length - b.slug.length; });
+    }
     var catName = state.cat ? (TOOLCATEGORIES.find(function (c) { return c.id === state.cat; }) || {}).name : '';
     results.appendChild(App.el('div', { class: 'text-xs font-mono', style: { color: 'rgba(141,148,158,0.7)', marginBottom: '0.75rem' },
       text: filtered.length + ' tool' + (filtered.length !== 1 ? 's' : '') + ' found' + (catName ? ' in ' + catName : '') }));
