@@ -519,6 +519,10 @@ console.log('-- json to toml --');
     var _jt = TOOLS['jwt-generator'].handler('{"sub":"1"}', { secret: 's', expires: 'none' });
     ok(TOOLS['jwt-verifier'].handler(_jt, { secret: 's' }).indexOf('Signature: VALID') === 0, 'jwt-verifier roundtrip valid');
     ok(TOOLS['jwt-verifier'].handler(_jt, { secret: 'wrong' }).indexOf('INVALID') >= 0, 'jwt-verifier wrong secret invalid'); }
+    var _jtf = TOOLS['jwt-generator'].handler('{"sub":"1"}', { secret: 's', expires: '1h' });
+    ok(/Expiry:   valid \(expires in /.test(TOOLS['jwt-verifier'].handler(_jtf, { secret: 's' })), 'jwt-verifier expiry badge counts down');
+    var _jtp = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' + Buffer.from('{"sub":"1","exp":1}').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') + '.x';
+    ok(/EXPIRED .+ ago/.test(TOOLS['jwt-verifier'].handler(_jtp, { secret: 's' })), 'jwt-verifier expiry badge counts up');
   ok(T.hexToBase64('616263') === 'YWJj', 'hexToBase64 abc vector');
   ok(T.hexToBase64('deadbeef') === Buffer.from('deadbeef', 'hex').toString('base64'), 'hexToBase64 matches Buffer');
   { global.Core = { sha384Hex: function () { return require('crypto').createHash('sha384').update('abc').digest('hex'); }, sha512Hex: function () { return '00'; }, sha256Hex: function () { return '00'; } };
