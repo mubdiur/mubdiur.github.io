@@ -369,6 +369,12 @@ console.log('-- text / formats --');
   ok(TOOLS['csv-pivot-table'].handler('d;q;s\ne;q1;10', { row: 'd', col: 'q', value: 's', agg: 'sum' }) === ';q1\ne;10', 'pivot auto semicolon');
   ok(TOOLS['csv-pivot-table'].handler(_pv, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', totals: 'true' }) === ',q1,q2,Total\neng,10,20,30\nops,5,,5\nTotal,15,20,35', 'pivot totals');
   ok(TOOLS['csv-pivot-table'].handler(_pv, { agg: 'count', totals: true }) === ',q1,q2,Total\neng,1,1,2\nops,1,,1\nTotal,2,1,3', 'pivot totals bool');
+  var _pvr = 'dept,q,sales\nops,q1,5\neng,q1,10\neng,q2,20';
+  ok(TOOLS['csv-pivot-table'].handler(_pvr, { row: 'dept', col: 'q', value: 'sales', agg: 'sum' }) === ',q1,q2\nops,5,\neng,10,20', 'pivot seen default');
+  ok(TOOLS['csv-pivot-table'].handler(_pvr, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', sort: 'row-asc' }) === ',q1,q2\neng,10,20\nops,5,', 'pivot sort row-asc');
+  ok(TOOLS['csv-pivot-table'].handler(_pvr, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', sort: 'row-desc' }) === ',q1,q2\nops,5,\neng,10,20', 'pivot sort row-desc');
+  ok(TOOLS['csv-pivot-table'].handler(_pvr, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', sort: 'row-total' }) === ',q1,q2\neng,10,20\nops,5,', 'pivot sort row-total');
+  ok(TOOLS['csv-pivot-table'].handler(_pvr, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', sort: 'col-total' }) === ',q2,q1\nops,,5\neng,20,10', 'pivot sort col-total');
   ok(TOOLS['csv-delimiter-sniffer'].handler('a;b,c\nd;e,f').indexOf('ambiguous') >= 0, 'sniffer tie reports honest');
   ok(TOOLS['csv-delimiter-sniffer'].handler('plain').indexOf('none detected') >= 0, 'sniffer single column');
 }

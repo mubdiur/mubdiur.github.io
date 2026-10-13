@@ -66,6 +66,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('csv-pivot-table', 'unknown col throws', mustThrow(() => TOOLS['csv-pivot-table'].handler(PV, { row: 'nope', col: 'q', agg: 'count' })));
     push('csv-pivot-table', 'empty throws', mustThrow(() => TOOLS['csv-pivot-table'].handler('   ', {})));
     push('csv-pivot-table', 'totals', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', totals: 'true' }).includes('Total,15,20,35'));
+    push('csv-pivot-table', 'sort row-total', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', sort: 'row-total' }) === ',q1,q2\neng,10,20\nops,5,');
+    push('csv-pivot-table', 'sort col-total', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'sum', sort: 'col-total' }) === ',q2,q1\neng,20,10\nops,,5');
     push('csv-transposer', 'empty throws', mustThrow(() => TOOLS['csv-transposer'].handler('   ', {})));
     push('csv-delimiter-sniffer', 'empty throws', mustThrow(() => TOOLS['csv-delimiter-sniffer'].handler('   ')));
     push('yaml-to-json', 'happy', JSON.parse(TOOLS['yaml-to-json'].handler('a: 1\nb: hello')).a === 1);

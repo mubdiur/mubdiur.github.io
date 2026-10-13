@@ -973,6 +973,41 @@ T.csvPivot = function (s, opts) {
       return has(cells[rk], ck) ? aggVals(cells[rk][ck]) : '';
     });
   });
+  var sortMode = String(o.sort || 'seen');
+  if (['seen', 'row-asc', 'row-desc', 'row-total', 'col-total'].indexOf(sortMode) < 0) sortMode = 'seen';
+  function keyCmp(a, b) {
+    var na = Number(a), nb = Number(b);
+    var aN = a !== '' && isFinite(na), bN = b !== '' && isFinite(nb);
+    if (aN && bN) return na - nb;
+    if (aN) return -1;
+    if (bN) return 1;
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
+  function rowNumTotal(row) {
+    var t = 0;
+    row.forEach(function (v) { var n = Number(v); if (v !== '' && isFinite(n)) t += n; });
+    return t;
+  }
+  if (sortMode === 'row-asc' || sortMode === 'row-desc' || sortMode === 'row-total') {
+    var rOrder = rowKeys.map(function (_, i) { return i; });
+    if (sortMode === 'row-total') {
+      var rTotals = matrix.map(rowNumTotal);
+      rOrder.sort(function (a, b) { return rTotals[b] - rTotals[a] || keyCmp(rowKeys[a], rowKeys[b]); });
+    } else if (sortMode === 'row-asc') {
+      rOrder.sort(function (a, b) { return keyCmp(rowKeys[a], rowKeys[b]); });
+    } else {
+      rOrder.sort(function (a, b) { return keyCmp(rowKeys[b], rowKeys[a]); });
+    }
+    rowKeys = rOrder.map(function (i) { return rowKeys[i]; });
+    matrix = rOrder.map(function (i) { return matrix[i]; });
+  }
+  if (sortMode === 'col-total') {
+    var cTotals = colKeys.map(function (_, c) { return rowNumTotal(matrix.map(function (row) { return row[c]; })); });
+    var cOrder = colKeys.map(function (_, i) { return i; });
+    cOrder.sort(function (a, b) { return cTotals[b] - cTotals[a] || keyCmp(colKeys[a], colKeys[b]); });
+    colKeys = cOrder.map(function (i) { return colKeys[i]; });
+    matrix = matrix.map(function (row) { return cOrder.map(function (i) { return row[i]; }); });
+  }
   function marginSum(vals) {
     var t = 0, any = false;
     vals.forEach(function (v) { var n = Number(v); if (v !== '' && isFinite(n)) { t += n; any = true; } });
