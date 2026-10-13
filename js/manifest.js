@@ -10,11 +10,7 @@ window.TOOLMANIFEST = [
   // ── JSON ────────────────────────────────────────────────
   { slug: 'json-validator', name: 'JSON Validator', desc: 'Validate and format JSON with detailed error messages — line, column, and position', category: 'json', tags: ['validate', 'format', 'lint'], icon: 'braces', template: 'custom' },
   { slug: 'json-formatter', name: 'JSON Formatter', desc: 'Beautify JSON with configurable indentation', category: 'json', tags: ['format', 'beautify', 'pretty-print'], icon: 'braces', template: 'transform',
-    handler: function (s, opts) {
-      var n = parseInt((opts && opts.indent) || '2', 10);
-      if (isNaN(n) || n < 1 || n > 8) n = 2;
-      return Transforms.formatJSON(s, n);
-    },
+    handler: function (s, opts) { return Transforms.formatJSONOpts(s, opts); },
     params: [{ key: 'indent', label: 'Indent', type: 'select', default: '2', options: [{ value: '2', label: '2 spaces' }, { value: '4', label: '4 spaces' }, { value: '1', label: '1 space' }] }] },
   { slug: 'json-minifier', name: 'JSON Minifier', desc: 'Compress JSON by removing all whitespace', category: 'json', tags: ['minify', 'compress'], icon: 'braces', template: 'transform',
     handler: function (s) { return Transforms.minifyJSON(s); } },
@@ -59,20 +55,11 @@ window.TOOLMANIFEST = [
   { slug: 'slug-generator', name: 'Slug Generator', desc: 'Generate URL-friendly slug from text', category: 'text', tags: ['slug', 'url'], icon: 'globe', template: 'transform',
     handler: function (s) { return Transforms.slugify(s); } },
   { slug: 'text-diff', name: 'Text Diff', desc: 'Myers shortest-edit-script line diff (the algorithm behind GNU diff/Git) — pinpoints what changed instead of flagging everything after an insertion', category: 'text', tags: ['diff', 'compare'], icon: 'gitbranch', template: 'transform',
-    handler: function (s, opts) {
-      var b = (opts && opts.compareTo) || '';
-      if ((opts && opts.granularity) === 'words') return MyersDiff.wordsText(s, b);
-      return Transforms.textDiff(s, b);
-    },
+    handler: function (s, opts) { return Transforms.diffOpts(s, opts); },
     params: [{ key: 'compareTo', label: 'Compare with', type: 'textarea', default: '' },
       { key: 'granularity', label: 'Granularity', type: 'select', default: 'lines', options: [{ value: 'lines', label: 'Lines' }, { value: 'words', label: 'Words' }] }] },
   { slug: 'regex-tester', name: 'Regex Tester', desc: 'Test regular expressions against text with match count', category: 'text', tags: ['regex', 'test', 'pattern'], icon: 'code2', template: 'transform',
-    handler: function (s, opts) {
-      var pat = (opts && opts.pattern) || ''; var flags = (opts && opts.flags) || 'g';
-      if (!pat) throw new Error('Enter a regex pattern');
-      var r = Transforms.regexTest(pat, flags, s);
-      return 'Matches found: ' + r.count + '\n' + '\u2500'.repeat(40) + '\n' + r.matches.join('\n');
-    },
+    handler: function (s, opts) { return Transforms.regexTestOpts(s, opts); },
     params: [
       { key: 'pattern', label: 'Pattern', type: 'text', default: '' },
       { key: 'flags', label: 'Flags', type: 'select', default: 'g', options: [{ value: 'g', label: 'g' }, { value: 'gi', label: 'gi' }, { value: 'gm', label: 'gm' }, { value: 'gim', label: 'gim' }] }
@@ -80,16 +67,13 @@ window.TOOLMANIFEST = [
   { slug: 'regex-escape', name: 'Regex Escape', desc: 'Escape special regex characters in text', category: 'text', tags: ['regex', 'escape'], icon: 'code2', template: 'transform',
     handler: function (s) { return Transforms.regexEscape(s); } },
   { slug: 'text-sorter', name: 'Text Sorter', desc: 'Sort lines alphabetically or by length', category: 'text', tags: ['sort', 'lines'], icon: 'arrowleftright', template: 'transform',
-    handler: function (s, opts) {
-      var desc = opts && opts.direction === 'desc';
-      return ((opts && opts.sortBy) || 'alpha') === 'length' ? Transforms.sortByLength(s, desc) : Transforms.sortLines(s, desc);
-    },
+    handler: function (s, opts) { return Transforms.sortText(s, opts); },
     params: [
       { key: 'sortBy', label: 'Sort by', type: 'select', default: 'alpha', options: [{ value: 'alpha', label: 'Alphabetical' }, { value: 'length', label: 'Length' }] },
       { key: 'direction', label: 'Direction', type: 'select', default: 'asc', options: [{ value: 'asc', label: 'Ascending' }, { value: 'desc', label: 'Descending' }] }
     ] },
   { slug: 'text-reverser', name: 'Text Reverser', desc: 'Reverse entire text or each line', category: 'text', tags: ['reverse'], icon: 'shuffle', template: 'transform',
-    handler: function (s, opts) { return Transforms.reverseText(s, opts && opts.mode === 'lines'); },
+    handler: function (s, opts) { return Transforms.reverseTextOpts(s, opts); },
     params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'full', options: [{ value: 'full', label: 'Full text' }, { value: 'lines', label: 'Each line' }] }] },
   { slug: 'text-deduplicator', name: 'Line Deduplicator', desc: 'Remove duplicate lines from text', category: 'text', tags: ['deduplicate', 'clean'], icon: 'combine', template: 'transform',
     handler: function (s) { return Transforms.deduplicate(s); } },
@@ -255,10 +239,7 @@ window.TOOLMANIFEST = [
     handler: function (s, opts) { return Transforms.jsonPath(s, (opts && opts.path) || '$'); },
     params: [{ key: 'path', label: 'Path', type: 'text', default: '$' }] },
   { slug: 'html-to-markdown', name: 'HTML → Markdown', desc: 'Convert HTML to Markdown — headings, emphasis, lists, tables', category: 'converters', tags: ['html', 'markdown', 'convert'], icon: 'filetype', template: 'transform',
-    handler: function (s) {
-      if (!String(s).trim()) throw new Error('Enter HTML to convert');
-      return Transforms.htmlToMarkdown(s);
-    } },
+    handler: function (s) { return Transforms.htmlToMarkdownOpts(s); } },
   { slug: 'json-to-toml', name: 'JSON → TOML', desc: 'Convert JSON to TOML', category: 'converters', tags: ['json', 'toml', 'convert'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.jsonToTOML(s); } },
   { slug: 'toml-to-json', name: 'TOML → JSON', desc: 'Convert TOML to JSON', category: 'converters', tags: ['toml', 'json', 'convert'], icon: 'filetype', template: 'transform',
@@ -276,16 +257,9 @@ window.TOOLMANIFEST = [
     handler: function (s, opts) { return Transforms.curlToFetch(s, (opts && opts.style) || 'async'); },
     params: [{ key: 'style', label: 'Style', type: 'select', default: 'async', options: [{ value: 'async', label: 'Async/await' }, { value: 'promise', label: 'Promises' }] }] },
   { slug: 'yaml-formatter', name: 'YAML Formatter', desc: 'Format YAML with canonical indentation', category: 'converters', tags: ['yaml', 'format'], icon: 'filetype', template: 'transform',
-    handler: function (s) {
-      if (!String(s).trim()) throw new Error('Enter YAML to format');
-      return Transforms.yamlFormat(s);
-    } },
+    handler: function (s) { return Transforms.yamlFormatOpts(s); } },
   { slug: 'semver-compare', name: 'SemVer Compare', desc: 'Compare semantic versions — ordering, bump kind, prerelease precedence', category: 'code', tags: ['semver', 'version', 'compare'], icon: 'code2', template: 'transform',
-    handler: function (s, opts) {
-      var b = (opts && opts.compareTo) || '';
-      if (!String(s).trim() || !String(b).trim()) return 'Enter a version in each field';
-      return Transforms.semverCompare(String(s).trim(), String(b).trim());
-    },
+    handler: function (s, opts) { return Transforms.semverCompareOpts(s, opts); },
     params: [{ key: 'compareTo', label: 'Compare with', type: 'text', default: '' }] },
   { slug: 'tool-scaffold', name: 'Tool Scaffold', desc: 'Stamp out a new tool entry — transform, generator or custom stub wired to the shared UIs', category: 'code', tags: ['scaffold', 'generator', 'tool'], icon: 'terminal', template: 'generator',
     genHandler: function (opts) { return Transforms.toolScaffold(opts); },
@@ -339,11 +313,7 @@ window.TOOLMANIFEST = [
     handler: function (s, opts) { return Transforms.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant'); },
     params: [{ key: 'operation', label: 'Operation', type: 'select', default: 'determinant', options: [{ value: 'determinant', label: 'Determinant' }, { value: 'inverse', label: 'Inverse' }, { value: 'transpose', label: 'Transpose' }, { value: 'trace', label: 'Trace' }, { value: 'add', label: 'Add (A+B)' }, { value: 'subtract', label: 'Subtract (A-B)' }, { value: 'multiply', label: 'Multiply (A*B)' }] }, { key: 'matrixB', label: 'Matrix B', type: 'textarea', default: '' }] },
   { slug: 'number-base-converter', name: 'Number Base Converter', desc: 'Convert numbers between binary, octal, decimal, hexadecimal — BigInt-exact at any width, strict digit validation', category: 'math', tags: ['base', 'convert', 'binary', 'hex'], icon: 'calculator', template: 'transform',
-    handler: function (s, opts) {
-      var from = parseInt((opts && opts.fromBase) || '10', 10);
-      var to = parseInt((opts && opts.toBase) || '16', 10);
-      return Transforms.baseConvertDetailed(s, from, to);
-    },
+    handler: function (s, opts) { return Transforms.baseConvertOpts(s, opts); },
     params: [
       { key: 'fromBase', label: 'From Base', type: 'select', default: '10', options: [{ value: '2', label: 'Binary' }, { value: '8', label: 'Octal' }, { value: '10', label: 'Decimal' }, { value: '16', label: 'Hex' }] },
       { key: 'toBase', label: 'To Base', type: 'select', default: '16', options: [{ value: '2', label: 'Binary' }, { value: '8', label: 'Octal' }, { value: '10', label: 'Decimal' }, { value: '16', label: 'Hex' }] }
@@ -394,17 +364,10 @@ window.TOOLMANIFEST = [
   { slug: 'qr-code-decoder', name: 'QR Code Decoder', desc: 'Scan QR codes from screenshots — drop, paste or upload, decoded in-browser', category: 'generators', tags: ['qr', 'barcode', 'decode', 'scan'], icon: 'scan-eye', template: 'custom' },
   { slug: 'post-maker', name: 'HTML Post Maker', desc: 'Compose rich HTML posts — text and image blocks, drag & drop, reorder, copy or preview as self-contained HTML', category: 'generators', tags: ['html', 'post', 'builder', 'image'], icon: 'filetype', template: 'custom' },
   { slug: 'lorem-ipsum', name: 'Lorem Ipsum Generator', desc: 'Generate Lorem Ipsum placeholder text', category: 'generators', tags: ['lorem', 'ipsum', 'placeholder'], icon: 'filetype', template: 'generator',
-    genHandler: function (opts) {
-      var p = parseInt((opts && opts.paragraphs) || '1', 10);
-      return Transforms.loremIpsum(p);
-    },
+    genHandler: function (opts) { return Transforms.loremIpsumOpts(opts); },
     params: [{ key: 'paragraphs', label: 'Paragraphs', type: 'number', default: '1', min: 1, max: 50 }] },
   { slug: 'api-key-generator', name: 'API Key Generator', desc: 'Generate API keys in various formats — 192 bits from the Web Crypto CSPRNG', category: 'generators', tags: ['api', 'key', 'token'], icon: 'key', template: 'generator',
-    genHandler: function (opts) {
-      var fmt = (opts && opts.format) || 'sk';
-      var prefix = fmt === 'sk' ? 'sk-' : fmt === 'pk' ? 'pk-' : '';
-      return prefix + CryptoRand.string(32, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
-    },
+    genHandler: function (opts) { return Transforms.apiKey((opts && opts.format) || 'sk'); },
     params: [{ key: 'format', label: 'Format', type: 'select', default: 'sk', options: [{ value: 'sk', label: 'sk-...' }, { value: 'pk', label: 'pk-...' }, { value: 'raw', label: 'No prefix' }] }] },
 
   // ── Image tools ─────────────────────────────────────────
@@ -430,18 +393,7 @@ window.TOOLMANIFEST = [
   { slug: 'uuid-v4-validate', name: 'UUID Validator', desc: 'Validate UUIDs and report the version — v1, v3–v8 plus Nil and Max, RFC 9562 aware', category: 'network', tags: ['uuid', 'validate'], icon: 'key', template: 'transform',
     handler: function (s) { return Transforms.uuidValidate(s); } },
   { slug: 'ulid-validator', name: 'ULID Validator', desc: 'Validate ULIDs and decode the embedded timestamp — Crockford charset, 48-bit time range, per-line verdicts', category: 'network', tags: ['ulid', 'validate'], icon: 'key', template: 'transform',
-    handler: function (s) {
-      var lines = s.trim().split('\n');
-      return lines.map(function (ln) {
-        var t = ln.trim();
-        try {
-          var d = Transforms.ulidDecode(t);
-          return '✓ ' + d.id + ' — valid ULID, timestamp ' + d.iso;
-        } catch (e) {
-          return '✗ ' + t + ' — ' + (e instanceof Error ? e.message : String(e));
-        }
-      }).join('\n');
-    } },
+    handler: function (s) { return Transforms.ulidValidate(s); } },
   { slug: 'http-header-inspector', name: 'HTTP Header Inspector', desc: 'Paste raw response headers \u2014 parsed table plus a security audit (HSTS, CSP, cookies, CORS)', category: 'network', tags: ['http', 'headers', 'security', 'audit'], icon: 'globe', template: 'transform',
     handler: function (s) { return Transforms.httpInspect(s); } },
   { slug: 'dns-lookup', name: 'DNS Lookup', desc: 'Resolve DNS records over encrypted DNS (DoH) \u2014 A/AAAA/MX/TXT and more, cached 5 min', category: 'network', tags: ['dns', 'doh', 'domain', 'records'], icon: 'globe', template: 'custom' },
@@ -459,14 +411,7 @@ window.TOOLMANIFEST = [
   { slug: 'search-visualizer', name: 'Search Algorithm Visualizer', desc: 'Visualize linear and binary search on arrays', category: 'algorithms', tags: ['search', 'visualizer'], icon: 'workflow', template: 'custom' },
   { slug: 'binary-tree-visualizer', name: 'Binary Tree Visualizer', desc: 'Visualize binary search tree operations', category: 'algorithms', tags: ['binary tree', 'bst', 'visualizer'], icon: 'gitbranch', template: 'custom' },
   { slug: 'levenshtein-distance', name: 'Levenshtein Distance', desc: 'Edit distance between two texts — substitutions, insertions and deletions counted, similarity scored', category: 'algorithms', tags: ['edit distance', 'diff', 'similarity', 'algorithm'], icon: 'gitbranch', template: 'transform',
-    handler: function (s, opts) {
-      var b = (opts && opts.compareTo) || '';
-      var d = Transforms.levenshtein(s, b);
-      var la = Array.from(s).length, lb = Array.from(b).length;
-      var mx = Math.max(la, lb);
-      var sim = mx === 0 ? 100 : (1 - d / mx) * 100;
-      return 'Distance: ' + d + '\nSimilarity: ' + sim.toFixed(1) + '%' + '\nLengths: ' + la + ' vs ' + lb;
-    },
+    handler: function (s, opts) { return Transforms.levenshteinReport(s, opts); },
     params: [{ key: 'compareTo', label: 'Compare with (text)', type: 'textarea', default: '' }] }
 ];
 

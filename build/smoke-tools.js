@@ -62,6 +62,9 @@ console.log('-- generators --');
   ok(T.ulid(1000) < T.ulid(2000), 'ulid lexicographic time order');
   ok(Math.abs(T.ulidDecode(ulids[0]).timestamp - Date.now()) < 60000, 'ulid timestamp decodes to now');
   ok(TOOLS['ulid-generator'].genHandler({ count: '999999' }).split('\n').length === 1000, 'ulid count clamped to 1000');
+  ok(TOOLS['lorem-ipsum'].genHandler.toString().indexOf('loremIpsumOpts') >= 0, 'lorem delegates');
+  ok(TOOLS['lorem-ipsum'].genHandler({ paragraphs: '2' }).split('\n\n').length === 2, 'lorem 2 paragraphs');
+  ok(T.loremIpsumOpts({ paragraphs: '999' }).split('\n\n').length === 50, 'lorem clamp 50');
   let threwU = false; try { T.ulidDecode('nope'); } catch (e) { threwU = true; }
   ok(threwU, 'ulid decode rejects garbage');
   threwU = false; try { T.ulidDecode('80000000000000000000000000'); } catch (e) { threwU = true; }
@@ -69,6 +72,7 @@ console.log('-- generators --');
   var uv = TOOLS['ulid-validator'].handler('01ARZ3NDEKTSV4RRFFQ69G5FAV\nnope\n80000000000000000000000000').split('\n');
   ok(uv.length === 3 && uv[0].indexOf('✓') === 0 && uv[0].indexOf('valid ULID') >= 0 && uv[0].indexOf('timestamp') >= 0, 'ulid validator accepts known-good with timestamp');
   ok(uv[1].indexOf('✗') === 0 && uv[2].indexOf('✗') === 0, 'ulid validator rejects bad lines per-line');
+  ok(TOOLS['ulid-validator'].handler.toString().indexOf('ulidValidate') >= 0, 'ulid-validator delegates');
   { var HV = TOOLS['uuid-v4-validate'].handler;
     ok(HV('550e8400-e29b-41d4-a716-446655440000').indexOf('UUIDv4') >= 0, 'uuid validator reports v4');
     ok(HV(T.uuidV7(0)).indexOf('UUIDv7') >= 0, 'uuid validator accepts generated v7');
@@ -128,7 +132,9 @@ console.log('-- math --');
   ok(TOOLS['url-extractor'].handler('go https://example.com/a now') === 'https://example.com/a', 'url-extractor vector');
   ok(TOOLS['ip-extractor'].handler.toString().indexOf('extractIPs') >= 0, 'ip-extractor delegates');
   ok(TOOLS['ip-extractor'].handler('ip 192.168.1.1 and 999.1.1.1') === '192.168.1.1', 'ip-extractor drops octet overflow');
-  ok(TOOLS['json-formatter'].handler('{"a":1}', { indent: '4' }) === T.formatJSON('{"a":1}', 4), 'json-formatter delegates clamp-kept');
+  ok(TOOLS['json-formatter'].handler.toString().indexOf('formatJSONOpts') >= 0, 'json-formatter delegates');
+  ok(TOOLS['json-formatter'].handler('{"a":1}', { indent: '4' }) === T.formatJSON('{"a":1}', 4), 'json-formatter 4-space vector');
+  ok(TOOLS['json-formatter'].handler('{"a":1}', { indent: '99' }) === T.formatJSON('{"a":1}', 2), 'json-formatter clamp vector');
   ok(TOOLS['filename-sanitizer'].handler.toString().indexOf('filenameSanitize') >= 0, 'filename-sanitizer delegates');
   ok(TOOLS['filename-sanitizer'].handler('a<b>c:d"e') === 'abcde', 'filename strips Windows-forbidden');
   ok(TOOLS['filename-sanitizer'].handler('CON.txt') === '_CON.txt', 'filename guards reserved name');
@@ -137,6 +143,9 @@ console.log('-- math --');
   ok(TOOLS['phone-extractor'].handler('a 555-123-4567 b 555-987-6543', {}) === T.extractPhones('a 555-123-4567 b 555-987-6543', 'newline'), 'phone bare default is newline');
   ok(TOOLS['regex-tester'].handler.toString().indexOf('regexTest') >= 0, 'regex-tester runs on Transforms engine');
   ok(TOOLS['regex-tester'].handler('abc 123', { pattern: '\\d+', flags: 'g' }).indexOf('Matches found: 1') === 0, 'regex-tester digit vector');
+  ok(TOOLS['regex-tester'].handler.toString().indexOf('regexTestOpts') >= 0, 'regex-tester delegates opts');
+  var threwR=false; try { TOOLS['regex-tester'].handler('abc', {}) } catch (e) { threwR=true; }
+  ok(threwR, 'regex-tester empty pattern throws');
   ok(TOOLS['epoch-converter'].handler.toString().indexOf('epochInfo') >= 0, 'epoch-converter delegates');
   ok(TOOLS['epoch-converter'].handler('1718035200').indexOf('Epoch (s):  1718035200') >= 0, 'epoch seconds vector');
   ok(TOOLS['epoch-converter'].handler('1718035200000').indexOf('Epoch (s):  1718035200') >= 0, 'epoch millis heuristic');
@@ -189,11 +198,17 @@ console.log('-- math --');
 }
 {
   const conv = TOOLS['number-base-converter'].handler;
+  ok(conv.toString().indexOf("baseConvertOpts") >= 0, "base-converter delegates");
+  ok(T.baseConvertOpts("255", undefined).includes("Hex: FF"), "base-converter default opts dec->hex");
   ok(conv('255', { fromBase: '10', toBase: '16' }).includes('Hex: FF'), 'dec->hex');
   ok(conv('1010', { fromBase: '2', toBase: '10' }).includes('Decimal: 10'), 'bin->dec');
   ok(conv('ffffffffffffffff', { fromBase: '16', toBase: '10' }).includes('18446744073709551615'),
     'uint64 max exact (parseInt would truncate)');
   let threw = false; try { conv('129', { fromBase: '8', toBase: '10' }); } catch (e) { threw = true; }
+  ok(TOOLS["api-key-generator"].genHandler.toString().indexOf("apiKey") >= 0, "api-key delegates");
+  ok(/^pk-[a-zA-Z0-9]{32}$/.test(TOOLS["api-key-generator"].genHandler({ format: "pk" })), "api-key pk- prefix + 32 chars");
+  ok(/^[a-zA-Z0-9]{32}$/.test(TOOLS["api-key-generator"].genHandler({ format: "raw" })), "api-key raw 32 chars");
+  ok(T.apiKey("xx").length === 32, "api-key unknown format no prefix");
   ok(threw, 'invalid digit for base 8 throws');
 }
 
@@ -233,18 +248,25 @@ console.log('-- text / formats --');
   ok(T.yamlFormat('- a\n- b') === '- a\n- b\n', 'yaml format seq');
   ok(T.yamlFormat('a:\n    b: 1') === 'a:\n  b: 1\n', 'yaml format reindents');
   ok(T.yamlToJSON(T.yamlFormat('a: 1\nb:\n  - x\n  - 2')) === T.yamlToJSON('a: 1\nb:\n  - x\n  - 2'), 'yaml format roundtrip');
-  ok(TOOLS['yaml-formatter'].handler('a: 1') === 'a: 1\n', 'yaml formatter delegates');
+  ok(TOOLS['yaml-formatter'].handler.toString().indexOf('yamlFormatOpts') >= 0, 'yaml formatter delegates');
+  ok(TOOLS['yaml-formatter'].handler('a: 1') === 'a: 1\n', 'yaml formatter vector');
+  var threwY=false; try { TOOLS['yaml-formatter'].handler('   ') } catch (e) { threwY=true; }
+  ok(threwY, 'yaml formatter empty throws');
 }
 {
   const diffOut = TOOLS['text-diff'].handler(['a','b','c','d','e'].join('\n'), { compareTo: ['a','b','X','c','d','e'].join('\n') });
   ok(diffOut.split('\n').filter(l => l === '+ X').length === 1 &&
      diffOut.split('\n').filter(l => l.startsWith('  ')).length === 5, 'myers diff via manifest handler');
+  ok(TOOLS['text-diff'].handler.toString().indexOf('diffOpts') >= 0, 'diff delegates opts');
 }
 {
   ok(TOOLS['text-sorter'].handler('c\na\nb', { sortBy: 'alpha', direction: 'asc' }) === T.sortLines('c\na\nb', false), 'sorter delegates alpha');
   ok(TOOLS['text-sorter'].handler('aa\nb', { sortBy: 'length', direction: 'asc' }) === T.sortByLength('aa\nb', false), 'sorter delegates length');
+  ok(TOOLS['text-sorter'].handler.toString().indexOf('sortText') >= 0, 'sorter delegates via sortText');
+  ok(T.sortText('c\na\nb', { sortBy: 'alpha', direction: 'desc' }) === 'c\nb\na', 'sorter desc vector');
   ok(TOOLS['text-reverser'].handler('abc', { mode: 'full' }) === 'cba', 'reverser delegates full');
   ok(TOOLS['text-reverser'].handler('ab\ncd', { mode: 'lines' }) === 'ba\ndc', 'reverser delegates lines');
+  ok(TOOLS['text-reverser'].handler.toString().indexOf('reverseTextOpts') >= 0, 'reverser delegates opts');
   ok(TOOLS['text-deduplicator'].handler('a\na\nb') === 'a\nb', 'dedup delegates');
   ok(TOOLS['palindrome-checker'].handler('racecar').indexOf('\u2713 YES') === 0, 'palindrome delegates yes');
   ok(TOOLS['palindrome-checker'].handler('hello').indexOf('\u2717 NO') === 0, 'palindrome delegates no');
@@ -293,7 +315,9 @@ console.log('-- text / formats --');
   ok(T.svgMinify('<svg inkscape:version="1.2"><rect/></svg>').indexOf('inkscape') < 0, 'svg-optimizer strips namespaced cruft');
   ok(T.levenshtein('kitten', 'sitting') === 3, 'levenshtein textbook vector');
   ok(T.levenshtein('abc', 'abc') === 0 && T.levenshtein('', 'abc') === 3, 'levenshtein identical and empty');
-  ok(TOOLS['levenshtein-distance'].handler('kitten', { compareTo: 'sitting' }).indexOf('Distance: 3') >= 0, 'levenshtein manifest delegates');
+  ok(TOOLS['levenshtein-distance'].handler.toString().indexOf('levenshteinReport') >= 0, 'levenshtein delegates opts');
+  ok(TOOLS['levenshtein-distance'].handler('kitten', { compareTo: 'sitting' }).indexOf('Distance: 3') >= 0, 'levenshtein manifest vector');
+  ok(TOOLS['levenshtein-distance'].handler('abc', { compareTo: 'abc' }).indexOf('Similarity: 100.0%') >= 0, 'levenshtein identical similarity');
   ok(TOOLS['json-to-typescript'].handler('{"name":"Ada","age":30}').indexOf('name: string') >= 0, 'json-to-ts scalars');
   ok(TOOLS['json-to-typescript'].handler('{"addr":{"city":"X"}}').indexOf('interface RootAddr') >= 0, 'json-to-ts nested interface');
   ok(T.jsonToTS('[{"id":1}]', { rootName: 'User' }).indexOf('type User =') >= 0, 'json-to-ts array root alias');
@@ -330,7 +354,9 @@ console.log('-- transforms lib --');
   ok(T.semverCompare('v1.2.3', '1.2.3') === '1.2.3 == 1.2.3 (equal)', 'semver v prefix plus equal');
   ok(T.semverCompare('1.0.0-alpha', '1.0.0') === '1.0.0-alpha < 1.0.0 (release beats prerelease)', 'semver prerelease precedence');
   ok(T.semverCompare('1.0.0-alpha.1', '1.0.0-alpha.beta') === '1.0.0-alpha.1 < 1.0.0-alpha.beta (prerelease)', 'semver numeric prerelease first');
+  ok(TOOLS['semver-compare'].handler.toString().indexOf('semverCompareOpts') >= 0, 'semver delegates opts');
   ok(TOOLS['semver-compare'].handler('1.2.3', {}) === 'Enter a version in each field', 'semver empty compareTo guarded');
+  ok(TOOLS['semver-compare'].handler('1.2.3', { compareTo: '2.0.0' }).indexOf('major bump') >= 0, 'semver happy vector');
   ok(TOOLS['tool-scaffold'].genHandler({ slug: 'my-tool', kind: 'transform' }).includes('Transforms.myTool(s)'), 'scaffold transform stub');
   ok(TOOLS['tool-scaffold'].genHandler({ slug: 'my-viz', kind: 'custom' }).includes('App.registerTool'), 'scaffold custom stub');
   ok(TOOLS['tool-scaffold'].genHandler({ slug: 'gen-x', kind: 'generator' }).includes('genHandler'), 'scaffold generator stub');
@@ -338,7 +364,10 @@ console.log('-- transforms lib --');
   ok(T.htmlToMarkdown('<p>Hello <strong>b</strong></p>') === 'Hello **b**', 'md bold para');
   ok(T.htmlToMarkdown('<ul><li>a</li><li>b</li></ul>') === '- a\n- b', 'md list');
   ok(T.htmlToMarkdown('<table><tr><th>A</th></tr><tr><td>1</td></tr></table>') === '| A |\n| --- |\n| 1 |', 'md table');
-  ok(TOOLS['html-to-markdown'].handler('<h2>T</h2>') === '## T', 'md manifest delegates');
+  ok(TOOLS['html-to-markdown'].handler.toString().indexOf('htmlToMarkdownOpts') >= 0, 'md delegates opts');
+  ok(TOOLS['html-to-markdown'].handler('<h2>T</h2>') === '## T', 'md manifest vector');
+  var threwH=false; try { TOOLS['html-to-markdown'].handler('   ') } catch (e) { threwH=true; }
+  ok(threwH, 'md empty throws');
   ok(typeof window.warmPrimeCache === 'function', 'warmPrimeCache hook exposed');
   var pd = window.warmPrimeCache();
   ok(pd.length === 78496 && pd[0] === 5 && pd[pd.length - 1] === 999983, 'prime table exact: 78496 primes 5..999983');

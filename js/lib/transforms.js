@@ -279,6 +279,11 @@ T.yamlFormat = function (s) {
   if (!text.trim()) throw new Error('Enter YAML to format');
   return yamlEmitLines(yamlParseDocument(text), '').join('\n') + '\n';
 };
+/* YAML-formatter UI contract: empty-input guard plus canonical format. Guard already exists in yamlFormat; this wrapper keeps the manifest free of duplicated logic. */
+T.yamlFormatOpts = function (s) {
+  if (!String(s).trim()) throw new Error('Enter YAML to format');
+  return T.yamlFormat(s);
+};
 function yamlDquote(str) {
   var out = '';
   for (var i = 0; i < str.length; i++) {
@@ -370,6 +375,12 @@ T.baseConvertDetailed = function (raw, fromBase, toBase) {
   var BASE_NAMES = { 2: 'Binary', 8: 'Octal', 10: 'Decimal', 16: 'Hex' };
   var name = BASE_NAMES[toBase] || 'Base ' + toBase;
   return s.trim() + ' (base ' + fromBase + ' \u2192 ' + name + ')\n' + '\u2500'.repeat(20) + '\n' + name + ': ' + out + (fromBase !== 10 ? '\nDecimal: ' + (neg ? '-' : '') + n.toString(10) : '');
+};
+/* Base-converter UI contract: from/to arrive as option strings with '10'/'16' defaults. Moved from the manifest so shell UI delegates to this single source. */
+T.baseConvertOpts = function (raw, opts) {
+  var from = parseInt((opts && opts.fromBase) || '10', 10);
+  var to = parseInt((opts && opts.toBase) || '16', 10);
+  return T.baseConvertDetailed(raw, from, to);
 };
 T.baseConvert = function (num, fromBase, toBase) {
   var raw = String(num).trim();
@@ -1322,6 +1333,12 @@ T.semverCompare = function (a, b) {
   return x.raw + ' ' + op + ' ' + y.raw + ' (' + scope + ')';
 };
 
+/* Semver-compare UI contract: main input plus compareTo option, friendly message when either is blank. Moved from the manifest so shell UI delegates to this single source. */
+T.semverCompareOpts = function (s, opts) {
+  var b = (opts && opts.compareTo) || '';
+  if (!String(s).trim() || !String(b).trim()) return 'Enter a version in each field';
+  return T.semverCompare(String(s).trim(), String(b).trim());
+};
 T.toolScaffold = function (opts) {
   opts = opts || {};
   var slug = String(opts.slug === undefined ? '' : opts.slug).trim().toLowerCase();
@@ -1369,6 +1386,11 @@ T.toolScaffold = function (opts) {
   return L.join('\n');
 };
 
+/* HTML-to-markdown UI contract: empty-input guard plus conversion. Guard already exists in htmlToMarkdown; this wrapper keeps the manifest free of duplicated logic. */
+T.htmlToMarkdownOpts = function (s) {
+  if (!String(s).trim()) throw new Error('Enter HTML to convert');
+  return T.htmlToMarkdown(s);
+};
 T.htmlToMarkdown = function (html) {
   var src = String(html);
   if (!src.trim()) throw new Error('Enter HTML to convert');
@@ -1671,6 +1693,12 @@ T.validateJSON = function (s) {
   }
 };
 T.formatJSON = function (s, indent) { return JSON.stringify(JSON.parse(s), null, indent === undefined ? 2 : indent); };
+/* JSON-formatter UI contract: indent arrives as an option string clamped to 1..8 (default 2). Moved from the manifest so shell UI delegates to this single source. */
+T.formatJSONOpts = function (s, opts) {
+  var n = parseInt((opts && opts.indent) || '2', 10);
+  if (isNaN(n) || n < 1 || n > 8) n = 2;
+  return T.formatJSON(s, n);
+};
 T.minifyJSON = function (s) { return JSON.stringify(JSON.parse(s)); };
 T.jsonBadge = function (mode, ok) {
   if (mode === 'format') return ok ? { text: '✓ Formatted', cls: 'ok' } : { text: '✗ Error', cls: 'bad' };
@@ -1862,6 +1890,15 @@ T.levenshtein = function (a, b) {
     var tmp = prev; prev = cur; cur = tmp;
   }
   return prev[n];
+};
+/* Levenshtein UI contract: compare-text option plus distance/similarity/lengths report. Codepoint-aware lengths, moved from the manifest so shell UI delegates to this single source. */
+T.levenshteinReport = function (s, opts) {
+  var b = (opts && opts.compareTo) || '';
+  var d = T.levenshtein(s, b);
+  var la = Array.from(s).length, lb = Array.from(b).length;
+  var mx = Math.max(la, lb);
+  var sim = mx === 0 ? 100 : (1 - d / mx) * 100;
+  return 'Distance: ' + d + '\nSimilarity: ' + sim.toFixed(1) + '%' + '\nLengths: ' + la + ' vs ' + lb;
 };
 T.jsonToCSV = function (s, opts) {
   var o = opts || {};
@@ -3017,6 +3054,12 @@ T.caseConvert = function (s, style) {
 };
 T.slugify = function (s) { return s.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/^-+|-+$/g, ''); };
 T.textDiff = function (a, b) { return MyersDiff.linesText(a, b); };
+/* Diff UI contract: compare-text plus lines/words granularity arrive as option strings (lines default). Moved from the manifest so shell UI delegates to this single source. */
+T.diffOpts = function (s, opts) {
+  var b = (opts && opts.compareTo) || '';
+  if ((opts && opts.granularity) === 'words') return MyersDiff.wordsText(s, b);
+  return T.textDiff(s, b);
+};
 T.deduplicate = function (s) { return Array.from(new Set(s.split('\n'))).join('\n'); };
 T.sortLines = function (s, desc) {
   var lines = s.split('\n');
@@ -3028,10 +3071,19 @@ T.sortByLength = function (s, desc) {
   lines.sort(function (a, b) { return desc ? b.length - a.length : a.length - b.length; });
   return lines.join('\n');
 };
+/* Line sorter UI contract: mode + direction arrive as option strings with alpha/asc defaults. Moved from the manifest so shell UI delegates to this single source. */
+T.sortText = function (s, opts) {
+  var desc = opts && opts.direction === 'desc';
+  return ((opts && opts.sortBy) || 'alpha') === 'length' ? T.sortByLength(s, desc) : T.sortLines(s, desc);
+};
 T.reverseText = function (s, perLine) {
   function rev(t) { return t.split('').reverse().join(''); }
   if (perLine) return String(s).split('\n').map(rev).join('\n');
   return rev(String(s));
+};
+/* Text-reverser UI contract: mode arrives as an option string ('lines' reverses per line, anything else reverses full text). Moved from the manifest so shell UI delegates to this single source. */
+T.reverseTextOpts = function (s, opts) {
+  return T.reverseText(s, opts && opts.mode === 'lines');
 };
 T.palindromeReport = function (s) {
   var clean = String(s).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
@@ -3044,6 +3096,14 @@ T.regexTest = function (pattern, flags, text) {
     var matches = Array.from(text.matchAll(re), function (m) { return m[0]; });
     return { matches: matches, count: matches.length };
   } catch (e) { throw new Error('Invalid regex: ' + (e instanceof Error ? e.message : String(e))); }
+};
+/* Regex-tester UI contract: pattern/flags arrive as option strings (flags default g, empty pattern throws). Report formatting moved from the manifest so shell UI delegates to this single source. */
+T.regexTestOpts = function (s, opts) {
+  var pat = (opts && opts.pattern) || '';
+  var flags = (opts && opts.flags) || 'g';
+  if (!pat) throw new Error('Enter a regex pattern');
+  var r = T.regexTest(pat, flags, s);
+  return 'Matches found: ' + r.count + '\n' + '\u2500'.repeat(40) + '\n' + r.matches.join('\n');
 };
 T.regexEscape = function (s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
 T.palindromeCheck = function (s) {
@@ -3116,6 +3176,19 @@ T.ulidDecode = function (s) {
   for (var m = 0; m < 6; m++) ms = ms * 256 + bytes[m];
   return { id: t, timestamp: ms, iso: new Date(ms).toISOString() };
 };
+/* ULID validator: per-line verdicts with decoded timestamps. Moved from the manifest so shell UI delegates to this single source. */
+T.ulidValidate = function (s) {
+  var lines = s.trim().split('\n');
+  return lines.map(function (ln) {
+    var t = ln.trim();
+    try {
+      var d = T.ulidDecode(t);
+      return '✓ ' + d.id + ' — valid ULID, timestamp ' + d.iso;
+    } catch (e) {
+      return '✗ ' + t + ' — ' + (e instanceof Error ? e.message : String(e));
+    }
+  }).join('\n');
+};
 /* UUID validator: Nil/Max plus v1, v3-v8 per RFC 9562, per-line verdicts.
    Moved verbatim from the manifest handler. */
 T.uuidValidate = function (s) {
@@ -3181,6 +3254,12 @@ T.generatePassword = function (length, opts) {
   if (!active.length) throw new Error('Select at least one character set');
   return CryptoRand.string(length, active.join(''), active);
 };
+/* API key: prefixed 32-char CSPRNG token (192 bits). Moved from the manifest
+   so shell UI delegates to this single source. */
+T.apiKey = function (fmt) {
+  var prefix = fmt === 'sk' ? 'sk-' : fmt === 'pk' ? 'pk-' : '';
+  return prefix + CryptoRand.string(32, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
+};
 T.macAddress = function () {
   var arr = CryptoRand.bytes(6);
   arr[0] = (arr[0] | 0x02) & 0xfe;
@@ -3204,6 +3283,10 @@ T.loremIpsum = function (paragraphs) {
   var result = [];
   for (var i = 0; i < paragraphs; i++) result.push(sentences.slice(i * 5, i * 5 + 5).join(' '));
   return result.join('\n\n');
+};
+/* Lorem-ipsum UI contract: paragraph count arrives as an option string (default 1, clamped 1..50 inside loremIpsum). Moved from the manifest so shell UI delegates to this single source. */
+T.loremIpsumOpts = function (opts) {
+  return T.loremIpsum((opts && opts.paragraphs) || '1');
 };
 T.formatPhone = function (s) {
   var digits = s.replace(/\D/g, '');
