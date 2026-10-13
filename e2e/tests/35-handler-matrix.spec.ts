@@ -183,6 +183,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('quoted-printable-encode', 'empty fine', TOOLS['quoted-printable-encode'].handler('') === '');
     push('quoted-printable-decode', 'happy', TOOLS['quoted-printable-decode'].handler('a=3Db') === 'a=b');
     push('quoted-printable-decode', 'bad throws', mustThrow(() => TOOLS['quoted-printable-decode'].handler('=ZZ')));
+    push('punycode-encode', 'happy', TOOLS['punycode-encode'].handler('m' + String.fromCharCode(252) + 'nchen.de') === 'xn--mnchen-3ya.de');
+    push('punycode-encode', 'empty label throws', mustThrow(() => TOOLS['punycode-encode'].handler('a..b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);
     push('json-to-jsonl', 'bad throws', mustThrow(() => TOOLS['json-to-jsonl'].handler('not json')));
     push('toml-to-json', 'happy', TOOLS['toml-to-json'].handler('a = 1').includes('"a": 1'));

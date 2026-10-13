@@ -1982,6 +1982,69 @@ function base58ToBytes(s) {
 T.base58Bytes = function (s) { return new Uint8Array(base58ToBytes(s)); };
 /* Ascii85 encode: UTF-8 bytes to printable Base85 (4 bytes to 5 chars, all-zero groups squeeze to z, final partial groups emit length-matched prefixes). */
 /* Quoted-Printable encode: RFC 2045 email-safe text (printables pass, = and non-ASCII become =XX, trailing blanks hardened, lines soft-wrapped at 76 cols). */
+/* Punycode encode: RFC 3492 Bootstring for internationalized hostnames (per-label xn--, ASCII passes through, case folds, lone surrogates become U+FFFD). */
+T.punycodeEncode = function (s) {
+  var str = String(s);
+  if (!str.trim()) return '';
+  function toPoints(st) {
+    var pts = [];
+    for (var i = 0; i < st.length; i++) {
+      var c = st.charCodeAt(i);
+      if (c >= 55296 && c <= 56319 && i + 1 < st.length) {
+        var d = st.charCodeAt(i + 1);
+        if (d >= 56320 && d <= 57343) { pts.push((c - 55296) * 1024 + (d - 56320) + 65536); i++; continue; }
+      }
+      pts.push((c >= 55296 && c <= 57343) ? 65533 : c);
+    }
+    return pts;
+  }
+  function adapt(delta, numpoints, first) {
+    delta = first ? Math.floor(delta / 700) : Math.floor(delta / 2);
+    delta += Math.floor(delta / numpoints);
+    var k = 0;
+    while (delta > 35) { delta = Math.floor(delta / 35); k += 36; }
+    return k + Math.floor(36 * delta / (delta + 38));
+  }
+  function digitChar(d) { return d < 26 ? String.fromCharCode(97 + d) : String.fromCharCode(48 + d - 26); }
+  function encLabel(label) {
+    var input = toPoints(label.toLowerCase());
+    var basic = input.filter(function (c) { return c < 128; });
+    if (basic.length === input.length) return label.toLowerCase();
+    var out = basic.map(function (c) { return String.fromCharCode(c); }).join('');
+    if (basic.length) out += '-';
+    var n = 128, delta = 0, bias = 72, h = basic.length;
+    while (h < input.length) {
+      var m = 2147483647, i, j;
+      for (i = 0; i < input.length; i++) if (input[i] >= n && input[i] < m) m = input[i];
+      delta += (m - n) * (h + 1);
+      n = m;
+      for (j = 0; j < input.length; j++) {
+        if (input[j] < n) delta++;
+        else if (input[j] === n) {
+          var q = delta, k = 36;
+          for (;;) {
+            var tt = k <= bias ? 1 : (k >= bias + 26 ? 26 : k - bias);
+            if (q < tt) break;
+            out += digitChar(tt + (q - tt) % (36 - tt));
+            q = Math.floor((q - tt) / (36 - tt));
+            k += 36;
+          }
+          out += digitChar(q);
+          bias = adapt(delta, h + 1, h === basic.length);
+          delta = 0;
+          h++;
+        }
+      }
+      delta++;
+      n++;
+    }
+    return 'xn--' + out;
+  }
+  return str.split(/[\.\u3002\uFF0E\uFF61]/).map(function (lb) {
+    if (!lb) throw new Error('Empty domain label \u2014 check dots');
+    return encLabel(lb);
+  }).join('.');
+};
 T.quotedPrintableEncode = function (s) {
   function encLine(line) {
     var bs = new TextEncoder().encode(line);
