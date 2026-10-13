@@ -392,3 +392,18 @@ test('IDE — all 8 languages produce output (with stdin where expected)', async
     if (await clear.isVisible().catch(() => false)) await clear.click();
   }
 });
+
+
+// ── palette DOM: typo query surfaces intended tool ──
+test('palette typo tolerance at DOM level', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#site-nav')).toBeVisible();
+  await page.evaluate(() => (window as any).App.openPalette());
+  const input = page.locator('.palette-input');
+  await expect(input).toBeVisible({ timeout: 8000 });
+  await input.fill('jtw');
+  await expect(page.locator('.palette-item').first(), 'typo jtw surfaces jwt tool').toContainText(/jwt/i, { timeout: 8000 });
+  await input.fill('totp-generator');
+  await expect(page.locator('.palette-item').first(), 'exact slug tops').toContainText(/totp/i, { timeout: 8000 });
+  await page.keyboard.press('Escape');
+});
