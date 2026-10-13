@@ -6162,6 +6162,8 @@ T.envToTOML = function (s) { return T.jsonToTOML(T.envToJSON(s)); };
 T.envToSchema = function (s, opts) { return T.jsonToSchema(T.envToJSON(s), opts); };
 T.envToYAML = function (s) { return T.jsonToYAML(T.envToJSON(s)); };
 /* TOML to Markdown: parse tables to one object, bridge through one compact JSON line, emit pipe tables with the canonical JSONL-to-Markdown core (nested tables flatten to dotted columns). */
+/* TOML to JSONL: tables to CSV rows with the shared TOML core, one compact object per line with the CSV-to-JSONL core (line-numbered errors, delimiter shared). */
+T.tomlToJSONL = function (s, opts) { return T.csvToJSONL(T.tomlToCSV(s, opts), opts); };
 T.tomlToMarkdown = function (s, opts) { return T.jsonlToMarkdown(JSON.stringify(JSON.parse(T.tomlToJSON(s))), opts); };
 /* TOML to CSV: parse once with the TOML core (line-numbered errors), emit with the canonical JSON-to-CSV core (tables flatten to dotted columns, delimiter shared). */
 /* TOML to Schema: parse once with the shared TOML core (line-numbered errors), infer with the canonical JSON-to-Schema core so table types and required keys stay single-sourced. */
