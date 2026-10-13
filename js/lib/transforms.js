@@ -6123,6 +6123,8 @@ T.jsonlToYAML = function (s) { return T.jsonToYAML(T.jsonlToJSON(s)); };
 /* JSONL to TOML: validate one JSON value per line (line-numbered errors); a lone object emits bare keys, several docs wrap as [[docs]] tables since TOML has no top-level arrays. */
 T.jsonlToTOML = function (s) { var arr = JSON.parse(T.jsonlToJSON(s)); if (arr.length === 1 && arr[0] !== null && typeof arr[0] === 'object' && !Array.isArray(arr[0])) return T.jsonToTOML(JSON.stringify(arr[0])); return T.jsonToTOML(JSON.stringify({ docs: arr })); };
 /* Markdown table to XML: pipe table to CSV rows, CSV rows to header-keyed records, records to sibling XML elements (delimiter shared). */
+/* Markdown to Schema: pipe table to CSV rows, CSV rows to a draft-07 array schema (headers as properties, column types detected, required where no gaps, delimiter shared). */
+T.markdownToSchema = function (s, opts) { return T.csvToSchema(T.markdownToCSV(s, opts), opts); };
 T.markdownToXML = function (s, opts) { return T.jsonToXML(T.csvToJSON(T.markdownToCSV(s, opts), opts)); };
 /* Markdown table to JSON: pipe table to CSV rows, CSV rows to header-keyed records, records pretty-printed (delimiter shared). */
 T.markdownToJSON = function (s, opts) { return T.csvToJSON(T.markdownToCSV(s, opts), opts); };

@@ -417,6 +417,10 @@ window.TOOLMANIFEST = [
       { key: 'delimiter', label: 'Delimiter', type: 'select', default: 'comma', options: [{ value: 'comma', label: 'Comma' }, { value: 'semicolon', label: 'Semicolon' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe' }] },
       { key: 'headers', label: 'Headers', type: 'select', default: 'keep', options: [{ value: 'keep', label: 'Keep' }, { value: 'drop', label: 'Drop' }] }
     ] },
+  { slug: 'markdown-to-schema', name: 'Markdown \u2192 Schema', desc: 'Infer a draft-07 JSON Schema from GitHub pipe tables \u2014 headers become properties, column types detected, required where no gaps, validator-ready output', category: 'converters', tags: ['markdown', 'table', 'schema', 'generate', 'types'], icon: 'filespreadsheet', template: 'transform',
+    placeholder: '| a | b |\n|---|---|\n| 1 | x |',
+    handler: function (s, opts) { return Transforms.markdownToSchema(s, opts); },
+    params: [{ key: 'delimiter', label: 'Delimiter', type: 'select', default: 'comma', options: [{ value: 'comma', label: 'Comma' }, { value: 'semicolon', label: 'Semicolon' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe' }] }, { key: 'indent', label: 'Indent', type: 'select', default: '2', options: [{ value: '2', label: '2 spaces' }, { value: '4', label: '4 spaces' }, { value: '1', label: '1 space' }] }] },
   { slug: 'markdown-to-xml', name: 'Markdown \u2192 XML', desc: 'Convert GitHub pipe tables to XML \u2014 header cells become elements, rows repeat as siblings, delimiter shared', category: 'converters', tags: ['markdown', 'xml', 'table', 'convert'], icon: 'filetype', template: 'transform',
     placeholder: '| a | b |\n|---|---|\n| 1 | 2 |',
     handler: function (s, opts) { return Transforms.markdownToXML(s, opts); },
