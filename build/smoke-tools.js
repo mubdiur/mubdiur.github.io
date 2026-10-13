@@ -1108,6 +1108,9 @@ console.log('-- env-to-json --');
   var e3 = TOOLS['env-to-json'];
   ok(e3.template === 'transform', 'env manifest template');
   ok(e3.category === 'converters', 'env manifest category');
+  ok(TOOLS['env-to-xml'].handler('A=1') === T.envToXML('A=1'), 'env-to-xml delegates to Transforms');
+  ok(TOOLS['env-to-xml'].handler('A=1\nB=hello').indexOf('<A>1</A>') >= 0, 'env-to-xml basic');
+  ok(TOOLS['env-to-xml'].handler('export X=9').indexOf('<X>9</X>') >= 0, 'env-to-xml export prefix');
   var f1 = TOOLS['filename-sanitizer'].handler('my file?.txt', {});
   ok(f1 === 'my_file.txt', 'sanitize delegates identically');
 }

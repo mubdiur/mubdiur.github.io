@@ -359,6 +359,9 @@ window.TOOLMANIFEST = [
 
   { slug: 'env-to-json', name: '.env → JSON', desc: 'Convert dotenv files to JSON — export prefixes, empty values, comments kept', category: 'converters', tags: ['env', 'dotenv', 'json'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.envToJSON(s); } },
+  { slug: 'env-to-xml', name: 'ENV \u2192 XML', desc: 'Convert dotenv files to XML \u2014 keys become elements, export prefixes stripped, shared dependency-free parser', category: 'converters', tags: ['env', 'dotenv', 'xml', 'convert'], icon: 'filetype', template: 'transform',
+    placeholder: 'A=1\nB=hello',
+    handler: function (s) { return Transforms.envToXML(s); } },
   { slug: 'ini-to-json', name: 'INI → JSON', desc: 'Convert INI config to JSON \u2014 sections as objects, duplicate keys and bad headers carry line numbers', category: 'converters', tags: ['ini', 'json', 'convert', 'config'], icon: 'filetype', template: 'transform',
     placeholder: '[server]\nhost = example.com\nport = 8080',
     handler: function (s) { return Transforms.iniToJSON(s); } },
