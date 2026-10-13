@@ -50,6 +50,23 @@ T.parseCSV = function (s, delim) {
 
 /* CSV transpose: rows become columns. Ragged rows pad short,
    delimiter auto-detects (or explicit opt), output re-quoted RFC 4180. */
+/* JSONL to JSON: one JSON value per line becomes a JSON array.
+   Blank lines skip; failures carry the offending line number. */
+T.jsonlToJSON = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  var lines = raw.split(/\r?\n/);
+  var docs = [], bad = -1, why = '';
+  for (var n = 0; n < lines.length; n++) {
+    if (!lines[n].trim()) continue;
+    var v = T.validateJSON(lines[n]);
+    if (!v.valid) { bad = n + 1; why = v.error || 'Invalid JSON'; break; }
+    docs.push(v.data);
+  }
+  if (bad >= 0) throw new Error('Line ' + bad + ': ' + why);
+  if (!docs.length) throw new Error('Paste JSONL first \u2014 one JSON value per line');
+  return JSON.stringify(docs, null, 2);
+};
+
 T.csvTranspose = function (s, opts) {
   var o = opts || {};
   var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };

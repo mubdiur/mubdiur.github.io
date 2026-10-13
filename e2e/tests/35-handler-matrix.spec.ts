@@ -50,6 +50,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('csv-delimiter-sniffer', 'semicolon', TOOLS['csv-delimiter-sniffer'].handler('a;b\nc;d').indexOf('Delimiter: Semicolon (;)') === 0);
     push('csv-delimiter-sniffer', 'comma', TOOLS['csv-delimiter-sniffer'].handler('a,b\nc,d').indexOf('Delimiter: Comma (,)') === 0);
     push('csv-transposer', 'square', TOOLS['csv-transposer'].handler('a,b\nc,d', {}) === 'a,c\nb,d');
+    push('jsonl-to-json', 'two docs', JSON.parse(TOOLS['jsonl-to-json'].handler('{"a":1}\n{"b":2}')).length === 2);
+    push('jsonl-to-json', 'bad line throws', mustThrow(() => TOOLS['jsonl-to-json'].handler('{"a":1}\nnope')));
     push('csv-transposer', 'empty throws', mustThrow(() => TOOLS['csv-transposer'].handler('   ', {})));
     push('csv-delimiter-sniffer', 'empty throws', mustThrow(() => TOOLS['csv-delimiter-sniffer'].handler('   ')));
     push('yaml-to-json', 'happy', JSON.parse(TOOLS['yaml-to-json'].handler('a: 1\nb: hello')).a === 1);
@@ -281,7 +283,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
   if (failed.length) console.log('failed handlers:', JSON.stringify(failed, null, 2));
   expect(failed, `handler matrix failures:\n` + JSON.stringify(failed, null, 2)).toEqual([]);
   expect((result as any[]).length, 'handler matrix must cover all tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
-  // Full manifest is 130 (csv-transposer added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
+  // Full manifest is 131 (jsonl-to-json added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
-  expect(manifest, 'TOOLMANIFEST must be 130').toBe(130);
+  expect(manifest, 'TOOLMANIFEST must be 131').toBe(131);
 });

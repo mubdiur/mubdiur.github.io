@@ -90,6 +90,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'http-header-inspector': { good: 'strict-transport-security: max-age=31536000; includeSubDomains\ncontent-security-policy: default-src self\nx-frame-options: DENY\nx-content-type-options: nosniff\nreferrer-policy: no-referrer', bad: 'no colon here', expectInOutput: /Security: 0 issues/, expectError: /not a header/ },
   'csv-delimiter-sniffer': { good: 'a;b\nc;d', expectInOutput: /Delimiter: Semicolon/ },
   'csv-transposer': { good: 'a,b\nc,d', expectInOutput: /a,c/ },
+  'jsonl-to-json': { good: '{"a":1}\n{"b":2}', bad: '{"a":1}\nnope', expectInOutput: /"b": 2/, expectError: /Line 2/ },
   'xml-to-json': { good: '<root><a>1</a></root>', bad: '<root><unclosed>', expectInOutput: /"a": "1"/, expectError: /Invalid XML/ },
   'css-formatter': { good: 'a{color:red}', expectInOutput: /color:\s*red/ },
   'levenshtein-distance': { good: 'kitten', expectInOutput: /Distance: 3/ },
