@@ -283,6 +283,24 @@ const syntax = HighlightStyle.define([
    (csharp/go). javascript()/python() bundle their own sources.
    StreamLanguage instances expose .data, so each source only fires
    while its language is active. */
+function snips(list) {
+  return completeFromList(list.map(function (sn) { return { label: sn.label, type: 'snippet', detail: sn.detail, apply: sn.apply }; }));
+}
+function completeBoth(words, snippets) {
+  return [keywords(words), snips(snippets)];
+}
+const JS_SNIPS = [
+  { label: 'console.log', detail: 'log', apply: 'console.log()' },
+  { label: 'console.error', detail: 'log', apply: 'console.error()' },
+  { label: 'JSON.stringify', detail: 'json', apply: 'JSON.stringify(, null, 2)' }];
+const PY_SNIPS = [
+  { label: 'print()', detail: 'out', apply: 'print()' },
+  { label: 'with open', detail: 'file', apply: 'with open() as f:' },
+  { label: "if __name__", detail: 'main', apply: "if __name__ == '__main__':" }];
+const GO_SNIPS = [
+  { label: 'fmt.Println', detail: 'out', apply: 'fmt.Println()' },
+  { label: 'func()', detail: 'decl', apply: 'func () {' },
+  { label: 'if err != nil', detail: 'err', apply: 'if err != nil {' }];
 function keywords(list) {
   return completeFromList(list.map(function (w) { return { label: w, type: 'keyword' }; }));
 }
@@ -297,13 +315,13 @@ const GO_WORDS = ['break','case','chan','const','continue','default','defer','el
 
 function langFor(id) {
   switch (id) {
-    case 'js': return [javascript(), javascriptLanguage.data.of({ autocomplete: keywords(JS_WORDS) })];
-    case 'py': return [python(), pythonLanguage.data.of({ autocomplete: keywords(PY_WORDS) })];
+    case 'js': return [javascript(), javascriptLanguage.data.of({ autocomplete: completeBoth(JS_WORDS, JS_SNIPS) })];
+    case 'py': return [python(), pythonLanguage.data.of({ autocomplete: completeBoth(PY_WORDS, PY_SNIPS) })];
     case 'c':
     case 'cpp': return [cpp(), cppLanguage.data.of({ autocomplete: keywords(CPP_WORDS) })];
     case 'cs': return [csharp(), csharpLanguage.data.of({ autocomplete: keywords(CS_WORDS) })];
     case 'java': return [java(), javaLanguage.data.of({ autocomplete: keywords(JAVA_WORDS) })];
-    case 'go': return [go(), goLanguage.data.of({ autocomplete: keywords(GO_WORDS) })];
+    case 'go': return [go(), goLanguage.data.of({ autocomplete: completeBoth(GO_WORDS, GO_SNIPS) })];
     case 'rs': return [rust(), rustLanguage.data.of({ autocomplete: keywords(RUST_WORDS) })];
     default: return [];
   }
