@@ -6053,6 +6053,8 @@ T.yamlToXML = function (s) { if (!String(s).trim()) throw new Error('Enter YAML 
 /* TOML to XML: parse once with the TOML core, emit with the canonical JSON-to-XML emitter (tables nest, arrays repeat as siblings). */
 T.tomlToXML = function (s) { return T.jsonToXML(T.tomlToJSON(s)); };
 /* CSV to XML: parse once with the RFC 4180 CSV core (auto delimiter, headers as keys), emit with the canonical JSON-to-XML emitter (rows repeat as siblings). */
+/* CSV to JSONL: parse once with the RFC 4180 CSV core (auto delimiter, headers as keys), emit one compact JSON object per line for streaming and logging pipelines. */
+T.csvToJSONL = function (s, opts) { var arr = JSON.parse(T.csvToJSON(s, opts)); if (!arr.length) throw new Error('CSV has no data rows \u2014 need a header plus at least one record'); return arr.map(function (r) { return JSON.stringify(r); }).join('\n'); };
 T.csvToXML = function (s, opts) { return T.jsonToXML(T.csvToJSON(s, opts)); };
 /* CSV to TOML: parse once with the RFC 4180 CSV core (auto delimiter, headers as keys), emit rows as [[docs]] tables since TOML has no bare record streams. */
 T.csvToTOML = function (s, opts) { return T.jsonToTOML(JSON.stringify({ docs: JSON.parse(T.csvToJSON(s, opts)) })); };
