@@ -168,7 +168,7 @@ mustNotThrow(() => TOOLS['json-to-csv'].handler('[{"a":1,"b":2}]'), 'json-to-csv
 mustThrow(() => TOOLS['json-to-csv'].handler('not json'), 'json-to-csv bad json');
 mustThrow(() => T.matrixCalc('1 x\n3 4', '', 'determinant'), 'matrixCalc bad cell');
 mustThrow(() => T.matrixCalc('1 2 3\n4 5', '', 'determinant'), 'matrixCalc ragged');
-mustThrow(() => T.csvToMarkdown('   \n  ', {}), 'csvToMarkdown empty');mustThrow(() => T.csvSniffDelim('   '), 'csvSniffDelim empty');mustThrow(() => T.csvTranspose('   ', {}), 'csvTranspose empty');mustThrow(() => T.jsonlToJSON('   '), 'jsonlToJSON empty');mustThrow(() => T.jsonlToJSON('{"a":1}\nnope'), 'jsonlToJSON line number');
+mustThrow(() => T.csvToMarkdown('   \n  ', {}), 'csvToMarkdown empty');mustThrow(() => T.csvSniffDelim('   '), 'csvSniffDelim empty');mustThrow(() => T.csvTranspose('   ', {}), 'csvTranspose empty');mustThrow(() => T.jsonlToJSON('   '), 'jsonlToJSON empty');mustThrow(() => T.jsonlToJSON('{"a":1}\nnope'), 'jsonlToJSON line number');mustThrow(() => T.harSummary('   '), 'harSummary empty');mustThrow(() => T.harSummary('nope'), 'harSummary bad json');mustThrow(() => T.harSummary('{"log":{}}'), 'harSummary no entries');
 mustThrow(() => T.morseTimeline('   ', 20), 'morseTimeline empty');
 mustThrow(() => T.morseTimeline('hi', 99), 'morseTimeline bad wpm');
 mustThrow(() => T.xmlFormat('<a><b></a>', {}), 'xmlFormat mismatch');

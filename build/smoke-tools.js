@@ -355,6 +355,12 @@ console.log('-- text / formats --');
   ok(TOOLS['csv-delimiter-sniffer'].handler('a;b\nc;d').indexOf('Delimiter: Semicolon (;)') === 0, 'sniffer semicolon vector');
   ok(TOOLS['csv-delimiter-sniffer'].handler('a,b\nc,d').indexOf('Delimiter: Comma (,)') === 0, 'sniffer comma vector');
   ok(TOOLS['csv-delimiter-sniffer'].handler('"a;b";c\nd;e').indexOf('Delimiter: Semicolon (;)') === 0, 'sniffer quote-aware');
+  ok(TOOLS['har-inspector'].handler.toString().indexOf('harSummary') >= 0, 'har delegates single source');
+  var _har = '{"log":{"entries":[{"time":120,"request":{"method":"GET","url":"https://a.test/x"},"response":{"status":200,"bodySize":100}},{"time":5,"request":{"method":"GET","url":"https://a.test/y"},"response":{"status":404,"bodySize":10}}]}}';
+  ok(TOOLS['har-inspector'].handler(_har, {}).indexOf('2 requests') === 0, 'har table header');
+  ok(TOOLS['har-inspector'].handler(_har, {}).indexOf('https://a.test/x') < TOOLS['har-inspector'].handler(_har, {}).indexOf('https://a.test/y'), 'har slowest first');
+  ok(TOOLS['har-inspector'].handler(_har, { sort: 'chrono' }).indexOf('https://a.test/x') < TOOLS['har-inspector'].handler(_har, { sort: 'chrono' }).indexOf('https://a.test/y'), 'har chrono order');
+  ok(JSON.parse(TOOLS['har-inspector'].handler(_har, { view: 'json' })).failed === 1, 'har json failed count');
   ok(TOOLS['csv-delimiter-sniffer'].handler('a;b,c\nd;e,f').indexOf('ambiguous') >= 0, 'sniffer tie reports honest');
   ok(TOOLS['csv-delimiter-sniffer'].handler('plain').indexOf('none detected') >= 0, 'sniffer single column');
 }

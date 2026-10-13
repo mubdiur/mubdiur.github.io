@@ -404,6 +404,10 @@ window.TOOLMANIFEST = [
 
   { slug: 'user-agent-parser', name: 'User-Agent Parser', desc: 'Parse any User-Agent string \u2014 browser, version, OS, device class and bot detection', category: 'network', tags: ['user-agent', 'browser', 'parse', 'bot'], icon: 'globe', template: 'transform',
     handler: function (s) { return Transforms.parseUA(s); } },
+  { slug: 'har-inspector', name: 'HAR Inspector', desc: 'Summarize a DevTools HAR file \u2014 per-request timing table, slowest first, totals and failure count', category: 'network', tags: ['har', 'network', 'waterfall', 'performance', 'devtools'], icon: 'zap', template: 'transform',
+    placeholder: '{"log":{"entries":[{"time":120,"request":{"method":"GET","url":"https://example.com/"},"response":{"status":200,"bodySize":13}}]}}',
+    handler: function (s, opts) { return Transforms.harSummary(s, opts); },
+    params: [{ key: 'view', label: 'View', type: 'select', default: 'table', options: [{ value: 'table', label: 'Table' }, { value: 'json', label: 'JSON' }] }, { key: 'sort', label: 'Sort', type: 'select', default: 'slowest', options: [{ value: 'slowest', label: 'Slowest first' }, { value: 'chrono', label: 'Chronological' }] }] },
 
   // ── Algorithm Visualizers ───────────────────────────────
   { slug: 'sorting-visualizer', name: 'Sorting Algorithm Visualizer', desc: 'Watch bubble, quick, merge, insertion, selection sorts in action', category: 'algorithms', tags: ['sorting', 'visualizer', 'algorithm'], icon: 'gitbranch', template: 'custom' },

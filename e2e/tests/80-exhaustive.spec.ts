@@ -91,6 +91,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'csv-delimiter-sniffer': { good: 'a;b\nc;d', expectInOutput: /Delimiter: Semicolon/ },
   'csv-transposer': { good: 'a,b\nc,d', expectInOutput: /a,c/ },
   'jsonl-to-json': { good: '{"a":1}\n{"b":2}', bad: '{"a":1}\nnope', expectInOutput: /"b": 2/, expectError: /Line 2/ },
+  'har-inspector': { good: '{"log":{"entries":[{"time":120,"request":{"method":"GET","url":"https://a.test/x"},"response":{"status":200,"bodySize":100}},{"time":5,"request":{"method":"GET","url":"https://a.test/y"},"response":{"status":404,"bodySize":10}}]}}', bad: 'nope', expectInOutput: /2 requests/, expectError: /Invalid HAR/ },
   'xml-to-json': { good: '<root><a>1</a></root>', bad: '<root><unclosed>', expectInOutput: /"a": "1"/, expectError: /Invalid XML/ },
   'css-formatter': { good: 'a{color:red}', expectInOutput: /color:\s*red/ },
   'levenshtein-distance': { good: 'kitten', expectInOutput: /Distance: 3/ },

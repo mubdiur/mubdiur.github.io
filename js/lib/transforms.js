@@ -910,6 +910,49 @@ T.matrixCalcOpts = function (s, opts) {
 
 /* ── crypto (hashes, HMAC, SRI, PEM, JWT): moved to js/lib/crypto.js, shares Transforms ── */
 
+/* HAR inspector: DevTools HAR JSON becomes a timing summary -
+   per-request method/status/ms/size lines plus totals and failure count. */
+T.harSummary = function (s, opts) {
+  var o = opts || {};
+  var raw = String(s === undefined || s === null ? '' : s);
+  if (!raw.trim()) throw new Error('Paste HAR JSON first - export it from the DevTools Network tab');
+  var doc;
+  try { doc = JSON.parse(raw); }
+  catch (e) { throw new Error('Invalid HAR - paste DevTools HAR JSON (an object with log.entries)'); }
+  var entries = (doc && doc.log && Array.isArray(doc.log.entries)) ? doc.log.entries
+    : (doc && Array.isArray(doc.entries)) ? doc.entries
+    : Array.isArray(doc) ? doc : null;
+  if (!entries || !entries.length) throw new Error('No entries found - paste a HAR object with log.entries');
+  function num(v, fb) { v = Number(v); return isFinite(v) && v >= 0 ? v : fb; }
+  function fmtBytes(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1048576).toFixed(1) + ' MB';
+  }
+  var rows = entries.map(function (e, i) {
+    var req = (e && e.request) || {};
+    var res = (e && e.response) || {};
+    var size = num(res.bodySize, -1);
+    if (size < 0) size = num(res.content && res.content.size, 0);
+    return { n: i + 1, method: String(req.method || 'GET'), status: num(res.status, 0),
+      ms: Math.round(num(e && e.time, 0)), size: size, url: String(req.url || '(unknown url)') };
+  });
+  var failed = rows.filter(function (r) { return r.status === 0 || r.status >= 400; }).length;
+  var bytes = rows.reduce(function (a, r) { return a + r.size; }, 0);
+  var worst = rows.reduce(function (a, r) { return r.ms > a.ms ? r : a; }, rows[0]);
+  var chrono = (o.sort === 'chrono');
+  var list = rows.slice().sort(function (a, b) { return chrono ? a.n - b.n : b.ms - a.ms; });
+  if (o.view === 'json') {
+    return JSON.stringify({ requests: rows.length, bytes: bytes, slowestMs: worst.ms, failed: failed, entries: list }, null, 2);
+  }
+  var head = rows.length + (rows.length === 1 ? ' request' : ' requests') + ' \u00B7 ' + fmtBytes(bytes) +
+    ' \u00B7 slowest ' + worst.ms + ' ms \u00B7 ' + failed + ' failed';
+  var lines = list.map(function (r) {
+    return r.ms + ' ms  ' + r.status + '  ' + r.method + '  ' + fmtBytes(r.size) + '  ' + r.url;
+  });
+  return head + '\n' + lines.join('\n');
+};
+
 /* User-Agent parser: browser/version, OS, device class and bot flag
    from a UA string. Ordered patterns (Edge before Chrome) plus a
    bot allowlist; pure match, no tables to ship. */

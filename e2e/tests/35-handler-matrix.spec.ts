@@ -53,6 +53,12 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('csv-transposer', 'involution', TOOLS['csv-transposer'].handler(TOOLS['csv-transposer'].handler('a,b\nc,d', {}), {}) === 'a,b\nc,d');
     push('jsonl-to-json', 'two docs', JSON.parse(TOOLS['jsonl-to-json'].handler('{"a":1}\n{"b":2}')).length === 2);
     push('jsonl-to-json', 'bad line throws', mustThrow(() => TOOLS['jsonl-to-json'].handler('{"a":1}\nnope')));
+    var HAR = '{"log":{"entries":[{"time":120,"request":{"method":"GET","url":"https://a.test/x"},"response":{"status":200,"bodySize":100}},{"time":5,"request":{"method":"GET","url":"https://a.test/y"},"response":{"status":404,"bodySize":10}}]}}';
+    push('har-inspector', 'table header', TOOLS['har-inspector'].handler(HAR, {}).includes('2 requests'));
+    push('har-inspector', 'slowest first', TOOLS['har-inspector'].handler(HAR, {}).indexOf('https://a.test/x') < TOOLS['har-inspector'].handler(HAR, {}).indexOf('https://a.test/y'));
+    push('har-inspector', 'json view', JSON.parse(TOOLS['har-inspector'].handler(HAR, { view: 'json' })).failed === 1);
+    push('har-inspector', 'bad throws', mustThrow(() => TOOLS['har-inspector'].handler('nope', {})));
+    push('har-inspector', 'chrono sort', TOOLS['har-inspector'].handler(HAR, { sort: 'chrono' }).includes('slowest 120 ms'));
     push('csv-transposer', 'empty throws', mustThrow(() => TOOLS['csv-transposer'].handler('   ', {})));
     push('csv-delimiter-sniffer', 'empty throws', mustThrow(() => TOOLS['csv-delimiter-sniffer'].handler('   ')));
     push('yaml-to-json', 'happy', JSON.parse(TOOLS['yaml-to-json'].handler('a: 1\nb: hello')).a === 1);
@@ -288,7 +294,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
   if (failed.length) console.log('failed handlers:', JSON.stringify(failed, null, 2));
   expect(failed, `handler matrix failures:\n` + JSON.stringify(failed, null, 2)).toEqual([]);
   expect((result as any[]).length, 'handler matrix must cover all tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
-  // Full manifest is 131 (jsonl-to-json added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
+  // Full manifest is 132 (har-inspector added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
-  expect(manifest, 'TOOLMANIFEST must be 131').toBe(131);
+  expect(manifest, 'TOOLMANIFEST must be 132').toBe(132);
 });
