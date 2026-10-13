@@ -4682,5 +4682,58 @@ T.loanSchedule = function (principal, ratePct, years) {
   if (bal > 0) throw new Error('Schedule did not converge — check the inputs');
   return { payment: pay, months: month, totalPaid: r2(P + totalInt), totalInterest: totalInt, yearly: yearly, rows: rows };
 };
+/* Tracker sets for the URL cleaner. Standard strips analytics/click IDs;
+   aggressive additionally strips affiliate/commerce params (tag, cjevent,
+   rakuten ran*, amazon pd_rd_/pf_rd_). Matching is case-insensitive;
+   the tool keep-list always wins. */
+var CLEAN_PREFIX = ['utm_', 'ref_', 'mc_', 'hsa_', 'vero_'];
+var CLEAN_EXACT = { gclid: 1, gbraid: 1, wbraid: 1, dclid: 1, gclsrc: 1, fbclid: 1, msclkid: 1, ircid: 1, igshid: 1, li_fat_id: 1, yclid: 1, twclid: 1, ttclid: 1, mkt_tok: 1, hsctatracking: 1, srsltid: 1, si: 1, ref: 1 };
+var AGGR_PREFIX = ['pd_rd_', 'pf_rd_', 'pf_'];
+var AGGR_EXACT = { tag: 1, ascsubtag: 1, camp: 1, creative: 1, creativeasin: 1, linkcode: 1, linkid: 1, aff_id: 1, affid: 1, affiliate: 1, cjevent: 1, cjdata: 1, ranmid: 1, raneaid: 1, ransiteid: 1, scid: 1 };
+function isTrackerKey(lower, aggressive, keep) {
+  if (keep[lower]) return false;
+  var i;
+  for (i = 0; i < CLEAN_PREFIX.length; i++) { if (lower.slice(0, CLEAN_PREFIX[i].length) === CLEAN_PREFIX[i]) return true; }
+  if (CLEAN_EXACT[lower]) return true;
+  if (!aggressive) return false;
+  for (i = 0; i < AGGR_PREFIX.length; i++) { if (lower.slice(0, AGGR_PREFIX[i].length) === AGGR_PREFIX[i]) return true; }
+  return !!AGGR_EXACT[lower];
+}
+/* URL cleaner: one URL per line, tracker params stripped, survivors
+   sorted for a canonical form. Bare domains gain https://; the hash
+   is never touched (fragments are app state, not tracking). */
+T.cleanURL = function (s, opts) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  var o = opts || {};
+  var aggressive = o.mode === 'aggressive';
+  var keep = {};
+  String(o.keep || '').split(',').forEach(function (k) {
+    var t = k.trim().toLowerCase();
+    if (t) keep[t] = 1;
+  });
+  var lines = raw.split(/\r?\n/);
+  var out = [];
+  for (var n = 0; n < lines.length; n++) {
+    var line = lines[n].trim();
+    if (!line) continue;
+    var text = line;
+    if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(text)) text = 'https://' + text;
+    var u;
+    try { u = new URL(text); } catch (e) { throw new Error('Line ' + (n + 1) + ' is not a URL — include https://'); }
+    var kill = [];
+    u.searchParams.forEach(function (v, k) {
+      if (isTrackerKey(k.toLowerCase(), aggressive, keep)) kill.push(k);
+    });
+    kill.forEach(function (k) { u.searchParams.delete(k); });
+    var pairs = [];
+    u.searchParams.forEach(function (v, k) { pairs.push([k, v]); });
+    pairs.sort(function (a, b) { return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0; });
+    u.search = '';
+    pairs.forEach(function (pr) { u.searchParams.append(pr[0], pr[1]); });
+    out.push(u.href);
+  }
+  if (!out.length) throw new Error('Paste at least one URL — one per line, https:// included');
+  return out.join('\n');
+};
 window.Transforms = T;
 })();

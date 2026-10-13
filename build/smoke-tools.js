@@ -648,6 +648,13 @@ console.log('-- url parser port --');
 {
   ok(TOOLS['url-parser'].handler('https://example.com/a?x=1') === T.parseURL('https://example.com/a?x=1', {}), 'url-parser table delegates to Transforms');
   ok(TOOLS['url-parser'].handler('https://example.com/a?x=1', { view: 'json' }) === T.parseURL('https://example.com/a?x=1', { view: 'json' }), 'url-parser json delegates to Transforms');
+  ok(TOOLS['url-cleaner'].handler.toString().indexOf('cleanURL') >= 0, 'url-cleaner delegates to Transforms');
+  ok(TOOLS['url-cleaner'].handler('https://example.com/shoes?utm_source=n&color=red&gclid=x') === 'https://example.com/shoes?color=red', 'url-cleaner strips trackers');
+  ok(TOOLS['url-cleaner'].handler('https://www.youtube.com/watch?v=abc&si=xyz&t=30') === 'https://www.youtube.com/watch?t=30&v=abc', 'url-cleaner keeps video params, sorts survivors');
+  ok(TOOLS['url-cleaner'].handler('example.com/?b=2&a=1') === 'https://example.com/?a=1&b=2', 'url-cleaner prefixes scheme, sorts params');
+  ok(TOOLS['url-cleaner'].handler('https://e.com/?utm_source=n', { keep: 'utm_source' }) === 'https://e.com/?utm_source=n', 'url-cleaner keep-list wins');
+  ok(TOOLS['url-cleaner'].handler('https://www.amazon.com/dp/X?tag=af-20&pd_rd_w=a&psc=1', { mode: 'aggressive' }) === 'https://www.amazon.com/dp/X?psc=1', 'url-cleaner aggressive strips affiliate tags');
+  ok(TOOLS['url-cleaner'].handler('https://www.amazon.com/dp/X?tag=af-20&psc=1') === 'https://www.amazon.com/dp/X?psc=1&tag=af-20', 'url-cleaner standard spares affiliate tags');
 }
 
 console.log('-- dns lookup (DoH core, no network) --');

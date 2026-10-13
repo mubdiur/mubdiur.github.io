@@ -440,6 +440,10 @@ window.TOOLMANIFEST = [
   { slug: 'url-parser', name: 'URL Parser', desc: 'Decompose any URL — protocol, host, port, path and a decoded query-param table', category: 'network', tags: ['url', 'parse', 'query', 'params'], icon: 'globe', template: 'transform',
     handler: function (s, opts) { return Transforms.parseURL(s, opts); },
     params: [{ key: 'view', label: 'View', type: 'select', default: 'table', options: [{ value: 'table', label: 'Table' }, { value: 'json', label: 'JSON' }] }] },
+  { slug: 'url-cleaner', name: 'URL Cleaner', desc: 'Strip tracker params (utm, gclid, fbclid, affiliate tags) — survivors sorted into a canonical, shareable link', category: 'network', tags: ['url', 'clean', 'utm', 'tracking', 'privacy'], icon: 'globe', template: 'transform',
+    placeholder: 'https://example.com/shoes?utm_source=newsletter&gclid=abc&color=red',
+    handler: function (s, opts) { return Transforms.cleanURL(s, opts); },
+    params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'standard', options: [{ value: 'standard', label: 'Standard' }, { value: 'aggressive', label: 'Aggressive (+affiliate)' }] }, { key: 'keep', label: 'Keep params (comma list)', type: 'text', default: '' }] },
 
   { slug: 'user-agent-parser', name: 'User-Agent Parser', desc: 'Parse any User-Agent string \u2014 browser, version, OS, device class and bot detection', category: 'network', tags: ['user-agent', 'browser', 'parse', 'bot'], icon: 'globe', template: 'transform',
     handler: function (s) { return Transforms.parseUA(s); } },
