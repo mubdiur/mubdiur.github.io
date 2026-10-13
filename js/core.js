@@ -7,7 +7,7 @@
 
 var App = {
   icons: {},
-  TOOL_VERSION: '53',
+  TOOL_VERSION: '54',
 
   /* ── DOM helpers ── */
   SVG_TAGS: ['svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'text', 'g', 'defs', 'marker', 'pattern', 'use', 'ellipse', 'tspan'],

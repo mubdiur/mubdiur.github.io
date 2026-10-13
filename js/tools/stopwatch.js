@@ -130,6 +130,19 @@ App.registerTool('stopwatch', {
       catch (e) { face.textContent = '00:00:00.00'; }
       face.classList.toggle('done', mode === 'dn' && running === false && acc > 0 && ms === 0);
     }
+    function lapTable() {
+      return laps.map(function (l) { return [String(l.n), Transforms.formatStopwatch(l.split), Transforms.formatStopwatch(l.total)]; });
+    }
+    function csvCell(v) {
+      return (v.indexOf(',') >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    }
+    function lapsCSV() {
+      return [['Lap', 'Split', 'Total']].concat(lapTable()).map(function (r) { return r.map(csvCell).join(','); }).join('\n');
+    }
+    function lapsMarkdown() {
+      var rows = lapTable().map(function (r) { return '| ' + r.join(' | ') + ' |'; });
+      return ['| Lap | Split | Total |', '| --- | --- | --- |'].concat(rows).join('\n');
+    }
     function renderLaps() {
       lapsWrap.innerHTML = '';
       if (!laps.length) return;
@@ -154,10 +167,14 @@ App.registerTool('stopwatch', {
       lapsWrap.appendChild(table);
       var copyBtn = App.el('button', { class: 'btn-copy', type: 'button' }, App.icon('copy', '', 14), App.el('span', { text: 'Copy laps' }));
       copyBtn.addEventListener('click', function () {
-        var lines = laps.map(function (l) { return 'Lap ' + l.n + '  split ' + Transforms.formatStopwatch(l.split) + '  total ' + Transforms.formatStopwatch(l.total); });
+        var lines = lapTable().map(function (r) { return 'Lap ' + r[0] + '  split ' + r[1] + '  total ' + r[2]; });
         App.copy(lines.join('\n'), copyBtn);
       });
-      lapsWrap.appendChild(App.el('div', { class: 'sw-row' }, copyBtn));
+      var mdBtn = App.el('button', { class: 'btn-copy', type: 'button' }, App.icon('copy', '', 14), App.el('span', { text: 'Copy Markdown' }));
+      mdBtn.addEventListener('click', function () { App.copy(lapsMarkdown(), mdBtn); });
+      var csvBtn = App.el('button', { class: 'btn-copy', type: 'button' }, App.icon('download', '', 14), App.el('span', { text: 'Download CSV' }));
+      csvBtn.addEventListener('click', function () { App.download('stopwatch-laps.csv', lapsCSV(), 'text/csv;charset=utf-8'); });
+      lapsWrap.appendChild(App.el('div', { class: 'sw-row' }, copyBtn, mdBtn, csvBtn));
       if (!running) {
       var many = laps.length > 1;
       sub.textContent = many ? ('Best ' + Transforms.formatStopwatch(laps[best].split) + ' · Worst ' + Transforms.formatStopwatch(laps[worst].split)) : (laps.length + ' lap recorded.');
@@ -299,7 +316,7 @@ App.registerTool('stopwatch', {
       face, sub, cdRow, chips,
       App.el('div', { class: 'sw-row' }, mainBtn, lapBtn, resetBtn),
       status, lapsWrap,
-      App.el('div', { class: 'sw-hint', text: 'Centisecond display, pause-safe math, laps survive pausing. The countdown beep needs no files — it is synthesized live.' })));
+      App.el('div', { class: 'sw-hint', text: 'Centisecond display, pause-safe math, laps survive pausing and export as text, Markdown or CSV. The countdown beep needs no files — it is synthesized live.' })));
     render();
   }
 });
