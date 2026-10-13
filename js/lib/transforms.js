@@ -2802,6 +2802,52 @@ T.csvToMarkdown = function (s, opts) {
   return [mdRow(head), sep].concat(body.map(mdRow)).join('\n');
 };
 
+/* CSV to ASCII table: delimited rows become a bordered fixed-width
+   plain-text table for terminals, READMEs and code comments. Delimiter
+   auto-detects (or explicit opt), ragged rows pad short, header
+   defaults to the first row. Styles are ascii (+--+) and unicode box
+   drawing. Quoted newlines collapse to spaces so rows stay rectangular. */
+T.csvToAsciiTable = function (s, opts) {
+  var o = opts || {};
+  var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
+  var d = Object.prototype.hasOwnProperty.call(DELIMS, o.delimiter) ? DELIMS[o.delimiter] : null;
+  var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
+  var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
+  if (!lines.length) throw new Error('Paste rows first \u2014 one record per line, values separated by commas, tabs or pipes');
+  if (d === null) d = T.detectDelimChar(lines.slice(0, 10)) || ',';
+  var rows = T.parseCSV(raw, d).filter(function (r) {
+    return !r.every(function (c) { return c.trim() === ''; });
+  }).map(function (r) { return r.map(function (c) { return c.trim().replace(/\r\n|\r|\n/g, ' ').replace(/\t/g, '    '); }); });
+  if (!rows.length) throw new Error('Paste rows first \u2014 one record per line, values separated by commas, tabs or pipes');
+  var cols = rows.reduce(function (m, r) { return Math.max(m, r.length); }, 0);
+  rows = rows.map(function (r) { while (r.length < cols) r.push(''); return r; });
+  var useHeader = o.header !== 'none';
+  var head = useHeader ? rows[0] : rows[0].map(function (_, i) { return 'Column ' + (i + 1); });
+  var body = useHeader ? rows.slice(1) : rows;
+  var widths = head.map(function (h, i) {
+    var m = h.length;
+    for (var k = 0; k < body.length; k++) m = Math.max(m, body[k][i].length);
+    return m;
+  });
+  var right = o.align === 'right', center = o.align === 'center';
+  function rep(ch, n) { return new Array(n + 1).join(ch); }
+  function cell(c, wdt) {
+    var p = wdt - c.length;
+    if (right) return rep(' ', p) + c;
+    if (center) { var l = Math.floor(p / 2); return rep(' ', l) + c + rep(' ', p - l); }
+    return c + rep(' ', p);
+  }
+  var st = o.style === 'unicode'
+    ? { tl: '\u250c', tm: '\u252c', tr: '\u2510', ml: '\u251c', mm: '\u253c', mr: '\u2524', bl: '\u2514', bm: '\u2534', br: '\u2518', h: '\u2500', v: '\u2502' }
+    : { tl: '+', tm: '+', tr: '+', ml: '+', mm: '+', mr: '+', bl: '+', bm: '+', br: '+', h: '-', v: '|' };
+  function rule(l, m, r) { return l + widths.map(function (wdt) { return rep(st.h, wdt + 2); }).join(m) + r; }
+  function dataRow(r) { return st.v + ' ' + r.map(function (c, i) { return cell(c, widths[i]); }).join(' ' + st.v + ' ') + ' ' + st.v; }
+  var out = [rule(st.tl, st.tm, st.tr), dataRow(head), rule(st.ml, st.mm, st.mr)];
+  for (var b = 0; b < body.length; b++) out.push(dataRow(body[b]));
+  out.push(rule(st.bl, st.bm, st.br));
+  return out.join('\n');
+};
+
 /* Delimiter scoring core: quote-aware field counts per candidate over the
    sampled lines. Shared by the sniffer report and auto-delimiter parsing. */
 T.scoreDelims = function (sample) {

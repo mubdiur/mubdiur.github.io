@@ -315,6 +315,16 @@ window.TOOLMANIFEST = [
       { key: 'align', label: 'Align', type: 'select', default: 'left', options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }] },
       { key: 'delimiter', label: 'Delimiter', type: 'select', default: 'auto', options: [{ value: 'auto', label: 'Auto' }, { value: 'comma', label: 'Comma' }, { value: 'semicolon', label: 'Semicolon' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe' }] }
     ] },
+  { slug: 'ascii-table', name: 'ASCII Table Generator', desc: 'CSV rows to bordered fixed-width text tables \u2014 ASCII or Unicode box style, auto delimiter', category: 'converters', tags: ['ascii', 'table', 'csv', 'unicode'], icon: 'filespreadsheet', template: 'transform',
+    placeholder: 'name,age\nAda,30\nBo,25',
+    handler: function (s, opts) { return Transforms.csvToAsciiTable(s, opts); },
+    params: [
+      { key: 'header', label: 'Header', type: 'select', default: 'first-row', options: [{ value: 'first-row', label: 'First row' }, { value: 'none', label: 'None' }] },
+      { key: 'align', label: 'Align', type: 'select', default: 'left', options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }] },
+      { key: 'delimiter', label: 'Delimiter', type: 'select', default: 'auto', options: [{ value: 'auto', label: 'Auto' }, { value: 'comma', label: 'Comma' }, { value: 'semicolon', label: 'Semicolon' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe' }] },
+      { key: 'style', label: 'Style', type: 'select', default: 'ascii', options: [{ value: 'ascii', label: 'ASCII' }, { value: 'unicode', label: 'Unicode box' }] }
+    ] },
+
   { slug: 'env-to-json', name: '.env → JSON', desc: 'Convert dotenv files to JSON — export prefixes, empty values, comments kept', category: 'converters', tags: ['env', 'dotenv', 'json'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.envToJSON(s); } },
   { slug: 'ini-to-json', name: 'INI → JSON', desc: 'Convert INI config to JSON \u2014 sections as objects, duplicate keys and bad headers carry line numbers', category: 'converters', tags: ['ini', 'json', 'convert', 'config'], icon: 'filetype', template: 'transform',

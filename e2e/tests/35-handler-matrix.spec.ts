@@ -225,6 +225,10 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('number-to-words', 'throws non-int', mustThrow(() => TOOLS['number-to-words'].handler('3.14')));
     push('roman-converter', 'dec to roman', TOOLS['roman-converter'].handler('2026') === 'MMXXVI');
     push('roman-converter', 'roman to dec', TOOLS['roman-converter'].handler('MCMXCIV') === '1994');
+    push('ascii-table', 'ascii style', TOOLS['ascii-table'].handler('a,b\n1,2') === '+---+---+\n| a | b |\n+---+---+\n| 1 | 2 |\n+---+---+');
+    push('ascii-table', 'unicode style', TOOLS['ascii-table'].handler('a,b\n1,2', {style:'unicode'}).indexOf('\u2502') >= 0);
+    push('ascii-table', 'throws empty', mustThrow(() => TOOLS['ascii-table'].handler('')));
+
     push('roman-converter', 'throws IIII', mustThrow(() => TOOLS['roman-converter'].handler('IIII')));
 
     // --- crypto (delegate) ---
