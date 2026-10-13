@@ -6136,6 +6136,8 @@ T.xmlToMarkdown = function (s, opts) { var v = T.xmlToJsonValue(s); var ks = Obj
 /* INI to Markdown: parse sections to a single object, bridge through one compact JSON line, emit pipe tables with the canonical JSONL-to-Markdown core (nested sections flatten to dotted columns). */
 T.iniToMarkdown = function (s, opts) { return T.jsonlToMarkdown(JSON.stringify(JSON.parse(T.iniToJSON(s))), opts); };
 /* INI to CSV: parse once with the INI core (sections as objects, line-numbered errors), emit with the canonical JSON-to-CSV core (sections flatten to dotted columns, delimiter shared). */
+/* INI to Schema: parse once with the shared INI core (line-numbered errors), infer with the canonical JSON-to-Schema core (sections as objects, values stay strings since INI carries no scalar types). */
+T.iniToSchema = function (s, opts) { return T.jsonToSchema(T.iniToJSON(s), opts); };
 T.iniToCSV = function (s, opts) { return T.jsonToCSV(T.iniToJSON(s), opts); };
 /* INI to TOML: parse once with the INI core (sections as objects, line-numbered errors), emit with the canonical JSON-to-TOML emitter (sections as tables). */
 T.iniToTOML = function (s) { return T.jsonToTOML(T.iniToJSON(s)); };
