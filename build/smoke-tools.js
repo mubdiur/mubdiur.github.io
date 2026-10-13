@@ -260,6 +260,7 @@ console.log('-- text / formats --');
   ok(diffOut.split('\n').filter(l => l === '+ X').length === 1 &&
      diffOut.split('\n').filter(l => l.startsWith('  ')).length === 5, 'myers diff via manifest handler');
   ok(TOOLS['text-diff'].handler.toString().indexOf('diffOpts') >= 0, 'diff delegates opts');
+  ok(TOOLS['text-diff'].handler('a') === T.textDiff('a', ''), 'diff default lines+empty');
 }
 {
   ok(TOOLS['text-sorter'].handler('c\na\nb', { sortBy: 'alpha', direction: 'asc' }) === T.sortLines('c\na\nb', false), 'sorter delegates alpha');
@@ -267,6 +268,7 @@ console.log('-- text / formats --');
   ok(TOOLS['text-sorter'].handler.toString().indexOf('sortText') >= 0, 'sorter delegates via sortText');
   ok(T.sortText('c\na\nb', { sortBy: 'alpha', direction: 'desc' }) === 'c\nb\na', 'sorter desc vector');
   ok(TOOLS['text-reverser'].handler('abc', { mode: 'full' }) === 'cba', 'reverser delegates full');
+  ok(TOOLS['text-reverser'].handler('abc') === 'cba', 'reverser default full');
   ok(TOOLS['text-reverser'].handler('ab\ncd', { mode: 'lines' }) === 'ba\ndc', 'reverser delegates lines');
   ok(TOOLS['text-reverser'].handler.toString().indexOf('reverseTextOpts') >= 0, 'reverser delegates opts');
   ok(TOOLS['text-deduplicator'].handler('a\na\nb') === 'a\nb', 'dedup delegates');
