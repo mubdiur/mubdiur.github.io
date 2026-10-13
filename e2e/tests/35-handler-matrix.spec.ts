@@ -217,6 +217,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('straddling-checkerboard', 'blank cell throws', mustThrow(() => TOOLS['straddling-checkerboard'].handler('10', { key: 'A', mode: 'decode' })));
     push('porta-cipher', 'happy', TOOLS['porta-cipher'].handler('HELLO', { key: 'A' }) === 'URYYB');
     push('porta-cipher', 'empty key throws', mustThrow(() => TOOLS['porta-cipher'].handler('ABC', { key: '' })));
+    push('bifid-cipher', 'happy', TOOLS['bifid-cipher'].handler('AM', { square: 'A', period: '5' }) === 'CB');
+    push('bifid-cipher', 'bad period throws', mustThrow(() => TOOLS['bifid-cipher'].handler('AB', { square: 'A', period: '1' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

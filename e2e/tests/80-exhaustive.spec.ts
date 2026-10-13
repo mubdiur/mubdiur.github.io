@@ -52,6 +52,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'hill-cipher': { good: 'HELP', expectInOutput: /HIAT/ },
   'straddling-checkerboard': { good: 'HELLOWORLD', expectInOutput: /^[0-9]+$/ },
   'porta-cipher': { good: 'HELLO', expectInOutput: /URYYB/ },
+  'bifid-cipher': { good: 'HELLOWORLD', expectInOutput: /[A-Z]{10}/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },

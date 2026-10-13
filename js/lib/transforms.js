@@ -2249,6 +2249,42 @@ T.straddleDecode = function (s, key) {
 T.straddleCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'KEYWORD' : o.key; if ((o.mode || 'encode') === 'decode') return T.straddleDecode(s, k); return T.straddleEncode(s, k); };
 /* Porta cipher: reciprocal polyalphabetic with 13 alphabets (AB share 0 through YZ share 12); key A alone is ROT13, case preserved, non-letters pass through. */
 T.portaCipher = function (s, opts) {
+/* Bifid cores: Polybius coordinates diffused in blocks of period (rows then columns reread as pairs); length preserved, doubles allowed. */
+T.bifidPeriod = function (p) {
+  var n = p === undefined ? 5 : parseInt(p, 10);
+  if (isNaN(n) || n < 2) throw new Error('Period must be 2 or more \u2014 saw ' + p);
+  return n;
+};
+T.bifidEncode = function (s, squareKey, period) {
+  var sq = T.playfairSquare(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var per = T.bifidPeriod(period === undefined ? 5 : period);
+  var t = String(s).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var out = '';
+  for (var st = 0; st < t.length; st += per) {
+    var blk = t.slice(st, st + per); var n = blk.length;
+    var rows = [], cols = [];
+    for (var i = 0; i < n; i++) { var q = sq.pos[blk.charAt(i)]; rows.push((q / 5) | 0); cols.push(q % 5); }
+    var combo = rows.concat(cols);
+    for (var j = 0; j < n; j++) out += sq.seq[combo[2 * j] * 5 + combo[2 * j + 1]];
+  }
+  return out;
+};
+T.bifidDecode = function (s, squareKey, period) {
+  var sq = T.playfairSquare(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var per = T.bifidPeriod(period === undefined ? 5 : period);
+  var t = String(s).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var out = '';
+  for (var st = 0; st < t.length; st += per) {
+    var blk = t.slice(st, st + per); var n = blk.length;
+    var flat = [];
+    for (var i = 0; i < n; i++) { var q = sq.pos[blk.charAt(i)]; flat.push((q / 5) | 0); flat.push(q % 5); }
+    for (var j = 0; j < n; j++) out += sq.seq[flat[j] * 5 + flat[n + j]];
+  }
+  return out;
+};
+T.bifidCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; var p = o.period === undefined ? '5' : o.period; if ((o.mode || 'encode') === 'decode') return T.bifidDecode(s, q, p); return T.bifidEncode(s, q, p); };
   var o = opts || {}; var key = String(o.key === undefined ? 'LEMON' : o.key).replace(/[^a-zA-Z]/g, '');
   if (!key) throw new Error('Enter a letter key \u2014 AB share alphabet 0, CD share 1, and so on');
   var ki = 0;
