@@ -106,6 +106,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'yaml-to-toml': { good: 'a: 1', expectInOutput: /a = 1/ },
   'yaml-to-xml': { good: 'a: 1', expectInOutput: /<a>1/ },
   'yaml-to-markdown': { good: 'a: 1', expectInOutput: /\| 1 \|/ },
+  'yaml-to-csv': { good: 'a: 1', expectInOutput: /a\n1/ },
   'json-to-markdown': { good: '{"a":1}', expectInOutput: /\| 1 \|/ },
   'toml-to-xml': { good: 'a = 1', expectInOutput: /<a>1/ },
   'toml-to-markdown': { good: 'a = 1', expectInOutput: /\| 1 \|/ },

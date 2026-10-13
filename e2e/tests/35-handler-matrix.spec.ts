@@ -152,6 +152,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('yaml-to-xml', 'empty throws', mustThrow(() => TOOLS['yaml-to-xml'].handler('')));
     push('yaml-to-markdown', 'happy', TOOLS['yaml-to-markdown'].handler('a: 1', {}).indexOf('| 1 |') >= 0);
     push('yaml-to-markdown', 'scalar throws', mustThrow(() => TOOLS['yaml-to-markdown'].handler('- 1', {})));
+    push('yaml-to-csv', 'happy', TOOLS['yaml-to-csv'].handler('a: 1', {}) === 'a\n1');
+    push('yaml-to-csv', 'scalar throws', mustThrow(() => TOOLS['yaml-to-csv'].handler('- 1', {})));
     push('json-to-markdown', 'happy', TOOLS['json-to-markdown'].handler('{"a":1}', {}).indexOf('| 1 |') >= 0);
     push('json-to-markdown', 'scalar throws', mustThrow(() => TOOLS['json-to-markdown'].handler('[1]', {})));
     push('yaml-to-toml', 'flow seq', TOOLS['yaml-to-toml'].handler('ports: [80, 443]').indexOf('ports = [80, 443]') >= 0);
