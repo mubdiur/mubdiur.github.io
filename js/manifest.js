@@ -37,7 +37,7 @@ window.TOOLMANIFEST = [
   { slug: 'filename-sanitizer', name: 'Windows Filename Sanitizer', desc: 'Clean any text into a Windows-safe filename: spaces→underscores, invalid chars stripped, reserved names handled, 255-char limit', category: 'text', tags: ['filename', 'windows', 'sanitize'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.filenameSanitize(s); } },
   { slug: 'phone-extractor', name: 'Phone Extractor', desc: 'Extract phone numbers from text with configurable delimiter', category: 'text', tags: ['extract', 'phone'], icon: 'textsearch', template: 'transform',
-    handler: function (s, opts) { return Transforms.extractPhones(s, (opts && opts.delimiter) || 'newline'); },
+    handler: function (s, opts) { return Transforms.extractPhonesOpts(s, opts); },
     params: [{ key: 'delimiter', label: 'Delimiter', type: 'select', default: 'newline', options: [{ value: 'newline', label: 'Newline' }, { value: 'comma', label: 'Comma' }, { value: 'semicolon', label: 'Semicolon' }, { value: 'space', label: 'Space' }] }] },
   { slug: 'url-extractor', name: 'URL Extractor', desc: 'Extract all URLs from text content', category: 'text', tags: ['extract', 'url'], icon: 'globe', template: 'transform',
     handler: function (s) { return Transforms.extractURLs(s); } },
@@ -46,7 +46,7 @@ window.TOOLMANIFEST = [
   { slug: 'word-counter', name: 'Word Counter', desc: 'Count words, characters, lines, sentences, and reading time', category: 'text', tags: ['count', 'stats', 'analyze'], icon: 'sigma', template: 'transform',
     handler: function (s) { return Transforms.wordReport(s); } },
   { slug: 'case-converter', name: 'Case Converter', desc: 'Convert between lowercase, UPPERCASE, Title Case, camelCase, snake_case, kebab-case, PascalCase', category: 'text', tags: ['case', 'convert'], icon: 'casesensitive', template: 'transform',
-    handler: function (s, opts) { return Transforms.caseConvert(s, (opts && opts.style) || 'lower'); },
+    handler: function (s, opts) { return Transforms.caseConvertOpts(s, opts); },
     params: [{ key: 'style', label: 'Style', type: 'select', default: 'lower', options: [
       { value: 'lower', label: 'lowercase' }, { value: 'upper', label: 'UPPERCASE' }, { value: 'title', label: 'Title Case' },
       { value: 'camel', label: 'camelCase' }, { value: 'pascal', label: 'PascalCase' }, { value: 'snake', label: 'snake_case' },

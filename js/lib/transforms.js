@@ -2782,6 +2782,10 @@ T.extractPhones = function (s, delimiter) {
   else if (d === 'space') d = ' ';
   return (s.match(PHONE_RE) || []).join(d);
 };
+/* Phone UI contract: text input plus delimiter option. Moved from the manifest for single source. */
+T.extractPhonesOpts = function (s, opts) {
+  return T.extractPhones(s, (opts && opts.delimiter) || 'newline');
+};
 T.extractURLs = function (s, delimiter) { return (s.match(URL_RE) || []).join(delimiter || '\n'); };
 T.extractIPs = function (s, delimiter) {
   var matches = s.match(IP_RE) || [];
@@ -3059,6 +3063,10 @@ T.caseConvert = function (s, style) {
     case 'train': return words.map(function (w) { return w[0].toUpperCase() + w.slice(1).toLowerCase(); }).join('-');
     default: return s;
   }
+};
+/* Case UI contract: text input plus style option. Moved from the manifest for single source. */
+T.caseConvertOpts = function (s, opts) {
+  return T.caseConvert(s, (opts && opts.style) || 'lower');
 };
 T.slugify = function (s) { return s.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/^-+|-+$/g, ''); };
 T.textDiff = function (a, b) { return MyersDiff.linesText(a, b); };

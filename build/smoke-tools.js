@@ -138,7 +138,7 @@ console.log('-- math --');
   ok(TOOLS['filename-sanitizer'].handler.toString().indexOf('filenameSanitize') >= 0, 'filename-sanitizer delegates');
   ok(TOOLS['filename-sanitizer'].handler('a<b>c:d"e') === 'abcde', 'filename strips Windows-forbidden');
   ok(TOOLS['filename-sanitizer'].handler('CON.txt') === '_CON.txt', 'filename guards reserved name');
-  ok(TOOLS['phone-extractor'].handler.toString().indexOf('extractPhones') >= 0, 'phone-extractor delegates');
+  ok(TOOLS['phone-extractor'].handler.toString().indexOf('extractPhonesOpts') >= 0, 'phone-extractor delegates opts');
   ok(TOOLS['phone-extractor'].handler('a 555-123-4567 b 555-987-6543', { delimiter: 'comma' }) === '555-123-4567,555-987-6543', 'phone comma vector');
   ok(TOOLS['phone-extractor'].handler('a 555-123-4567 b 555-987-6543', {}) === T.extractPhones('a 555-123-4567 b 555-987-6543', 'newline'), 'phone bare default is newline');
   ok(TOOLS['regex-tester'].handler.toString().indexOf('regexTest') >= 0, 'regex-tester runs on Transforms engine');
@@ -661,7 +661,7 @@ console.log('-- case-slug --');
   ok(TOOLS['case-converter'].handler('foo BAR baz', {style:'kebab'}) === 'foo-bar-baz', 'case kebab vector');
   ok(TOOLS['case-converter'].handler('x') === 'x', 'case default lower');
   ok(TOOLS['slug-generator'].handler('Hello, World!') === 'hello-world', 'slug vector');
-  ok(TOOLS['case-converter'].handler.toString().indexOf('caseConvert') >= 0, 'case delegates');
+  ok(TOOLS['case-converter'].handler.toString().indexOf('caseConvertOpts') >= 0, 'case delegates opts');
   ok(TOOLS['slug-generator'].handler.toString().indexOf('slugify') >= 0, 'slug delegates');
 }
 console.log('-- json-escape --');
