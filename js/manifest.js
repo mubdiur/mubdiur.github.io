@@ -92,7 +92,7 @@ window.TOOLMANIFEST = [
 
   // ── Generators ──────────────────────────────────────────
   { slug: 'random-string', name: 'Random String Generator', desc: 'Generate random strings with configurable character sets — rejection-sampled, zero modulo bias', category: 'generators', tags: ['random', 'generate'], icon: 'shuffle', template: 'generator',
-    genHandler: function (opts) { return Transforms.randomString((opts && opts.length) || '16', (opts && opts.charset) || 'alphanumeric'); },
+    genHandler: function (opts) { return Transforms.randomStringOpts(opts); },
     params: [
       { key: 'length', label: 'Length', type: 'number', default: '16', min: 1, max: 1024 },
       { key: 'charset', label: 'Character Set', type: 'select', default: 'alphanumeric', options: [
@@ -101,7 +101,7 @@ window.TOOLMANIFEST = [
       ] }
     ] },
   { slug: 'uuid-generator', name: 'UUID v4 Generator', desc: 'RFC 4122 UUID v4 from the Web Crypto CSPRNG — 122 secure random bits, bulk mode available', category: 'generators', tags: ['uuid', 'identifier'], icon: 'key', template: 'generator',
-    genHandler: function (opts) { return Transforms.uuidV4Batch((opts && opts.count) || '1'); },
+    genHandler: function (opts) { return Transforms.uuidV4BatchOpts(opts); },
     params: [{ key: 'count', label: 'Count', type: 'number', default: '1', min: 1, max: 1000 }] },
   { slug: 'password-generator', name: 'Password Generator', desc: 'Strong passwords from the Web Crypto CSPRNG — guaranteed coverage of every selected class, unbiased sampling, shuffled', category: 'generators', tags: ['password', 'security'], icon: 'lock', template: 'generator',
     genHandler: function (opts) { return Transforms.generatePassword((opts && opts.length) || '24', opts); },

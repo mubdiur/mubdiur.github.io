@@ -3232,6 +3232,10 @@ T.uuidV4Batch = function (count) {
   for (var i = 0; i < count; i++) out.push(T.uuidV4());
   return out.join('\n');
 };
+/* UUID v4 UI contract: count option. Moved from the manifest for single source. */
+T.uuidV4BatchOpts = function (opts) {
+  return T.uuidV4Batch((opts && opts.count) || '1');
+};
 T.ulidBatch = function (count) {
   count = parseInt(count, 10);
   if (!(count >= 1)) count = 1;
@@ -3251,6 +3255,10 @@ T.randomString = function (length, charset) {
     charset === 'alphanumeric' ? 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' :
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
   return CryptoRand.string(length, pool);
+};
+/* Random-string UI contract: length and charset options. Moved from the manifest for single source. */
+T.randomStringOpts = function (opts) {
+  return T.randomString((opts && opts.length) || '16', (opts && opts.charset) || 'alphanumeric');
 };
 /* Password builder: UI contract (string or boolean class flags, length
    floor 4, throw when every class is off) over rejection-sampled draws
