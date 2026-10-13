@@ -47,6 +47,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'columnar-transposition': { good: 'ABCDEF', expectInOutput: /CFBEAD/ },
   'four-square-cipher': { good: 'HELLOWORLD', expectInOutput: /[A-Z]{10}/ },
   'adfgx-cipher': { good: 'HELLOWORLD', expectInOutput: /^[ADFGX]+$/ },
+  'adfgvx-cipher': { good: 'HELLO123', expectInOutput: /^[ADFGVX]+$/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },

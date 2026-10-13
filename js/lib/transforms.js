@@ -2107,6 +2107,42 @@ T.adfgxDecode = function (s, squareKey, transKey) {
   return out;
 };
 T.adfgxCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; var k = o.trans === undefined ? 'ZEBRAS' : o.trans; if ((o.mode || 'encode') === 'decode') return T.adfgxDecode(s, q, k); return T.adfgxEncode(s, q, k); };
+/* ADFGVX cores: 6x6 square (A-Z0-9, J kept) plus columnar stage; output is A/D/F/G/V/X only, digits supported. */
+T.adfgvxSquare = function (key) {
+  var k = String(key === undefined ? 'KEYWORD' : key).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!k) throw new Error('Enter an alphanumeric key \u2014 A-Z0-9 builds the 6x6 square');
+  var seen = {}; var seq = [];
+  var full = k + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  for (var i = 0; i < full.length; i++) { var c = full.charAt(i); if (!seen[c]) { seen[c] = 1; seq.push(c); } }
+  var pos = {}; for (var j = 0; j < seq.length; j++) pos[seq[j]] = j;
+  return { seq: seq, pos: pos };
+};
+T.adfgvxEncode = function (s, squareKey, transKey) {
+  var sq = T.adfgvxSquare(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var tk = transKey === undefined ? 'ZEBRAS' : transKey;
+  T.columnarOrder(tk);
+  var t = String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!t) return '';
+  var labels = ['A', 'D', 'F', 'G', 'V', 'X'];
+  var frac = '';
+  for (var i = 0; i < t.length; i++) { var p = sq.pos[t.charAt(i)]; frac += labels[(p / 6) | 0] + labels[p % 6]; }
+  return T.columnarEncode(frac, tk);
+};
+T.adfgvxDecode = function (s, squareKey, transKey) {
+  var sq = T.adfgvxSquare(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var tk = transKey === undefined ? 'ZEBRAS' : transKey;
+  T.columnarOrder(tk);
+  var c = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!c) return '';
+  var interim = T.columnarDecode(c, tk);
+  if (interim.length % 2) throw new Error('Bad ADFGVX input \u2014 need pairs, saw ' + interim.length);
+  if (!/^[ADFGVX]*$/.test(interim)) throw new Error('Bad ADFGVX input \u2014 A/D/F/G/V/X only');
+  var lab = { A: 0, D: 1, F: 2, G: 3, V: 4, X: 5 };
+  var out = '';
+  for (var i = 0; i < interim.length; i += 2) out += sq.seq[lab[interim.charAt(i)] * 6 + lab[interim.charAt(i + 1)]];
+  return out;
+};
+T.adfgvxCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; var k = o.trans === undefined ? 'ZEBRAS' : o.trans; if ((o.mode || 'encode') === 'decode') return T.adfgvxDecode(s, q, k); return T.adfgvxEncode(s, q, k); };
 /* Columnar cores: keyword-ordered columns (stable for duplicate letters), no padding, uneven columns handled, code points preserved. */
 T.columnarOrder = function (key) {
   var k = String(key === undefined ? 'ZEBRAS' : key).toUpperCase().replace(/[^A-Z]/g, '');
