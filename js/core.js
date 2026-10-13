@@ -542,7 +542,19 @@ var App = {
         }
       } else {
         App.paletteResults = null;
-        var recents = App.getRecentTools();
+        var favs = App.getFavSlugs();
+        var favSet = {};
+        favs.forEach(function (s) { favSet[s] = true; });
+        if (favs.length) {
+          list.appendChild(App.el('div', { class: 'palette-label', text: 'Favorites' }));
+          favs.forEach(function (s) {
+            var t = TOOLS_BY_SLUG[s];
+            if (!t) return;
+            App.paletteRows.push({ kind: 'tool', slug: t.slug });
+            list.appendChild(toolItem(t, App.paletteRows.length - 1));
+          });
+        }
+        var recents = App.getRecentTools().filter(function (t) { return !favSet[t.slug]; });
         if (recents.length) {
           list.appendChild(App.el('div', { class: 'palette-label', text: 'Recent' }));
           recents.forEach(function (t) {

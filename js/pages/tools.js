@@ -169,6 +169,15 @@ function renderTools() {
       }
     }
     if (!q && !state.cat) {
+      var recentTools = App.getRecentTools().filter(function (t) { return favs.indexOf(t.slug) < 0; });
+      if (recentTools.length) {
+        results.appendChild(App.el('div', { class: 'cat-section' },
+          App.el('div', { class: 'cat-head' },
+            App.icon('clock', '', 16),
+            App.el('h2', { text: 'Recent' }),
+            App.el('span', { text: String(recentTools.length) })),
+          App.el('div', { class: 'tool-grid' }, cards(recentTools))));
+      }
       TOOLCATEGORIES.forEach(function (cat) {
         var tools = TOOLMANIFEST.filter(function (t) { return t.category === cat.id; });
         if (!tools.length) return;
