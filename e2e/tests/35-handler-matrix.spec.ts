@@ -59,6 +59,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('har-inspector', 'json view', JSON.parse(TOOLS['har-inspector'].handler(HAR, { view: 'json' })).failed === 1);
     push('har-inspector', 'bad throws', mustThrow(() => TOOLS['har-inspector'].handler('nope', {})));
     push('har-inspector', 'chrono sort', TOOLS['har-inspector'].handler(HAR, { sort: 'chrono' }).includes('slowest 120 ms'));
+    push('har-inspector', 'url filter', TOOLS['har-inspector'].handler(HAR, { filter: 'y' }).includes('https://a.test/y') && !TOOLS['har-inspector'].handler(HAR, { filter: 'y' }).includes('https://a.test/x'));
+    push('har-inspector', 'failed only', TOOLS['har-inspector'].handler(HAR, { failedOnly: 'true' }).indexOf('1 request') === 0);
     var PV = 'dept,q,sales\neng,q1,10\neng,q2,20\nops,q1,5';
     push('csv-pivot-table', 'sum', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'sum' }) === ',q1,q2\neng,10,20\nops,5,');
     push('csv-pivot-table', 'count defaults', TOOLS['csv-pivot-table'].handler(PV, {}).indexOf(',q1,q2') === 0);

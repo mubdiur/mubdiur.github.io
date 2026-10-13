@@ -1059,17 +1059,26 @@ T.harSummary = function (s, opts) {
     return { n: i + 1, method: String(req.method || 'GET'), status: num(res.status, 0),
       ms: Math.round(num(e && e.time, 0)), size: size, url: String(req.url || '(unknown url)') };
   });
-  var failed = rows.filter(function (r) { return r.status === 0 || r.status >= 400; }).length;
-  var bytes = rows.reduce(function (a, r) { return a + r.size; }, 0);
-  var worst = rows.reduce(function (a, r) { return r.ms > a.ms ? r : a; }, rows[0]);
+  var q = String(o.filter || '').trim().toLowerCase();
+  var failedOnly = o.failedOnly === true || o.failedOnly === 'true';
+  function isFailed(r) { return r.status === 0 || r.status >= 400; }
+  var list = rows.filter(function (r) {
+    if (failedOnly && !isFailed(r)) return false;
+    if (q && r.url.toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+  var failed = list.filter(isFailed).length;
+  var bytes = list.reduce(function (a, r) { return a + r.size; }, 0);
+  var worst = list.reduce(function (a, r) { return r.ms > a.ms ? r : a; }, list[0] || { ms: 0 });
   var chrono = (o.sort === 'chrono');
-  var list = rows.slice().sort(function (a, b) { return chrono ? a.n - b.n : b.ms - a.ms; });
+  var sorted = list.slice().sort(function (a, b) { return chrono ? a.n - b.n : b.ms - a.ms; });
   if (o.view === 'json') {
-    return JSON.stringify({ requests: rows.length, bytes: bytes, slowestMs: worst.ms, failed: failed, entries: list }, null, 2);
+    return JSON.stringify({ requests: list.length, bytes: bytes, slowestMs: worst.ms, failed: failed, entries: sorted }, null, 2);
   }
-  var head = rows.length + (rows.length === 1 ? ' request' : ' requests') + ' \u00B7 ' + fmtBytes(bytes) +
+  var head = list.length + (list.length === 1 ? ' request' : ' requests') + ' \u00B7 ' + fmtBytes(bytes) +
     ' \u00B7 slowest ' + worst.ms + ' ms \u00B7 ' + failed + ' failed';
-  var lines = list.map(function (r) {
+  if (!sorted.length) return head + '\n(no requests match \u2014 clear the filter or untick failed-only)';
+  var lines = sorted.map(function (r) {
     return r.ms + ' ms  ' + r.status + '  ' + r.method + '  ' + fmtBytes(r.size) + '  ' + r.url;
   });
   return head + '\n' + lines.join('\n');
