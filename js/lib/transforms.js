@@ -143,12 +143,14 @@ T.csvToJSON = function (s, opts) {
   var rows = T.parseCSV(s, d);
   if (!rows.length) throw new Error('CSV is empty');
   var seen = {};
-  var headers = rows[0].map(function (h) {
-    var name = h === '' ? '(unnamed)' : h;
+  function nameCol(name) {
     if (seen[name]) { seen[name]++; return name + '_' + seen[name]; }
     seen[name] = 1;
     return name;
-  });
+  }
+  var headers = rows[0].map(function (h) { return nameCol(h === '' ? '(unnamed)' : h); });
+  var width = rows.reduce(function (m, r) { return Math.max(m, r.length); }, headers.length);
+  for (var ci = headers.length; ci < width; ci++) headers.push(nameCol('(extra_' + (ci + 1) + ')'));
   var json = rows.slice(1).map(function (r) {
     var obj = {};
     headers.forEach(function (h, idx) { obj[h] = idx < r.length ? r[idx] : ''; });
