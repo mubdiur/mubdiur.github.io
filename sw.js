@@ -22,7 +22,7 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-var SW_VERSION = 'v151';
+var SW_VERSION = 'v152';
 var STATIC_CACHE = 'mub-static-' + SW_VERSION;
 var RUNTIME_CACHE = 'mub-runtime-v1';
 
@@ -40,7 +40,7 @@ var SHELL = [
   'js/lib/transforms.js?v=125',
   'js/lib/crypto.js?v=5',
   'js/wasm.js?v=28',
-  'js/core.js?v=47',
+  'js/core.js?v=48',
   'js/pages/home.js?v=30',
   'js/pages/tools.js?v=28',
   'js/pages/tool.js?v=27',

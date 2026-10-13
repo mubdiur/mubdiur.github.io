@@ -448,6 +448,39 @@ var App = {
     slugs = [slug].concat(slugs.filter(function (s) { return s !== slug; })).slice(0, App.recentToolsMax);
     try { localStorage.setItem(App.recentToolsKey, JSON.stringify(slugs)); } catch (e) {}
   },
+  getFavSlugs: function () {
+    var arr = [];
+    try { arr = JSON.parse(localStorage.getItem('mub.favtools.v1') || '[]'); } catch (e) { arr = []; }
+    if (!Array.isArray(arr)) return [];
+    var known = {};
+    TOOLMANIFEST.forEach(function (t) { known[t.slug] = true; });
+    return arr.filter(function (s) { return typeof s === 'string' && known[s]; });
+  },
+  /* Boosts nudge favorites and recents above near-ties and weak
+     substring hits, but never above an exact slug/name match. */
+  rankBoosts: function () {
+    var boosts = {};
+    App.getFavSlugs().forEach(function (s) { boosts[s] = Math.max(boosts[s] || 0, 400); });
+    App.getRecentTools().forEach(function (t, i) {
+      var w = 300 - i * 40;
+      if (w < 60) w = 60;
+      boosts[t.slug] = Math.max(boosts[t.slug] || 0, w);
+    });
+    return boosts;
+  },
+  /* Scored search shared by the palette: base fuzzy score plus
+     favorite/recent boosts. Only true matches rank (base > 0). */
+  rankedTools: function (query, limit) {
+    var q = String(query || '').trim().toLowerCase();
+    if (!q) return [];
+    var boosts = App.rankBoosts();
+    return TOOLMANIFEST
+      .map(function (t) { var base = App.toolMatchScore(t, q); return { tool: t, base: base, s: base + (base > 0 ? (boosts[t.slug] || 0) : 0) }; })
+      .filter(function (x) { return x.base > 0; })
+      .sort(function (a, b) { return b.s - a.s || a.tool.slug.length - b.tool.slug.length; })
+      .map(function (x) { return x.tool; })
+      .slice(0, limit || 20);
+  },
   /* ── command palette ── */
   paletteOpen: false,
   paletteSelected: 0,
@@ -496,12 +529,7 @@ var App = {
       list.innerHTML = '';
       App.paletteRows = [];
       if (q) {
-        var results = TOOLMANIFEST
-          .map(function (t) { return { tool: t, s: App.toolMatchScore(t, q) }; })
-          .filter(function (x) { return x.s > 0; })
-          .sort(function (a, b) { return b.s - a.s || a.tool.slug.length - b.tool.slug.length; })
-          .map(function (x) { return x.tool; })
-          .slice(0, 20);
+        var results = App.rankedTools(q, 20);
         if (!results.length) {
           list.appendChild(App.el('div', { class: 'palette-empty', text: 'No tools match "' + q + '"' }));
         } else {
