@@ -5382,5 +5382,64 @@ T.xmlToJsonValue = function (s) {
 };
 T.xmlToJsonDoc = function (s) { return JSON.stringify(T.xmlToJsonValue(s), null, 2); };
 T.xmlToYAML = function (s) { return T.jsonToYAML(JSON.stringify(T.xmlToJsonValue(s))); };
+/* Duration calculator: one signed duration per line, summed. Each line takes
+   jammed or spaced unit groups (1h30m, 2 days 4 hours), colon times (1:30:00,
+   12:30) or bare seconds; leading - subtracts, # lines and blanks skip.
+   Months read as 30 days and years as 365 days. Totals show s/min/h plus
+   ms under a minute and days past a day. Unknown units and bad clocks throw
+   with the offending line number. */
+T.durationCalc = function (s) {
+  var UN = { ms: 1, millisecond: 1, milliseconds: 1, s: 1000, sec: 1000, secs: 1000, second: 1000, seconds: 1000, m: 60000, min: 60000, mins: 60000, minute: 60000, minutes: 60000, h: 3600000, hr: 3600000, hrs: 3600000, hour: 3600000, hours: 3600000, d: 86400000, day: 86400000, days: 86400000, w: 604800000, week: 604800000, weeks: 604800000, mo: 2592000000, month: 2592000000, months: 2592000000, y: 31536000000, year: 31536000000, years: 31536000000 };
+  var URE = /^\s*([0-9]+(?:\.[0-9]+)?)\s*(milliseconds|millisecond|seconds|second|minutes|minute|hours|hour|days|weeks|months|years|ms|mo|sec|secs|min|mins|hrs|hr|s|m|h|d|w|y)/i;
+  function fmt(n) {
+    if (Math.abs(n) < 1e-9) n = 0;
+    return String(Math.round(n * 10000) / 10000);
+  }
+  function parseTerm(body, ln) {
+    if (body.indexOf(':') >= 0) {
+      var parts = body.split(':');
+      if (parts.length < 2 || parts.length > 3) throw new Error('Line ' + ln + ': clocks take H:MM:SS or MM:SS \u2014 got ' + JSON.stringify(body.slice(0, 24)));
+      var nums = parts.map(function (x) { return /^[0-9]+(?:\.[0-9]+)?$/.test(x.trim()) ? Number(x) : NaN; });
+      for (var k = 0; k < nums.length; k++) if (!isFinite(nums[k])) throw new Error('Line ' + ln + ': bad clock segment ' + JSON.stringify(parts[k].trim().slice(0, 12)));
+      var hh = nums.length === 3 ? nums[0] : 0, mm = nums.length === 3 ? nums[1] : nums[0], ss = nums[nums.length - 1];
+      if (mm >= 60 || ss >= 60) throw new Error('Line ' + ln + ': minutes and seconds must stay under 60');
+      return (hh * 3600 + mm * 60 + ss) * 1000;
+    }
+    if (/^[0-9]+(?:\.[0-9]+)?$/.test(body)) return Number(body) * 1000;
+    var rest = body, ms = 0, matched = false, m;
+    while (rest) {
+      m = URE.exec(rest);
+      if (!m || !m[0].length) break;
+      ms += Number(m[1]) * UN[m[2].toLowerCase()];
+      rest = rest.slice(m[0].length);
+      matched = true;
+    }
+    if (!matched) throw new Error('Line ' + ln + ': could not parse ' + JSON.stringify(body.slice(0, 32)));
+    if (rest.trim()) throw new Error('Line ' + ln + ': leftover ' + JSON.stringify(rest.trim().slice(0, 24)) + ' \u2014 jam units like 1h30m or use 1:30:00');
+    return ms;
+  }
+  var raw = String(s === undefined || s === null ? '' : s);
+  var rows = raw.split(/\r?\n/);
+  var out = [], total = 0, count = 0;
+  for (var n = 0; n < rows.length; n++) {
+    var line = rows[n].trim();
+    if (!line || line.charAt(0) === '#') continue;
+    var ln = n + 1, sign = 1, body = line;
+    var sig = /^\s*([+-])\s*(.*)$/.exec(line);
+    if (sig) { sign = sig[1] === '-' ? -1 : 1; body = sig[2]; }
+    if (!body) throw new Error('Line ' + ln + ': sign with no duration');
+    var ms = sign * parseTerm(body, ln);
+    total += ms;
+    count++;
+    out.push(line + ' = ' + fmt(ms / 1000) + 's');
+  }
+  if (!count) throw new Error('Paste durations first \u2014 one per line, e.g. 1h30m');
+  var segs = [];
+  if (Math.abs(total) < 60000) segs.push(fmt(total) + 'ms');
+  segs.push(fmt(total / 1000) + 's', fmt(total / 60000) + 'min', fmt(total / 3600000) + 'h');
+  if (Math.abs(total / 86400000) >= 1) segs.push(fmt(total / 86400000) + 'd');
+  out.push('Total = ' + segs.join(' = '));
+  return out.join('\n');
+};
 window.Transforms = T;
 })();
