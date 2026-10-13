@@ -91,6 +91,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('matrix-calculator', 'multiply', TOOLS['matrix-calculator'].handler('1 2\n3 4', { operation: 'multiply', matrixB: '5 6\n7 8' }).includes('19 22'));
     push('matrix-calculator', 'singular throws', mustThrow(() => TOOLS['matrix-calculator'].handler('1 1\n1 1', { operation: 'inverse' })));
     push('markdown-table-generator', 'basic', TOOLS['markdown-table-generator'].handler('a,b\n1,2', {}).includes('| a | b |'));
+    push('markdown-table-generator', 'auto semicolon', TOOLS['markdown-table-generator'].handler('a;b\n1;2', {}).includes('| a | b |'));
     push('markdown-table-generator', 'center', TOOLS['markdown-table-generator'].handler('a,b\n1,2', { align: 'center' }).includes(':center:'));
     push('markdown-table-generator', 'empty throws', mustThrow(() => TOOLS['markdown-table-generator'].handler('   ', {})));
     push('xml-formatter', 'inline', TOOLS['xml-formatter'].handler('<r><a>1</a></r>', {}).includes('<a>1</a>'));

@@ -1954,7 +1954,7 @@ T.csvToMarkdown = function (s, opts) {
   var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
   var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
   if (!lines.length) throw new Error('Paste rows first \u2014 one record per line, values separated by commas, tabs or pipes');
-  if (d === null) d = lines[0].indexOf('\t') >= 0 ? '\t' : (lines[0].indexOf(';') >= 0 && lines[0].indexOf(',') < 0 ? ';' : (lines[0].indexOf('|') >= 0 && lines[0].indexOf(',') < 0 ? '|' : ','));
+  if (d === null) d = T.detectDelimChar(lines.slice(0, 10)) || ',';
   function splitRow(line) {
     var cells = [], cur = '', q = false;
     for (var i = 0; i < line.length; i++) {

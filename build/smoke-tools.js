@@ -635,6 +635,7 @@ console.log('-- markdown table --');
 {
   var t1 = TOOLS['markdown-table-generator'].handler('a,b\n1,2', {});
   ok(t1 === '| a | b |\n|---|---|\n| 1 | 2 |', 'markdown table basic');
+  ok(TOOLS['markdown-table-generator'].handler('"a,b";c\n"d,e";f', {}).indexOf('| a,b | c |') >= 0, 'markdown auto semicolon despite quoted comma');
   var t2 = TOOLS['markdown-table-generator'].handler('\u0022Bo, Jr\u0022,25', { header: 'none', align: 'center' });
   ok(t2.indexOf('Bo, Jr') >= 0 && t2.indexOf('|:center:|') >= 0 && t2.indexOf('Column 1') >= 0, 'markdown quoted + center + gen header');
   var t3 = TOOLS['markdown-table-generator'];
