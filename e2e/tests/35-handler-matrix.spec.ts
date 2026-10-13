@@ -117,6 +117,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('toml-to-json', 'dup throws', mustThrow(() => TOOLS['toml-to-json'].handler('a = 1\na = 2')));
     push('xml-to-toml', 'happy', TOOLS['xml-to-toml'].handler('<r><a>1</a></r>').includes('a = '));
     push('xml-to-toml', 'mismatch throws', mustThrow(() => TOOLS['xml-to-toml'].handler('<a></b>')));
+    push('xml-to-csv', 'happy', TOOLS['xml-to-csv'].handler('<rows><row><name>Ada</name><age>30</age></row><row><name>Bob</name><age>25</age></row></rows>', {}) === 'name,age\nAda,30\nBob,25');
+    push('xml-to-csv', 'scalar throws', mustThrow(() => TOOLS['xml-to-csv'].handler('<a>hello</a>', {})));
 
     push('toml-to-json', 'quoted eq key', TOOLS['toml-to-json'].handler('"a=b" = 1').includes('"a=b"'));
 

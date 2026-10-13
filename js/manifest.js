@@ -284,6 +284,10 @@ window.TOOLMANIFEST = [
   { slug: 'xml-to-toml', name: 'XML \u2192 TOML', desc: 'Convert XML (SOAP, RSS, configs) to TOML \u2014 attributes as @-keys, repeats as arrays, shared dependency-free parser', category: 'converters', tags: ['xml', 'toml', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
     placeholder: '<server><host>example.com</host><port>8080</port></server>',
     handler: function (s) { return Transforms.xmlToTOML(s); } },
+  { slug: 'xml-to-csv', name: 'XML \u2192 CSV', desc: 'Convert XML repeats to CSV \u2014 first repeating group becomes rows, single records stay one row, shared dependency-free parser', category: 'converters', tags: ['xml', 'csv', 'convert', 'soap', 'rss'], icon: 'filespreadsheet', template: 'transform',
+    placeholder: '<rows><row><name>Ada</name><age>30</age></row></rows>',
+    handler: function (s, opts) { return Transforms.xmlToCSV(s, opts); },
+    params: [{ key: 'delimiter', label: 'Delimiter', type: 'select', default: 'comma', options: [{ value: 'comma', label: 'Comma (,)' }, { value: 'semicolon', label: 'Semicolon (;)' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe (|)' }] }, { key: 'nested', label: 'Nested objects', type: 'select', default: 'flatten', options: [{ value: 'flatten', label: 'Flatten (a.b)' }, { value: 'stringify', label: 'Stringify JSON' }] }] },
 
   { slug: 'yaml-to-json', name: 'YAML → JSON', desc: 'Convert YAML to JSON', category: 'converters', tags: ['yaml', 'json', 'convert'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.yamlToJSON(s); } },

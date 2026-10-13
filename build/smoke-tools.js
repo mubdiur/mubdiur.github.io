@@ -605,6 +605,10 @@ console.log('-- json to toml --');
   ok(TOOLS['xml-to-toml'].handler('<r><a>1</a></r>') === '[r]\na = "1"', 'xml-to-toml basic');
   ok(TOOLS['xml-to-toml'].handler('<r><i>1</i><i>2</i></r>') === '[r]\ni = ["1", "2"]', 'xml-to-toml repeats');
   ok(TOOLS['xml-to-toml'].handler.toString().indexOf('xmlToTOML') >= 0, 'xml-to-toml delegates');
+  ok(TOOLS['xml-to-csv'].handler.toString().indexOf('xmlToCSV(s, opts)') >= 0, 'xml-to-csv delegates opts');
+  ok(TOOLS['xml-to-csv'].handler('<rows><row><name>Ada</name><age>30</age></row><row><name>Bob</name><age>25</age></row></rows>', {}) === 'name,age\nAda,30\nBob,25', 'xml-to-csv repeats');
+  ok(TOOLS['xml-to-csv'].handler('<server><host>h</host><port>8080</port></server>', {}) === 'host,port\nh,8080', 'xml-to-csv single');
+  ok(TOOLS['xml-to-csv'].handler('<rows><row><name>Ada</name></row></rows>', { delimiter: 'semicolon' }).indexOf('name') >= 0, 'xml-to-csv delim opt');
 
   ok(JSON.parse(T.tomlToJSON('"a=b" = 1'))['a=b'] === 1, 'toml quoted eq key');
   ok(JSON.parse(T.tomlToJSON('t = { "x=y" = 3 }')).t["x=y"] === 3, 'toml inline quoted eq key');

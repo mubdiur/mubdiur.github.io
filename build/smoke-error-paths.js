@@ -117,6 +117,10 @@ mustThrow(() => T.tomlToJSON('a = 1\na = 2'), 'tomlToJSON dup key');
 mustThrow(() => T.xmlToTOML(''), 'xmlToTOML empty');
 mustThrow(() => T.xmlToTOML('<a></b>'), 'xmlToTOML mismatch');
 mustNotThrow(() => T.xmlToTOML('<r><a>1</a></r>'), 'xmlToTOML good');
+mustThrow(() => T.xmlToCSV('', {}), 'xmlToCSV empty');
+mustThrow(() => T.xmlToCSV('<a></b>', {}), 'xmlToCSV mismatch');
+mustThrow(() => T.xmlToCSV('<a>hello</a>', {}), 'xmlToCSV scalar no rows');
+mustNotThrow(() => T.xmlToCSV('<r><a>1</a></r>', {}), 'xmlToCSV good');
 
 mustThrow(() => T.tomlToJSON('"a = 1'), 'tomlToJSON unterminated quoted key');
 mustThrow(() => T.tomlToJSON('t = { a = }'), 'tomlToJSON inline missing val');
