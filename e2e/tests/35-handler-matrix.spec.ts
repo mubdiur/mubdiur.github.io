@@ -151,6 +151,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('yaml-to-schema', 'dup throws', mustThrow(() => TOOLS['yaml-to-schema'].handler('a: 1\na: 2')));
     push('xml-to-schema', 'happy', TOOLS['xml-to-schema'].handler('<r><a>1</a></r>').indexOf('string') >= 0);
     push('xml-to-schema', 'mismatch throws', mustThrow(() => TOOLS['xml-to-schema'].handler('<a><b>')));
+    push('toml-to-schema', 'happy', TOOLS['toml-to-schema'].handler('a = 1').indexOf('integer') >= 0);
+    push('toml-to-schema', 'bad throws', mustThrow(() => TOOLS['toml-to-schema'].handler('a = =')));
     push('toml-to-json', 'happy', TOOLS['toml-to-json'].handler('a = 1').includes('"a": 1'));
     push('toml-to-json', 'dup throws', mustThrow(() => TOOLS['toml-to-json'].handler('a = 1\na = 2')));
     push('xml-to-toml', 'happy', TOOLS['xml-to-toml'].handler('<r><a>1</a></r>').includes('a = '));

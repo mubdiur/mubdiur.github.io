@@ -19,6 +19,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
     'csv-to-schema': { good: 'name,age\nAda,36', expectInOutput: /integer/ },
   'yaml-to-schema': { good: 'a: 1', expectInOutput: /integer/ },
   'xml-to-schema': { good: '<r><a>1</a></r>', expectInOutput: /required/ },
+  'toml-to-schema': { good: 'a = 1', expectInOutput: /integer/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },
   'json-escape': { good: 'a"b', expectInOutput: /\\"/ },
   'json-unescape': { good: 'a\\"b', expectInOutput: /a"b/ },
