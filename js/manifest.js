@@ -425,6 +425,7 @@ window.TOOLMANIFEST = [
   { slug: 'base64-image-decoder', name: 'Base64 → Image', desc: 'Decode Base64 string and preview as image', category: 'image', tags: ['base64', 'image', 'preview'], icon: 'images', template: 'custom' },
   { slug: 'image-to-base64', name: 'Image → Base64', desc: 'Upload an image and get its Base64 data URI', category: 'image', tags: ['image', 'base64', 'encode'], icon: 'images', template: 'custom' },
   { slug: 'image-palette-extractor', name: 'Image Palette Extractor', desc: 'Pull the dominant color palette from any image — drop, paste or upload, click a swatch to copy', category: 'image', tags: ['color', 'palette', 'image', 'theme'], icon: 'palette', template: 'custom' },
+  { slug: 'image-compressor', name: 'Image Compressor', desc: 'Shrink images in-browser — drop, paste or upload, resize, JPEG/WebP quality, side-by-side sizes plus one-click download', category: 'image', tags: ['image', 'compress', 'resize', 'jpeg', 'webp'], icon: 'images', template: 'custom' },
   { slug: 'contrast-checker', name: 'Contrast Checker', desc: 'Check WCAG contrast ratio between two colors', category: 'image', tags: ['color', 'contrast', 'accessibility'], icon: 'palette', template: 'custom' },
   { slug: 'svg-optimizer', name: 'SVG Optimizer', desc: 'Minify SVG markup — strips comments, editor metadata and namespaced cruft; collapses indentation', category: 'image', tags: ['svg', 'minify', 'optimize', 'vector'], icon: 'images', template: 'transform',
     handler: function (s) { return Transforms.svgMinify(s); } },

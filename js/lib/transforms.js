@@ -5010,5 +5010,16 @@ T.formatStopwatch = function (ms) {
   var h = Math.floor(t / 3600000);
   return (h < 10 ? '0' + h : '' + h) + ':' + p2(m) + ':' + p2(s) + '.' + p2(cs);
 };
+/* Aspect-preserving fit: scale w×h so the long side lands on max
+   (never upscale). Returns { w, h, scaled }. Single source for the
+   image-compressor tool sizing. */
+T.fitDimensions = function (w, h, max) {
+  var W = Number(w), H = Number(h), M = Number(max);
+  if (!isFinite(W) || !isFinite(H) || !(W > 0) || !(H > 0)) throw new Error('Image has no readable dimensions');
+  if (!isFinite(M) || !(M >= 16)) throw new Error('Max side must be 16px or more');
+  if (W <= M && H <= M) return { w: Math.round(W), h: Math.round(H), scaled: false };
+  var k = M / Math.max(W, H);
+  return { w: Math.max(1, Math.round(W * k)), h: Math.max(1, Math.round(H * k)), scaled: true };
+};
 window.Transforms = T;
 })();

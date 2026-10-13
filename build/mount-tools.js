@@ -86,6 +86,8 @@ global.App = {
   downloadButton: (fn, label) => { const b = makeEl('button'); b.addEventListener('click', fn); b._label = label; return b; },
   copyButton: (t, label) => { const b = makeEl('button'); b.addEventListener('click', () => copied.push(t)); return b; },
   interval: (fn) => { intervals.push(fn); return 1000 + intervals.length; },
+  on: (t, ty, f) => { try { if (t && t.addEventListener) t.addEventListener(ty, f); } catch (e) {} return f; },
+  debounce: (fn, ms) => { let t = 0; return function () { const self = this, args = arguments; clearTimeout(t); t = setTimeout(() => fn.apply(self, args), ms || 120); }; },
   timer: (fn) => { fn(); return 1; },
   onUnmount: (fn) => { unmounters.push(fn); },
   registerTool: (slug, def) => { toolDefs[slug] = def; }
@@ -116,7 +118,7 @@ function faces(root) {
   walk(root);
   return found;
 }
-for (const slug of ['stopwatch', 'loan-calculator', 'timezone-converter', 'aes-encryptor']) {
+for (const slug of ['stopwatch', 'loan-calculator', 'timezone-converter', 'aes-encryptor', 'image-compressor']) {
   delete require.cache[require.resolve('../js/tools/' + slug + '.js')];
   require('../js/tools/' + slug + '.js');
   const root = makeEl('div');
