@@ -910,6 +910,75 @@ T.matrixCalcOpts = function (s, opts) {
 
 /* ── crypto (hashes, HMAC, SRI, PEM, JWT): moved to js/lib/crypto.js, shares Transforms ── */
 
+/* CSV pivot table: group rows by one column, spread another across the top,
+   aggregate a value column (count/sum/avg/min/max). First row is headers;
+   empty row/col/value options fall back to the first/second/third columns. */
+T.csvPivot = function (s, opts) {
+  var o = opts || {};
+  var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
+  var d = Object.prototype.hasOwnProperty.call(DELIMS, o.delimiter) ? DELIMS[o.delimiter] : null;
+  var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
+  var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
+  if (!lines.length) throw new Error('Paste delimited rows first \u2014 one record per line, first row headers');
+  if (d === null) d = T.detectDelimChar(lines.slice(0, 10)) || ',';
+  var rows = T.parseCSV(s, d);
+  if (rows.length < 2) throw new Error('Need a header row plus at least one data row');
+  var headers = rows[0];
+  function colIdx(name, label, fallback) {
+    var nm = String(name === undefined || name === null ? '' : name).trim();
+    if (!nm) {
+      if (fallback >= 0 && fallback < headers.length) return fallback;
+      throw new Error('Pick the ' + label + ' column \u2014 headers: ' + headers.join(', '));
+    }
+    var ix = headers.indexOf(nm);
+    if (ix < 0) throw new Error('Unknown ' + label + ' column \u2018' + nm + '\u2019 \u2014 headers: ' + headers.join(', '));
+    return ix;
+  }
+  var agg = String(o.agg || 'count');
+  if (['count', 'sum', 'avg', 'min', 'max'].indexOf(agg) < 0) agg = 'count';
+  var ri = colIdx(o.row, 'row-key', 0);
+  var ci = colIdx(o.col, 'pivot', headers.length > 1 ? 1 : -1);
+  if (ci === ri) throw new Error('Row-key and pivot must be different columns');
+  var vi = -1;
+  if (agg !== 'count') vi = colIdx(o.value, 'value', headers.length > 2 ? 2 : -1);
+  var rowKeys = [], colKeys = [], cells = Object.create(null);
+  function has(m, k) { return Object.prototype.hasOwnProperty.call(m, k); }
+  rows.slice(1).forEach(function (r) {
+    var rk = ri < r.length ? r[ri] : '';
+    var ck = ci < r.length ? r[ci] : '';
+    if (!has(cells, rk)) { cells[rk] = Object.create(null); rowKeys.push(rk); }
+    var bucket = cells[rk];
+    if (!has(bucket, ck)) { bucket[ck] = []; if (colKeys.indexOf(ck) < 0) colKeys.push(ck); }
+    bucket[ck].push(vi >= 0 && vi < r.length ? r[vi] : '');
+  });
+  function trimNum(v) {
+    if (!isFinite(v)) return '';
+    var r = Math.round(v * 1e10) / 1e10;
+    return String(r);
+  }
+  function aggVals(list) {
+    if (agg === 'count') return String(list.length);
+    var nums = list.map(function (v) { return Number(v); }).filter(function (v) { return isFinite(v); });
+    if (!nums.length) return '';
+    if (agg === 'min') return trimNum(Math.min.apply(null, nums));
+    if (agg === 'max') return trimNum(Math.max.apply(null, nums));
+    var sum = nums.reduce(function (a, b) { return a + b; }, 0);
+    return trimNum(agg === 'avg' ? sum / nums.length : sum);
+  }
+  function cell(v) {
+    return (v.indexOf(d) >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0 || v.indexOf('\r') >= 0) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  var head = [''].concat(colKeys).map(cell).join(d);
+  var grid = [head];
+  rowKeys.forEach(function (rk) {
+    var line = [rk].concat(colKeys.map(function (ck) {
+      return has(cells[rk], ck) ? aggVals(cells[rk][ck]) : '';
+    })).map(cell).join(d);
+    grid.push(line);
+  });
+  return grid.join('\n');
+};
+
 /* HAR inspector: DevTools HAR JSON becomes a timing summary -
    per-request method/status/ms/size lines plus totals and failure count. */
 T.harSummary = function (s, opts) {

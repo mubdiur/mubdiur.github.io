@@ -361,6 +361,12 @@ console.log('-- text / formats --');
   ok(TOOLS['har-inspector'].handler(_har, {}).indexOf('https://a.test/x') < TOOLS['har-inspector'].handler(_har, {}).indexOf('https://a.test/y'), 'har slowest first');
   ok(TOOLS['har-inspector'].handler(_har, { sort: 'chrono' }).indexOf('https://a.test/x') < TOOLS['har-inspector'].handler(_har, { sort: 'chrono' }).indexOf('https://a.test/y'), 'har chrono order');
   ok(JSON.parse(TOOLS['har-inspector'].handler(_har, { view: 'json' })).failed === 1, 'har json failed count');
+  ok(TOOLS['csv-pivot-table'].handler.toString().indexOf('csvPivot') >= 0, 'pivot delegates single source');
+  var _pv = 'dept,q,sales\neng,q1,10\neng,q2,20\nops,q1,5';
+  ok(TOOLS['csv-pivot-table'].handler(_pv, { row: 'dept', col: 'q', value: 'sales', agg: 'sum' }) === ',q1,q2\neng,10,20\nops,5,', 'pivot sum');
+  ok(TOOLS['csv-pivot-table'].handler(_pv, {}).indexOf(',q1,q2') === 0, 'pivot count defaults');
+  ok(TOOLS['csv-pivot-table'].handler(_pv, { row: 'dept', col: 'q', value: 'sales', agg: 'avg' }).indexOf('eng,10,20') >= 0, 'pivot avg');
+  ok(TOOLS['csv-pivot-table'].handler('d;q;s\ne;q1;10', { row: 'd', col: 'q', value: 's', agg: 'sum' }) === ';q1\ne;10', 'pivot auto semicolon');
   ok(TOOLS['csv-delimiter-sniffer'].handler('a;b,c\nd;e,f').indexOf('ambiguous') >= 0, 'sniffer tie reports honest');
   ok(TOOLS['csv-delimiter-sniffer'].handler('plain').indexOf('none detected') >= 0, 'sniffer single column');
 }
