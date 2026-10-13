@@ -3351,6 +3351,23 @@ T.tomlToJSON = function (s) {
     if (Object.prototype.hasOwnProperty.call(o, k)) bad(ln, 'Duplicate key ' + '"' + k + '"');
     o[k] = v;
   }
+  function findKeyEq(str, from) {
+    var i = from || 0, q = '';
+    while (i < str.length) {
+      var ch = str.charAt(i);
+      if (q) {
+        if (ch === '\\' && q === '"') i++;
+        else if (ch === q) q = '';
+        i++;
+        continue;
+      }
+      if (ch === '"' || ch === '\'') { q = ch; i++; continue; }
+      if (ch === '=') return i;
+      i++;
+    }
+    return -1;
+  }
+
   function splitKey(raw, ln) {
     var segs = [], i = 0, n = raw.length;
     function skipSp() { while (i < n && (raw.charAt(i) === ' ' || raw.charAt(i) === '\t')) i++; }
@@ -3364,6 +3381,11 @@ T.tomlToJSON = function (s) {
         }
         if (j >= n) bad(ln, 'Unterminated quoted key');
         segs.push(unesc(o, ln)); i = j + 1;
+      } else if (raw.charAt(i) === '\'') {
+        var lq = i + 1, lit = '';
+        while (lq < n && raw.charAt(lq) !== '\'') { lit += raw.charAt(lq); lq++; }
+        if (lq >= n) bad(ln, 'Unterminated quoted key');
+        segs.push(lit); i = lq + 1;
       } else {
         var m = /^[A-Za-z0-9_-]+/.exec(raw.slice(i));
         if (!m) bad(ln, 'Bad key near ' + '"' + raw.slice(i, i + 12) + '"');
@@ -3456,7 +3478,7 @@ T.tomlToJSON = function (s) {
       for (;;) {
         sp();
         if (i < n && str.charAt(i) === '}') { i++; return o; }
-        var eq = str.indexOf('=', i);
+        var eq = findKeyEq(str, i);
         if (eq < 0) bad(ln, 'Expected key = value in inline table');
         var ks = splitKey(str.slice(i, eq), ln);
         i = eq + 1;
@@ -3608,7 +3630,7 @@ T.tomlToJSON = function (s) {
       }
       return;
     }
-    var eq = line.indexOf('=');
+    var eq = findKeyEq(line, 0);
     if (eq < 0) bad(ln2, 'Expected key = value');
     var ks = splitKey(line.slice(0, eq), ln2);
     var vv = parseVal(line.slice(eq + 1), ln2);

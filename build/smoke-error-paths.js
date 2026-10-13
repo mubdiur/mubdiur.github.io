@@ -114,6 +114,9 @@ mustThrow(() => TOOLS['json-to-toml'].handler('[]'), 'json-to-toml array');
 mustThrow(() => T.tomlToJSON('   '), 'tomlToJSON empty');
 mustThrow(() => T.tomlToJSON('[a]\n[a]'), 'tomlToJSON dup table');
 mustThrow(() => T.tomlToJSON('a = 1\na = 2'), 'tomlToJSON dup key');
+mustThrow(() => T.tomlToJSON('"a = 1'), 'tomlToJSON unterminated quoted key');
+mustThrow(() => T.tomlToJSON('t = { a = }'), 'tomlToJSON inline missing val');
+
 mustThrow(() => T.tomlToJSON('v = nan'), 'tomlToJSON nan');
 mustThrow(() => T.tomlFormat(''), 'tomlFormat empty');
 mustThrow(() => T.tomlFormat('a = 1\na = 2'), 'tomlFormat dup key');

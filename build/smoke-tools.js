@@ -598,6 +598,11 @@ console.log('-- json to toml --');
   var tj = TOOLS['toml-to-json'].handler('[db]\nhost = "h"\n[[srv]]\nip = "a"');
   ok(tj === '{\n  "db": {\n    "host": "h"\n  },\n  "srv": [\n    {\n      "ip": "a"\n    }\n  ]\n}', 'toml tables decode');
   ok(TOOLS['toml-to-json'].handler('a = 1') === T.tomlToJSON('a = 1'), 'toml-to-json delegates to Transforms');
+  ok(JSON.parse(T.tomlToJSON('"a=b" = 1'))['a=b'] === 1, 'toml quoted eq key');
+  ok(JSON.parse(T.tomlToJSON('t = { "x=y" = 3 }')).t["x=y"] === 3, 'toml inline quoted eq key');
+  ok(T.jsonToTOML(T.tomlToJSON('"a=b" = 1')) === '"a=b" = 1', 'toml eq key round trip');
+  ok(JSON.parse(T.tomlToJSON(String.fromCharCode(39) + 'a=b' + String.fromCharCode(39) + ' = 2'))['a=b'] === 2, 'toml literal eq key');
+
   ok(T.tomlFormat('a=1') === 'a = 1', 'toml-format basic');
   ok(T.tomlFormat('[t]\na=[1,2]') === '[t]\na = [1, 2]', 'toml-format array spacing');
   ok(T.tomlFormat('d = 1979-05-27') === 'd = 1979-05-27', 'toml-format datetime verbatim');
