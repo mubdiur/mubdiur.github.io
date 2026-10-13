@@ -193,6 +193,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('caesar-cipher', 'decode', TOOLS['caesar-cipher'].handler('Khoor', { shift: '3', mode: 'decode' }) === 'Hello');
     push('vigenere-cipher', 'happy', TOOLS['vigenere-cipher'].handler('ATTACKATDAWN', { key: 'LEMON' }) === 'LXFOPVEFRNHR');
     push('vigenere-cipher', 'empty key throws', mustThrow(() => TOOLS['vigenere-cipher'].handler('ABC', { key: '' })));
+    push('atbash-cipher', 'happy', TOOLS['atbash-cipher'].handler('Hello') === 'Svool');
+    push('atbash-cipher', 'involution', TOOLS['atbash-cipher'].handler(TOOLS['atbash-cipher'].handler('Hi')) === 'Hi');
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

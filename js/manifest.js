@@ -170,6 +170,8 @@ window.TOOLMANIFEST = [
   { slug: 'vigenere-cipher', name: 'Vigen\u00e8re Cipher', desc: 'Polyalphabetic keyword cipher \u2014 repeating key, case preserved, non-letters pass through unshifted', category: 'encoding', tags: ['vigenere', 'cipher', 'keyword', 'polyalphabetic'], icon: 'shuffle', template: 'transform',
     handler: function (s, opts) { return Transforms.vigenereCipher(s, opts); },
     params: [{ key: 'key', label: 'Key', type: 'text', default: 'LEMON' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'atbash-cipher', name: 'Atbash Cipher', desc: 'Mirror the alphabet A-Z and back \u2014 self-inverse like ROT13, case preserved, non-letters pass through', category: 'encoding', tags: ['atbash', 'cipher', 'mirror'], icon: 'shuffle', template: 'transform',
+    handler: function (s) { return Transforms.atbashCipher(s); } },
   { slug: 'morse-encode', name: 'Morse Code Encoder', desc: 'Encode text to Morse code', category: 'encoding', tags: ['morse', 'encode'], icon: 'code2', template: 'transform',
     handler: function (s) { return Transforms.morseEncode(s); } },
   { slug: 'morse-decode', name: 'Morse Code Decoder', desc: 'Decode Morse code back to text', category: 'encoding', tags: ['morse', 'decode'], icon: 'code2', template: 'transform',

@@ -40,6 +40,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'utf7-decode': { good: 'a+-b', expectInOutput: /a\+b/ },
   'caesar-cipher': { good: 'Hello', expectInOutput: /Khoor/ },
   'vigenere-cipher': { good: 'ATTACKATDAWN', expectInOutput: /LXFOP/ },
+  'atbash-cipher': { good: 'Hello', expectInOutput: /Svool/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },

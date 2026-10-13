@@ -1220,6 +1220,11 @@ console.log('-- rot --');
   ok(TOOLS['vigenere-cipher'].handler('Attack at dawn!', { key: 'lemon' }) === 'Lxfopv ef rnhr!', 'vigenere case kept');
   ok(TOOLS['vigenere-cipher'].handler('ABC', { key: 'L3M0N!' }) === TOOLS['vigenere-cipher'].handler('ABC', { key: 'LMN' }), 'vigenere key cleaned');
   ok(TOOLS['vigenere-cipher'].handler('ABC', { key: 'A' }) === 'ABC', 'vigenere A-shift identity');
+  ok(TOOLS['atbash-cipher'].handler('Hello') === 'Svool', 'atbash vector');
+  ok(TOOLS['atbash-cipher'].handler(TOOLS['atbash-cipher'].handler('Hello, World!')) === 'Hello, World!', 'atbash involution');
+  ok(TOOLS['atbash-cipher'].handler('ABCxyz') === 'ZYXcba', 'atbash edges');
+  ok(TOOLS['atbash-cipher'].handler('') === '', 'atbash empty');
+  ok(TOOLS['atbash-cipher'].handler.toString().indexOf('atbashCipher') >= 0, 'atbash delegates');
   ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
   ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }

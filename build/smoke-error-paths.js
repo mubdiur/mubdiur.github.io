@@ -85,6 +85,7 @@ mustNotThrow(() => T.caesarCipher(''), 'caesar empty fine');
 mustNotThrow(() => T.caesarCipher('Hello', { shift: 'bogus' }), 'caesar bad shift falls back');
 mustThrow(() => T.vigenereCipher('ABC', { key: '' }), 'vigenere empty key');
 mustThrow(() => T.vigenereCipher('ABC', { key: '123' }), 'vigenere non-letter key');
+mustNotThrow(() => T.atbashCipher('Hello, World!'), 'atbash basic fine');
 mustNotThrow(() => T.vigenereCipher('', { key: 'LEMON' }), 'vigenere empty fine');
 mustNotThrow(() => T.quotedPrintableEncode(''), 'qp empty fine');
 mustNotThrow(() => T.quotedPrintableEncode(String.fromCharCode(55296)), 'qp lone surrogate no throw');
