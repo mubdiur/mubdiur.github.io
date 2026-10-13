@@ -1975,6 +1975,62 @@ T.csvToMarkdown = function (s, opts) {
   return [mdRow(head), sep].concat(body.map(mdRow)).join('\n');
 };
 
+/* CSV delimiter sniffer: quote-aware scoring over comma/semicolon/tab/pipe.
+   Samples up to 10 non-empty lines; the winner splits every sampled line
+   into the same field count greater than one. Ties and single-column input
+   report honestly instead of guessing. */
+T.csvSniffDelim = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s).replace(/^\uFEFF/, '');
+  var lines = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; });
+  if (!lines.length) throw new Error('Paste delimited rows first \u2014 one record per line');
+  var sample = lines.slice(0, 10);
+  var cands = [
+    { name: 'Comma (,)', ch: ',' },
+    { name: 'Semicolon (;)', ch: ';' },
+    { name: 'Tab', ch: '\t' },
+    { name: 'Pipe (|)', ch: '|' }
+  ];
+  function countFields(line, d) {
+    var n = 1, q = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line.charAt(i);
+      if (q) {
+        if (ch === '"') {
+          if (line.charAt(i + 1) === '"') i++;
+          else q = false;
+        }
+      } else if (ch === '"') q = true;
+      else if (ch === d) n++;
+    }
+    return n;
+  }
+  var scored = cands.map(function (c) {
+    var counts = sample.map(function (ln) { return countFields(ln, c.ch); });
+    var same = counts.every(function (x) { return x === counts[0]; });
+    return { name: c.name, cols: counts[0], same: same };
+  });
+  var winners = scored.filter(function (r) { return r.same && r.cols > 1; });
+  var best = winners.length === 1 ? winners[0] : null;
+  var out = [];
+  if (best) {
+    out.push('Delimiter: ' + best.name);
+    out.push(sample.length > 1
+      ? 'Confidence: high \u2014 ' + sample.length + ' sampled lines, each split into ' + best.cols + ' fields'
+      : 'Confidence: low \u2014 single line, consistency unproven');
+  } else if (winners.length > 1) {
+    out.push('Delimiter: ambiguous \u2014 ' + winners.map(function (r) { return r.name; }).join(' vs '));
+    out.push('Confidence: low \u2014 paste more rows to break the tie');
+  } else {
+    out.push('Delimiter: none detected \u2014 single column');
+    out.push('Confidence: high \u2014 no candidate delimiter splits every line');
+  }
+  out.push('');
+  out.push('Candidates (' + sample.length + (sample.length === 1 ? ' sampled line' : ' sampled lines') + '):');
+  scored.forEach(function (r) {
+    out.push((best && r.name === best.name ? '\u2713 ' : '\u2717 ') + r.name + ' \u2014 ' + r.cols + (r.cols === 1 ? ' field' : ' fields') + (r.same ? ' (consistent)' : ' (ragged)'));
+  });
+  return out.join('\n');
+};
 /**
  * JSON to TypeScript: interfaces for objects, type aliases for roots
  * that are arrays or primitives. Empty arrays become unknown[] (no element

@@ -336,6 +336,12 @@ console.log('-- text / formats --');
   ok(parsed[0]['name'] === 'Smith, John', 'quoted comma cell');
   ok(parsed[0]['note'] === 'said "hi"\nthen left', 'escaped quotes + newline inside quotes');
   ok(parsed[1]['name'] === 'Ann' && parsed[1]['note'] === 'ok', 'CRLF handled');
+  ok(TOOLS['csv-delimiter-sniffer'].handler.toString().indexOf('csvSniffDelim') >= 0, 'sniffer delegates single source');
+  ok(TOOLS['csv-delimiter-sniffer'].handler('a;b\nc;d').indexOf('Delimiter: Semicolon (;)') === 0, 'sniffer semicolon vector');
+  ok(TOOLS['csv-delimiter-sniffer'].handler('a,b\nc,d').indexOf('Delimiter: Comma (,)') === 0, 'sniffer comma vector');
+  ok(TOOLS['csv-delimiter-sniffer'].handler('"a;b";c\nd;e').indexOf('Delimiter: Semicolon (;)') === 0, 'sniffer quote-aware');
+  ok(TOOLS['csv-delimiter-sniffer'].handler('a;b,c\nd;e,f').indexOf('ambiguous') >= 0, 'sniffer tie reports honest');
+  ok(TOOLS['csv-delimiter-sniffer'].handler('plain').indexOf('none detected') >= 0, 'sniffer single column');
 }
 
 console.log('-- transforms lib --');

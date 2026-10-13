@@ -45,6 +45,9 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('json-minifier', 'bad json throws', mustThrow(() => TOOLS['json-minifier'].handler('not json')));
     push('json-to-csv', 'happy', TOOLS['json-to-csv'].handler('[{"a":1,"b":2},{"a":3}]').includes('a,b'));
     push('csv-to-json', 'happy', JSON.parse(TOOLS['csv-to-json'].handler('name,age\nAda,30')).length === 1);
+    push('csv-delimiter-sniffer', 'semicolon', TOOLS['csv-delimiter-sniffer'].handler('a;b\nc;d').indexOf('Delimiter: Semicolon (;)') === 0);
+    push('csv-delimiter-sniffer', 'comma', TOOLS['csv-delimiter-sniffer'].handler('a,b\nc,d').indexOf('Delimiter: Comma (,)') === 0);
+    push('csv-delimiter-sniffer', 'empty throws', mustThrow(() => TOOLS['csv-delimiter-sniffer'].handler('   ')));
     push('yaml-to-json', 'happy', JSON.parse(TOOLS['yaml-to-json'].handler('a: 1\nb: hello')).a === 1);
     push('yaml-to-json', 'nested roundtrip', JSON.parse(TOOLS['yaml-to-json'].handler(TOOLS['json-to-yaml'].handler('{"a":1,"nest":{"k":true}}'))).nest.k === true);
     push('yaml-to-json', 'literal roundtrip', JSON.parse(TOOLS['yaml-to-json'].handler(TOOLS['json-to-yaml'].handler('{"s":"a\\n\\nb"}'))).s === 'a\n\nb');
@@ -273,7 +276,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
   if (failed.length) console.log('failed handlers:', JSON.stringify(failed, null, 2));
   expect(failed, `handler matrix failures:\n` + JSON.stringify(failed, null, 2)).toEqual([]);
   expect((result as any[]).length, 'handler matrix must cover all tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
-  // Full manifest is 128 (jwt-verifier added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
+  // Full manifest is 129 (csv-delimiter-sniffer added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
-  expect(manifest, 'TOOLMANIFEST must be 128').toBe(128);
+  expect(manifest, 'TOOLMANIFEST must be 129').toBe(129);
 });

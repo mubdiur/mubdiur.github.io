@@ -182,6 +182,9 @@ window.TOOLMANIFEST = [
   // ── Converters ──────────────────────────────────────────
   { slug: 'csv-to-json', name: 'CSV → JSON', desc: 'RFC 4180-exact CSV parsing: quoted commas, escaped quotes ("") and newlines inside quotes, CRLF, BOM', category: 'converters', tags: ['csv', 'json', 'convert'], icon: 'filespreadsheet', template: 'transform',
     handler: function (s) { return Transforms.csvToJSON(s); } },
+  { slug: 'csv-delimiter-sniffer', name: 'CSV Delimiter Sniffer', desc: 'Detect the delimiter in pasted rows \u2014 quote-aware scoring over comma, semicolon, tab and pipe, with a consistency report', category: 'converters', tags: ['csv', 'delimiter', 'detect'], icon: 'filespreadsheet', template: 'transform',
+    placeholder: 'name;city\nAda;Lovelace',
+    handler: function (s) { return Transforms.csvSniffDelim(s); } },
   { slug: 'xml-to-json', name: 'XML → JSON', desc: 'Convert XML (SOAP, RSS, configs) to JSON via the native DOMParser — attributes as @-keys, repeats as arrays', category: 'converters', tags: ['xml', 'json', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
     handler: function (s) {
       var d;

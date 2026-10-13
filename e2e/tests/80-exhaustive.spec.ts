@@ -88,6 +88,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'cidr-calculator': { good: '192.168.1.10/24', expectInOutput: /192\.168\.1\.0/ },
   'url-parser': { good: 'https://example.com:8443/p?a=1&b=2', expectInOutput: /example\.com/ },
   'http-header-inspector': { good: 'strict-transport-security: max-age=31536000; includeSubDomains\ncontent-security-policy: default-src self\nx-frame-options: DENY\nx-content-type-options: nosniff\nreferrer-policy: no-referrer', bad: 'no colon here', expectInOutput: /Security: 0 issues/, expectError: /not a header/ },
+  'csv-delimiter-sniffer': { good: 'a;b\nc;d', expectInOutput: /Delimiter: Semicolon/ },
   'xml-to-json': { good: '<root><a>1</a></root>', expectInOutput: /"a": "1"/ },
   'css-formatter': { good: 'a{color:red}', expectInOutput: /color:\s*red/ },
   'levenshtein-distance': { good: 'kitten', expectInOutput: /Distance: 3/ },
@@ -117,6 +118,7 @@ async function assertOutput(page: any, re: RegExp, slug: string) {
 
 // ── every transform: try every param option, submit good+sad paths ──
 test('exhaustive: every transform × every option × success+error', async ({ page }) => {
+  test.setTimeout(120000); // 129 tools x real DOM + debounce waits exceed the 30s default
   await page.goto('/');
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST);
   const transforms = manifest.filter(m => m.template === 'transform');

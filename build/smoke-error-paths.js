@@ -168,7 +168,7 @@ mustNotThrow(() => TOOLS['json-to-csv'].handler('[{"a":1,"b":2}]'), 'json-to-csv
 mustThrow(() => TOOLS['json-to-csv'].handler('not json'), 'json-to-csv bad json');
 mustThrow(() => T.matrixCalc('1 x\n3 4', '', 'determinant'), 'matrixCalc bad cell');
 mustThrow(() => T.matrixCalc('1 2 3\n4 5', '', 'determinant'), 'matrixCalc ragged');
-mustThrow(() => T.csvToMarkdown('   \n  ', {}), 'csvToMarkdown empty');
+mustThrow(() => T.csvToMarkdown('   \n  ', {}), 'csvToMarkdown empty');mustThrow(() => T.csvSniffDelim('   '), 'csvSniffDelim empty');
 mustThrow(() => T.morseTimeline('   ', 20), 'morseTimeline empty');
 mustThrow(() => T.morseTimeline('hi', 99), 'morseTimeline bad wpm');
 mustThrow(() => T.xmlFormat('<a><b></a>', {}), 'xmlFormat mismatch');
@@ -199,7 +199,7 @@ mustNotThrow(() => T.jwtSign('{"sub":"123"}', 'secret', 'none'), 'jwtSign good')
 mustNotThrow(() => T.httpInspect('HTTP/1.1 301\nlocation: https://x.y/\nx-content-type-options: nosniff\n'), 'httpInspect good');
 mustNotThrow(() => T.dohParse({ Status: 0, Answer: [{ data: '1.2.3.4', TTL: 60 }] }, 'A', 'x.com'), 'dohParse good');
 mustNotThrow(() => T.matrixCalc('1 2\n3 4', '', 'trace'), 'matrixCalc good');
-mustNotThrow(() => T.csvToMarkdown('a,b\n1,2', {}), 'csvToMarkdown good');
+mustNotThrow(() => T.csvToMarkdown('a,b\n1,2', {}), 'csvToMarkdown good');mustNotThrow(() => T.csvSniffDelim(String.fromCharCode(0xD800)), 'csvSniffDelim lone surrogate survives');
 mustNotThrow(() => T.morseTimeline('SOS', 20), 'morseTimeline good');
 mustNotThrow(() => T.xmlFormat('<r><a>1</a></r>', {}), 'xmlFormat good');
 mustNotThrow(() => T.readability('Hello world. Bye world.'), 'readability good');
