@@ -50,6 +50,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('csv-delimiter-sniffer', 'semicolon', TOOLS['csv-delimiter-sniffer'].handler('a;b\nc;d').indexOf('Delimiter: Semicolon (;)') === 0);
     push('csv-delimiter-sniffer', 'comma', TOOLS['csv-delimiter-sniffer'].handler('a,b\nc,d').indexOf('Delimiter: Comma (,)') === 0);
     push('csv-transposer', 'square', TOOLS['csv-transposer'].handler('a,b\nc,d', {}) === 'a,c\nb,d');
+    push('csv-transposer', 'involution', TOOLS['csv-transposer'].handler(TOOLS['csv-transposer'].handler('a,b\nc,d', {}), {}) === 'a,b\nc,d');
     push('jsonl-to-json', 'two docs', JSON.parse(TOOLS['jsonl-to-json'].handler('{"a":1}\n{"b":2}')).length === 2);
     push('jsonl-to-json', 'bad line throws', mustThrow(() => TOOLS['jsonl-to-json'].handler('{"a":1}\nnope')));
     push('csv-transposer', 'empty throws', mustThrow(() => TOOLS['csv-transposer'].handler('   ', {})));
