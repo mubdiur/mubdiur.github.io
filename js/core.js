@@ -617,12 +617,18 @@ var App = {
     btn.addEventListener('click', onClear);
     return btn;
   },
-  outputBox: function (output, error, label, onClear) {
+  downloadButton: function (onDownload, label) {
+    var btn = App.el('button', { class: 'btn-copy', type: 'button', title: 'Download output as a file', 'aria-label': 'Download output' }, App.icon('download', '', 14), App.el('span', { text: label || 'Download' }));
+    btn.addEventListener('click', function () { onDownload(); });
+    return btn;
+  },
+  outputBox: function (output, error, label, onClear, onDownload) {
     return App.el('div', {},
       App.el('div', { class: 'output-head' },
         App.el('span', { class: 'output-label', text: error ? 'Error' : (label || 'Output') }),
         App.el('div', { class: 'output-actions' },
           output && !error ? App.copyButton(output) : null,
+          output && !error && onDownload ? App.downloadButton(onDownload) : null,
           onClear ? App.clearButton(onClear) : null)),
       App.el('div', { class: 'output-box' + (error ? ' error' : ''), text: error || output || '' }));
   }

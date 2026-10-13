@@ -84,6 +84,10 @@ function TransformToolUI(tool) {
     renderOutput();
   }
 
+  function downloadOutput() {
+    var ext = (tool.downloadExt || 'txt').replace(/[^a-z0-9]/gi, '') || 'txt';
+    App.download(tool.slug + '-output.' + ext, state.output, ext === 'csv' ? 'text/csv' : 'text/plain');
+  }
   function renderOutput() {
     outputArea.innerHTML = '';
     if (state.pending) {
@@ -91,7 +95,7 @@ function TransformToolUI(tool) {
       return;
     }
     if (!state.output && !state.error) return;
-    outputArea.appendChild(App.outputBox(state.output, state.error, 'Output', clear));
+    outputArea.appendChild(App.outputBox(state.output, state.error, 'Output', clear, downloadOutput));
   }
 
   /* params */
