@@ -3248,6 +3248,19 @@ T.ulidBatch = function (count) {
 T.ulidBatchOpts = function (opts) {
   return T.ulidBatch((opts && opts.count) || '1');
 };
+/* UUID v7 batch: count-clamped bulk generation over T.uuidV7. Extracted from the manifest so shell UI delegates to this single source. */
+T.uuidV7Batch = function (count) {
+  count = parseInt(count, 10);
+  if (!(count >= 1)) count = 1;
+  if (count > 1000) count = 1000;
+  var out = [];
+  for (var i = 0; i < count; i++) out.push(T.uuidV7());
+  return out.join('\n');
+};
+/* UUID v7 UI contract: count option. Moved from the manifest for single source. */
+T.uuidV7BatchOpts = function (opts) {
+  return T.uuidV7Batch((opts && opts.count) || '1');
+};
 T.randomString = function (length, charset) {
   length = parseInt(length, 10);
   if (!charset) charset = 'alphanumeric';
@@ -3300,6 +3313,19 @@ T.macAddress = function () {
   var arr = CryptoRand.bytes(6);
   arr[0] = (arr[0] | 0x02) & 0xfe;
   return Array.from(arr, function (b) { return b.toString(16).padStart(2, '0'); }).join(':').toUpperCase();
+};
+/* MAC batch: count-clamped bulk generation over T.macAddress. Extracted from the manifest so shell UI delegates to this single source. */
+T.macBatch = function (count) {
+  count = parseInt(count, 10);
+  if (!(count >= 1)) count = 1;
+  if (count > 100) count = 100;
+  var out = [];
+  for (var n = 0; n < count; n++) out.push(T.macAddress());
+  return out.join('\n');
+};
+/* MAC UI contract: count option. Moved from the manifest for single source. */
+T.macBatchOpts = function (opts) {
+  return T.macBatch((opts && opts.count) || '1');
 };
 T.loremIpsum = function (paragraphs) {
   paragraphs = parseInt(paragraphs, 10);

@@ -51,6 +51,7 @@ console.log('-- generators --');
   ok(T.uuidV7(Date.now()).length === 36, 'uuid v7 length 36');
   ok(TOOLS['uuid-generator'].genHandler({ count: '999999' }).split('\n').length === 1000, 'uuid v4 count clamped to 1000');
   ok(TOOLS['uuid-v7-generator'].genHandler({ count: '999999' }).split('\n').length === 1000, 'uuid v7 count clamped to 1000');
+  ok(TOOLS['uuid-v7-generator'].genHandler.toString().indexOf('uuidV7BatchOpts') >= 0, 'uuid-v7 delegates opts');
 }
 {
   const ulids = TOOLS['ulid-generator'].genHandler({ count: '200' }).split('\n');
@@ -154,6 +155,7 @@ console.log('-- math --');
   ok(TOOLS['uuid-v4-validate'].handler(T.uuidV7(0)).indexOf('UUIDv7') >= 0, 'uuid accepts generated v7');
   ok(TOOLS['password-generator'].genHandler.toString().indexOf('generatePasswordOpts') >= 0, 'password delegates opts');
   ok(TOOLS['mac-address-generator'].genHandler({ count: '999999' }).split('\n').length === 100, 'mac count clamped to 100');
+  ok(TOOLS['mac-address-generator'].genHandler.toString().indexOf('macBatchOpts') >= 0, 'mac delegates opts');
   ok(TOOLS['mac-address-generator'].genHandler({ count: '20' }).split('\n').every(function (x) { return (parseInt(x.slice(0, 2), 16) & 3) === 2; }), 'mac locally-administered unicast bits x20');
   ok(TOOLS['uuid-generator'].genHandler.toString().indexOf('uuidV4BatchOpts') >= 0, 'uuid-generator delegates opts');
   ok(TOOLS['uuid-generator'].genHandler({ count: '999999' }).split('\n').length === 1000, 'uuid count clamped');

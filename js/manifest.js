@@ -287,14 +287,7 @@ window.TOOLMANIFEST = [
     handler: function (s) { return Transforms.pemInspect(s); } },
   { slug: 'totp-generator', name: 'TOTP Generator', desc: 'Time-based one-time passwords — RFC 6238, 30-second countdown, copy-ready codes', category: 'crypto', tags: ['totp', 'otp', 'auth', '2fa'], icon: 'lock', template: 'custom' },
   { slug: 'uuid-v7-generator', name: 'UUID v7 Generator', desc: 'RFC 9562 UUID v7 from the Web Crypto CSPRNG — Unix-millisecond time prefix, bulk mode available', category: 'generators', tags: ['uuid', 'identifier'], icon: 'key', template: 'generator',
-    genHandler: function (opts) {
-      var count = parseInt((opts && opts.count) || '1', 10);
-      if (!(count >= 1)) count = 1;
-      if (count > 1000) count = 1000;
-      var out = [];
-      for (var i = 0; i < count; i++) out.push(Transforms.uuidV7());
-      return out.join('\n');
-    },
+    genHandler: function (opts) { return Transforms.uuidV7BatchOpts(opts); },
     params: [{ key: 'count', label: 'Count', type: 'number', default: '1', min: 1, max: 1000 }] },
   { slug: 'ulid-generator', name: 'ULID Generator', desc: 'Universally-unique lexicographically-sortable identifiers — Crockford Base32, millisecond timestamp, CSPRNG entropy', category: 'generators', tags: ['ulid', 'identifier'], icon: 'key', template: 'generator',
     genHandler: function (opts) { return Transforms.ulidBatchOpts(opts); },
@@ -376,14 +369,7 @@ window.TOOLMANIFEST = [
 
   // ── Network ─────────────────────────────────────────────
   { slug: 'mac-address-generator', name: 'MAC Address Generator', desc: 'Generate random MAC addresses — locally-administered unicast bit pattern (never collides with real vendor OUIs)', category: 'network', tags: ['mac', 'address'], icon: 'globe', template: 'generator',
-    genHandler: function (opts) {
-      var count = parseInt((opts && opts.count) || '1', 10);
-      if (!(count >= 1)) count = 1;
-      if (count > 100) count = 100;
-      var out = [];
-      for (var n = 0; n < count; n++) out.push(Transforms.macAddress());
-      return out.join('\n');
-    },
+    genHandler: function (opts) { return Transforms.macBatchOpts(opts); },
     params: [{ key: 'count', label: 'Count', type: 'number', default: '1', min: 1, max: 100 }] },
   { slug: 'http-status-codes', name: 'HTTP Status Codes', desc: 'Browse and search HTTP status codes', category: 'network', tags: ['http', 'status', 'api'], icon: 'globe', template: 'custom' },
   { slug: 'uuid-v4-validate', name: 'UUID Validator', desc: 'Validate UUIDs and report the version — v1, v3–v8 plus Nil and Max, RFC 9562 aware', category: 'network', tags: ['uuid', 'validate'], icon: 'key', template: 'transform',
