@@ -1225,6 +1225,11 @@ console.log('-- rot --');
   ok(TOOLS['atbash-cipher'].handler('ABCxyz') === 'ZYXcba', 'atbash edges');
   ok(TOOLS['atbash-cipher'].handler('') === '', 'atbash empty');
   ok(TOOLS['atbash-cipher'].handler.toString().indexOf('atbashCipher') >= 0, 'atbash delegates');
+  ok(TOOLS['bacon-cipher'].handler('ABC') === 'AAAAA AAAAB AAABA', 'bacon vector');
+  ok(TOOLS['bacon-cipher'].handler('AAAAA AAAAB', { mode: 'decode' }) === 'AB', 'bacon decode');
+  ok(TOOLS['bacon-cipher'].handler('Hi, Dad!', { mode: 'decode' }) === 'Hi, Dad!', 'bacon non-groups pass');
+  ok(TOOLS['bacon-cipher'].handler(TOOLS['bacon-cipher'].handler('Hi Dad'), { mode: 'decode' }) === 'HI DAD', 'bacon roundtrip uppercases');
+  ok(TOOLS['bacon-cipher'].handler.toString().indexOf('baconCipher') >= 0, 'bacon delegates');
   ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
   ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }

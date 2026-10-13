@@ -1934,6 +1934,36 @@ T.rot47 = function (s) { return s.replace(/[\x21-\x7e]/g, function (c) { return 
 T.caesarCipher = function (s, opts) { var o = opts || {}; var n = parseInt(o.shift || '3', 10); if (isNaN(n)) n = 3; n = ((n % 26) + 26) % 26; if ((o.mode || 'encode') === 'decode') n = (26 - n) % 26; return String(s).replace(/[a-zA-Z]/g, function (c) { var b = c.charCodeAt(0) >= 97 ? 97 : 65; return String.fromCharCode(((c.charCodeAt(0) - b + n) % 26) + b); }); };
 T.vigenereCipher = function (s, opts) { var o = opts || {}; var key = String(o.key || '').replace(/[^a-zA-Z]/g, ''); if (!key) throw new Error('Enter a letter key \u2014 A shifts 0, B shifts 1, and so on'); var dir = (o.mode || 'encode') === 'decode' ? -1 : 1; var ki = 0; return String(s).replace(/[a-zA-Z]/g, function (c) { var b = c.charCodeAt(0) >= 97 ? 97 : 65; var kc = key.charCodeAt(ki++ % key.length); var k = kc >= 97 ? kc - 97 : kc - 65; return String.fromCharCode((((c.charCodeAt(0) - b + dir * k) % 26 + 26) % 26) + b); }); };
 T.atbashCipher = function (s) { return String(s).replace(/[a-zA-Z]/g, function (c) { var code = c.charCodeAt(0); var base = code >= 97 ? 97 : 65; return String.fromCharCode(base + 25 - (code - base)); }); };
+/* Bacon cipher cores: 26-code biliteral (A=AAAAA, case-insensitive); encode spaces words with /, decode restores them, pure A/B tokens must be five long and in A-Z range. */
+T.baconEncode = function (s) {
+  function code(c) { var v = c.toUpperCase().charCodeAt(0) - 65; var g = ''; for (var i = 4; i >= 0; i--) g += ((v >> i) & 1) ? 'B' : 'A'; return g; }
+  return String(s).split(' ').map(function (w) {
+    return w.replace(/[a-zA-Z]/g, function (c, off, st) { return code(c) + (/[a-zA-Z]/.test(st.charAt(off + 1)) ? ' ' : ''); });
+  }).join(' / ');
+};
+T.baconDecode = function (s) {
+  var str = String(s);
+  var strict = /^[ABab\s/]+$/.test(str) && /[ABab]/.test(str);
+  return str.split('/').map(function (w) {
+    var t = w.trim().replace(/([ABab])\s+(?=[ABab])/g, '$1');
+    var chunks = t.match(/[ABab]+|[^ABab]+/g) || [];
+    return chunks.map(function (tok) {
+      if (!/^[ABab]+$/.test(tok)) return tok;
+      if (tok.length % 5) {
+        if (strict) throw new Error('Bad Bacon group \u2014 A/B runs must split into fives, saw ' + tok.length);
+        return tok;
+      }
+      var letters = '';
+      for (var i = 0; i < tok.length; i += 5) {
+        var v = parseInt(tok.slice(i, i + 5).toUpperCase().replace(/A/g, '0').replace(/B/g, '1'), 2);
+        if (v > 25) throw new Error('Bad Bacon group \u2014 out of A-Z range');
+        letters += String.fromCharCode(65 + v);
+      }
+      return letters;
+    }).join('');
+  }).join(' ');
+};
+T.baconCipher = function (s, opts) { return (opts && opts.mode === 'decode') ? T.baconDecode(s) : T.baconEncode(s); };
 T.base32Encode = function (s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var bytes = new TextEncoder().encode(s);
