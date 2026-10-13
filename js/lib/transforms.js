@@ -6129,6 +6129,8 @@ T.jsonlToTOML = function (s) { var arr = JSON.parse(T.jsonlToJSON(s)); if (arr.l
 /* Markdown table to XML: pipe table to CSV rows, CSV rows to header-keyed records, records to sibling XML elements (delimiter shared). */
 /* Markdown to Schema: pipe table to CSV rows, CSV rows to a draft-07 array schema (headers as properties, column types detected, required where no gaps, delimiter shared). */
 T.markdownToSchema = function (s, opts) { return T.csvToSchema(T.markdownToCSV(s, opts), opts); };
+/* Markdown to JSONL: pipe table to CSV rows with the shared table core, one compact object per line with the CSV-to-JSONL core (surrounding prose ignored, delimiter shared). */
+T.markdownToJSONL = function (s, opts) { return T.csvToJSONL(T.markdownToCSV(s, opts), opts); };
 T.markdownToXML = function (s, opts) { return T.jsonToXML(T.csvToJSON(T.markdownToCSV(s, opts), opts)); };
 /* Markdown table to JSON: pipe table to CSV rows, CSV rows to header-keyed records, records pretty-printed (delimiter shared). */
 T.markdownToJSON = function (s, opts) { return T.csvToJSON(T.markdownToCSV(s, opts), opts); };
