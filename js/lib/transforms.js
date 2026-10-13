@@ -2080,6 +2080,33 @@ T.fourSquareDecode = function (s, key1, key2) {
   return out;
 };
 T.fourSquareCipher = function (s, opts) { var o = opts || {}; var k1 = o.key1 === undefined ? 'EXAMPLE' : o.key1; var k2 = o.key2 === undefined ? 'KEYWORD' : o.key2; if ((o.mode || 'encode') === 'decode') return T.fourSquareDecode(s, k1, k2); return T.fourSquareEncode(s, k1, k2); };
+/* ADFGX cores: Polybius fractionation through a Playfair square (I/J merged) plus a columnar transposition stage; output is A/D/F/G/X only. */
+T.adfgxEncode = function (s, squareKey, transKey) {
+  var sq = T.playfairSquare(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var tk = transKey === undefined ? 'ZEBRAS' : transKey;
+  T.columnarOrder(tk);
+  var t = String(s).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var labels = ['A', 'D', 'F', 'G', 'X'];
+  var frac = '';
+  for (var i = 0; i < t.length; i++) { var p = sq.pos[t.charAt(i)]; frac += labels[(p / 5) | 0] + labels[p % 5]; }
+  return T.columnarEncode(frac, tk);
+};
+T.adfgxDecode = function (s, squareKey, transKey) {
+  var sq = T.playfairSquare(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var tk = transKey === undefined ? 'ZEBRAS' : transKey;
+  T.columnarOrder(tk);
+  var c = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!c) return '';
+  var interim = T.columnarDecode(c, tk);
+  if (interim.length % 2) throw new Error('Bad ADFGX input \u2014 need pairs, saw ' + interim.length);
+  if (!/^[ADFGX]*$/.test(interim)) throw new Error('Bad ADFGX input \u2014 A/D/F/G/X only');
+  var lab = { A: 0, D: 1, F: 2, G: 3, X: 4 };
+  var out = '';
+  for (var i = 0; i < interim.length; i += 2) out += sq.seq[lab[interim.charAt(i)] * 5 + lab[interim.charAt(i + 1)]];
+  return out;
+};
+T.adfgxCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; var k = o.trans === undefined ? 'ZEBRAS' : o.trans; if ((o.mode || 'encode') === 'decode') return T.adfgxDecode(s, q, k); return T.adfgxEncode(s, q, k); };
 /* Columnar cores: keyword-ordered columns (stable for duplicate letters), no padding, uneven columns handled, code points preserved. */
 T.columnarOrder = function (key) {
   var k = String(key === undefined ? 'ZEBRAS' : key).toUpperCase().replace(/[^A-Z]/g, '');

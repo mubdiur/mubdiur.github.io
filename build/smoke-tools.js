@@ -1250,6 +1250,11 @@ console.log('-- rot --');
   ok(TOOLS['four-square-cipher'].handler(TOOLS['four-square-cipher'].handler('HELLOWORLD', { key1: 'EXAMPLE', key2: 'KEYWORD' }), { key1: 'EXAMPLE', key2: 'KEYWORD', mode: 'decode' }) === 'HELLOWORLD', 'foursquare roundtrip');
   ok(TOOLS['four-square-cipher'].handler('HELLO', { key1: 'EXAMPLE', key2: 'KEYWORD' }).length === 6, 'foursquare odd pads');
   ok(TOOLS['four-square-cipher'].handler.toString().indexOf('fourSquareCipher') >= 0, 'foursquare delegates');
+  ok(TOOLS['adfgx-cipher'].handler('AB', { square: 'A', trans: 'A' }) === 'AAAD', 'adfgx vector');
+  ok(TOOLS['adfgx-cipher'].handler('AAAD', { square: 'A', trans: 'A', mode: 'decode' }) === 'AB', 'adfgx decode');
+  ok(TOOLS['adfgx-cipher'].handler(TOOLS['adfgx-cipher'].handler('HELLOWORLD', { square: 'KEYWORD', trans: 'ZEBRAS' }), { square: 'KEYWORD', trans: 'ZEBRAS', mode: 'decode' }) === 'HELLOWORLD', 'adfgx roundtrip');
+  ok(TOOLS['adfgx-cipher'].handler('HELLO', { square: 'KEYWORD', trans: 'ZEBRAS' }).length === 10, 'adfgx doubles length');
+  ok(TOOLS['adfgx-cipher'].handler.toString().indexOf('adfgxCipher') >= 0, 'adfgx delegates');
   ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
   ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }

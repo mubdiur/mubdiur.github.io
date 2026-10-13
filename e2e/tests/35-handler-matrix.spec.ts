@@ -205,6 +205,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('columnar-transposition', 'bad key throws', mustThrow(() => TOOLS['columnar-transposition'].handler('ABC', { key: '' })));
     push('four-square-cipher', 'happy', TOOLS['four-square-cipher'].handler('AB', { key1: 'A', key2: 'A' }) === 'BA');
     push('four-square-cipher', 'bad key throws', mustThrow(() => TOOLS['four-square-cipher'].handler('AB', { key1: '', key2: 'A' })));
+    push('adfgx-cipher', 'happy', TOOLS['adfgx-cipher'].handler('AB', { square: 'A', trans: 'A' }) === 'AAAD');
+    push('adfgx-cipher', 'bad input throws', mustThrow(() => TOOLS['adfgx-cipher'].handler('BC', { square: 'A', trans: 'A', mode: 'decode' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);
