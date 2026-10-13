@@ -143,6 +143,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('sql-minifier', 'empty throws', mustThrow(() => TOOLS['sql-minifier'].handler('   ')));
     push('json-to-toml', 'happy', TOOLS['json-to-toml'].handler('{"a":1}') === 'a = 1');
     push('json-to-toml', 'array throws', mustThrow(() => TOOLS['json-to-toml'].handler('[1]')));
+    push('json-to-schema', 'happy', TOOLS['json-to-schema'].handler('{"a":1}').indexOf('integer') >= 0);
+    push('json-to-schema', 'bad json throws', mustThrow(() => TOOLS['json-to-schema'].handler('not json')));
     push('toml-to-json', 'happy', TOOLS['toml-to-json'].handler('a = 1').includes('"a": 1'));
     push('toml-to-json', 'dup throws', mustThrow(() => TOOLS['toml-to-json'].handler('a = 1\na = 2')));
     push('xml-to-toml', 'happy', TOOLS['xml-to-toml'].handler('<r><a>1</a></r>').includes('a = '));

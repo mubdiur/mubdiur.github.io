@@ -6107,6 +6107,39 @@ T.yamlToMarkdown = function (s, opts) { if (!String(s).trim()) throw new Error('
 T.yamlToCSV = function (s, opts) { if (!String(s).trim()) throw new Error('Enter YAML to convert'); return T.jsonToCSV(T.yamlToJSON(s), opts); };
 /* JSON to Markdown: parse objects or arrays (single row or per-element rows), bridge through compact JSON lines, emit pipe tables with the canonical JSONL-to-Markdown core. */
 T.jsonToMarkdown = function (s, opts) { if (!String(s).trim()) throw new Error('Enter JSON to convert'); var v; try { v = JSON.parse(s); } catch (e) { void e; throw new Error('Invalid JSON \u2014 check commas, quotes and brackets'); } var docs = Array.isArray(v) ? v : [v]; if (!docs.length) throw new Error('JSON has no tabular rows \u2014 need objects with keys'); for (var i = 0; i < docs.length; i++) { var d = docs[i]; if (d === null || typeof d !== 'object' || Array.isArray(d)) throw new Error('JSON has no tabular rows \u2014 need objects with keys'); } return T.jsonlToMarkdown(docs.map(function (r) { return JSON.stringify(r); }).join('\n'), opts); };
+/* JSON to Schema: infer a draft-07 schema from example JSON \u2014 nested types, merged array items via deep-equal, required keys, validator-ready output. */
+T.jsonToSchema = function (s, opts) {
+  var o = opts || {};
+  var n = parseInt(o.indent || '2', 10);
+  if (isNaN(n) || n < 1 || n > 8) n = 2;
+  if (!String(s).trim()) throw new Error('Enter JSON to convert');
+  var v = T.validateJSON(s);
+  if (!v.valid) throw new Error('Invalid JSON \u2014 ' + (v.error || 'check commas, quotes and brackets'));
+  function infer(val) {
+    if (val === null) return { type: 'null' };
+    if (Array.isArray(val)) {
+      if (!val.length) return { type: 'array', items: {} };
+      var subs = val.map(infer);
+      var uniq = [];
+      subs.forEach(function (x) { if (!uniq.some(function (u) { return schemaDeepEqual(u, x); })) uniq.push(x); });
+      return uniq.length === 1 ? { type: 'array', items: uniq[0] } : { type: 'array', items: { anyOf: uniq } };
+    }
+    if (typeof val === 'object') {
+      var props = {}, req = [];
+      Object.keys(val).forEach(function (k) { props[k] = infer(val[k]); req.push(k); });
+      var sch = { type: 'object', properties: props };
+      if (req.length) sch.required = req;
+      return sch;
+    }
+    if (typeof val === 'string') return { type: 'string' };
+    if (typeof val === 'boolean') return { type: 'boolean' };
+    return { type: (Math.floor(val) === val ? 'integer' : 'number') };
+  }
+  var out = { $schema: 'http://json-schema.org/draft-07/schema#' };
+  var root = infer(v.data);
+  Object.keys(root).forEach(function (k) { out[k] = root[k]; });
+  return JSON.stringify(out, null, n);
+};
 /* Duration calculator: one signed duration per line, summed. Each line takes
    jammed or spaced unit groups (1h30m, 2 days 4 hours), colon times (1:30:00,
    12:30) or bare seconds; leading - subtracts, # lines and blanks skip.
