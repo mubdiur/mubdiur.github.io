@@ -2048,6 +2048,37 @@ T.playfairDecode = function (s, key) {
   return out;
 };
 T.playfairCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'PLAYFAIR EXAMPLE' : o.key; if ((o.mode || 'encode') === 'decode') return T.playfairDecode(s, k); return T.playfairEncode(s, k); };
+/* Columnar cores: keyword-ordered columns (stable for duplicate letters), no padding, uneven columns handled, code points preserved. */
+T.columnarOrder = function (key) {
+  var k = String(key === undefined ? 'ZEBRAS' : key).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!k) throw new Error('Enter a letter key \u2014 A-Z orders the columns');
+  var idx = []; for (var i = 0; i < k.length; i++) idx.push(i);
+  idx.sort(function (a, b) { var ca = k.charAt(a), cb = k.charAt(b); if (ca < cb) return -1; if (ca > cb) return 1; return a - b; });
+  return { k: k, order: idx };
+};
+T.columnarEncode = function (s, key) {
+  var o = T.columnarOrder(key); var cols = o.k.length;
+  var str = Array.from(String(s)); var n = str.length;
+  if (!n || cols <= 1) return String(s);
+  var rows = Math.ceil(n / cols); var order = o.order; var out = [];
+  for (var oi = 0; oi < order.length; oi++) { var c = order[oi]; for (var r = 0; r < rows; r++) { var ix = r * cols + c; if (ix < n) out.push(str[ix]); } }
+  return out.join('');
+};
+T.columnarDecode = function (s, key) {
+  var o = T.columnarOrder(key); var cols = o.k.length;
+  var str = Array.from(String(s)); var n = str.length;
+  if (!n || cols <= 1) return String(s);
+  var rows = Math.ceil(n / cols); var full = Math.floor(n / cols); var rem = n % cols;
+  var h = []; for (var c = 0; c < cols; c++) h.push(full + (c < rem ? 1 : 0));
+  var data = []; for (var i = 0; i < cols; i++) data.push([]);
+  var off = 0; var order = o.order;
+  for (var oi = 0; oi < order.length; oi++) { var cc = order[oi]; var hh = h[cc]; data[cc] = str.slice(off, off + hh); off += hh; }
+  var pos = []; for (var q = 0; q < cols; q++) pos.push(0);
+  var out = [];
+  for (var r = 0; r < rows; r++) for (var c2 = 0; c2 < cols; c2++) if (pos[c2] < data[c2].length) out.push(data[c2][pos[c2]++]);
+  return out.join('');
+};
+T.columnarCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'ZEBRAS' : o.key; if ((o.mode || 'encode') === 'decode') return T.columnarDecode(s, k); return T.columnarEncode(s, k); };
 T.base32Encode = function (s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var bytes = new TextEncoder().encode(s);

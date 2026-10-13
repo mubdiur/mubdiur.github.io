@@ -1240,6 +1240,11 @@ console.log('-- rot --');
   ok(TOOLS['playfair-cipher'].handler(TOOLS['playfair-cipher'].handler('PLAYFAIR', { key: 'PLAYFAIR EXAMPLE' }), { key: 'PLAYFAIR EXAMPLE', mode: 'decode' }) === 'PLAYFAIR', 'playfair roundtrip');
   ok(TOOLS['playfair-cipher'].handler('HELLO', { key: 'PLAYFAIR EXAMPLE' }).length === 6, 'playfair filler pads doubles');
   ok(TOOLS['playfair-cipher'].handler.toString().indexOf('playfairCipher') >= 0, 'playfair delegates');
+  ok(TOOLS['columnar-transposition'].handler('ABCDEF', { key: 'CBA' }) === 'CFBEAD', 'columnar vector');
+  ok(TOOLS['columnar-transposition'].handler('CFBEAD', { key: 'CBA', mode: 'decode' }) === 'ABCDEF', 'columnar decode');
+  ok(TOOLS['columnar-transposition'].handler(TOOLS['columnar-transposition'].handler('Hello World', { key: 'ZEBRAS' }), { key: 'ZEBRAS', mode: 'decode' }) === 'Hello World', 'columnar roundtrip');
+  ok(TOOLS['columnar-transposition'].handler(TOOLS['columnar-transposition'].handler('HELLO', { key: 'BALLOON' }), { key: 'BALLOON', mode: 'decode' }) === 'HELLO', 'columnar duplicate key roundtrip');
+  ok(TOOLS['columnar-transposition'].handler.toString().indexOf('columnarCipher') >= 0, 'columnar delegates');
   ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
   ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }
