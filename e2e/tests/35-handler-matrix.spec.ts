@@ -215,6 +215,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('hill-cipher', 'bad matrix throws', mustThrow(() => TOOLS['hill-cipher'].handler('AB', { ka: '2', kb: '4', kc: '2', kd: '4' })));
     push('straddling-checkerboard', 'happy', TOOLS['straddling-checkerboard'].handler('AB', { key: 'A' }) === '23');
     push('straddling-checkerboard', 'blank cell throws', mustThrow(() => TOOLS['straddling-checkerboard'].handler('10', { key: 'A', mode: 'decode' })));
+    push('porta-cipher', 'happy', TOOLS['porta-cipher'].handler('HELLO', { key: 'A' }) === 'URYYB');
+    push('porta-cipher', 'empty key throws', mustThrow(() => TOOLS['porta-cipher'].handler('ABC', { key: '' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

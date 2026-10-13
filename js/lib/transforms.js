@@ -2247,6 +2247,20 @@ T.straddleDecode = function (s, key) {
   return out;
 };
 T.straddleCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'KEYWORD' : o.key; if ((o.mode || 'encode') === 'decode') return T.straddleDecode(s, k); return T.straddleEncode(s, k); };
+/* Porta cipher: reciprocal polyalphabetic with 13 alphabets (AB share 0 through YZ share 12); key A alone is ROT13, case preserved, non-letters pass through. */
+T.portaCipher = function (s, opts) {
+  var o = opts || {}; var key = String(o.key === undefined ? 'LEMON' : o.key).replace(/[^a-zA-Z]/g, '');
+  if (!key) throw new Error('Enter a letter key \u2014 AB share alphabet 0, CD share 1, and so on');
+  var ki = 0;
+  return String(s).replace(/[a-zA-Z]/g, function (c) {
+    var base = c.charCodeAt(0) >= 97 ? 97 : 65;
+    var p = c.charCodeAt(0) - base;
+    var kc = key.charCodeAt(ki++ % key.length);
+    var k = (kc >= 97 ? kc - 97 : kc - 65) >> 1;
+    var q = p < 13 ? 13 + ((p + k) % 13) : (((p - 13 - k) % 13) + 13) % 13;
+    return String.fromCharCode(base + q);
+  });
+};
 /* Columnar cores: keyword-ordered columns (stable for duplicate letters), no padding, uneven columns handled, code points preserved. */
 T.columnarOrder = function (key) {
   var k = String(key === undefined ? 'ZEBRAS' : key).toUpperCase().replace(/[^A-Z]/g, '');

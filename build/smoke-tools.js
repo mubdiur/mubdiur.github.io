@@ -1275,6 +1275,11 @@ console.log('-- rot --');
   ok(TOOLS['straddling-checkerboard'].handler(TOOLS['straddling-checkerboard'].handler('HELLOWORLD', { key: 'KEYWORD' }), { key: 'KEYWORD', mode: 'decode' }) === 'HELLOWORLD', 'straddle roundtrip');
   ok(TOOLS['straddling-checkerboard'].handler('HELLO', { key: 'A' }).length === 8, 'straddle shortens frequent');
   ok(TOOLS['straddling-checkerboard'].handler.toString().indexOf('straddleCipher') >= 0, 'straddle delegates');
+  ok(TOOLS['porta-cipher'].handler('HELLO', { key: 'A' }) === 'URYYB', 'porta rot13 vector');
+  ok(TOOLS['porta-cipher'].handler(TOOLS['porta-cipher'].handler('Hello World', { key: 'LEMON' }), { key: 'LEMON' }) === 'Hello World', 'porta reciprocal');
+  ok(TOOLS['porta-cipher'].handler('HELLO', { key: 'A' }) === TOOLS['porta-cipher'].handler('HELLO', { key: 'B' }), 'porta pair shares');
+  ok(function (o) { return o.length === 8 && o.charAt(2) === ',' && o.charAt(7) === '!'; }(TOOLS['porta-cipher'].handler('Hi, Dad!', { key: 'KEY' })), 'porta keeps punctuation');
+  ok(TOOLS['porta-cipher'].handler.toString().indexOf('portaCipher') >= 0, 'porta delegates');
   ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
   ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }
