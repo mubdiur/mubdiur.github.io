@@ -54,6 +54,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('ini-to-markdown', 'dup throws', mustThrow(() => TOOLS['ini-to-markdown'].handler('[s]\nk = 1\nk = 2', {})));
     push('env-to-xml', 'happy', TOOLS['env-to-xml'].handler('A=1\nB=hello').indexOf('<A>1</A>') >= 0);
     push('env-to-xml', 'no equals throws', mustThrow(() => TOOLS['env-to-xml'].handler('NOEQUALS')));
+    push('env-to-markdown', 'happy', TOOLS['env-to-markdown'].handler('A=1\nB=hello', {}).indexOf('| 1 |') >= 0);
+    push('env-to-markdown', 'no equals throws', mustThrow(() => TOOLS['env-to-markdown'].handler('NOEQUALS', {})));
     push('csv-to-xml', 'empty throws', mustThrow(() => TOOLS['csv-to-xml'].handler('', {})));
     push('csv-delimiter-sniffer', 'semicolon', TOOLS['csv-delimiter-sniffer'].handler('a;b\nc;d').indexOf('Delimiter: Semicolon (;)') === 0);
     push('csv-delimiter-sniffer', 'comma', TOOLS['csv-delimiter-sniffer'].handler('a,b\nc,d').indexOf('Delimiter: Comma (,)') === 0);
