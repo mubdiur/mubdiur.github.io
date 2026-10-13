@@ -596,8 +596,8 @@ var App = {
     function runTool(slug) { App.navigate('/tools/' + slug); close(); }
     function keyHandler(e) {
       var rowCount = (App.paletteRows || []).length;
-      if (e.key === 'ArrowDown') { e.preventDefault(); App.paletteSelected = Math.min(App.paletteSelected + 1, rowCount - 1); refreshSel(); if (document.activeElement !== input) focusSel(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); App.paletteSelected = Math.max(App.paletteSelected - 1, 0); refreshSel(); if (document.activeElement !== input) focusSel(); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (rowCount) App.paletteSelected = (App.paletteSelected + 1) % rowCount; refreshSel(); if (document.activeElement !== input) focusSel(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (rowCount) App.paletteSelected = (App.paletteSelected - 1 + rowCount) % rowCount; refreshSel(); if (document.activeElement !== input) focusSel(); }
       else if (e.key === 'Enter') {
         if (document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('palette-item')) return;
         e.preventDefault();
