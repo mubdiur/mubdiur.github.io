@@ -114,6 +114,10 @@ mustThrow(() => TOOLS['json-to-toml'].handler('[]'), 'json-to-toml array');
 mustThrow(() => T.tomlToJSON('   '), 'tomlToJSON empty');
 mustThrow(() => T.tomlToJSON('[a]\n[a]'), 'tomlToJSON dup table');
 mustThrow(() => T.tomlToJSON('a = 1\na = 2'), 'tomlToJSON dup key');
+mustThrow(() => T.xmlToTOML(''), 'xmlToTOML empty');
+mustThrow(() => T.xmlToTOML('<a></b>'), 'xmlToTOML mismatch');
+mustNotThrow(() => T.xmlToTOML('<r><a>1</a></r>'), 'xmlToTOML good');
+
 mustThrow(() => T.tomlToJSON('"a = 1'), 'tomlToJSON unterminated quoted key');
 mustThrow(() => T.tomlToJSON('t = { a = }'), 'tomlToJSON inline missing val');
 

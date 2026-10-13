@@ -6044,6 +6044,11 @@ T.xmlToJsonValue = function (s) {
 };
 T.xmlToJsonDoc = function (s) { return JSON.stringify(T.xmlToJsonValue(s), null, 2); };
 T.xmlToYAML = function (s) { return T.jsonToYAML(JSON.stringify(T.xmlToJsonValue(s))); };
+/* XML to TOML: parse once with the shared dependency-free XML parser,
+   emit with the canonical JSON-to-TOML emitter (attributes as @-keys,
+   repeats as arrays, empty elements as empty strings). */
+T.xmlToTOML = function (s) { return T.jsonToTOML(T.xmlToJsonDoc(s)); };
+
 /* Duration calculator: one signed duration per line, summed. Each line takes
    jammed or spaced unit groups (1h30m, 2 days 4 hours), colon times (1:30:00,
    12:30) or bare seconds; leading - subtracts, # lines and blanks skip.

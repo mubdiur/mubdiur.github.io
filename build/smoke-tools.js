@@ -598,6 +598,10 @@ console.log('-- json to toml --');
   var tj = TOOLS['toml-to-json'].handler('[db]\nhost = "h"\n[[srv]]\nip = "a"');
   ok(tj === '{\n  "db": {\n    "host": "h"\n  },\n  "srv": [\n    {\n      "ip": "a"\n    }\n  ]\n}', 'toml tables decode');
   ok(TOOLS['toml-to-json'].handler('a = 1') === T.tomlToJSON('a = 1'), 'toml-to-json delegates to Transforms');
+  ok(TOOLS['xml-to-toml'].handler('<r><a>1</a></r>') === '[r]\na = "1"', 'xml-to-toml basic');
+  ok(TOOLS['xml-to-toml'].handler('<r><i>1</i><i>2</i></r>') === '[r]\ni = ["1", "2"]', 'xml-to-toml repeats');
+  ok(TOOLS['xml-to-toml'].handler.toString().indexOf('xmlToTOML') >= 0, 'xml-to-toml delegates');
+
   ok(JSON.parse(T.tomlToJSON('"a=b" = 1'))['a=b'] === 1, 'toml quoted eq key');
   ok(JSON.parse(T.tomlToJSON('t = { "x=y" = 3 }')).t["x=y"] === 3, 'toml inline quoted eq key');
   ok(T.jsonToTOML(T.tomlToJSON('"a=b" = 1')) === '"a=b" = 1', 'toml eq key round trip');

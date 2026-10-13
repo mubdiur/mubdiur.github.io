@@ -277,6 +277,10 @@ window.TOOLMANIFEST = [
   { slug: 'xml-to-yaml', name: 'XML → YAML', desc: 'Convert XML (SOAP, RSS, configs) to YAML \u2014 attributes as @-keys, repeats as sequences, shared dependency-free parser', category: 'converters', tags: ['xml', 'yaml', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
     placeholder: '<server><host>example.com</host><port>8080</port></server>',
     handler: function (s) { return Transforms.xmlToYAML(s); } },
+  { slug: 'xml-to-toml', name: 'XML \u2192 TOML', desc: 'Convert XML (SOAP, RSS, configs) to TOML \u2014 attributes as @-keys, repeats as arrays, shared dependency-free parser', category: 'converters', tags: ['xml', 'toml', 'convert', 'soap', 'rss'], icon: 'filetype', template: 'transform',
+    placeholder: '<server><host>example.com</host><port>8080</port></server>',
+    handler: function (s) { return Transforms.xmlToTOML(s); } },
+
   { slug: 'yaml-to-json', name: 'YAML → JSON', desc: 'Convert YAML to JSON', category: 'converters', tags: ['yaml', 'json', 'convert'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.yamlToJSON(s); } },
   { slug: 'table2xl', name: 'Table2xl — Table Converter', desc: 'Paste dirty HTML tables or ELK/Kibana grids — strip the noise, export as clean HTML or ASCII table', category: 'converters', tags: ['table', 'elk', 'kibana', 'ascii'], icon: 'filespreadsheet', template: 'custom' },
