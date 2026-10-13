@@ -205,6 +205,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('markdown-to-xml', 'no table throws', mustThrow(() => TOOLS['markdown-to-xml'].handler('hello', {})));
     push('markdown-to-json', 'happy', JSON.parse(TOOLS['markdown-to-json'].handler('| a |\n|---|\n| 1 |', {}))[0].a === '1');
     push('markdown-to-json', 'empty throws', mustThrow(() => TOOLS['markdown-to-json'].handler('', {})));
+    push('markdown-to-toml', 'happy', TOOLS['markdown-to-toml'].handler('| a |\n|---|\n| 1 |', {}).indexOf('[[docs]]') >= 0);
+    push('markdown-to-toml', 'empty throws', mustThrow(() => TOOLS['markdown-to-toml'].handler('', {})));
 
     push('xml-formatter', 'inline', TOOLS['xml-formatter'].handler('<r><a>1</a></r>', {}).includes('<a>1</a>'));
     push('xml-formatter', 'tab indent', TOOLS['xml-formatter'].handler('<r><a>1</a></r>', { indent: 'tab' }).includes('\t<a>1</a>'));
