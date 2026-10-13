@@ -269,6 +269,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('palette-rank', 'transposition tolerated', APP.fuzzyScore('jtw', 'jwt-verifier') > 0);
     push('palette-rank', 'transposition below straight', APP.fuzzyScore('jtw', 'jwt-verifier') < APP.fuzzyScore('jwt', 'jwt-verifier'));
     push('palette-rank', 'garbage still misses', APP.fuzzyScore('zzzqqq', 'jwt-verifier') === -1);
+    push('palette-rank', 'single-swap-typo tops', ['jwt-verifier', 'totp-generator', 'csv-to-json', 'uuid-v7-generator', 'json-to-xml', 'base64-decode'].every(function (slug: string) { for (var p = 0; p + 1 < slug.length; p++) { if (slug[p] === '-' || slug[p + 1] === '-') continue; var q = slug.slice(0, p) + slug[p + 1] + slug[p] + slug.slice(p + 2); if (topSlug(q) !== slug) return false; } return true; }));
     push('palette-rank', 'slug prefix tops', topSlug('sha384') === 'sha384-hash');
     push('palette-rank', 'exact slug tops', topSlug('totp-generator') === 'totp-generator');
     push('palette-rank', 'ties break shorter-first', (function () { var rs = MAN.map(function (t: any) { return { l: (t.slug as string).length, r: APP.toolMatchScore(t, 'json') as number }; }).filter(function (x: any) { return x.r > 0; }).sort(function (a: any, b: any) { return b.r - a.r || a.l - b.l; }); for (var k = 1; k < rs.length; k++) { if (rs[k].r === rs[k - 1].r && rs[k].l < rs[k - 1].l) return false; } return rs.length > 3; })());
