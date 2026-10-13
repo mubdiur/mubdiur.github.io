@@ -43,7 +43,7 @@ App.registerTool('image-to-base64', {
 
     var previewBox = App.el('div', { class: 'space-y-2 hidden' },
       App.el('div', { class: 'rounded border border-border/40 bg-black/20 p-2 flex items-center justify-center max-h-[200px]' }, imgEl),
-      App.el('div', { class: 'flex items-center gap-2' }, copyBtn),
+      App.el('div', { class: 'flex items-center gap-2' }, copyBtn, App.downloadButton(function () { App.download((fileName || 'image') + '.base64.txt', b64, 'text/plain'); })),
       b64Out);
 
     var fileInput = App.el('input', { type: 'file', accept: 'image/*', class: 'hidden' });

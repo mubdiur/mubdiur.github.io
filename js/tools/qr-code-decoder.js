@@ -32,7 +32,7 @@ if (url) { try { URL.revokeObjectURL(url); } catch (e) {} url = null; }
 function render() {
 statusNode.textContent = status === "idle" ? "No image yet — decoded text appears here." : status === "scanning" ? "Scanning…" : status === "done" ? meta : "";
 outputBox.innerHTML = "";
-if (result || error) outputBox.appendChild(App.outputBox(result, error, "Decoded text", clear));
+if (result || error) outputBox.appendChild(App.outputBox(result, error, "Decoded text", clear, result && !error ? function () { App.download("qr-code-decoder-output.txt", result, "text/plain"); } : null));
 if (url) { imgEl.src = url; imgEl.classList.remove("hidden"); }
 else imgEl.classList.add("hidden");
 }

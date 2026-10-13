@@ -68,7 +68,8 @@ App.registerTool('json-validator', {
 
     function setOutput(output, error) {
       outputBox.innerHTML = '';
-      outputBox.appendChild(App.outputBox(output, error, 'Output', clear));
+      var canSave = !error && output;
+      outputBox.appendChild(App.outputBox(output, error, 'Output', clear, canSave ? function () { App.download('json-validator-output.json', output, 'application/json'); } : null));
     }
 
     function clear() {
