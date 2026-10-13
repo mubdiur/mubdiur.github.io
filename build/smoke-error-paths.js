@@ -125,6 +125,10 @@ mustThrow(() => T.xmlToCSV('', {}), 'xmlToCSV empty');
 mustThrow(() => T.xmlToCSV('<a></b>', {}), 'xmlToCSV mismatch');
 mustThrow(() => T.xmlToCSV('<a>hello</a>', {}), 'xmlToCSV scalar no rows');
 mustNotThrow(() => T.xmlToCSV('<r><a>1</a></r>', {}), 'xmlToCSV good');
+mustThrow(() => T.xmlToMarkdown('', {}), 'xmlToMarkdown empty');
+mustThrow(() => T.xmlToMarkdown('<a></b>', {}), 'xmlToMarkdown mismatch');
+mustThrow(() => T.xmlToMarkdown('<a>hello</a>', {}), 'xmlToMarkdown scalar no rows');
+mustNotThrow(() => T.xmlToMarkdown('<r><a>1</a></r>', {}), 'xmlToMarkdown good');
 
 mustThrow(() => T.tomlToJSON('"a = 1'), 'tomlToJSON unterminated quoted key');
 mustThrow(() => T.tomlToJSON('t = { a = }'), 'tomlToJSON inline missing val');

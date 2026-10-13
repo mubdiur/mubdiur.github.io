@@ -95,6 +95,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'toml-formatter': { good: 'a=1', expectInOutput: /a = 1/ },
   'xml-to-toml': { good: '<r><a>1</a></r>', expectInOutput: /a = "1"/ },
   'xml-to-csv': { good: '<rows><row><name>Ada</name><age>30</age></row></rows>', expectInOutput: /Ada/ },
+  'xml-to-markdown': { good: '<rows><row><name>Ada</name><age>30</age></row></rows>', expectInOutput: /Ada/ },
 
 
   'toml-to-yaml': { good: 'a = 1', expectInOutput: /a: 1/ },
