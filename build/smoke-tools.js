@@ -1230,6 +1230,11 @@ console.log('-- rot --');
   ok(TOOLS['bacon-cipher'].handler('Hi, Dad!', { mode: 'decode' }) === 'Hi, Dad!', 'bacon non-groups pass');
   ok(TOOLS['bacon-cipher'].handler(TOOLS['bacon-cipher'].handler('Hi Dad'), { mode: 'decode' }) === 'HI DAD', 'bacon roundtrip uppercases');
   ok(TOOLS['bacon-cipher'].handler.toString().indexOf('baconCipher') >= 0, 'bacon delegates');
+  ok(TOOLS['rail-fence-cipher'].handler('WEAREDISCOVEREDFLEEATONCE', { rails: '3' }) === 'WECRLTEERDSOEEFEAOCAIVDEN', 'rail vector');
+  ok(TOOLS['rail-fence-cipher'].handler('WECRLTEERDSOEEFEAOCAIVDEN', { rails: '3', mode: 'decode' }) === 'WEAREDISCOVEREDFLEEATONCE', 'rail decode');
+  ok(TOOLS['rail-fence-cipher'].handler('HELLO', { rails: '2' }) === 'HLOEL', 'rail hello 2');
+  ok(TOOLS['rail-fence-cipher'].handler(TOOLS['rail-fence-cipher'].handler('Hello World', { rails: '3' }), { rails: '3', mode: 'decode' }) === 'Hello World', 'rail roundtrip');
+  ok(TOOLS['rail-fence-cipher'].handler.toString().indexOf('railFenceCipher') >= 0, 'rail delegates');
   ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
   ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }

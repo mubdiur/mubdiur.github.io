@@ -1964,6 +1964,40 @@ T.baconDecode = function (s) {
   }).join(' ');
 };
 T.baconCipher = function (s, opts) { return (opts && opts.mode === 'decode') ? T.baconDecode(s) : T.baconEncode(s); };
+/* Rail fence cores: zigzag transposition across N rails; encode reads rows, decode restores order, lone surrogates pass via code points. */
+T.railFenceEncode = function (s, rails) {
+  var R = rails === undefined ? 3 : parseInt(rails, 10);
+  if (isNaN(R) || R < 2) throw new Error('Rails must be 2 or more \u2014 saw ' + rails);
+  var str = Array.from(String(s));
+  var n = str.length;
+  if (n <= 1 || R >= n) return String(s);
+  var rows = []; for (var i = 0; i < R; i++) rows.push([]);
+  var rail = 0, dir = 1;
+  for (var k = 0; k < n; k++) {
+    rows[rail].push(str[k]);
+    if (rail === 0) dir = 1; else if (rail === R - 1) dir = -1;
+    rail += dir;
+  }
+  return rows.map(function (r) { return r.join(''); }).join('');
+};
+T.railFenceDecode = function (s, rails) {
+  var R = rails === undefined ? 3 : parseInt(rails, 10);
+  if (isNaN(R) || R < 2) throw new Error('Rails must be 2 or more \u2014 saw ' + rails);
+  var str = Array.from(String(s));
+  var n = str.length;
+  if (n <= 1 || R >= n) return String(s);
+  var pat = []; var rail = 0, dir = 1;
+  for (var k = 0; k < n; k++) { pat.push(rail); if (rail === 0) dir = 1; else if (rail === R - 1) dir = -1; rail += dir; }
+  var counts = []; for (var i = 0; i < R; i++) counts.push(0);
+  for (var j = 0; j < n; j++) counts[pat[j]]++;
+  var rows = []; var off = 0;
+  for (var r = 0; r < R; r++) { rows.push(str.slice(off, off + counts[r])); off += counts[r]; }
+  var pos = []; for (var q = 0; q < R; q++) pos.push(0);
+  var out = [];
+  for (var m = 0; m < n; m++) { var rr = pat[m]; out.push(rows[rr][pos[rr]++]); }
+  return out.join('');
+};
+T.railFenceCipher = function (s, opts) { var o = opts || {}; var R = o.rails === undefined ? '3' : o.rails; if ((o.mode || 'encode') === 'decode') return T.railFenceDecode(s, R); return T.railFenceEncode(s, R); };
 T.base32Encode = function (s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var bytes = new TextEncoder().encode(s);
