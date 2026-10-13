@@ -7,7 +7,7 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-import { cachedBytes } from './cache.js';
+import { cachedBytesProgress } from './cache.js';
 
 /* Confirm to the IDE that this worker script loaded successfully */
 console.log('[java-runner] script loaded');
@@ -40,13 +40,24 @@ function pushVmLine(s) {
   else if (vmLines.length === VM_LINES_CAP) vmLines.push('\u2026 (output truncated)');
 }
 
+function fileLabel(name, loaded, total) {
+  var mb = (loaded / 1048576).toFixed(1);
+  if (!(total > 0)) return 'Loading ' + name + ' (' + mb + ' MB)…';
+  var pct = Math.round((loaded / total) * 100);
+  return 'Loading ' + name + ' (' + mb + '/' + (total / 1048576).toFixed(1) + ' MB \u00b7 ' + pct + '%)…';
+}
+
 function ensureEngine() {
   if (!enginePromise) {
     enginePromise = (async function () {
       post('status', 'Starting Java VM…');
       var javacPromise = import('./vendor/199xvm/javac.js');
-      var shimPromise = cachedBytes('./vendor/199xvm/bundle.bin');
-      var wasmPromise = cachedBytes('./vendor/199xvm/jvm_core.wasm');
+      var shimPromise = cachedBytesProgress('./vendor/199xvm/bundle.bin', function (loaded, total) {
+        post('status', fileLabel('Java bundle', loaded, total));
+      });
+      var wasmPromise = cachedBytesProgress('./vendor/199xvm/jvm_core.wasm', function (loaded, total) {
+        post('status', fileLabel('JVM core', loaded, total));
+      });
       var javac = await javacPromise;
       var shim = await shimPromise;
       var wasmBytes = await wasmPromise;
