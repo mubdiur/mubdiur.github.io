@@ -29,6 +29,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'yaml-to-jsonl': { good: 'a: 1', expectInOutput: /a/ },
   'toml-to-jsonl': { good: 'a = 1', expectInOutput: /a/ },
   'ini-to-jsonl': { good: '[s]\na = 1', expectInOutput: /s\.a/ },
+  'env-to-jsonl': { good: 'A=1', expectInOutput: /A/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },
   'json-escape': { good: 'a"b', expectInOutput: /\\"/ },
   'json-unescape': { good: 'a\\"b', expectInOutput: /a"b/ },

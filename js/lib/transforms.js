@@ -6156,6 +6156,8 @@ T.iniToYAML = function (s) { return T.jsonToYAML(T.iniToJSON(s)); };
 /* ENV to Markdown: parse dotenv to one flat object, bridge through one compact JSON line, emit pipe tables with the canonical JSONL-to-Markdown core. */
 T.envToMarkdown = function (s, opts) { return T.jsonlToMarkdown(JSON.stringify(JSON.parse(T.envToJSON(s))), opts); };
 /* ENV to CSV: parse once with the dotenv core (export prefixes, line-numbered key errors), emit with the canonical JSON-to-CSV core (keys become columns, single row). */
+/* ENV to JSONL: dotenv keys to one CSV row with the shared dotenv core, one compact object line with the CSV-to-JSONL core (export prefixes stripped, line-numbered key errors). */
+T.envToJSONL = function (s, opts) { return T.csvToJSONL(T.envToCSV(s, opts), opts); };
 T.envToCSV = function (s, opts) { return T.jsonToCSV(T.envToJSON(s), opts); };
 /* ENV to TOML: parse once with the dotenv core (export prefixes, line-numbered key errors), emit with the canonical JSON-to-TOML emitter (keys as bare pairs). */
 T.envToTOML = function (s) { return T.jsonToTOML(T.envToJSON(s)); };
