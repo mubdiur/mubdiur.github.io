@@ -59,6 +59,12 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('har-inspector', 'json view', JSON.parse(TOOLS['har-inspector'].handler(HAR, { view: 'json' })).failed === 1);
     push('har-inspector', 'bad throws', mustThrow(() => TOOLS['har-inspector'].handler('nope', {})));
     push('har-inspector', 'chrono sort', TOOLS['har-inspector'].handler(HAR, { sort: 'chrono' }).includes('slowest 120 ms'));
+    var PV = 'dept,q,sales\neng,q1,10\neng,q2,20\nops,q1,5';
+    push('csv-pivot-table', 'sum', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'sum' }) === ',q1,q2\neng,10,20\nops,5,');
+    push('csv-pivot-table', 'count defaults', TOOLS['csv-pivot-table'].handler(PV, {}).indexOf(',q1,q2') === 0);
+    push('csv-pivot-table', 'agg avg', TOOLS['csv-pivot-table'].handler(PV, { row: 'dept', col: 'q', value: 'sales', agg: 'avg' }).includes('eng,10,20'));
+    push('csv-pivot-table', 'unknown col throws', mustThrow(() => TOOLS['csv-pivot-table'].handler(PV, { row: 'nope', col: 'q', agg: 'count' })));
+    push('csv-pivot-table', 'empty throws', mustThrow(() => TOOLS['csv-pivot-table'].handler('   ', {})));
     push('csv-transposer', 'empty throws', mustThrow(() => TOOLS['csv-transposer'].handler('   ', {})));
     push('csv-delimiter-sniffer', 'empty throws', mustThrow(() => TOOLS['csv-delimiter-sniffer'].handler('   ')));
     push('yaml-to-json', 'happy', JSON.parse(TOOLS['yaml-to-json'].handler('a: 1\nb: hello')).a === 1);
@@ -294,7 +300,7 @@ test('handler matrix via page.evaluate — every option, success + error', async
   if (failed.length) console.log('failed handlers:', JSON.stringify(failed, null, 2));
   expect(failed, `handler matrix failures:\n` + JSON.stringify(failed, null, 2)).toEqual([]);
   expect((result as any[]).length, 'handler matrix must cover all tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
-  // Full manifest is 132 (har-inspector added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
+  // Full manifest is 133 (csv-pivot-table added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
   const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
-  expect(manifest, 'TOOLMANIFEST must be 132').toBe(132);
+  expect(manifest, 'TOOLMANIFEST must be 133').toBe(133);
 });
