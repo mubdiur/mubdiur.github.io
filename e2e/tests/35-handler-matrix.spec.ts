@@ -209,6 +209,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('adfgx-cipher', 'bad input throws', mustThrow(() => TOOLS['adfgx-cipher'].handler('BC', { square: 'A', trans: 'A', mode: 'decode' })));
     push('adfgvx-cipher', 'happy', TOOLS['adfgvx-cipher'].handler('AB', { square: 'A', trans: 'A' }) === 'AAAD');
     push('adfgvx-cipher', 'bad input throws', mustThrow(() => TOOLS['adfgvx-cipher'].handler('BC', { square: 'A', trans: 'A', mode: 'decode' })));
+    push('two-square-cipher', 'happy', TOOLS['two-square-cipher'].handler('AB', { key1: 'A', key2: 'A' }) === 'BC');
+    push('two-square-cipher', 'bad key throws', mustThrow(() => TOOLS['two-square-cipher'].handler('AB', { key1: '', key2: 'A' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

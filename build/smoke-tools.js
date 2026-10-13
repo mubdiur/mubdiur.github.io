@@ -1260,6 +1260,11 @@ console.log('-- rot --');
   ok(TOOLS['adfgvx-cipher'].handler(TOOLS['adfgvx-cipher'].handler('HELLO123', { square: 'KEYWORD', trans: 'ZEBRAS' }), { square: 'KEYWORD', trans: 'ZEBRAS', mode: 'decode' }) === 'HELLO123', 'adfgvx roundtrip');
   ok(TOOLS['adfgvx-cipher'].handler('HELLO', { square: 'KEYWORD', trans: 'ZEBRAS' }).length === 10, 'adfgvx doubles length');
   ok(TOOLS['adfgvx-cipher'].handler.toString().indexOf('adfgvxCipher') >= 0, 'adfgvx delegates');
+  ok(TOOLS['two-square-cipher'].handler('AB', { key1: 'A', key2: 'A' }) === 'BC', 'twosquare vector');
+  ok(TOOLS['two-square-cipher'].handler('BC', { key1: 'A', key2: 'A', mode: 'decode' }) === 'AB', 'twosquare decode');
+  ok(TOOLS['two-square-cipher'].handler(TOOLS['two-square-cipher'].handler('HELLOWORLD', { key1: 'EXAMPLE', key2: 'KEYWORD' }), { key1: 'EXAMPLE', key2: 'KEYWORD', mode: 'decode' }) === 'HELLOWORLD', 'twosquare roundtrip');
+  ok(TOOLS['two-square-cipher'].handler('HELLO', { key1: 'EXAMPLE', key2: 'KEYWORD' }).length === 6, 'twosquare odd pads');
+  ok(TOOLS['two-square-cipher'].handler.toString().indexOf('twoSquareCipher') >= 0, 'twosquare delegates');
   ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
   ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }

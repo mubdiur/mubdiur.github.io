@@ -2143,6 +2143,38 @@ T.adfgvxDecode = function (s, squareKey, transKey) {
   return out;
 };
 T.adfgvxCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; var k = o.trans === undefined ? 'ZEBRAS' : o.trans; if ((o.mode || 'encode') === 'decode') return T.adfgvxDecode(s, q, k); return T.adfgvxEncode(s, q, k); };
+/* Two-square cores: horizontal digraph across two keyed Playfair squares (I/J merged); same-row shifts right, otherwise rectangle swaps columns; doubles allowed, odd tails padded. */
+T.twoSquareEncode = function (s, key1, key2) {
+  var sq1 = T.playfairSquare(key1 === undefined ? 'EXAMPLE' : key1);
+  var sq2 = T.playfairSquare(key2 === undefined ? 'KEYWORD' : key2);
+  var t = String(s).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  if (t.length % 2) t += (t.charAt(t.length - 1) === 'X' ? 'Q' : 'X');
+  var out = '';
+  for (var i = 0; i < t.length; i += 2) {
+    var ia = sq1.pos[t.charAt(i)]; var ib = sq2.pos[t.charAt(i + 1)];
+    var ra = (ia / 5) | 0, ca = ia % 5, rb = (ib / 5) | 0, cb = ib % 5;
+    if (ra === rb) out += sq1.seq[ra * 5 + (ca + 1) % 5] + sq2.seq[rb * 5 + (cb + 1) % 5];
+    else out += sq1.seq[ra * 5 + cb] + sq2.seq[rb * 5 + ca];
+  }
+  return out;
+};
+T.twoSquareDecode = function (s, key1, key2) {
+  var sq1 = T.playfairSquare(key1 === undefined ? 'EXAMPLE' : key1);
+  var sq2 = T.playfairSquare(key2 === undefined ? 'KEYWORD' : key2);
+  var t = String(s).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  if (t.length % 2) throw new Error('Bad two-square input \u2014 need letter pairs, saw ' + t.length);
+  var out = '';
+  for (var i = 0; i < t.length; i += 2) {
+    var ic = sq1.pos[t.charAt(i)]; var id = sq2.pos[t.charAt(i + 1)];
+    if (ic === undefined || id === undefined) throw new Error('Bad two-square input \u2014 A-Z only');
+    var rc = (ic / 5) | 0, cc = ic % 5, rd = (id / 5) | 0, cd = id % 5;
+    if (rc === rd) out += sq1.seq[rc * 5 + (cc + 4) % 5] + sq2.seq[rd * 5 + (cd + 4) % 5];
+    else out += sq1.seq[rc * 5 + cd] + sq2.seq[rd * 5 + cc];
+  }
+  return out;
+};
+T.twoSquareCipher = function (s, opts) { var o = opts || {}; var k1 = o.key1 === undefined ? 'EXAMPLE' : o.key1; var k2 = o.key2 === undefined ? 'KEYWORD' : o.key2; if ((o.mode || 'encode') === 'decode') return T.twoSquareDecode(s, k1, k2); return T.twoSquareEncode(s, k1, k2); };
 /* Columnar cores: keyword-ordered columns (stable for duplicate letters), no padding, uneven columns handled, code points preserved. */
 T.columnarOrder = function (key) {
   var k = String(key === undefined ? 'ZEBRAS' : key).toUpperCase().replace(/[^A-Z]/g, '');
