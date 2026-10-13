@@ -104,6 +104,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'yaml-to-toml': { good: 'a: 1', expectInOutput: /a = 1/ },
   'yaml-to-xml': { good: 'a: 1', expectInOutput: /<a>1/ },
   'yaml-to-markdown': { good: 'a: 1', expectInOutput: /\| 1 \|/ },
+  'json-to-markdown': { good: '{"a":1}', expectInOutput: /\| 1 \|/ },
   'toml-to-xml': { good: 'a = 1', expectInOutput: /<a>1/ },
   'toml-to-markdown': { good: 'a = 1', expectInOutput: /\| 1 \|/ },
   'user-agent-parser': { good: 'Mozilla/5.0 (Windows NT 10.0) Chrome/139.0.0.0', expectInOutput: /Browser:.*Chrome/ },
