@@ -86,6 +86,11 @@ mustNotThrow(() => T.quotedPrintableEncode(String.fromCharCode(55296)), 'qp lone
 mustThrow(() => T.punycodeEncode('a..b'), 'punycode empty label');
 mustNotThrow(() => T.punycodeEncode(''), 'punycode empty fine');
 mustNotThrow(() => T.punycodeEncode(String.fromCharCode(55296)), 'punycode lone surrogate no throw');
+mustThrow(() => T.punycodeDecode(''), 'punycode decode empty');
+mustThrow(() => T.punycodeDecode('xn--'), 'punycode bare prefix');
+mustThrow(() => T.punycodeDecode('xn--a_b'), 'punycode bad digit');
+mustThrow(() => T.punycodeDecode('a..b'), 'punycode empty label');
+mustNotThrow(() => T.punycodeDecode('xn--bcher-kva'), 'punycode decode good');
 mustThrow(() => T.quotedPrintableDecode(''), 'qp empty');
 mustThrow(() => T.quotedPrintableDecode('=ZZ'), 'qp bad hex');
 mustThrow(() => T.quotedPrintableDecode('a='), 'qp dangling');

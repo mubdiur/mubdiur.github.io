@@ -2045,6 +2045,67 @@ T.punycodeEncode = function (s) {
     return encLabel(lb);
   }).join('.');
 };
+/* Punycode decode: xn-- labels back to Unicode (basic run before the last dash, digit thresholds per bias, overflow and bad-digit guards with positions). */
+T.punycodeDecode = function (s) {
+  var str = String(s);
+  if (!str.trim()) throw new Error('Enter Punycode input');
+  function digitVal(c) {
+    if (c >= 48 && c <= 57) return c - 22;
+    if (c >= 65 && c <= 90) return c - 65;
+    if (c >= 97 && c <= 122) return c - 97;
+    return -1;
+  }
+  function adapt(delta, numpoints, first) {
+    delta = first ? Math.floor(delta / 700) : Math.floor(delta / 2);
+    delta += Math.floor(delta / numpoints);
+    var k = 0;
+    while (delta > 35) { delta = Math.floor(delta / 35); k += 36; }
+    return k + Math.floor(36 * delta / (delta + 38));
+  }
+  function decLabel(label, pos) {
+    var low = label.toLowerCase();
+    if (low.slice(0, 4) !== 'xn--') return label;
+    var rest = low.slice(4);
+    if (!rest) throw new Error('Empty Punycode label at part ' + pos);
+    var dash = rest.lastIndexOf('-');
+    var basic = dash < 0 ? '' : rest.slice(0, dash);
+    var ext = dash < 0 ? rest : rest.slice(dash + 1);
+    var out = [];
+    for (var b = 0; b < basic.length; b++) {
+      var bc = basic.charCodeAt(b);
+      if (bc >= 128) throw new Error('Bad basic char at part ' + pos + ', offset ' + (b + 1));
+      out.push(bc);
+    }
+    var n = 128, i = 0, bias = 72, h = out.length, e = 0;
+    while (e < ext.length) {
+      var oldi = i, w = 1, k = 36;
+      for (;;) {
+        if (e >= ext.length) throw new Error('Truncated input at part ' + pos);
+        var d = digitVal(ext.charCodeAt(e++));
+        if (d < 0) throw new Error('Bad digit at part ' + pos + ', offset ' + e);
+        if (d > Math.floor((2147483647 - i) / w)) throw new Error('Overflow at part ' + pos);
+        i += d * w;
+        var tt = k <= bias ? 1 : (k >= bias + 26 ? 26 : k - bias);
+        if (d < tt) break;
+        if (w > Math.floor(2147483647 / (36 - tt))) throw new Error('Overflow at part ' + pos);
+        w *= 36 - tt;
+        k += 36;
+      }
+      bias = adapt(i - oldi, h + 1, oldi === 0);
+      n += Math.floor(i / (h + 1));
+      i %= h + 1;
+      if (n < 0 || n > 1114111) throw new Error('Bad code point at part ' + pos);
+      out.splice(i, 0, n);
+      h++;
+      i++;
+    }
+    return out.map(function (c) { return String.fromCodePoint(c); }).join('');
+  }
+  return str.split(/[.\u3002\uFF0E\uFF61]/).map(function (lb, ix) {
+    if (!lb) throw new Error('Empty domain label \u2014 check dots');
+    return decLabel(lb, ix + 1);
+  }).join('.');
+};
 T.quotedPrintableEncode = function (s) {
   function encLine(line) {
     var bs = new TextEncoder().encode(line);
