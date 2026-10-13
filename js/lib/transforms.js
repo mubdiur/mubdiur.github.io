@@ -6142,6 +6142,8 @@ T.xmlToJSONL = function (s, opts) { return T.csvToJSONL(T.xmlToCSV(s, opts), opt
 T.xmlToMarkdown = function (s, opts) { var v = T.xmlToJsonValue(s); var ks = Object.keys(v); var root = v[ks[0]]; var rows; if (Array.isArray(root)) rows = root; else if (root !== null && typeof root === 'object') { var found = null; Object.keys(root).forEach(function (k) { if (!found && Array.isArray(root[k])) found = root[k]; }); rows = found || [root]; } else throw new Error('XML has no tabular rows \u2014 need repeating elements'); return T.jsonlToMarkdown(rows.map(function (r) { return JSON.stringify(r); }).join('\n'), opts); };
 
 /* INI to Markdown: parse sections to a single object, bridge through one compact JSON line, emit pipe tables with the canonical JSONL-to-Markdown core (nested sections flatten to dotted columns). */
+/* INI to JSONL: sections to CSV rows with the shared INI core, one compact object per line with the CSV-to-JSONL core (line-numbered errors, delimiter shared). */
+T.iniToJSONL = function (s, opts) { return T.csvToJSONL(T.iniToCSV(s, opts), opts); };
 T.iniToMarkdown = function (s, opts) { return T.jsonlToMarkdown(JSON.stringify(JSON.parse(T.iniToJSON(s))), opts); };
 /* INI to CSV: parse once with the INI core (sections as objects, line-numbered errors), emit with the canonical JSON-to-CSV core (sections flatten to dotted columns, delimiter shared). */
 /* INI to Schema: parse once with the shared INI core (line-numbered errors), infer with the canonical JSON-to-Schema core (sections as objects, values stay strings since INI carries no scalar types). */
