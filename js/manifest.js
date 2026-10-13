@@ -177,6 +177,7 @@ window.TOOLMANIFEST = [
     handler: function (s) { return Core.crc32Hex(s); } },
   { slug: 'password-entropy', name: 'Password Entropy', desc: 'Calculate password entropy and strength score', category: 'crypto', tags: ['entropy', 'strength', 'password'], icon: 'lock', template: 'transform',
     handler: function (s) { return Transforms.passwordEntropy(s); } },
+  { slug: 'aes-encryptor', name: 'AES Encrypt / Decrypt', desc: 'Encrypt text with AES-256-GCM — PBKDF2 passphrase key, fresh salt and IV, portable envelope', category: 'crypto', tags: ['aes', 'encrypt', 'decrypt', 'gcm', 'pbkdf2', 'passphrase'], icon: 'lock', template: 'custom' },
   { slug: 'jwt-debugger', name: 'JWT Debugger', desc: 'Decode and inspect JWT tokens — human-readable claims, expiry badges, HS256 signature verification via the WebAssembly HMAC core', category: 'network', tags: ['jwt', 'token', 'auth'], icon: 'lock', template: 'custom' },
 
   // ── Converters ──────────────────────────────────────────
