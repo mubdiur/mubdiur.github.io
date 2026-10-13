@@ -145,6 +145,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('json-to-toml', 'array throws', mustThrow(() => TOOLS['json-to-toml'].handler('[1]')));
     push('json-to-schema', 'happy', TOOLS['json-to-schema'].handler('{"a":1}').indexOf('integer') >= 0);
     push('json-to-schema', 'bad json throws', mustThrow(() => TOOLS['json-to-schema'].handler('not json')));
+        push('csv-to-schema', 'happy', TOOLS['csv-to-schema'].handler('name,age\nAda,36').indexOf('integer') >= 0);
+    push('csv-to-schema', 'empty throws', mustThrow(() => TOOLS['csv-to-schema'].handler('   ')));
     push('toml-to-json', 'happy', TOOLS['toml-to-json'].handler('a = 1').includes('"a": 1'));
     push('toml-to-json', 'dup throws', mustThrow(() => TOOLS['toml-to-json'].handler('a = 1\na = 2')));
     push('xml-to-toml', 'happy', TOOLS['xml-to-toml'].handler('<r><a>1</a></r>').includes('a = '));

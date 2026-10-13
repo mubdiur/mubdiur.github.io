@@ -6057,6 +6057,56 @@ T.csvToXML = function (s, opts) { return T.jsonToXML(T.csvToJSON(s, opts)); };
 /* CSV to TOML: parse once with the RFC 4180 CSV core (auto delimiter, headers as keys), emit rows as [[docs]] tables since TOML has no bare record streams. */
 T.csvToTOML = function (s, opts) { return T.jsonToTOML(JSON.stringify({ docs: JSON.parse(T.csvToJSON(s, opts)) })); };
 /* CSV to YAML: parse once with the RFC 4180 CSV core (auto delimiter, headers as keys), emit with the canonical JSON-to-YAML emitter (rows as sequences). */
+/* CSV to Schema: infer a draft-07 array schema from delimited rows \u2014 headers become properties, column types from non-empty cells, required where no gaps, validator-ready for csvToJSON output. */
+T.csvToSchema = function (s, opts) {
+  var o = opts || {};
+  var n = parseInt(o.indent || '2', 10);
+  if (isNaN(n) || n < 1 || n > 8) n = 2;
+  if (!String(s).trim()) throw new Error('Enter CSV to convert');
+  var DELIMS = { auto: null, comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
+  var d = Object.prototype.hasOwnProperty.call(DELIMS, o.delimiter) ? DELIMS[o.delimiter] : null;
+  var raw = String(s).replace(/^\uFEFF/, '');
+  var probe = raw.split(/\r?\n/).filter(function (ln) { return ln.trim() !== ''; }).slice(0, 10);
+  if (!probe.length) throw new Error('Enter CSV to convert');
+  if (d === null) d = T.detectDelimChar(probe) || ',';
+  var rows = T.parseCSV(s, d);
+  if (!rows.length) throw new Error('Enter CSV to convert');
+  if (rows.length < 2) throw new Error('Need a header row plus at least one data row');
+  var seen = {};
+  function nameCol(name) {
+    if (seen[name]) { seen[name]++; return name + '_' + seen[name]; }
+    seen[name] = 1;
+    return name;
+  }
+  var headers = rows[0].map(function (h) { return nameCol(h === '' ? '(unnamed)' : h); });
+  var width = rows.reduce(function (m, r) { return Math.max(m, r.length); }, headers.length);
+  for (var ci = headers.length; ci < width; ci++) headers.push(nameCol('(extra_' + (ci + 1) + ')'));
+  var body = rows.slice(1);
+  function colType(c) {
+    var vals = body.map(function (r) { return c < r.length ? r[c] : ''; }).filter(function (v) { return String(v).trim() !== ''; });
+    if (!vals.length) return { type: 'string' };
+    function isInt(v) { return /^[+-]?\d+$/.test(String(v).trim()); }
+    function isNum(v) { var x = Number(v); return String(v).trim() !== '' && isFinite(x); }
+    function isBool(v) { var x = String(v).trim().toLowerCase(); return x === 'true' || x === 'false'; }
+    if (vals.every(isInt)) return { type: 'integer' };
+    if (vals.every(isNum)) return { type: 'number' };
+    if (vals.every(isBool)) return { type: 'boolean' };
+    return { type: 'string' };
+  }
+  var props = {}, req = [];
+  headers.forEach(function (h, c) {
+    props[h] = colType(c);
+    var full = body.every(function (r) { return String(c < r.length ? r[c] : '').trim() !== ''; });
+    if (full) req.push(h);
+  });
+  var row = { type: 'object', properties: props };
+  if (req.length) row.required = req;
+  var ordered = {};
+  ordered.$schema = 'http://json-schema.org/draft-07/schema#';
+  ordered.type = 'array';
+  ordered.items = row;
+  return JSON.stringify(ordered, null, n);
+};
 T.csvToYAML = function (s, opts) { return T.jsonToYAML(T.csvToJSON(s, opts)); };
 /* XML to CSV: parse once with the shared XML parser, unwrap the first repeating group to rows (single records stay one row), emit with the canonical JSON-to-CSV core. */
 T.xmlToCSV = function (s, opts) { var v = T.xmlToJsonValue(s); var ks = Object.keys(v); var root = v[ks[0]]; var rows; if (Array.isArray(root)) rows = root; else if (root !== null && typeof root === 'object') { var found = null; Object.keys(root).forEach(function (k) { if (!found && Array.isArray(root[k])) found = root[k]; }); rows = found || [root]; } else throw new Error('XML has no tabular rows \u2014 need repeating elements'); return T.jsonToCSV(JSON.stringify(rows), opts); };
