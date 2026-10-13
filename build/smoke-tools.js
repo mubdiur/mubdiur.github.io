@@ -152,7 +152,7 @@ console.log('-- math --');
   ok(TOOLS['uuid-v4-validate'].handler.toString().indexOf('uuidValidate') >= 0, 'uuid-validator delegates');
   ok(T.uuidValidate('00000000-0000-0000-0000-000000000000').indexOf('Nil') >= 0, 'uuid Nil vector');
   ok(TOOLS['uuid-v4-validate'].handler(T.uuidV7(0)).indexOf('UUIDv7') >= 0, 'uuid accepts generated v7');
-  ok(TOOLS['password-generator'].genHandler.toString().indexOf('generatePassword') >= 0, 'password delegates');
+  ok(TOOLS['password-generator'].genHandler.toString().indexOf('generatePasswordOpts') >= 0, 'password delegates opts');
   ok(TOOLS['mac-address-generator'].genHandler({ count: '999999' }).split('\n').length === 100, 'mac count clamped to 100');
   ok(TOOLS['mac-address-generator'].genHandler({ count: '20' }).split('\n').every(function (x) { return (parseInt(x.slice(0, 2), 16) & 3) === 2; }), 'mac locally-administered unicast bits x20');
   ok(TOOLS['uuid-generator'].genHandler.toString().indexOf('uuidV4BatchOpts') >= 0, 'uuid-generator delegates opts');
@@ -181,7 +181,7 @@ console.log('-- math --');
   const F89 = 1779979416004714189n; // past 2^53 — doubles corrupt from term 79 on
   ok(BigInt(fib[89]) === F89 && BigInt(fib[78]) === 8944394323791464n, 'fibonacci exact at terms 79-90 (BigInt)');
   ok(fib.length === 90 && fib[0] === '0' && fib[1] === '1', 'fibonacci sequence head');
-  ok(TOOLS["fibonacci-generator"].genHandler.toString().indexOf("fibonacci") >= 0, "fibonacci delegates");
+  ok(TOOLS["fibonacci-generator"].genHandler.toString().indexOf("fibonacciOpts") >= 0, "fibonacci delegates opts");
   ok(T.fibonacci("999").split(", ").length === 100, "fibonacci clamp 100");
   ok(T.fibonacci("10") === "0, 1, 1, 2, 3, 5, 8, 13, 21, 34", "fibonacci head vector");
 }
@@ -205,7 +205,7 @@ console.log('-- math --');
   ok(conv('ffffffffffffffff', { fromBase: '16', toBase: '10' }).includes('18446744073709551615'),
     'uint64 max exact (parseInt would truncate)');
   let threw = false; try { conv('129', { fromBase: '8', toBase: '10' }); } catch (e) { threw = true; }
-  ok(TOOLS["api-key-generator"].genHandler.toString().indexOf("apiKey") >= 0, "api-key delegates");
+  ok(TOOLS["api-key-generator"].genHandler.toString().indexOf("apiKeyOpts") >= 0, "api-key delegates opts");
   ok(/^pk-[a-zA-Z0-9]{32}$/.test(TOOLS["api-key-generator"].genHandler({ format: "pk" })), "api-key pk- prefix + 32 chars");
   ok(/^[a-zA-Z0-9]{32}$/.test(TOOLS["api-key-generator"].genHandler({ format: "raw" })), "api-key raw 32 chars");
   ok(T.apiKey("xx").length === 32, "api-key unknown format no prefix");

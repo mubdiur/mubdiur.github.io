@@ -104,7 +104,7 @@ window.TOOLMANIFEST = [
     genHandler: function (opts) { return Transforms.uuidV4BatchOpts(opts); },
     params: [{ key: 'count', label: 'Count', type: 'number', default: '1', min: 1, max: 1000 }] },
   { slug: 'password-generator', name: 'Password Generator', desc: 'Strong passwords from the Web Crypto CSPRNG — guaranteed coverage of every selected class, unbiased sampling, shuffled', category: 'generators', tags: ['password', 'security'], icon: 'lock', template: 'generator',
-    genHandler: function (opts) { return Transforms.generatePassword((opts && opts.length) || '24', opts); },
+    genHandler: function (opts) { return Transforms.generatePasswordOpts(opts); },
     params: [
       { key: 'length', label: 'Length', type: 'number', default: '24', min: 4, max: 256 },
       { key: 'upper', label: 'Uppercase', type: 'boolean', default: 'true' },
@@ -324,7 +324,7 @@ window.TOOLMANIFEST = [
   { slug: 'prime-checker', name: 'Prime Number Checker', desc: 'Primality via deterministic Miller–Rabin (exact for any input < 3.3 × 10²⁴) — hundreds of digits welcome, smallest factor reported for composites', category: 'math', tags: ['prime', 'math'], icon: 'calculator', template: 'transform',
     handler: function (s) { return Transforms.primeCheck(s); } },
   { slug: 'fibonacci-generator', name: 'Fibonacci Generator', desc: 'Generate Fibonacci sequence up to N terms — arbitrary-precision BigInt, exact past term 78 where floats silently corrupt', category: 'math', tags: ['fibonacci', 'sequence'], icon: 'sigma', template: 'generator',
-    genHandler: function (opts) { return Transforms.fibonacci((opts && opts.terms) || "10"); },
+    genHandler: function (opts) { return Transforms.fibonacciOpts(opts); },
     params: [{ key: 'terms', label: 'Terms', type: 'number', default: '10', min: 1, max: 100 }] },
   { slug: 'statistics-calculator', name: 'Statistics Calculator', desc: 'Mean, median, mode, range — Welford one-pass variance (numerically stable), population AND sample stddev', category: 'math', tags: ['stats', 'mean', 'median', 'stddev'], icon: 'sigma', template: 'transform',
     handler: function (s) { return Transforms.describeStats(s); } },
@@ -363,7 +363,7 @@ window.TOOLMANIFEST = [
     genHandler: function (opts) { return Transforms.loremIpsumOpts(opts); },
     params: [{ key: 'paragraphs', label: 'Paragraphs', type: 'number', default: '1', min: 1, max: 50 }] },
   { slug: 'api-key-generator', name: 'API Key Generator', desc: 'Generate API keys in various formats — 192 bits from the Web Crypto CSPRNG', category: 'generators', tags: ['api', 'key', 'token'], icon: 'key', template: 'generator',
-    genHandler: function (opts) { return Transforms.apiKey((opts && opts.format) || 'sk'); },
+    genHandler: function (opts) { return Transforms.apiKeyOpts(opts); },
     params: [{ key: 'format', label: 'Format', type: 'select', default: 'sk', options: [{ value: 'sk', label: 'sk-...' }, { value: 'pk', label: 'pk-...' }, { value: 'raw', label: 'No prefix' }] }] },
 
   // ── Image tools ─────────────────────────────────────────

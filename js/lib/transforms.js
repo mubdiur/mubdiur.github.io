@@ -3282,11 +3282,19 @@ T.generatePassword = function (length, opts) {
   if (!active.length) throw new Error('Select at least one character set');
   return CryptoRand.string(length, active.join(''), active);
 };
+/* Password UI contract: length plus class flags arrive as one options object. Moved from the manifest for single source. */
+T.generatePasswordOpts = function (opts) {
+  return T.generatePassword((opts && opts.length) || '24', opts);
+};
 /* API key: prefixed 32-char CSPRNG token (192 bits). Moved from the manifest
    so shell UI delegates to this single source. */
 T.apiKey = function (fmt) {
   var prefix = fmt === 'sk' ? 'sk-' : fmt === 'pk' ? 'pk-' : '';
   return prefix + CryptoRand.string(32, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
+};
+/* API-key UI contract: format option. Moved from the manifest for single source. */
+T.apiKeyOpts = function (opts) {
+  return T.apiKey((opts && opts.format) || 'sk');
 };
 T.macAddress = function () {
   var arr = CryptoRand.bytes(6);
@@ -3896,6 +3904,10 @@ T.fibonacci = function (raw) {
   var a = 0n, b = 1n;
   for (var i = 0; i < n; i++) { out.push(a); var t = a + b; a = b; b = t; }
   return out.join(", ");
+};
+/* Fibonacci UI contract: terms option. Moved from the manifest for single source. */
+T.fibonacciOpts = function (opts) {
+  return T.fibonacci((opts && opts.terms) || "10");
 };
 window.Transforms = T;
 })();
