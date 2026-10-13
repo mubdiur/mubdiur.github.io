@@ -25,6 +25,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'markdown-to-schema': { good: '| a |\n|---|\n| 1 |', expectInOutput: /integer/ },
   'jsonl-to-schema': { good: '{\u0022a\u0022:1}', expectInOutput: /integer/ },
   'csv-to-jsonl': { good: 'a,b\n1,2', expectInOutput: /a/ },
+  'xml-to-jsonl': { good: '<r><a>1</a></r>', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },
   'json-escape': { good: 'a"b', expectInOutput: /\\"/ },
   'json-unescape': { good: 'a\\"b', expectInOutput: /a"b/ },
