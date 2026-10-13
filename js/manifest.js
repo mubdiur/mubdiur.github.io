@@ -254,7 +254,7 @@ window.TOOLMANIFEST = [
   { slug: 'env-to-json', name: '.env → JSON', desc: 'Convert dotenv files to JSON — export prefixes, empty values, comments kept', category: 'converters', tags: ['env', 'dotenv', 'json'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.envToJSON(s); } },
   { slug: 'curl-to-fetch', name: 'cURL → Fetch', desc: 'Convert curl commands to fetch calls — method, headers, body, auth mapped', category: 'network', tags: ['curl', 'fetch', 'http'], icon: 'terminal', template: 'transform',
-    handler: function (s, opts) { return Transforms.curlToFetch(s, (opts && opts.style) || 'async'); },
+    handler: function (s, opts) { return Transforms.curlToFetchOpts(s, opts); },
     params: [{ key: 'style', label: 'Style', type: 'select', default: 'async', options: [{ value: 'async', label: 'Async/await' }, { value: 'promise', label: 'Promises' }] }] },
   { slug: 'yaml-formatter', name: 'YAML Formatter', desc: 'Format YAML with canonical indentation', category: 'converters', tags: ['yaml', 'format'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.yamlFormatOpts(s); } },

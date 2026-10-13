@@ -3707,6 +3707,10 @@ T.curlToFetch = function (s, style) {
   for (var nn = 0; nn < notes.length; nn = nn + 1) tail = tail + '\n// NOTE: ' + notes[nn];
   return tail;
 };
+/* Curl UI contract: curl command input plus style option. Moved from the manifest for single source. */
+T.curlToFetchOpts = function (s, opts) {
+  return T.curlToFetch(s, (opts && opts.style) || 'async');
+};
 T.curlHeader = function (headers, hv) {
   var colon = hv.indexOf(':');
   if (colon < 0) throw new Error('Bad header (need Name: value): ' + hv);

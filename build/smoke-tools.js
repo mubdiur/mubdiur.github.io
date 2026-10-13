@@ -757,6 +757,8 @@ console.log('-- curl-to-fetch --');
   ok(c3.indexOf('Basic ') >= 0, 'curl basic auth mapped');
   var c4 = TOOLS['curl-to-fetch'].handler('curl https://example.com', { style: 'promise' });
   ok(c4.indexOf('.then(') >= 0, 'curl promise style');
+  ok(TOOLS['curl-to-fetch'].handler.toString().indexOf('curlToFetchOpts') >= 0, 'curl delegates opts');
+  ok(TOOLS['curl-to-fetch'].handler('curl https://example.com') === T.curlToFetch('curl https://example.com', 'async'), 'curl default async');
   var c5 = TOOLS['curl-to-fetch'];
   ok(c5.template === 'transform', 'curl manifest template');
   ok(c5.category === 'network', 'curl manifest category');
