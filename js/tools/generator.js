@@ -46,6 +46,10 @@ function GeneratorToolUI(tool) {
 
   function clear() { generate._token = {}; state.output = ''; state.pending = false; renderOutput(); }
 
+  function downloadOutput() {
+    var ext = (tool.downloadExt || 'txt').replace(/[^a-z0-9]/gi, '') || 'txt';
+    App.download(tool.slug + '-output.' + ext, state.output, 'text/plain');
+  }
   function renderOutput() {
     outputArea.innerHTML = '';
     if (state.pending) {
@@ -53,7 +57,10 @@ function GeneratorToolUI(tool) {
       return;
     }
     if (!state.output) return;
-    outputArea.appendChild(App.outputBox(state.output, null, 'Generated', clear));
+    /* Generator errors ride in state.output with an 'Error: ' prefix,
+       so offer Download for real output only. */
+    var canSave = state.output.indexOf('Error: ') !== 0;
+    outputArea.appendChild(App.outputBox(state.output, null, 'Generated', clear, canSave ? downloadOutput : null));
   }
 
   var paramsRow = App.el('div', { class: 'flex flex-wrap gap-2 items-center' });
