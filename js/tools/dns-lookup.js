@@ -81,7 +81,8 @@ App.registerTool('dns-lookup', {
     var runToken = 0;
     var status = 'idle';
     var records = [];
-    var error = null;
+
+    var lastQuery = null;    var error = null;
     var note = '';
 
     var wrap = App.el('div', { class: 'space-y-2' });
@@ -93,6 +94,7 @@ App.registerTool('dns-lookup', {
       App.el('option', { value: 'google', text: 'Google' }));
     var goBtn = App.el('button', { class: 'lookup-btn', type: 'button', text: 'Lookup' });
     var purgeBtn = App.el('button', { class: 'clear-btn', type: 'button', text: 'Clear cache', title: 'Drop all cached DNS answers' });
+    var exportBtn = App.el('button', { class: 'clear-btn', type: 'button', text: 'Export JSON', title: 'Save these records as JSON' });
     var hint = App.el('div', { class: 'dns-hint', text: 'Resolved over encrypted DNS (DoH) · results cached 5 min · click a record to copy' });
     var statusNode = App.el('div', { class: 'dns-status', 'aria-live': 'polite' });
     var list = App.el('div', { class: 'dns-list' });
@@ -107,6 +109,7 @@ App.registerTool('dns-lookup', {
       var cached = cacheCount();
       purgeBtn.textContent = 'Clear cache' + (cached ? ' (' + cached + ')' : '');
       purgeBtn.disabled = status === 'working' || !cached;
+      exportBtn.disabled = !(status === 'done' && records.length);
       records.forEach(function (r) {
         var row = App.el('div', { class: 'row', title: 'Click to copy' },
           App.el('div', { class: 'data', text: r.data }),
@@ -134,6 +137,7 @@ App.registerTool('dns-lookup', {
       if (hit) {
         if (token !== runToken) return;
         status = 'done'; records = hit.records;
+        lastQuery = { domain: req.domain, type: req.type, provider: hit.provider };
         note = 'cached ' + Math.max(1, Math.round((Date.now() - hit.t) / 1000)) + 's ago via ' + hit.provider;
         render();
         return;
@@ -152,6 +156,7 @@ App.registerTool('dns-lookup', {
           var json = jsonOrWrap && jsonOrWrap.json !== undefined ? jsonOrWrap.json : jsonOrWrap;
           var used = jsonOrWrap && jsonOrWrap.provider ? jsonOrWrap.provider : req.provider;
           var recs = Transforms.dohParse(json, req.type, req.domain);
+          lastQuery = { domain: req.domain, type: req.type, provider: used };
           status = 'done'; records = recs;
           note = note || ('live via ' + used);
           if (note.indexOf('retrying') === 0) note = 'live via fallback ' + used;
@@ -173,10 +178,15 @@ App.registerTool('dns-lookup', {
       statusNode.textContent = n ? 'Cache cleared (' + n + ' entries).' : 'Cache already empty.';
     });
     goBtn.addEventListener('click', lookup);
+    exportBtn.addEventListener('click', function () {
+      if (!lastQuery || !records.length) return;
+      var safe = String(lastQuery.domain).toLowerCase().replace(/[^a-z0-9.-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 60) || 'lookup';
+      App.download('dns-' + safe + '-' + lastQuery.type + '.json', JSON.stringify({ domain: lastQuery.domain, type: lastQuery.type, provider: lastQuery.provider, note: note, records: records }, null, 2), 'application/json');
+    });
     domainInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') lookup(); });
     App.onUnmount(function () { runToken++; });
     render();
-    wrap.appendChild(App.el('div', { class: 'dns-row' }, domainInput, typeSel, provSel, goBtn, purgeBtn));
+    wrap.appendChild(App.el('div', { class: 'dns-row' }, domainInput, typeSel, provSel, goBtn, exportBtn, purgeBtn));
     wrap.appendChild(hint);
     wrap.appendChild(statusNode);
     wrap.appendChild(list);
