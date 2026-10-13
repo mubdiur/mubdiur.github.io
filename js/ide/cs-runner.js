@@ -48,10 +48,49 @@ function parseDiagnostics(text) {
 
 var runtimePromise = null;
 
+/* Framework download progress: dotnet fetches dozens of .dll files during
+   create(). This wraps fetch so each DLL response is re-streamed through
+   a byte counter — the status bar shows growing MB plus file count.
+   Only .dll GETs are touched; WASM and everything else pass through
+   untouched so streaming compilation keeps working. */
+var dlBytes = 0, dlFiles = 0, fetchWrapped = false;
+function wrapFetchForProgress() {
+  if (fetchWrapped || typeof self.fetch !== 'function') return;
+  fetchWrapped = true;
+  var origFetch = self.fetch.bind(self);
+  self.fetch = function (input, init) {
+    var url = typeof input === 'string' ? input : (input && input.url) || '';
+    var method = (init && init.method) || (input && input.method) || 'GET';
+    if (method !== 'GET' || String(url).toLowerCase().indexOf('.dll') < 0) return origFetch(input, init);
+    return origFetch(input, init).then(function (res) {
+      if (!res.ok || !res.body || typeof res.body.getReader !== 'function') return res;
+      var reader = res.body.getReader();
+      dlFiles++;
+      var stream = new ReadableStream({
+        start: function (controller) {
+          function pump() {
+            return reader.read().then(function (r) {
+              if (r.done) { controller.close(); return; }
+              dlBytes += r.value.length;
+              post('status', 'Loading framework assemblies (' + (dlBytes / 1048576).toFixed(1) + ' MB \u00b7 ' + dlFiles + ' files)…');
+              controller.enqueue(r.value);
+              return pump();
+            }, function (err) { controller.error(err); });
+          }
+          return pump();
+        },
+        cancel: function () { try { reader.cancel(); } catch (e) {} }
+      });
+      return new Response(stream, { status: res.status, statusText: res.statusText, headers: res.headers });
+    });
+  };
+}
+
 function ensureRuntime() {
   if (!runtimePromise) {
     runtimePromise = (async function () {
       post('status', 'Starting .NET runtime…');
+      wrapFetchForProgress();
       var dotnetMod = await import('./vendor/dotnet/dotnet.js');
 
       post('status', 'Loading framework assemblies (first run only)…');
