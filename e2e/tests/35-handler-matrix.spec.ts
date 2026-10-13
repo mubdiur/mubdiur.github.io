@@ -158,6 +158,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('xml-minifier', 'happy', TOOLS['xml-minifier'].handler('<r><a>1</a></r>') === '<r><a>1</a></r>');
     push('xml-minifier', 'mismatch throws', mustThrow(() => TOOLS['xml-minifier'].handler('<a></b>')));
     push('xml-formatter', 'bare amp throws', mustThrow(() => TOOLS['xml-formatter'].handler('<a>AT&T</a>', {})));
+    push('xml-formatter', 'unknown entity throws', mustThrow(() => TOOLS['xml-formatter'].handler('<a>&nbsp;</a>', {})));
+
     push('xml-minifier', 'bare amp throws', mustThrow(() => TOOLS['xml-minifier'].handler('<a>AT&T</a>')));
 
     push('readability-analyzer', 'scores', TOOLS['readability-analyzer'].handler('The cat sat on the mat. It was happy.').includes('Flesch Reading Ease'));

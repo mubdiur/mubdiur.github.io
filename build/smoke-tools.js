@@ -925,6 +925,10 @@ console.log('-- xml formatter --');
   ok(threwAmp, 'xml-min rejects bare amp with position');
   threwAmp = false; try { T.xmlFormat('<a>&#0;</a>', {}); } catch (e) { threwAmp = /Bad character reference/.test(e.message); }
   ok(threwAmp, 'xml-format rejects bad char ref');
+  var threwEnt = false; try { T.xmlFormat('<a>&nbsp;</a>', {}); } catch (e) { threwEnt = /Unknown entity/.test(e.message); }
+  ok(threwEnt, 'xml-format rejects unknown entity like parser');
+  ok(JSON.parse(TOOLS['xml-to-json'].handler('<r><a>&lt;</a></r>')).r.a === '<', 'xml parser decodes lt');
+
   ok(T.xmlMinify('<a>A &amp; B</a>') === '<a>A &amp; B</a>', 'xml-min keeps valid entities');
   ok(T.xmlMinify('<a><!-- x&y --></a>') === '<a></a>', 'xml-min bare amp in comment stays literal');
 

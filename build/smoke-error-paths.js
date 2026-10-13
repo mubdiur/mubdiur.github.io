@@ -288,6 +288,11 @@ mustThrow(() => T.xmlMinify('a < b'), 'xmlMinify bare lt');
 mustThrow(() => T.xmlFormat('<a>AT&T</a>', {}), 'xmlFormat bare amp');
 mustThrow(() => T.xmlMinify('<a title=\'x&y\'>t</a>'), 'xmlMinify bare amp in attr');
 mustThrow(() => T.xmlFormat('<a>&#xD800;</a>', {}), 'xmlFormat surrogate ref');
+mustThrow(() => T.xmlFormat('<a>&nbsp;</a>', {}), 'xmlFormat unknown entity');
+mustThrow(() => T.xmlMinify('<a>&foo;</a>'), 'xmlMinify unknown entity');
+mustThrow(() => T.xmlToJsonValue('<a>&#xD800;</a>'), 'xmlToJsonValue surrogate ref');
+mustNotThrow(() => T.xmlToJsonValue('<a>&amp;</a>'), 'xmlToJsonValue entity still decodes');
+
 mustNotThrow(() => T.xmlMinify('<a>&lt;&gt;&quot;&apos;&#65;&#x41;</a>'), 'xmlMinify all valid refs');
 mustNotThrow(() => T.xmlFormat('<r><![CDATA[a&b]]></r>', {}), 'xmlFormat cdata amp literal');
 

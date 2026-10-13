@@ -3788,7 +3788,7 @@ T.xmlBareAmp = function (toks, text) {
         if (tk.charAt(i) !== '&') continue;
         var m = ent.exec(tk.slice(i));
         if (!m) throw new Error('Bare & near ' + JSON.stringify(text.slice(at + i, at + i + 16)) + ' \u2014 escape it as &amp;');
-        var body = m[1];
+        var body = m[1]; if (body.charAt(0) !== '#' && ['amp', 'lt', 'gt', 'quot', 'apos'].indexOf(body) < 0) throw new Error('Unknown entity &' + body + ';');
         if (body.charAt(0) === '#') {
           var hex = body.charAt(1) === 'x';
           var cp = parseInt(hex ? body.slice(2) : body.slice(1), hex ? 16 : 10);
@@ -5772,7 +5772,7 @@ T.xmlParseTree = function (s) {
       if (body.charAt(0) === '#') {
         var hex = body.charAt(1) === 'x';
         var cp = parseInt(hex ? body.slice(2) : body.slice(1), hex ? 16 : 10);
-        if (!isFinite(cp) || cp < 1 || cp > 1114111) throw new Error('Bad character reference &' + body + ';');
+        if (!isFinite(cp) || cp < 1 || cp > 1114111 || (cp >= 55296 && cp <= 57343)) throw new Error('Bad character reference &' + body + ';');
         return cp > 65535 ? String.fromCharCode(55296 + ((cp - 65536) >> 10), 56320 + ((cp - 65536) & 1023)) : String.fromCharCode(cp);
       }
       if (body === 'amp') return '&';
