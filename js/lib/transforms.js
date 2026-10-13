@@ -259,6 +259,84 @@ function yamlParseDocument(text) {
     if (Object.prototype.hasOwnProperty.call(obj, k)) yamlBad(n, "Duplicate key \"" + k + "\"");
     obj[k] = v;
   }
+  /** Scalar leaf shared by every YAML consumer (yamlToJSON, yamlFormat,
+   * and the bridges): quoted text stays a string, flow empties revive,
+   * flow collections parse to real arrays/maps, then bool/null/number. */
+  function yamlScalar(v, n) {
+    var u = yamlUnquote(v);
+    if (u.quoted) return u.text;
+    if (v === '{}') return {};
+    if (v === '[]') return [];
+    if (v.charAt(0) === '[') return yamlFlowSeq(v, n);
+    if (v.charAt(0) === '{') return yamlFlowMap(v, n);
+    if (v === 'true') return true;
+    if (v === 'false') return false;
+    if (v === 'null' || v === '~') return null;
+    var num = Number(v);
+    if (!isNaN(num) && v !== '') return num;
+    return v;
+  }
+  /** Split one line of flow content on top-level commas. Bracket depth
+   * plus quote tracking keep nested [maps, {"a,b": [1]}] intact. */
+  function yamlFlowParts(inner, n, what) {
+    var parts = [], depth = 0, cur = '', inS = false, inD = false;
+    for (var i = 0; i < inner.length; i++) {
+      var ch = inner.charAt(i);
+      if (inS) { cur += ch; if (ch === "'") inS = false; continue; }
+      if (inD) {
+        if (ch === '\\') { cur += ch + inner.charAt(i + 1); i++; continue; }
+        cur += ch;
+        if (ch === '"') inD = false;
+        continue;
+      }
+      if (ch === "'") { inS = true; cur += ch; continue; }
+      if (ch === '"') { inD = true; cur += ch; continue; }
+      if (ch === '[' || ch === '{') { depth++; cur += ch; continue; }
+      if (ch === ']' || ch === '}') {
+        if (depth === 0) yamlBad(n, 'Stray "' + ch + '" in flow ' + what);
+        depth--; cur += ch; continue;
+      }
+      if (ch === ',' && depth === 0) { parts.push(cur); cur = ''; continue; }
+      cur += ch;
+    }
+    if (inS || inD) yamlBad(n, 'Unterminated quote in flow ' + what);
+    parts.push(cur);
+    return parts;
+  }
+  /** [1, "a,b", [2]] — one trailing comma tolerated, other empties
+   * refused; items recurse so nesting and quoting stay consistent. */
+  function yamlFlowSeq(v, n) {
+    if (v.charAt(v.length - 1) !== ']') yamlBad(n, 'Unterminated flow sequence');
+    var inner = v.slice(1, -1).trim();
+    if (!inner) return [];
+    var parts = yamlFlowParts(inner, n, 'sequence');
+    if (parts.length > 1 && parts[parts.length - 1].trim() === '') parts.pop();
+    var out = [];
+    for (var i = 0; i < parts.length; i++) {
+      var t = parts[i].trim();
+      if (!t) yamlBad(n, 'Empty value in flow sequence');
+      out.push(yamlScalar(t, n));
+    }
+    return out;
+  }
+  /** {a: 1, b: [2]} — same rules as sequences; duplicate and
+   * forbidden keys go through the shared yamlPut guard. */
+  function yamlFlowMap(v, n) {
+    if (v.charAt(v.length - 1) !== '}') yamlBad(n, 'Unterminated flow mapping');
+    var inner = v.slice(1, -1).trim();
+    var obj = Object.create(null);
+    if (!inner) return obj;
+    var parts = yamlFlowParts(inner, n, 'mapping');
+    if (parts.length > 1 && parts[parts.length - 1].trim() === '') parts.pop();
+    for (var i = 0; i < parts.length; i++) {
+      var t = parts[i].trim();
+      if (!t) yamlBad(n, 'Empty entry in flow mapping');
+      var kv = yamlSplitPair(t);
+      if (!kv || !kv[0].trim()) yamlBad(n, 'Expected "key: value" in flow mapping');
+      yamlPut(obj, yamlKey(kv[0], n), yamlScalar(kv[1].trim(), n), n);
+    }
+    return obj;
+  }
   function yamlIsBlock(v) { return v === '|' || v === '|-' || v === '|+' || v === '>' || v === '>-' || v === '>+'; }
   function yamlChomp(v) { return (v === '|+' || v === '>+') ? 'keep' : ((v === '|-' || v === '>-' ) ? 'strip' : 'clip'); }
   function yamlFold(buf, chomp) {
@@ -320,7 +398,7 @@ function yamlParseDocument(text) {
       yamlPut(obj, k, null, pos);
       return pos + 1;
     }
-    yamlPut(obj, k, yamlScalar(v), pos);
+    yamlPut(obj, k, yamlScalar(v, pos), pos);
     return pos + 1;
   }
   function yamlMap(pos, parentIndent) {
@@ -333,6 +411,7 @@ function yamlParseDocument(text) {
       if (it.indent < base) break;
       if (it.indent > base) yamlBad(p, "Unexpected indent");
       if (it.content === "-" || it.content.startsWith("- ")) break;
+      if (it.content.charAt(0) === '{') yamlBad(p, 'Flow mapping cannot start a block line \u2014 quote it or dedent');
       var pr = yamlSplitPair(it.content);
       if (!pr) yamlBad(p, "Expected \"key: value\"");
       var k = yamlKey(pr[0], p);
@@ -377,6 +456,9 @@ function yamlParseDocument(text) {
         var sub0 = yamlNestedSeq(rest === '-' ? '' : rest.slice(2).trim(), it.indent, p);
         arr.push(sub0.value);
         p = sub0.next;
+      } else if (rest.charAt(0) === '{' || rest.charAt(0) === '[') {
+        arr.push(yamlScalar(rest, p));
+        p++;
       } else {
         var pr = yamlSplitPair(rest);
         if (pr && pr[0].trim() !== "") {
@@ -395,9 +477,10 @@ function yamlParseDocument(text) {
               yamlPut(m, k0, ch2.value, p);
               q = ch2.next;
             } else { yamlPut(m, k0, null, p); q = p + 1; }
-          } else { yamlPut(m, k0, yamlScalar(v0), p); q = p + 1; }
+          } else { yamlPut(m, k0, yamlScalar(v0, p), p); q = p + 1; }
           while (q < items.length && items[q].indent > base && !(items[q].content === "-" || items[q].content.startsWith("- "))) {
             if (items[q].blank) { q++; continue; }
+            if (items[q].content.charAt(0) === '{') yamlBad(q, 'Flow mapping cannot start a block line \u2014 quote it or dedent');
             var prc = yamlSplitPair(items[q].content);
             if (!prc) yamlBad(q, "Expected \"key: value\"");
             var kc = yamlKey(prc[0], q);
@@ -410,7 +493,7 @@ function yamlParseDocument(text) {
           arr.push(lit0.text);
           p = lit0.next;
         } else {
-          arr.push(yamlScalar(rest));
+          arr.push(yamlScalar(rest, p));
           p++;
         }
       }
@@ -421,7 +504,7 @@ function yamlParseDocument(text) {
     return yamlLiteral(1, items[0].indent, yamlChomp(items[0].content), items[0].content.charAt(0) === '>').text;
   }
   var core = items.filter(function (it) { return !it.blank; });
-  if (core.length === 1 && !(core[0].content === "-" || core[0].content.startsWith("- ")) && !yamlSplitPair(core[0].content) && !yamlIsBlock(core[0].content)) return yamlScalar(core[0].content);
+  if (core.length === 1 && !(core[0].content === "-" || core[0].content.startsWith("- ")) && (!yamlSplitPair(core[0].content) || core[0].content.charAt(0) === '{') && !yamlIsBlock(core[0].content)) return yamlScalar(core[0].content, 0);
   var doc = yamlBlock(0, -1);
   while (doc.next < items.length && items[doc.next].blank) doc.next++;
   if (doc.next !== items.length) yamlBad(doc.next, "Unexpected content");
@@ -1704,20 +1787,6 @@ function yamlUnquote(v) {
   return { quoted: false, text: v };
 }
 
-/** Scalar leaf shared by both yamlToJSON paths: quoted text stays a
- * string, flow empties revive, then the usual bool/null/number reads. */
-function yamlScalar(v) {
-  var u = yamlUnquote(v);
-  if (u.quoted) return u.text;
-  if (v === '{}') return {};
-  if (v === '[]') return [];
-  if (v === 'true') return true;
-  if (v === 'false') return false;
-  if (v === 'null' || v === '~') return null;
-  var num = Number(v);
-  if (!isNaN(num) && v !== '') return num;
-  return v;
-}
 T._utf8Bytes = function (s) { return new TextEncoder().encode(s); }
 T._bytesToBinaryString = function (bytes) {
   var out = '';
@@ -3219,6 +3288,10 @@ T.tomlToJSON = function (s) {
    JSON-to-YAML emitter, so quoting stays single-sourced (bool-like strings
    stay quoted, tables become maps, [[arrays]] become sequences). */
 T.tomlToYAML = function (s) { return T.jsonToYAML(T.tomlToJSON(s)); };
+/* YAML to TOML: parse once with the YAML core (flow styles included),
+   emit with the canonical JSON-to-TOML emitter. YAML nulls and top-level
+   arrays/scalars have no TOML form, so those throw with the key path. */
+T.yamlToTOML = function (s) { return T.jsonToTOML(T.yamlToJSON(s)); };
 T.jsonDiff = function (a, b) {
   var oa = JSON.parse(a), ob = JSON.parse(b);
   var diffs = [];
