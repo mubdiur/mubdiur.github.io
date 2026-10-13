@@ -175,6 +175,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('env-to-jsonl', 'bad throws', mustThrow(() => TOOLS['env-to-jsonl'].handler('1BAD=x')));
     push('markdown-to-jsonl', 'happy', TOOLS['markdown-to-jsonl'].handler('| a |\n|---|\n| 1 |').split('\n').length === 1);
     push('markdown-to-jsonl', 'no table throws', mustThrow(() => TOOLS['markdown-to-jsonl'].handler('no table')));
+    push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);
+    push('json-to-jsonl', 'bad throws', mustThrow(() => TOOLS['json-to-jsonl'].handler('not json')));
     push('toml-to-json', 'happy', TOOLS['toml-to-json'].handler('a = 1').includes('"a": 1'));
     push('toml-to-json', 'dup throws', mustThrow(() => TOOLS['toml-to-json'].handler('a = 1\na = 2')));
     push('xml-to-toml', 'happy', TOOLS['xml-to-toml'].handler('<r><a>1</a></r>').includes('a = '));

@@ -20,6 +20,9 @@ window.TOOLMANIFEST = [
       { key: 'delimiter', label: 'Delimiter', type: 'select', default: 'comma', options: [{ value: 'comma', label: 'Comma (,)' }, { value: 'semicolon', label: 'Semicolon (;)' }, { value: 'tab', label: 'Tab' }, { value: 'pipe', label: 'Pipe (|)' }] },
       { key: 'nested', label: 'Nested objects', type: 'select', default: 'flatten', options: [{ value: 'flatten', label: 'Flatten (a.b)' }, { value: 'stringify', label: 'Stringify JSON' }] }
     ] },
+  { slug: 'json-to-jsonl', name: 'JSON \u2192 JSONL', desc: 'Convert JSON arrays to newline-delimited JSON \u2014 one compact value per line, single values stay one line, streaming-ready output', category: 'json', tags: ['json', 'jsonl', 'ndjson', 'lines', 'convert'], icon: 'braces', template: 'transform',
+    placeholder: '[{\u0022a\u0022:1},{\u0022a\u0022:2}]',
+    handler: function (s) { return Transforms.jsonToJSONL(s); } },
   { slug: 'json-to-yaml', name: 'JSON → YAML', desc: 'Convert JSON objects to YAML format — spec-correct quoting of scalars that would re-parse as bools, numbers, nulls or indicators', category: 'json', tags: ['convert', 'yaml'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.jsonToYAML(s); } },
   { slug: 'json-diff', name: 'JSON Diff', desc: 'Compare two JSON objects and highlight differences', category: 'json', tags: ['diff', 'compare'], icon: 'gitbranch', template: 'transform',

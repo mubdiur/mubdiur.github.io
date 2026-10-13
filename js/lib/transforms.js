@@ -2742,6 +2742,15 @@ T.levenshteinReport = function (s, opts) {
   var sim = mx === 0 ? 100 : (1 - d / mx) * 100;
   return 'Distance: ' + d + '\nSimilarity: ' + sim.toFixed(1) + '%' + '\nLengths: ' + la + ' vs ' + lb;
 };
+/* JSON to JSONL: arrays unwrap to one compact value per line (empty arrays throw), single values stay one line \u2014 the root-level emitter for streaming and logging pipelines. */
+T.jsonToJSONL = function (s) {
+  if (!String(s).trim()) throw new Error('Enter JSON to convert');
+  var v = T.validateJSON(s);
+  if (!v.valid) throw new Error('Invalid JSON \u2014 ' + (v.error || 'check commas, quotes and brackets'));
+  var docs = Array.isArray(v.data) ? v.data : [v.data];
+  if (!docs.length) throw new Error('JSON array has no items \u2014 need at least one value');
+  return docs.map(function (d) { return JSON.stringify(d); }).join('\n');
+};
 T.jsonToCSV = function (s, opts) {
   var o = opts || {};
   var DELIMS = { comma: ',', semicolon: ';', tab: '\t', pipe: '|' };
