@@ -89,6 +89,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'env-to-markdown': { good: 'A=1\nB=hello', expectInOutput: /\| 1 \|/ },
   'env-to-csv': { good: 'A=1\nB=hello', expectInOutput: /A,B/ },
   'env-to-toml': { good: 'A=1', expectInOutput: /A = / },
+  'env-to-yaml': { good: 'A=1', expectInOutput: /A: / },
   'ascii-table': { good: 'name,age\nAda,30', expectInOutput: /\+---/ },
 
   'yaml-to-json': { good: 'a: 1\nb: hello', expectInOutput: /"a": 1/ },
