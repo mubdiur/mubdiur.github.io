@@ -22,7 +22,7 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-var SW_VERSION = 'v173';
+var SW_VERSION = 'v174';
 var STATIC_CACHE = 'mub-static-' + SW_VERSION;
 var RUNTIME_CACHE = 'mub-runtime-v1';
 
@@ -36,7 +36,7 @@ var SHELL = [
   'js/lib/diff.js?v=27',
   'js/lib/adaptive-radix.js?v=1',
   'js/lib/qr-decode.js?v=2',
-  'js/manifest.js?v=151',
+  'js/manifest.js?v=152',
   'js/lib/transforms.js?v=132',
   'js/lib/crypto.js?v=6',
   'js/wasm.js?v=28',
@@ -45,8 +45,8 @@ var SHELL = [
   'js/pages/tools.js?v=31',
   'js/pages/tool.js?v=27',
   'js/ide/ide.js?v=20',
-  'js/tools/transform.js?v=36',
-  'js/tools/generator.js?v=31',
+  'js/tools/transform.js?v=37',
+  'js/tools/generator.js?v=32',
   'js/ide/vendor/editor.js?v=17',
   'js/tools/json-validator.js?v=46',
   'js/tools/email-extractor.js?v=46',

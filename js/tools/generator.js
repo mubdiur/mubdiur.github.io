@@ -47,7 +47,8 @@ function GeneratorToolUI(tool) {
   function clear() { generate._token = {}; state.output = ''; state.pending = false; renderOutput(); }
 
   function downloadOutput() {
-    var ext = (tool.downloadExt || 'txt').replace(/[^a-z0-9]/gi, '') || 'txt';
+    var rawExt = (typeof tool.downloadExt === 'function') ? tool.downloadExt(state.opts) : tool.downloadExt;
+    var ext = String(rawExt || 'txt').replace(/[^a-z0-9]/gi, '') || 'txt';
     App.download(tool.slug + '-output.' + ext, state.output, 'text/plain');
   }
   function renderOutput() {

@@ -359,6 +359,8 @@ console.log('-- text / formats --');
   ok(TOOLS['csv-delimiter-sniffer'].handler('a,b\nc,d').indexOf('Delimiter: Comma (,)') === 0, 'sniffer comma vector');
   ok(TOOLS['csv-delimiter-sniffer'].handler('"a;b";c\nd;e').indexOf('Delimiter: Semicolon (;)') === 0, 'sniffer quote-aware');
   ok(TOOLS['har-inspector'].handler.toString().indexOf('harSummary') >= 0, 'har delegates single source');
+  ok(TOOLS['har-inspector'].downloadExt({ view: 'json' }) === 'json', 'har json view downloads json');
+  ok(TOOLS['har-inspector'].downloadExt({ view: 'table' }) === 'txt', 'har table view downloads txt');
   var _har = '{"log":{"entries":[{"time":120,"request":{"method":"GET","url":"https://a.test/x"},"response":{"status":200,"bodySize":100}},{"time":5,"request":{"method":"GET","url":"https://a.test/y"},"response":{"status":404,"bodySize":10}}]}}';
   ok(TOOLS['har-inspector'].handler(_har, {}).indexOf('2 requests') === 0, 'har table header');
   ok(TOOLS['har-inspector'].handler(_har, {}).indexOf('https://a.test/x') < TOOLS['har-inspector'].handler(_har, {}).indexOf('https://a.test/y'), 'har slowest first');
