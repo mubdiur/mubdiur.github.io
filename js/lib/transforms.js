@@ -5513,5 +5513,53 @@ T.jsonlStats = function (s) {
   }
   return out.join('\n');
 };
+/* Date difference: two dates, one per line (epoch s/ms or any Date.parse
+   string); a lone date compares against now. Reports the signed exact total
+   plus a calendar-accurate year/month/day split on the UTC calendar.
+   Unknown dates throw with the offending line number. */
+T.dateDiff = function (s) {
+  function parseDate(t, ln) {
+    t = t.trim();
+    if (/^-?\d+(\.\d+)?$/.test(t)) {
+      var n = parseFloat(t);
+      var digits = t.replace(/[-.]/g, '').replace(/^0+/, '').length || 1;
+      return new Date(digits > 10 ? n : n * 1000);
+    }
+    var ms = Date.parse(t);
+    if (isNaN(ms)) throw new Error('Line ' + ln + ': Unrecognized date \u2014 try 2024-06-10 or 1718035200');
+    return new Date(ms);
+  }
+  function dim(y, m) { return new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); }
+  function tod(d) { return d.getUTCHours() * 3600000 + d.getUTCMinutes() * 60000 + d.getUTCSeconds() * 1000 + d.getUTCMilliseconds(); }
+  var raw = String(s === undefined || s === null ? '' : s);
+  var rows = raw.split(/\r?\n/);
+  var dates = [];
+  for (var n = 0; n < rows.length; n++) {
+    if (!rows[n].trim()) continue;
+    if (dates.length >= 2) throw new Error('Line ' + (n + 1) + ': expected at most two dates \u2014 extra input');
+    dates.push(parseDate(rows[n], n + 1));
+  }
+  if (!dates.length) throw new Error('Paste one or two dates \u2014 one date compares against now');
+  var a = dates[0], b = dates.length > 1 ? dates[1] : new Date();
+  if (isNaN(a.getTime()) || isNaN(b.getTime())) throw new Error('Out-of-range date');
+  var ms = b.getTime() - a.getTime();
+  var sign = ms < 0 ? '-' : '';
+  var abs = Math.abs(ms);
+  var lo = ms < 0 ? b : a, hi = ms < 0 ? a : b;
+  var Y = hi.getUTCFullYear() - lo.getUTCFullYear();
+  var M = hi.getUTCMonth() - lo.getUTCMonth();
+  var D = hi.getUTCDate() - lo.getUTCDate();
+  if (tod(hi) < tod(lo)) D--;
+  var by = hi.getUTCFullYear(), bm = hi.getUTCMonth();
+  while (D < 0) { M--; bm--; if (bm < 0) { bm += 12; by--; } D += dim(by, bm); }
+  if (M < 0) { Y--; M += 12; }
+  var parts = [];
+  if (Y) parts.push(Y + 'y');
+  if (M || parts.length) parts.push(M + 'mo');
+  parts.push(D + 'd');
+  return 'from = ' + a.toISOString() + '\nto = ' + b.toISOString() +
+    '\nTotal = ' + sign + Math.floor(abs / 86400000) + 'd = ' + sign + Math.floor(abs / 3600000) + 'h = ' + sign + Math.floor(abs / 60000) + 'min = ' + sign + Math.floor(abs / 1000) + 's' +
+    '\nCalendar = ' + sign + parts.join(' ');
+};
 window.Transforms = T;
 })();
