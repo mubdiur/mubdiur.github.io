@@ -127,6 +127,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'jsonl-to-json': { good: '{"a":1}\n{"b":2}', bad: '{"a":1}\nnope', expectInOutput: /"b": 2/, expectError: /Line 2/ },
   'jsonl-to-xml': { good: '1\n2', expectInOutput: /<root>1/ },
   'jsonl-to-yaml': { good: '1\n2', expectInOutput: /- 1/ },
+  'jsonl-to-toml': { good: '{"a":1}', expectInOutput: /a = 1/ },
   'har-inspector': { good: '{"log":{"entries":[{"time":120,"request":{"method":"GET","url":"https://a.test/x"},"response":{"status":200,"bodySize":100}},{"time":5,"request":{"method":"GET","url":"https://a.test/y"},"response":{"status":404,"bodySize":10}}]}}', bad: 'nope', expectInOutput: /2 requests/, expectError: /Invalid HAR/ },
   'csv-pivot-table': { good: 'dept,q,sales\neng,q1,10\nops,q1,5', expectInOutput: /,q1/ },
   'csv-column-profiler': { good: 'a,b\n1,x\n2,y', expectInOutput: /column,type,filled/ },

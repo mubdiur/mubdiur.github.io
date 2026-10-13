@@ -72,6 +72,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('jsonl-to-xml', 'line number throws', mustThrow(() => TOOLS['jsonl-to-xml'].handler('1\nnope')));
     push('jsonl-to-yaml', 'happy', TOOLS['jsonl-to-yaml'].handler('1\n2').indexOf('- 1') >= 0);
     push('jsonl-to-yaml', 'line number throws', mustThrow(() => TOOLS['jsonl-to-yaml'].handler('1\nnope')));
+    push('jsonl-to-toml', 'happy', TOOLS['jsonl-to-toml'].handler('{"a":1}') === 'a = 1');
+    push('jsonl-to-toml', 'wraps docs', TOOLS['jsonl-to-toml'].handler('{"a":1}\n{"a":2}').indexOf('[[docs]]') >= 0);
     push('jsonl-to-json', 'bad line throws', mustThrow(() => TOOLS['jsonl-to-json'].handler('{"a":1}\nnope')));
     var HAR = '{"log":{"entries":[{"time":120,"request":{"method":"GET","url":"https://a.test/x"},"response":{"status":200,"bodySize":100}},{"time":5,"request":{"method":"GET","url":"https://a.test/y"},"response":{"status":404,"bodySize":10}}]}}';
     push('har-inspector', 'table header', TOOLS['har-inspector'].handler(HAR, {}).includes('2 requests'));
