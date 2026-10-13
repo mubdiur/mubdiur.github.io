@@ -278,6 +278,12 @@ window.TOOLMANIFEST = [
       { key: 'secret', label: 'Secret', type: 'password', default: 'secret' },
       { key: 'expires', label: 'Expires', type: 'select', default: 'none', options: [{ value: 'none', label: 'Never' }, { value: '1h', label: '1 hour' }, { value: '24h', label: '24 hours' }, { value: '7d', label: '7 days' }, { value: '30d', label: '30 days' }] }
     ] },
+  { slug: 'jwt-verifier', name: 'JWT Verifier', desc: 'Verify HS256 JWT signatures: tamper check, expiry status, payload view', category: 'crypto', tags: ['jwt', 'verify', 'auth'], icon: 'lock', template: 'transform', wasm: true,
+    placeholder: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw',
+    handler: function (s, opts) { return Transforms.jwtVerifyOpts(s, opts); },
+    params: [
+      { key: 'secret', label: 'Secret', type: 'password', default: 'secret' }
+    ] },
   { slug: 'sri-generator', name: 'SRI Hash Generator', desc: 'Subresource Integrity hashes — SHA-384/512/256 via the WebAssembly core', category: 'crypto', tags: ['sri', 'hash', 'integrity'], icon: 'hash', template: 'transform', wasm: true,
     placeholder: 'console.log(1)',
     handler: function (s, opts) { return Transforms.sriHashOpts(s, opts); },

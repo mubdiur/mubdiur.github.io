@@ -446,7 +446,11 @@ console.log('-- json to toml --');
     ok(TOOLS['hmac-generator'].handler.toString().indexOf('hmacOpts') >= 0, 'hmac delegates opts');
     ok(TOOLS['hmac-generator'].handler('hello') === T.hmacSha256('secret', 'hello'), 'hmac default key+sha256');
     ok(TOOLS['jwt-generator'].handler.toString().indexOf('jwtSignOpts') >= 0, 'jwt delegates opts');
-    ok(TOOLS['jwt-generator'].handler('{"sub":"1"}', { secret: 's', expires: 'none' }) === T.jwtSign('{"sub":"1"}', 's', 'none'), 'jwt delegates vector'); }
+    ok(TOOLS['jwt-generator'].handler('{"sub":"1"}', { secret: 's', expires: 'none' }) === T.jwtSign('{"sub":"1"}', 's', 'none'), 'jwt delegates vector');
+    ok(TOOLS['jwt-verifier'].handler.toString().indexOf('jwtVerifyOpts') >= 0, 'jwt-verifier delegates opts');
+    var _jt = TOOLS['jwt-generator'].handler('{"sub":"1"}', { secret: 's', expires: 'none' });
+    ok(TOOLS['jwt-verifier'].handler(_jt, { secret: 's' }).indexOf('Signature: VALID') === 0, 'jwt-verifier roundtrip valid');
+    ok(TOOLS['jwt-verifier'].handler(_jt, { secret: 'wrong' }).indexOf('INVALID') >= 0, 'jwt-verifier wrong secret invalid'); }
   ok(T.hexToBase64('616263') === 'YWJj', 'hexToBase64 abc vector');
   ok(T.hexToBase64('deadbeef') === Buffer.from('deadbeef', 'hex').toString('base64'), 'hexToBase64 matches Buffer');
   { global.Core = { sha384Hex: function () { return require('crypto').createHash('sha384').update('abc').digest('hex'); }, sha512Hex: function () { return '00'; }, sha256Hex: function () { return '00'; } };

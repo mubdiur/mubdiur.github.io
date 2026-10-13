@@ -142,4 +142,30 @@ T.jwtSign = function (rawPayload, secret, expires) {
 T.jwtSignOpts = function (s, opts) {
   return T.jwtSign(s, (opts && opts.secret) || '', (opts && opts.expires) || 'none');
 };
+/* JWT verify: recompute the HS256 signature through the WASM HMAC core, then report tamper state, expiry state and payload. */
+T.jwtVerify = function (token, secret) {
+  if (!secret) throw new Error("Enter the secret key");
+  var text = String(token === undefined || token === null ? "" : token).trim();
+  if (!text) throw new Error("Paste a JWT first");
+  var parts = text.split(".");
+  if (parts.length !== 3) throw new Error("Invalid JWT format (expected header.payload.signature)");
+  var dec = T.jwtDecode(text);
+  var hex = Core.hmacHex(secret, parts[0] + "." + parts[1], 1);
+  var bytes = [];
+  for (var i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.slice(i, i + 2), 16));
+  var expectSig = T.base64UrlEncodeBytes(bytes);
+  var valid = (expectSig === parts[2]);
+  var expLine = "Expiry:   none (no exp claim)";
+  var exp = dec.rawPayload ? dec.rawPayload.exp : undefined;
+  if (exp !== undefined && exp !== null) {
+    var expMs = Number(exp) * 1000;
+    if (!isFinite(expMs)) expLine = "Expiry:   invalid exp claim";
+    else if (Date.now() >= expMs) expLine = "Expiry:   EXPIRED";
+    else expLine = "Expiry:   valid";
+  }
+  return "Signature: " + (valid ? "VALID" : "INVALID") + "\n" + expLine + "\nPayload: " + dec.payload;
+};
+T.jwtVerifyOpts = function (s, opts) {
+  return T.jwtVerify(s, (opts && opts.secret) || "");
+};
 })();

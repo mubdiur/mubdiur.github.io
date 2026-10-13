@@ -98,6 +98,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'chmod-converter': { good: '755', expectInOutput: /rwxr-xr-x/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
+  'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },
   'sri-generator': { good: 'console.log(1)', expectInOutput: /sha384-/ },
   'pem-inspector': { good: '-----BEGIN CERTIFICATE-----\nMAICAQE=\n-----END CERTIFICATE-----', expectInOutput: /SEQUENCE/ },
 };
