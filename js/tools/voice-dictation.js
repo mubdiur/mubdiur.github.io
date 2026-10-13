@@ -133,8 +133,9 @@ App.registerTool('voice-dictation', {
     }
     /* Option checkboxes persist alongside the draft. */
     var OPT_KEY = 'mub.dictation.opts.v1';
+    var goalWords = 0;
     function saveOpts() {
-      try { localStorage.setItem(OPT_KEY, JSON.stringify({ interim: !!showInterim, restart: !!autoRestart, commands: !!voiceCommands, smart: !!smartFormat })); } catch (eO) {}
+      try { localStorage.setItem(OPT_KEY, JSON.stringify({ interim: !!showInterim, restart: !!autoRestart, commands: !!voiceCommands, smart: !!smartFormat, goal: goalWords || 0 })); } catch (eO) {}
     }
     function loadOpts() {
       try {
@@ -144,6 +145,7 @@ App.registerTool('voice-dictation', {
           autoRestart = o.restart !== false;
           voiceCommands = o.commands !== false;
           smartFormat = o.smart !== false;
+          goalWords = Math.max(0, Math.floor(Number(o.goal) || 0));
         }
       } catch (eP) {}
     }
@@ -152,6 +154,7 @@ App.registerTool('voice-dictation', {
     var optRestart = App.el('input', { type: 'checkbox', checked: 'checked', 'aria-label': 'Auto-restart on pause' });
     var optCommands = App.el('input', { type: 'checkbox', checked: 'checked', 'aria-label': 'Voice commands for punctuation and editing' });
     var optSmart = App.el('input', { type: 'checkbox', checked: 'checked', 'aria-label': 'Smart capitalization and spacing' });
+    var goalInput = App.el('input', { type: 'number', min: '1', 'aria-label': 'Word count goal', title: 'Word count goal', style: 'width:4rem;padding:0.1rem 0.4rem;font-size:12px;background:rgba(255,255,255,0.04);color:inherit;border:1px solid rgba(255,255,255,0.12);border-radius:6px' });
 
     function paintStartButton(btn, live) {
       btn.className = 'vd-start ' + (live ? 'live' : 'idle');
@@ -184,6 +187,10 @@ App.registerTool('voice-dictation', {
       var words = (v.match(/\S+/g) || []).length;
       metaEl.innerHTML = '';
       metaEl.appendChild(App.el('span', { text: words + ' words · ' + v.length + ' chars' }));
+      if (goalWords > 0) {
+        var done = Math.min(words, goalWords);
+        metaEl.appendChild(App.el('span', { text: 'goal ' + done + '/' + goalWords + (words >= goalWords ? ' ✓' : '') }));
+      }
       metaEl.appendChild(App.el('span', { html: '<span class="vd-kbd">Ctrl</span> + <span class="vd-kbd">C</span> copies transcript' }));
       var empty = !v;
       copyBtn.disabled = empty;
@@ -768,11 +775,13 @@ App.registerTool('voice-dictation', {
     App.on(optRestart, 'change', function () { autoRestart = !!optRestart.checked; saveOpts(); });
     App.on(optCommands, 'change', function () { voiceCommands = !!optCommands.checked; saveOpts(); });
     App.on(optSmart, 'change', function () { smartFormat = !!optSmart.checked; saveOpts(); });
+    App.on(goalInput, 'input', App.debounce(function () { goalWords = Math.max(0, Math.floor(Number(goalInput.value) || 0)); saveOpts(); updateStats(); }, 300));
     loadOpts();
     optInterim.checked = showInterim;
     optRestart.checked = autoRestart;
     optCommands.checked = voiceCommands;
     optSmart.checked = smartFormat;
+    goalInput.value = goalWords > 0 ? String(goalWords) : '';
     App.interval(tickTimer, 500);
 
     /* Ctrl+C / Cmd+C copies the whole transcript.
@@ -816,7 +825,8 @@ App.registerTool('voice-dictation', {
       App.el('label', {}, optInterim, App.el('span', { text: 'Live interim results' })),
       App.el('label', {}, optRestart, App.el('span', { text: 'Auto-restart on pause' })),
       App.el('label', {}, optCommands, App.el('span', { text: 'Voice commands' })),
-      App.el('label', {}, optSmart, App.el('span', { text: 'Smart caps + spacing' }))));
+      App.el('label', {}, optSmart, App.el('span', { text: 'Smart caps + spacing' })),
+      App.el('label', {}, goalInput, App.el('span', { text: 'Word goal' }))));
     root.appendChild(errBox);
     root.appendChild(App.el('p', { class: 'vd-note',
       text: 'Tip: select any wrong word, then just say the fix — it swaps in place. Short single words (“He”) ' +
