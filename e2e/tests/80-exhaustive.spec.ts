@@ -73,6 +73,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'csv-to-json': { good: 'name,age\nAda,30', expectInOutput: /Ada/ },
   'yaml-to-json': { good: 'a: 1\nb: hello', expectInOutput: /"a": 1/ },
   'number-base-converter': { good: '10', expectInOutput: /Hex:/i },
+  'roman-converter': { good: '2026', expectInOutput: /MMXXVI/ },
   'prime-checker': { good: '13', expectInOutput: /prime/i },
   'statistics-calculator': { good: '1 2 3 4 5', expectInOutput: /Mean:/ },
   'number-to-words': { good: '42', expectInOutput: /forty/i },

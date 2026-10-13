@@ -223,6 +223,9 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('statistics-calculator', 'happy', TOOLS['statistics-calculator'].handler('1 2 3 4 5').includes('Mean:'));
     push('number-to-words', 'happy', TOOLS['number-to-words'].handler('42').includes('forty'));
     push('number-to-words', 'throws non-int', mustThrow(() => TOOLS['number-to-words'].handler('3.14')));
+    push('roman-converter', 'dec to roman', TOOLS['roman-converter'].handler('2026') === 'MMXXVI');
+    push('roman-converter', 'roman to dec', TOOLS['roman-converter'].handler('MCMXCIV') === '1994');
+    push('roman-converter', 'throws IIII', mustThrow(() => TOOLS['roman-converter'].handler('IIII')));
 
     // --- crypto (delegate) ---
     push('uuid-v4-validate', 'valid', TOOLS['uuid-v4-validate'].handler('550e8400-e29b-41d4-a716-446655440000').includes('\u2713') || TOOLS['uuid-v4-validate'].handler('550e8400-e29b-41d4-a716-446655440000').toLowerCase().includes('valid'));

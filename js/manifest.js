@@ -402,6 +402,9 @@ window.TOOLMANIFEST = [
   { slug: 'loan-calculator', name: 'Loan Calculator', desc: 'Fixed-rate loan math — monthly payment, total interest, yearly schedule plus a full monthly CSV', category: 'math', tags: ['loan', 'mortgage', 'amortization', 'interest', 'finance'], icon: 'calculator', template: 'custom' },
   { slug: 'number-to-words', name: 'Number to Words', desc: 'Convert numbers to English word representation', category: 'math', tags: ['number', 'words'], icon: 'calculator', template: 'transform',
     handler: function (s) { return Transforms.numberToWordsText(s); } },
+  { slug: 'roman-converter', name: 'Roman Numeral Converter', desc: 'Convert decimal \u2194 Roman numerals \u2014 auto-detects direction, strict canonical validation, 1\u20133999', category: 'math', tags: ['roman', 'numerals', 'number', 'convert'], icon: 'calculator', template: 'transform',
+    placeholder: '2026',
+    handler: function (s) { return Transforms.romanConvert(s); } },
 
   // ── Code Formatters ─────────────────────────────────────
   { slug: 'xml-formatter', name: 'XML Formatter', desc: 'Beautify XML \u2014 comment/CDATA/doctype aware, text-only elements stay inline, mismatched tags reported', category: 'code', tags: ['xml', 'format', 'beautify'], icon: 'code2', template: 'transform',

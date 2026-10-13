@@ -1021,6 +1021,47 @@ T.numberToWordsText = function (raw) {
   if (n < 0) return 'negative ' + T.numberToWords(-n);
   return T.numberToWords(n);
 };
+/** Decimal to Roman (greedy subtractive table) and back. The decoder
+ * parses leniently, then re-encodes and compares, so only canonical
+ * forms validate (IV passes, IIII/VIV/IL/XM do not). Range is 1-3999. */
+T.romanEncode = function (n) {
+  var table = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
+  var o = '';
+  for (var i = 0; i < table.length; i++) {
+    while (n >= table[i][0]) { o += table[i][1]; n -= table[i][0]; }
+  }
+  return o;
+};
+T.romanDecode = function (s) {
+  var val = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+  var okPair = { IV: 1, IX: 1, XL: 1, XC: 1, CD: 1, CM: 1 };
+  var total = 0;
+  for (var i = 0; i < s.length; i++) {
+    var c = s.charAt(i), v = val[c];
+    if (!v) throw new Error('Invalid Roman numeral ' + JSON.stringify(s.slice(0, 12)));
+    var nx = val[s.charAt(i + 1)];
+    if (nx && nx > v) {
+      if (!okPair[c + s.charAt(i + 1)]) throw new Error('Invalid subtractive pair ' + JSON.stringify(c + s.charAt(i + 1)));
+      total += nx - v; i++;
+    } else total += v;
+  }
+  if (total < 1 || total > 3999 || T.romanEncode(total) !== s) throw new Error('Not a canonical Roman numeral ' + JSON.stringify(s.slice(0, 12)) + ' \u2014 e.g. 4 is IV, not IIII');
+  return total;
+};
+/** Auto-bidirectional handler: digits convert to Roman, Roman converts
+ * to decimal. Single source for the manifest tool. */
+T.romanConvert = function (raw) {
+  var t = String(raw === undefined || raw === null ? '' : raw).trim().toUpperCase();
+  if (!t) throw new Error('Enter a decimal (1\u20133999) or a Roman numeral');
+  if (/^[0-9]+$/.test(t)) {
+    var n = parseInt(t, 10);
+    var shown = t.replace(/^0+/, '') || '0';
+    if (!(n >= 1 && n <= 3999)) throw new Error('Roman numerals cover 1\u20133999 \u2014 got ' + shown);
+    return T.romanEncode(n);
+  }
+  if (/^[IVXLCDM]+$/.test(t)) return String(T.romanDecode(t));
+  throw new Error('Enter a decimal (1\u20133999) or a Roman numeral like MMXXVI');
+};
 
 /* Matrix calculator: determinant (pivoted elimination), inverse
    (Gauss-Jordan), add/subtract/multiply/transpose/trace. */
