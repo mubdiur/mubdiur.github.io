@@ -2971,7 +2971,53 @@ T.tomlToJSON = function (s) {
   }
   function parseVal(str, ln) {
     var i = 0, n = str.length;
-    function sp() { while (i < n && (str.charAt(i) === ' ' || str.charAt(i) === '\t')) i++; }
+    function sp() { while (i < n && (str.charAt(i) === ' ' || str.charAt(i) === '\t' || str.charAt(i) === '\n' || str.charAt(i) === '\r')) i++; }
+    function mlBasic() {
+      var o = ''; i += 3;
+      if (str.charAt(i) === '\n') i++;
+      else if (str.charAt(i) === '\r' && str.charAt(i + 1) === '\n') i += 2;
+      while (i < n) {
+        if (str.charAt(i) === '\\') {
+          var nx = str.charAt(i + 1);
+          if (nx === '\\') { o += '\\\\'; i += 2; continue; }
+          var k = i + 1;
+          while (k < n && (str.charAt(k) === ' ' || str.charAt(k) === '\t')) k++;
+          if (str.charAt(k) === '\n' || (str.charAt(k) === '\r' && str.charAt(k + 1) === '\n')) {
+            k += str.charAt(k) === '\r' ? 2 : 1;
+            while (k < n && /\s/.test(str.charAt(k))) k++;
+            i = k; continue;
+          }
+          o += '\\' + nx; i += 2; continue;
+        }
+        if (str.substr(i, 3) === '"""') {
+          var e = i;
+          while (str.charAt(e) === '"') e++;
+          if (e - i === 4) o += '"';
+          else if (e - i === 5) o += '""';
+          i = (e - i === 4 || e - i === 5) ? e : i + 3;
+          return unesc(o, ln);
+        }
+        o += str.charAt(i); i++;
+      }
+      bad(ln, 'Unterminated multi-line string');
+    }
+    function mlLiteral() {
+      var o2 = ''; i += 3;
+      if (str.charAt(i) === '\n') i++;
+      else if (str.charAt(i) === '\r' && str.charAt(i + 1) === '\n') i += 2;
+      while (i < n) {
+        if (str.substr(i, 3) === "'''") {
+          var e2 = i;
+          while (str.charAt(e2) === "'") e2++;
+          if (e2 - i === 4) o2 += "'";
+          else if (e2 - i === 5) o2 += "''";
+          i = (e2 - i === 4 || e2 - i === 5) ? e2 : i + 3;
+          return o2;
+        }
+        o2 += str.charAt(i); i++;
+      }
+      bad(ln, 'Unterminated multi-line literal string');
+    }
     function basic() {
       var o = ''; i++;
       while (i < n && str.charAt(i) !== '"') {
@@ -3020,7 +3066,7 @@ T.tomlToJSON = function (s) {
     }
     function token() {
       var j = i;
-      while (j < n && ' \t,#}]'.indexOf(str.charAt(j)) < 0) j++;
+      while (j < n && ' \t\r\n,#}]'.indexOf(str.charAt(j)) < 0) j++;
       var t = str.slice(i, j); i = j; return t;
     }
     function numlike(t) {
@@ -3029,6 +3075,8 @@ T.tomlToJSON = function (s) {
     function val() {
       sp();
       var c = str.charAt(i);
+      if (c === '"' && str.substr(i, 3) === '"""') return mlBasic();
+      if (c === "'" && str.substr(i, 3) === "'''") return mlLiteral();
       if (c === '"') return basic();
       if (c === "'") return literal();
       if (c === '[') return arr();
@@ -3063,39 +3111,67 @@ T.tomlToJSON = function (s) {
     }
     return o;
   }
-  var raws = text.split('\n'), lns = [], buf = '', bstart = 1, depth = 0, inS = false, sq = ''; 
+  var raws = text.split('\n'), lns = [], buf = '', bstart = 1, depth = 0, inS = false, sq = '', tri = '';
   for (var r = 0; r < raws.length; r++) {
     var rl = raws[r];
     for (var p = 0; p < rl.length; p++) {
       var ch = rl.charAt(p);
+      if (tri) {
+        if (tri === '"""' && ch === '\\') { buf += ch + rl.charAt(p + 1); p++; continue; }
+        if (rl.substr(p, 3) === tri) {
+          var run = p;
+          while (rl.charAt(run) === tri.charAt(0)) run++;
+          run -= p;
+          if (run === 4 || run === 5) { buf += rl.substr(p, run); p += run - 1; tri = ''; continue; }
+          buf += tri; p += 2; tri = ''; continue;
+        }
+        buf += ch; continue;
+      }
       if (inS) {
         if (ch === '\\' && sq === '"') { buf += ch + rl.charAt(p + 1); p++; continue; }
         if (ch === sq) inS = false;
         buf += ch; continue;
       }
+      if (rl.substr(p, 3) === '"""' || rl.substr(p, 3) === "'''") { tri = rl.substr(p, 3); buf += tri; p += 2; continue; }
       if (ch === '"' || ch === "'") { inS = true; sq = ch; buf += ch; continue; }
+      if (ch === '#') { buf += rl.slice(p); break; }
       if (ch === '[') depth++;
       if (ch === ']') depth = Math.max(0, depth - 1);
       buf += ch;
     }
-    if (depth > 0) { buf += '\n'; continue; }
+    if (depth > 0 || tri) { buf += '\n'; continue; }
     lns.push({ t: buf, ln: bstart }); buf = ''; bstart = r + 2;
   }
   if (buf.trim()) lns.push({ t: buf, ln: bstart });
   lns.forEach(function (L) {
     var line = L.t, ln2 = L.ln;
-    var cut = -1, iq = false, qq = '';
+    var cut = -1, iq = false, qq = '', tq = '';
     for (var q2 = 0; q2 < line.length; q2++) {
       var cc = line.charAt(q2);
+      if (tq) {
+        if (tq === '"""' && cc === '\\') { q2++; continue; }
+        if (line.substr(q2, 3) === tq) {
+          var rq = q2;
+          while (line.charAt(rq) === tq.charAt(0)) rq++;
+          if (rq - q2 === 4 || rq - q2 === 5) q2 = rq - 1;
+          else q2 += 2;
+          tq = ''; continue;
+        }
+        continue;
+      }
       if (iq) {
         if (cc === '\\' && qq === '"') { q2++; continue; }
         if (cc === qq) iq = false;
         continue;
       }
+      if ((cc === '"' && line.substr(q2, 3) === '"""') || (cc === "'" && line.substr(q2, 3) === "'''")) { tq = line.substr(q2, 3); q2 += 2; continue; }
       if (cc === '"' || cc === "'") { iq = true; qq = cc; continue; }
       if (cc === '#') { cut = q2; break; }
     }
-    if (cut >= 0) line = line.slice(0, cut);
+    if (cut >= 0) {
+      var nl = line.indexOf('\n', cut);
+      line = line.slice(0, cut) + (nl < 0 ? '' : line.slice(nl));
+    }
     line = line.trim();
     if (!line) return;
     if (line.charAt(0) === '[') {
