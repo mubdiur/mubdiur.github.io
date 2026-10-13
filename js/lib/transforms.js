@@ -1931,6 +1931,7 @@ T.binaryDecode = function (s) {
 };
 T.rot13 = function (s) { return s.replace(/[a-zA-Z]/g, function (c) { var code = c.charCodeAt(0); var base = code >= 97 ? 97 : 65; return String.fromCharCode(((code - base + 13) % 26) + base); }); };
 T.rot47 = function (s) { return s.replace(/[\x21-\x7e]/g, function (c) { return String.fromCharCode(33 + ((c.charCodeAt(0) - 33 + 47) % 94)); }); };
+T.caesarCipher = function (s, opts) { var o = opts || {}; var n = parseInt(o.shift || '3', 10); if (isNaN(n)) n = 3; n = ((n % 26) + 26) % 26; if ((o.mode || 'encode') === 'decode') n = (26 - n) % 26; return String(s).replace(/[a-zA-Z]/g, function (c) { var b = c.charCodeAt(0) >= 97 ? 97 : 65; return String.fromCharCode(((c.charCodeAt(0) - b + n) % 26) + b); }); };
 T.base32Encode = function (s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var bytes = new TextEncoder().encode(s);

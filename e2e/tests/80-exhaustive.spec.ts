@@ -38,6 +38,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'punycode-encode': { good: 'm\u00fcnchen.de', expectInOutput: /xn--/ },
   'utf7-encode': { good: 'a+b', expectInOutput: /\+-/ },
   'utf7-decode': { good: 'a+-b', expectInOutput: /a\+b/ },
+  'caesar-cipher': { good: 'Hello', expectInOutput: /Khoor/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },

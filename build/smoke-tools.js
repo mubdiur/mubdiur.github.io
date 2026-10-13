@@ -1210,6 +1210,11 @@ console.log('-- rot --');
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
   ok(TOOLS['rot13'].handler(TOOLS['rot13'].handler('Hello, World!')) === 'Hello, World!', 'rot13 involution');
   ok(TOOLS['rot47'].handler('Hello') === 'w6==@', 'rot47 vector');
+  ok(TOOLS['caesar-cipher'].handler('Hello', { shift: '3' }) === 'Khoor', 'caesar vector');
+  ok(TOOLS['caesar-cipher'].handler('Khoor', { shift: '3', mode: 'decode' }) === 'Hello', 'caesar roundtrip');
+  ok(TOOLS['caesar-cipher'].handler('Hello', { shift: '13' }) === TOOLS['rot13'].handler('Hello'), 'caesar thirteen matches rot13');
+  ok(TOOLS['caesar-cipher'].handler('Hello, World!') === TOOLS['caesar-cipher'].handler('Hello, World!', { shift: '3' }), 'caesar default shift');
+  ok(TOOLS['caesar-cipher'].handler('abc', { shift: '27' }) === TOOLS['caesar-cipher'].handler('abc', { shift: '1' }), 'caesar shift wraps');
   ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
   ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }
