@@ -6054,6 +6054,8 @@ T.yamlToXML = function (s) { if (!String(s).trim()) throw new Error('Enter YAML 
 T.tomlToXML = function (s) { return T.jsonToXML(T.tomlToJSON(s)); };
 /* CSV to XML: parse once with the RFC 4180 CSV core (auto delimiter, headers as keys), emit with the canonical JSON-to-XML emitter (rows repeat as siblings). */
 T.csvToXML = function (s, opts) { return T.jsonToXML(T.csvToJSON(s, opts)); };
+/* CSV to TOML: parse once with the RFC 4180 CSV core (auto delimiter, headers as keys), emit rows as [[docs]] tables since TOML has no bare record streams. */
+T.csvToTOML = function (s, opts) { return T.jsonToTOML(JSON.stringify({ docs: JSON.parse(T.csvToJSON(s, opts)) })); };
 /* CSV to YAML: parse once with the RFC 4180 CSV core (auto delimiter, headers as keys), emit with the canonical JSON-to-YAML emitter (rows as sequences). */
 T.csvToYAML = function (s, opts) { return T.jsonToYAML(T.csvToJSON(s, opts)); };
 /* XML to CSV: parse once with the shared XML parser, unwrap the first repeating group to rows (single records stay one row), emit with the canonical JSON-to-CSV core. */
