@@ -1551,6 +1551,14 @@ console.log('-- cycloid --');
   ok(TOOLS['cycloid-solver'].handler('cycloid 5 3').indexOf('Arch length: 120') >= 0, 'cycloid arches');
   ok(TOOLS['cycloid-solver'].handler.toString().indexOf('cycloidSolve') >= 0, 'cycloid delegates');
 }
+console.log('-- belt --');
+{
+  ok(TOOLS['belt-solver'].handler('belt 10 20 30').indexOf('Length: ~107.959168427') >= 0, 'belt length');
+  ok(TOOLS['belt-solver'].handler('belt 10 20 30').indexOf('Wrap small: 160.8118635463 deg') >= 0, 'belt wrap');
+  ok(TOOLS['belt-solver'].handler('belt 10 20 30').indexOf('Ratio 1:2') >= 0, 'belt ratio');
+  ok(TOOLS['belt-solver'].handler('belt 10 10 20').indexOf('Length: ~71.4159265359') >= 0, 'belt equal is 2C plus piD');
+  ok(TOOLS['belt-solver'].handler.toString().indexOf('beltSolve') >= 0, 'belt delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

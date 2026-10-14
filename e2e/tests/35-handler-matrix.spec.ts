@@ -666,6 +666,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('cycloid-solver', 'area', TOOLS['cycloid-solver'].handler('cycloid 5').indexOf('Arch area: 235.6194490192') >= 0);
     push('cycloid-solver', 'arches', TOOLS['cycloid-solver'].handler('cycloid 5 3').indexOf('Arch length: 120') >= 0);
     push('cycloid-solver', 'junk throws', mustThrow(() => TOOLS['cycloid-solver'].handler('abc')));
+    push('belt-solver', 'length', TOOLS['belt-solver'].handler('belt 10 20 30').indexOf('Length: ~107.959168427') >= 0);
+    push('belt-solver', 'equal pulleys', TOOLS['belt-solver'].handler('belt 10 10 20').indexOf('Length: ~71.4159265359') >= 0);
+    push('belt-solver', 'junk throws', mustThrow(() => TOOLS['belt-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

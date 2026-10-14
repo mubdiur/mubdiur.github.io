@@ -284,6 +284,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'catenary-solver': { good: 'catenary 10 2', bad: 'abc', expectInOutput: /Support angle:/, expectError: /Unknown curve/ },
   'gear-solver': { good: 'gear 20 2', bad: 'abc', expectInOutput: /Pitch dia:/, expectError: /Unknown gear/ },
   'cycloid-solver': { good: 'cycloid 5', bad: 'abc', expectInOutput: /Arch area:/, expectError: /Unknown curve/ },
+  'belt-solver': { good: 'belt 10 20 30', bad: 'abc', expectInOutput: /Wrap small:/, expectError: /Unknown drive/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

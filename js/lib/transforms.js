@@ -2830,6 +2830,48 @@ T.cycloidSolve = function (s) {
   if (!isFinite(yarea) || !isFinite(ylen)) throw new Error('Out of range \u2014 radius overflows');
   return 'Cycloid: r = ' + ytrim(yr) + ', ' + ytrim(yn) + ' arch' + (yn === 1 ? '' : 'es') + '\nArch area: ' + ytrim(yarea) + '\nArch length: ' + ytrim(ylen) + '\nHeight: ' + ytrim(yht) + '\nWidth: ' + ytrim(ywid) + '\nDescent time: ' + ytrim(ytime) + ' s';
 };
+/* Belt solver: open-belt length, wrap angles and ratio from pulley dias and centre. */
+T.beltSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a belt drive \u2014 e.g. belt 10 20 30');
+  function bpos(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (!(v > 0)) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function btrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(belt|pulley|drive)\b/.exec(low);
+  if (!m0) throw new Error('Unknown drive \u2014 use belt 10 20 30');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'd1' || tk === 'd2' || tk === 'c' || tk === 'small' || tk === 'large' || tk === 'centre' || tk === 'center') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 3) throw new Error('Belt wants small dia, large dia and centre distance \u2014 e.g. belt 10 20 30');
+  var bd1 = bpos(nums[0], 'Bad pulley 1');
+  var bd2 = bpos(nums[1], 'Bad pulley 2');
+  var bc = bpos(nums[2], 'Bad centre');
+  var br = Math.min(bd1, bd2) / 2, bR = Math.max(bd1, bd2) / 2;
+  if (bc <= bR - br) throw new Error('Centre too short \u2014 pulleys overlap');
+  var bal = Math.asin((bR - br) / bc);
+  var blen = 2 * Math.sqrt(bc * bc - (bR - br) * (bR - br)) + Math.PI * (bR + br) + 2 * bal * (bR - br);
+  if (!isFinite(blen)) throw new Error('Out of range \u2014 length overflows');
+  var bw1 = (Math.PI - 2 * bal) * 180 / Math.PI;
+  var bw2 = (Math.PI + 2 * bal) * 180 / Math.PI;
+  var brat = Math.max(bd1, bd2) / Math.min(bd1, bd2);
+  return 'Belt: d1 = ' + btrim(bd1) + ', d2 = ' + btrim(bd2) + ', C = ' + btrim(bc) + '\nLength: ~' + btrim(blen) + '\nWrap small: ' + btrim(bw1) + ' deg\nWrap large: ' + btrim(bw2) + ' deg\nRatio 1:' + btrim(brat);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
