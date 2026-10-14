@@ -1756,6 +1756,24 @@ console.log('-- qr-decode (dependency-free, v1-v6) --');
   ok(px.version === 1 && px.ecl === 'L' && typeof px.mask === 'number', 'qr pixel exposes version/ecl/mask for tool meta');
 }
 
+console.log('-- shared-cores --');
+{
+  ok(T.luhnSum('79927398713', false) % 10 === 0, 'cores luhn validate');
+  ok((10 - (T.luhnSum('7992739871', true) % 10)) % 10 === 3, 'cores luhn check-digit');
+  ok(T.luhnSum('808401043477615', false) % 10 === 0, 'cores luhn npi-shape');
+  ok(T.mod97('NWBK60161331926819GB29') === 1, 'cores mod97 iban gb29');
+  ok((function(){var cd=98-T.mod97('5493006MHB84DD0ZWV18'+'00');return cd>=2&&cd<=98;})(), 'cores mod97 lei cd range');
+  ok(T.altSum('9780306406157') % 10 === 0, 'cores altsum isbn13');
+  ok(T.altSum('5901234123457') % 10 === 0, 'cores altsum gtin13');
+  ok(T.luhnCheck.toString().indexOf('luhnSum')>=0, 'cores luhn delegates');
+  ok(T.isinCheck.toString().indexOf('luhnSum')>=0, 'cores isin delegates');
+  ok(T.npiCheck.toString().indexOf('luhnSum')>=0, 'cores npi delegates');
+  ok(T.ibanCheck.toString().indexOf('T.mod97')>=0, 'cores iban delegates');
+  ok(T.leiCheck.toString().indexOf('T.mod97')>=0, 'cores lei delegates');
+  ok(T.gtinCheck.toString().indexOf('T.altSum')>=0, 'cores gtin delegates');
+  ok(T.isbnCheck.toString().indexOf('T.altSum')>=0, 'cores isbn13 delegates');
+}
+
 console.log('-- shared UI async pending --');
 pending.push((async () => {
   var keepApp = global.App;

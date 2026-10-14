@@ -3892,6 +3892,40 @@ T.fenView = function (s) {
   return lines.join('\n');
 };
 /* Luhn cores: mod-10 checksum for cards and IMEIs, spaces and dashes ignored, trailing ? * or # accepted as the missing check slot. */
+/* Shared check-digit cores: Luhn mod-10 doubling, mod-97-10 streaming, right-anchored 1-3 weights (GTIN-native; equal to left-anchored 1-3 for odd lengths such as ISBN-13). */
+T.luhnSum = function (ds, startDbl) {
+  var t = 0;
+  var pos = 0;
+  for (var li = ds.length - 1; li >= 0; li--) {
+    var v = ds.charCodeAt(li) - 48;
+    if ((pos % 2 === 0) === startDbl) { v *= 2; if (v > 9) v -= 9; }
+    t += v;
+    pos++;
+  }
+  return t;
+};
+T.mod97 = function (st) {
+  var rr = 0;
+  for (var ii = 0; ii < st.length; ii++) {
+    var kk = st.charAt(ii);
+    if (kk >= "0" && kk <= "9") rr = (rr * 10 + (kk.charCodeAt(0) - 48)) % 97;
+    else {
+      var vv = kk.charCodeAt(0) - 55;
+      rr = (rr * 10 + Math.floor(vv / 10)) % 97;
+      rr = (rr * 10 + (vv % 10)) % 97;
+    }
+  }
+  return rr;
+};
+T.altSum = function (ds) {
+  var t = 0;
+  var pos = 0;
+  for (var li = ds.length - 1; li >= 0; li--) {
+    t += (ds.charCodeAt(li) - 48) * (pos % 2 === 0 ? 1 : 3);
+    pos++;
+  }
+  return t;
+};
 T.luhnCheck = function (s, opts) {
   var o = opts || {};
   var mode = o.mode || 'validate';
@@ -3907,24 +3941,13 @@ T.luhnCheck = function (s, opts) {
     else if (mode === 'check-digit' && (dh === '?' || dh === '*' || dh === '#')) continue;
     else throw new Error('Digits only \u2014 0-9 with spaces or dashes ignored, got ' + JSON.stringify(dh));
   }
-  function lsum(ds, startDbl) {
-    var t = 0;
-    var pos = 0;
-    for (var li = ds.length - 1; li >= 0; li--) {
-      var v = ds.charCodeAt(li) - 48;
-      if ((pos % 2 === 0) === startDbl) { v *= 2; if (v > 9) v -= 9; }
-      t += v;
-      pos++;
-    }
-    return t;
-  }
   if (!digits.length) throw new Error('Enter digits first \u2014 card, IMEI or serial digits to check');
   if (mode === 'validate') {
     if (digits.length < 2) throw new Error('Too short \u2014 a Luhn number needs at least 2 digits, got ' + digits.length);
-    if (lsum(digits, false) % 10 !== 0) throw new Error('Invalid Luhn number \u2014 checksum fails for ' + JSON.stringify(digits));
+    if (T.luhnSum(digits, false) % 10 !== 0) throw new Error('Invalid Luhn number \u2014 checksum fails for ' + JSON.stringify(digits));
     return 'Valid \u2014 Luhn checksum passes (' + digits.length + ' digits)';
   }
-  var sum = lsum(digits, true);
+  var sum = T.luhnSum(digits, true);
   var d = (10 - (sum % 10)) % 10;
   return digits + d;
 };
@@ -4024,13 +4047,10 @@ T.isbnCheck = function (s, opts) {
       return 'Valid \u2014 ISBN-10 checksum passes';
     }
     if (clean.length === 13) {
-      var v13 = 0;
       for (var i13 = 0; i13 < 13; i13++) {
-        var h13 = clean.charAt(i13);
-        if (h13 < '0' || h13 > '9') throw new Error('Bad ISBN-13 \u2014 all 13 characters are digits, X is ISBN-10 only');
-        v13 += (h13.charCodeAt(0) - 48) * (i13 % 2 === 0 ? 1 : 3);
+        if (clean.charAt(i13) < '0' || clean.charAt(i13) > '9') throw new Error('Bad ISBN-13 \u2014 all 13 characters are digits, X is ISBN-10 only');
       }
-      if (v13 % 10 !== 0) throw new Error('Invalid ISBN-13 \u2014 checksum fails for ' + JSON.stringify(clean));
+      if (T.altSum(clean) % 10 !== 0) throw new Error('Invalid ISBN-13 \u2014 checksum fails for ' + JSON.stringify(clean));
       return 'Valid \u2014 ISBN-13 checksum passes';
     }
     throw new Error('Bad length \u2014 ISBN-10 needs 10 characters or ISBN-13 needs 13 digits, got ' + clean.length);
@@ -4084,16 +4104,7 @@ T.ibanCheck = function (s) {
     if ((bh < '0' || bh > '9') && (bh < 'A' || bh > 'Z')) throw new Error('Bad BBAN character \u2014 letters or digits, got ' + JSON.stringify(bh));
   }
   var rearr = clean.slice(4) + clean.slice(0, 4);
-  var rem = 0;
-  for (var ri = 0; ri < rearr.length; ri++) {
-    var rh = rearr.charAt(ri);
-    if (rh >= '0' && rh <= '9') rem = (rem * 10 + (rh.charCodeAt(0) - 48)) % 97;
-    else {
-      var vv = rh.charCodeAt(0) - 55;
-      rem = (rem * 10 + Math.floor(vv / 10)) % 97;
-      rem = (rem * 10 + (vv % 10)) % 97;
-    }
-  }
+  var rem = T.mod97(rearr);
   if (rem !== 1) throw new Error('Invalid IBAN \u2014 mod-97 check fails for ' + JSON.stringify(clean));
   return 'Valid \u2014 ' + clean.slice(0, 2) + ' IBAN (' + clean.length + ' characters)';
 };
@@ -4114,22 +4125,13 @@ T.gtinCheck = function (s, opts) {
   }
   if (!digits.length) throw new Error('Enter digits first \u2014 a GTIN-8, UPC-A, EAN-13 or GTIN-14 barcode');
   var NAMES = { 8: 'GTIN-8', 12: 'UPC-A', 13: 'EAN-13', 14: 'GTIN-14' };
-  function wsum(ds) {
-    var t = 0;
-    var pos = 0;
-    for (var li = ds.length - 1; li >= 0; li--) {
-      t += (ds.charCodeAt(li) - 48) * (pos % 2 === 0 ? 1 : 3);
-      pos++;
-    }
-    return t;
-  }
   if (mode === 'validate') {
     if (NAMES[digits.length] === undefined) throw new Error('Bad length \u2014 barcodes run 8, 12, 13 or 14 digits, got ' + digits.length);
-    if (wsum(digits) % 10 !== 0) throw new Error('Invalid barcode \u2014 checksum fails for ' + JSON.stringify(digits));
+    if (T.altSum(digits) % 10 !== 0) throw new Error('Invalid barcode \u2014 checksum fails for ' + JSON.stringify(digits));
     return 'Valid \u2014 ' + NAMES[digits.length] + ' checksum passes';
   }
   if (NAMES[digits.length + 1] === undefined) throw new Error('Bad prefix \u2014 7, 11, 12 or 13 digits make a barcode, got ' + digits.length);
-  return digits + String((10 - (wsum(digits + '0') % 10)) % 10);
+  return digits + String((10 - (T.altSum(digits + '0') % 10)) % 10);
 };
 /* Verhoeff cores: dihedral D5 table check catching all single-digit errors and adjacent transpositions, spaces and dashes ignored. */
 T.verhoeffCheck = function (s, opts) {
@@ -4393,17 +4395,6 @@ T.isinCheck = function (s, opts) {
     }
     return dstr;
   }
-  function isinSum(ds, startDbl) {
-    var t = 0;
-    var pos = 0;
-    for (var li = ds.length - 1; li >= 0; li--) {
-      var vv = ds.charCodeAt(li) - 48;
-      if ((pos % 2 === 0) === startDbl) { vv *= 2; if (vv > 9) vv -= 9; }
-      t += vv;
-      pos++;
-    }
-    return t;
-  }
   if (!clean.length) throw new Error('Enter an ISIN first \u2014 two letters, nine securities characters and a check digit');
   if (mode === 'validate') {
     if (clean.length !== 12) throw new Error('Bad length \u2014 ISINs run 12 characters, got ' + clean.length);
@@ -4416,7 +4407,7 @@ T.isinCheck = function (s, opts) {
     }
     var kc = clean.charAt(11);
     if (kc < '0' || kc > '9') throw new Error('Bad check digit \u2014 a digit 0-9, got ' + JSON.stringify(kc));
-    if (isinSum(isinDigits(clean), false) % 10 !== 0) throw new Error('Invalid ISIN \u2014 checksum fails for ' + JSON.stringify(clean));
+    if (T.luhnSum(isinDigits(clean), false) % 10 !== 0) throw new Error('Invalid ISIN \u2014 checksum fails for ' + JSON.stringify(clean));
     return 'Valid \u2014 ' + clean.slice(0, 2) + ' ISIN checksum passes';
   }
   if (clean.length !== 11) throw new Error('Bad prefix \u2014 11 characters make an ISIN, got ' + clean.length);
@@ -4428,7 +4419,7 @@ T.isinCheck = function (s, opts) {
     if ((qh < '0' || qh > '9') && (qh < 'A' || qh > 'Z')) throw new Error('Bad securities character \u2014 letters or digits, got ' + JSON.stringify(qh));
   }
   var pds = isinDigits(clean);
-  var psum = isinSum(pds, true);
+  var psum = T.luhnSum(pds, true);
   return clean + String((10 - (psum % 10)) % 10);
 };
 /* ISSN cores: 8-character serials with mod-11 X check, dashes and spaces ignored. */
@@ -4547,19 +4538,6 @@ T.leiCheck = function (s, opts) {
     else if (mode === 'check-digit' && (ch === '?' || ch === '*' || ch === '#')) continue;
     else throw new Error('Letters and digits only \u2014 LEI with spaces or dashes ignored, got ' + JSON.stringify(ch));
   }
-  function leiMod(st) {
-    var rr = 0;
-    for (var ii = 0; ii < st.length; ii++) {
-      var kk = st.charAt(ii);
-      if (kk >= '0' && kk <= '9') rr = (rr * 10 + (kk.charCodeAt(0) - 48)) % 97;
-      else {
-        var vv = kk.charCodeAt(0) - 55;
-        rr = (rr * 10 + Math.floor(vv / 10)) % 97;
-        rr = (rr * 10 + (vv % 10)) % 97;
-      }
-    }
-    return rr;
-  }
   if (!clean.length) throw new Error('Enter an LEI first \u2014 eighteen entity characters and two check digits');
   if (mode === 'validate') {
     if (clean.length !== 20) throw new Error('Bad length \u2014 LEIs run 20 characters, got ' + clean.length);
@@ -4570,7 +4548,7 @@ T.leiCheck = function (s, opts) {
     var d0 = clean.charAt(18);
     var d1 = clean.charAt(19);
     if (d0 < '0' || d0 > '9' || d1 < '0' || d1 > '9') throw new Error('Bad check digits \u2014 two digits close the LEI');
-    if (leiMod(clean) !== 1) throw new Error('Invalid LEI \u2014 mod-97 check fails for ' + JSON.stringify(clean));
+    if (T.mod97(clean) !== 1) throw new Error('Invalid LEI \u2014 mod-97 check fails for ' + JSON.stringify(clean));
     return 'Valid \u2014 LEI checksum passes (20 characters)';
   }
   if (clean.length !== 18) throw new Error('Bad prefix \u2014 18 characters make an LEI, got ' + clean.length);
@@ -4578,7 +4556,7 @@ T.leiCheck = function (s, opts) {
     var qh = clean.charAt(qi);
     if ((qh < '0' || qh > '9') && (qh < 'A' || qh > 'Z')) throw new Error('Bad prefix character \u2014 letters or digits, got ' + JSON.stringify(qh));
   }
-  var cd = 98 - leiMod(clean + '00');
+  var cd = 98 - T.mod97(clean + '00');
   return clean + (cd < 10 ? '0' : '') + String(cd);
 };
 /* SEDOL cores: London Stock Exchange Daily Official List numbers, consonants plus digits with weighted check digit, spaces and dashes ignored. */
@@ -4734,26 +4712,14 @@ T.npiCheck = function (s, opts) {
     else if (mode === 'check-digit' && (ch === '?' || ch === '*' || ch === '#')) continue;
     else throw new Error('NPI digits only \u2014 ten digits with spaces or dashes ignored, got ' + JSON.stringify(ch));
   }
-  function npiLuhn(px) {
-    var str = '80840' + px;
-    var nt = 0;
-    var dbl = false;
-    for (var ji = str.length - 1; ji >= 0; ji--) {
-      var nd = str.charCodeAt(ji) - 48;
-      if (dbl) { nd = nd * 2; if (nd > 9) nd -= 9; }
-      nt += nd;
-      dbl = !dbl;
-    }
-    return nt;
-  }
   if (!clean.length) throw new Error('Enter an NPI first \u2014 nine digits plus check digit');
   if (mode === 'validate') {
     if (clean.length !== 10) throw new Error('Bad length \u2014 NPIs run 10 digits, got ' + clean.length);
-    if (npiLuhn(clean) % 10 !== 0) throw new Error('Invalid NPI \u2014 checksum fails for ' + JSON.stringify(clean));
+    if (T.luhnSum('80840' + clean, false) % 10 !== 0) throw new Error('Invalid NPI \u2014 checksum fails for ' + JSON.stringify(clean));
     return 'Valid \u2014 NPI checksum passes (10 digits)';
   }
   if (clean.length !== 9) throw new Error('Bad prefix \u2014 9 digits make an NPI, got ' + clean.length);
-  return clean + String((10 - (npiLuhn(clean + '0') % 10)) % 10);
+  return clean + String((10 - (T.luhnSum('80840' + clean + '0', false) % 10)) % 10);
 };
 /* VIN cores: ISO 3779 vehicle identifiers with transliterated mod-11 check letter, spaces and dashes ignored. */
 T.vinCheck = function (s, opts) {
