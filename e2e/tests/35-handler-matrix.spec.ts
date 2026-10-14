@@ -660,6 +660,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('catenary-solver', 'parameter', TOOLS['catenary-solver'].handler('catenary 10 2').indexOf('Parameter a: 6.5586258675') >= 0);
     push('catenary-solver', 'shallow parabola', TOOLS['catenary-solver'].handler('chain 100 0.1').indexOf('Length: ~100.0002666662') >= 0);
     push('catenary-solver', 'junk throws', mustThrow(() => TOOLS['catenary-solver'].handler('abc')));
+    push('gear-solver', 'diameters', TOOLS['gear-solver'].handler('gear 20 2').indexOf('Tip dia: 44') >= 0);
+    push('gear-solver', 'mesh', TOOLS['gear-solver'].handler('gear 20 2 40').indexOf('Centre distance: 60') >= 0);
+    push('gear-solver', 'junk throws', mustThrow(() => TOOLS['gear-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

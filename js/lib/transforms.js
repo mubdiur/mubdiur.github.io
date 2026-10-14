@@ -2733,6 +2733,59 @@ T.catenarySolve = function (s) {
   var cang = Math.atan(csinh(u)) * 180 / Math.PI;
   return 'Catenary: span = ' + ctrim(cs) + ', sag = ' + ctrim(cd) + '\nParameter a: ' + ctrim(ca) + '\nLength: ~' + ctrim(clen) + '\nSupport angle: ' + ctrim(cang) + ' deg';
 };
+/* Gear solver: metric spur-gear diameters plus optional mesh ratio from teeth and module. */
+T.gearSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a gear \u2014 e.g. gear 20 2');
+  function gpos(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (!(v > 0)) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function gteeth(tok, label) {
+    var v = gpos(tok, label);
+    if (Math.floor(v) !== v) throw new Error(label + ' must be whole \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v < 3) throw new Error(label + ' too small \u2014 min 3 teeth');
+    if (v > 1e6) throw new Error(label + ' too large \u2014 max 1000000');
+    return v;
+  }
+  function gtrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(gear|spur|cog)\b/.exec(low);
+  if (!m0) throw new Error('Unknown gear \u2014 use gear 20 2');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'z' || tk === 'teeth' || tk === 'm' || tk === 'module' || tk === 'z2' || tk === 'mate') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 2 && nums.length !== 3) throw new Error('Gear wants teeth and module \u2014 e.g. gear 20 2');
+  var gz = gteeth(nums[0], 'Bad teeth');
+  var gm = gpos(nums[1], 'Bad module');
+  var gpd = gm * gz;
+  var god = gm * (gz + 2);
+  var grd = gm * (gz - 2.5);
+  if (!(grd > 0)) throw new Error('Module too large for teeth \u2014 root diameter undercuts to zero');
+  var gcp = Math.PI * gm;
+  var gbd = gpd * Math.cos(20 * Math.PI / 180);
+  var out = 'Gear: z = ' + gtrim(gz) + ', m = ' + gtrim(gm) + '\nPitch dia: ' + gtrim(gpd) + '\nTip dia: ' + gtrim(god) + '\nRoot dia: ' + gtrim(grd) + '\nCircular pitch: ' + gtrim(gcp) + '\nBase dia (20 deg): ' + gtrim(gbd);
+  if (nums.length === 3) {
+    var gz2 = gteeth(nums[2], 'Bad mate');
+    var grat = gz2 / gz;
+    var gcd = gm * (gz + gz2) / 2;
+    out += '\nMesh 1:' + gtrim(grat) + ' with z2 = ' + gtrim(gz2) + '\nCentre distance: ' + gtrim(gcd);
+  }
+  return out;
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

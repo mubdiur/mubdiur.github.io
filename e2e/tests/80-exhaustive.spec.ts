@@ -282,6 +282,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'log-spiral-solver': { good: 'logspiral 2 0.1 2', bad: 'abc', expectInOutput: /Growth:/, expectError: /Unknown spiral/ },
   'helix-solver': { good: 'helix 5 10 3', bad: 'abc', expectInOutput: /Lead angle:/, expectError: /Unknown helix/ },
   'catenary-solver': { good: 'catenary 10 2', bad: 'abc', expectInOutput: /Support angle:/, expectError: /Unknown curve/ },
+  'gear-solver': { good: 'gear 20 2', bad: 'abc', expectInOutput: /Pitch dia:/, expectError: /Unknown gear/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

@@ -1534,6 +1534,15 @@ console.log('-- catenary --');
   ok(TOOLS['catenary-solver'].handler('chain 100 0.1').indexOf('Length: ~100.0002666662') >= 0, 'catenary shallow matches parabola');
   ok(TOOLS['catenary-solver'].handler.toString().indexOf('catenarySolve') >= 0, 'catenary delegates');
 }
+console.log('-- gear --');
+{
+  ok(TOOLS['gear-solver'].handler('gear 20 2').indexOf('Pitch dia: 40') >= 0, 'gear pitch');
+  ok(TOOLS['gear-solver'].handler('gear 20 2').indexOf('Tip dia: 44') >= 0, 'gear tip');
+  ok(TOOLS['gear-solver'].handler('gear 20 2').indexOf('Root dia: 35') >= 0, 'gear root');
+  ok(TOOLS['gear-solver'].handler('gear 20 2').indexOf('Base dia (20 deg): 37.5877048314') >= 0, 'gear base');
+  ok(TOOLS['gear-solver'].handler('gear 20 2 40').indexOf('Centre distance: 60') >= 0, 'gear mesh');
+  ok(TOOLS['gear-solver'].handler.toString().indexOf('gearSolve') >= 0, 'gear delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
