@@ -2381,6 +2381,19 @@ T.columnarEncode = function (s, key) {
   for (var oi = 0; oi < order.length; oi++) { var c = order[oi]; for (var r = 0; r < rows; r++) { var ix = r * cols + c; if (ix < n) out.push(str[ix]); } }
   return out.join('');
 };
+/* Beaufort cipher: reciprocal Vigenere variant (key minus plaintext); key A maps B to Z, case preserved, non-letters pass through. */
+T.beaufortCipher = function (s, opts) {
+  var o = opts || {}; var key = String(o.key === undefined ? 'LEMON' : o.key).replace(/[^a-zA-Z]/g, '');
+  if (!key) throw new Error('Enter a letter key \u2014 A leaves B as Z, Z as B');
+  var ki = 0;
+  return String(s).replace(/[a-zA-Z]/g, function (c) {
+    var base = c.charCodeAt(0) >= 97 ? 97 : 65;
+    var p = c.charCodeAt(0) - base;
+    var kc = key.charCodeAt(ki++ % key.length);
+    var k = kc >= 97 ? kc - 97 : kc - 65;
+    return String.fromCharCode(base + (((k - p) % 26 + 26) % 26));
+  });
+};
 T.columnarDecode = function (s, key) {
   var o = T.columnarOrder(key); var cols = o.k.length;
   var str = Array.from(String(s)); var n = str.length;
