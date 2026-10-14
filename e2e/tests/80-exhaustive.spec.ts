@@ -77,6 +77,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'brainfuck': { good: ',[.,]', expectInOutput: /Hi/ },
   'whitespace': { good: '   \t  \t   \n\t\n  \n\n', expectInOutput: /H/ },
   'braille': { good: 'abc', expectInOutput: /\u2801/ },
+  'nato-phonetic': { good: 'ABC', expectInOutput: /Alfa/ },
   'befunge': { good: '"A",@', expectInOutput: /A/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },

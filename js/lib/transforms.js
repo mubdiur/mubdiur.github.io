@@ -3414,6 +3414,77 @@ T.brailleCipher = function (s, opts) {
   }
   throw new Error('Bad mode \u2014 use encode or decode');
 };
+/* NATO cores: fixed Alfa-to-Zulu words with ITU digit pronunciations, slash word gaps, tolerant decode aliases, lone surrogates pass through untouched. */
+T.natoPhonetic = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'encode';
+  var WORDS = {
+    A: 'Alfa', B: 'Bravo', C: 'Charlie', D: 'Delta', E: 'Echo', F: 'Foxtrot',
+    G: 'Golf', H: 'Hotel', I: 'India', J: 'Juliett', K: 'Kilo', L: 'Lima',
+    M: 'Mike', N: 'November', O: 'Oscar', P: 'Papa', Q: 'Quebec', R: 'Romeo',
+    S: 'Sierra', T: 'Tango', U: 'Uniform', V: 'Victor', W: 'Whiskey', X: 'X-ray',
+    Y: 'Yankee', Z: 'Zulu', '0': 'Zero', '1': 'One', '2': 'Two', '3': 'Tree',
+    '4': 'Fower', '5': 'Fife', '6': 'Six', '7': 'Seven', '8': 'Eight', '9': 'Niner'
+  };
+  var ALIAS = { ALPHA: 'A', THREE: '3', FOUR: '4', FIVE: '5', NINE: '9', ZERO: '0', OH: '0', XRAY: 'X' };
+  var REV = {};
+  for (var wk in WORDS) {
+    if (Object.prototype.hasOwnProperty.call(WORDS, wk)) REV[WORDS[wk].toUpperCase().split('-').join('')] = wk;
+  }
+  for (var ak in ALIAS) {
+    if (Object.prototype.hasOwnProperty.call(ALIAS, ak)) REV[ak] = ALIAS[ak];
+  }
+  function isSurrogate(cc) { return cc >= 0xD800 && cc <= 0xDFFF; }
+  if (mode === 'encode') {
+    var src = String(s).toUpperCase();
+    var out = [];
+    for (var e = 0; e < src.length; e++) {
+      var ch = src.charAt(e);
+      var cd = src.charCodeAt(e);
+      if (isSurrogate(cd)) { out.push(ch); continue; }
+      if (ch === ' ') { out.push('/'); continue; }
+      if (cd === 9 || cd === 10 || cd === 13) { out.push('/'); continue; }
+      if (WORDS[ch] !== undefined) { out.push(WORDS[ch]); continue; }
+      throw new Error('No NATO word \u2014 cannot spell ' + JSON.stringify(ch));
+    }
+    return out.join(' ');
+  }
+  if (mode === 'decode') {
+    var dsrc = String(s);
+    var toks = [];
+    var cur = '';
+    for (var dd = 0; dd < dsrc.length; dd++) {
+      var dch = dsrc.charAt(dd);
+      var dcc = dsrc.charCodeAt(dd);
+      if (isSurrogate(dcc)) { if (cur) { toks.push(cur); cur = ''; } toks.push(dch); continue; }
+      if (dcc === 32 || dcc === 9 || dcc === 10 || dcc === 13 || dcc === 47 || dcc === 44 || dcc === 59 || dcc === 124) {
+        if (cur) { toks.push(cur); cur = ''; }
+        if (dcc === 47) toks.push('/');
+        continue;
+      }
+      cur += dch;
+    }
+    if (cur) toks.push(cur);
+    var dout = '';
+    for (var tt = 0; tt < toks.length; tt++) {
+      var tk = toks[tt];
+      if (tk === '/') { dout += ' '; continue; }
+      if (tk.length === 1 && isSurrogate(tk.charCodeAt(0))) { dout += tk; continue; }
+      var key = tk.toUpperCase().split('-').join('');
+      if (REV[key] !== undefined) { dout += REV[key]; continue; }
+      throw new Error('Unknown NATO word \u2014 no such word as ' + JSON.stringify(tk));
+    }
+    var res = '';
+    var prevSp = true;
+    for (var rr = 0; rr < dout.length; rr++) {
+      var rc = dout.charAt(rr);
+      if (rc === ' ') { if (!prevSp) { res += ' '; prevSp = true; } }
+      else { res += rc; prevSp = false; }
+    }
+    return res;
+  }
+  throw new Error('Bad mode \u2014 use encode or decode');
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');

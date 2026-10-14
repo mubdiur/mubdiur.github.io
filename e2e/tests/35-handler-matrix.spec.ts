@@ -267,6 +267,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('whitespace', 'div zero throws', mustThrow(() => TOOLS['whitespace'].handler('   \t \t\n   \n\t \t \n\n')));
     push('braille', 'happy', TOOLS['braille'].handler('abc') === String.fromCharCode(0x2801) + String.fromCharCode(0x2803) + String.fromCharCode(0x2809));
     push('braille', 'ascii decode throws', mustThrow(() => TOOLS['braille'].handler('abc', { mode: 'decode' })));
+    push('nato-phonetic', 'happy', TOOLS['nato-phonetic'].handler('ABC') === 'Alfa Bravo Charlie');
+    push('nato-phonetic', 'unknown word throws', mustThrow(() => TOOLS['nato-phonetic'].handler('Banana', { mode: 'decode' })));
     push('befunge', 'happy', TOOLS['befunge'].handler('"A",@') === 'A');
     push('befunge', 'div zero throws', mustThrow(() => TOOLS['befunge'].handler('50/.@')));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
