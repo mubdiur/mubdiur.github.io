@@ -1966,6 +1966,35 @@ T.fuelConv = function (s) {
   else throw new Error('Bad unit \u2014 use l/100km, mpg, mpg-uk or km/l');
   return 'Input: ' + ftrim(v) + ' ' + canon + '\nL/100km: ' + ftrim(l) + '\nkm/L: ' + ftrim(100 / l) + '\nMPG (US): ' + ftrim(CUS / l) + '\nMPG (UK): ' + ftrim(CUK / l);
 };
+/* Prime factorization: trial division over the cached prime table, honest remainder. */
+T.primeFactors = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim().replace(/[,_\s]/g, '');
+  if (!txt) throw new Error('Enter an integer \u2014 e.g. 360');
+  if (!/^\d+$/.test(txt)) throw new Error('Bad integer \u2014 got ' + JSON.stringify(raw.trim().slice(0, 40)));
+  if ((txt.replace(/^0+/, '').length || 1) > 2000) throw new Error('Integer too long \u2014 max 2000 digits');
+  var n = BigInt(txt);
+  if (n < BigInt(1)) throw new Error('Enter an integer >= 1 \u2014 factorials of nothing');
+  function fgrp(x) { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  if (n === BigInt(1)) return 'Factors: (none \u2014 1 is unity)\nRemaining: 1\nDistinct: 0\nTotal: 0';
+  var rem = n;
+  var facs = [];
+  function pull(p) { var e = 0; while (rem % p === BigInt(0)) { rem /= p; e++; } if (e > 0) facs.push([p, e]); }
+  pull(BigInt(2));
+  pull(BigInt(3));
+  var divs = primeDivisors();
+  for (var i = 0; i < divs.length && rem > BigInt(1); i++) {
+    var pb = BigInt(divs[i]);
+    if (pb * pb > rem) { facs.push([rem, 1]); rem = BigInt(1); break; }
+    if (rem % pb === BigInt(0)) { var e2 = 0; while (rem % pb === BigInt(0)) { rem /= pb; e2++; } facs.push([pb, e2]); }
+  }
+  var fline = facs.length ? facs.map(function (fe) { return fgrp(fe[0]) + (fe[1] === 1 ? '' : '^' + fe[1]); }).join(' \u00d7 ') : '(none <= 1,000,000)';
+  var remLine = rem === BigInt(1) ? '1' : fgrp(rem) + ' (no factor <= 1,000,000 \u2014 prime or composite)';
+  var tc = 0;
+  facs.forEach(function (fe) { tc += fe[1]; });
+  return 'Factors: ' + fline + '\nRemaining: ' + remLine + '\nDistinct: ' + facs.length + '\nTotal: ' + tc;
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

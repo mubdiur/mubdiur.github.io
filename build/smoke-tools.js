@@ -1387,6 +1387,14 @@ console.log('-- fuel --');
   ok(TOOLS['fuel-converter'].handler.toString().indexOf('fuelConv') >= 0, 'fuel delegates');
 }
 
+console.log('-- fact --');
+{
+  ok(TOOLS['prime-factorization'].handler('12') === 'Factors: 2^2 \u00d7 3\nRemaining: 1\nDistinct: 2\nTotal: 3', 'fact small');
+  ok(TOOLS['prime-factorization'].handler('360') === 'Factors: 2^3 \u00d7 3^2 \u00d7 5\nRemaining: 1\nDistinct: 3\nTotal: 6', 'fact powers');
+  ok(TOOLS['prime-factorization'].handler('1000036000099').indexOf('Remaining: 1,000,036,000,099') >= 0, 'fact partial');
+  ok(TOOLS['prime-factorization'].handler.toString().indexOf('primeFactors') >= 0, 'fact delegates');
+}
+
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

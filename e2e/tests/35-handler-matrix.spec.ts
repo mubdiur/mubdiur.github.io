@@ -604,6 +604,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('fuel-converter', 'forward', TOOLS['fuel-converter'].handler('8 l/100km') === 'Input: 8 L/100km\nL/100km: 8\nkm/L: 12.5\nMPG (US): 29.401823\nMPG (UK): 35.310117');
     push('fuel-converter', 'reverse', TOOLS['fuel-converter'].handler('36 mpg').indexOf('MPG (US): 36') >= 0);
     push('fuel-converter', 'junk throws', mustThrow(() => TOOLS['fuel-converter'].handler('abc')));
+    push('prime-factorization', 'small', TOOLS['prime-factorization'].handler('12') === 'Factors: 2^2 \u00d7 3\nRemaining: 1\nDistinct: 2\nTotal: 3');
+    push('prime-factorization', 'partial', TOOLS['prime-factorization'].handler('1000036000099').indexOf('Remaining: 1,000,036,000,099') >= 0);
+    push('prime-factorization', 'junk throws', mustThrow(() => TOOLS['prime-factorization'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));
