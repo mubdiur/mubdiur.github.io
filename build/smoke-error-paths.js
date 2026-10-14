@@ -894,6 +894,7 @@ mustThrow(() => T.solidSolve('   '), 'solidSolve empty');mustThrow(() => T.solid
 mustThrow(() => T.fuelConv('   '), 'fuelConv empty');mustThrow(() => T.fuelConv('abc'), 'fuelConv junk');mustThrow(() => T.fuelConv('-8 l/100km'), 'fuelConv neg');mustThrow(() => T.fuelConv('8 parsecs'), 'fuelConv badunit');mustNotThrow(() => T.fuelConv(String.fromCharCode(0xD800)), 'fuelConv lone surrogate survives');
 mustThrow(() => T.primeFactors('   '), 'primeFactors empty');mustThrow(() => T.primeFactors('abc'), 'primeFactors junk');mustThrow(() => T.primeFactors('0'), 'primeFactors zero');mustThrow(() => T.primeFactors('12.5'), 'primeFactors decimal');mustNotThrow(() => T.primeFactors(String.fromCharCode(0xD800)), 'primeFactors lone surrogate survives');
 mustThrow(() => T.boxSolve('   '), 'boxSolve empty');mustThrow(() => T.boxSolve('abc'), 'boxSolve junk');mustThrow(() => T.boxSolve('3 4'), 'boxSolve count');mustThrow(() => T.boxSolve('box -3 4 5'), 'boxSolve neg');mustNotThrow(() => T.boxSolve(String.fromCharCode(0xD800)), 'boxSolve lone surrogate survives');
+mustThrow(() => T.conePyramid('   '), 'conePyramid empty');mustThrow(() => T.conePyramid('abc'), 'conePyramid shape');mustThrow(() => T.conePyramid('cone 3'), 'conePyramid count');mustThrow(() => T.conePyramid('cone -3 7'), 'conePyramid neg');mustNotThrow(() => T.conePyramid(String.fromCharCode(0xD800)), 'conePyramid lone surrogate survives');
 console.log('-- wasm guards (proven by js/wasm.js unit, not smoke) --');
 ok(true, 'wasm guards exist (manual verify: js/wasm.js mem() bounds + ASN.1 cap)');
 

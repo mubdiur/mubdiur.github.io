@@ -1403,6 +1403,14 @@ console.log('-- box --');
   ok(TOOLS['box-solver'].handler('3x4x5').indexOf('Volume: 60') >= 0, 'box compact');
   ok(TOOLS['box-solver'].handler.toString().indexOf('boxSolve') >= 0, 'box delegates');
 }
+
+console.log('-- cone --');
+{
+  ok(TOOLS['cone-pyramid-solver'].handler('pyramid 4 6') === 'Solid: square pyramid, base = 4, height = 6\nVolume: 32\nSurface: 66.5964425627\nLateral: 50.5964425627\nSlant: 6.3245553203', 'cone pyramid');
+  ok(TOOLS['cone-pyramid-solver'].handler('cone 3 7').indexOf('Volume: 65.9734457254') >= 0, 'cone volume');
+  ok(TOOLS['cone-pyramid-solver'].handler('cone 3 7').indexOf('Slant: 7.6157731059') >= 0, 'cone slant');
+  ok(TOOLS['cone-pyramid-solver'].handler.toString().indexOf('conePyramid') >= 0, 'cone delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

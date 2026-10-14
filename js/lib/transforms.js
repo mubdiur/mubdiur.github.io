@@ -2034,6 +2034,50 @@ T.boxSolve = function (s) {
   var cube = (l === w && w === h);
   return 'Dims: ' + btrim(l) + ' \u00d7 ' + btrim(w) + ' \u00d7 ' + btrim(h) + '\nVolume: ' + btrim(l * w * h) + '\nSurface: ' + btrim(2 * (l * w + l * h + w * h)) + '\nSpace diagonal: ' + btrim(Math.sqrt(l * l + w * w + h * h)) + '\nCube: ' + (cube ? 'yes' : 'no');
 };
+/* Cone and square-pyramid solver: volume, surface, lateral plus slant. */
+T.conePyramid = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a solid \u2014 e.g. cone 3 7 or pyramid 4 6');
+  function pnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function ptrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(square\s+pyramid|pyramid|pyr|cone|con)\b/.exec(low);
+  if (!m0) throw new Error('Unknown solid \u2014 use cone or pyramid, e.g. cone 3 7');
+  var isP = m0[1].charAt(0) === 's' || m0[1].slice(0, 3) === 'pyr';
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '') continue;
+    nums.push(tk);
+  }
+  if (isP) {
+    if (nums.length !== 2) throw new Error('Pyramid wants base and height \u2014 e.g. pyramid 4 6');
+    var ba = pnum(nums[0], 'Bad base');
+    var ph = pnum(nums[1], 'Bad height');
+    var ps = Math.sqrt(ph * ph + (ba / 2) * (ba / 2));
+    var plat = 2 * ba * ps;
+    return 'Solid: square pyramid, base = ' + ptrim(ba) + ', height = ' + ptrim(ph) + '\nVolume: ' + ptrim(ba * ba * ph / 3) + '\nSurface: ' + ptrim(plat + ba * ba) + '\nLateral: ' + ptrim(plat) + '\nSlant: ' + ptrim(ps);
+  }
+  if (nums.length !== 2) throw new Error('Cone wants radius and height \u2014 e.g. cone 3 7');
+  var cr = pnum(nums[0], 'Bad radius');
+  var ch = pnum(nums[1], 'Bad height');
+  var cs = Math.sqrt(cr * cr + ch * ch);
+  var clat = Math.PI * cr * cs;
+  return 'Solid: cone, radius = ' + ptrim(cr) + ', height = ' + ptrim(ch) + '\nVolume: ' + ptrim(Math.PI * cr * cr * ch / 3) + '\nSurface: ' + ptrim(clat + Math.PI * cr * cr) + '\nLateral: ' + ptrim(clat) + '\nSlant: ' + ptrim(cs);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
