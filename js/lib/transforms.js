@@ -2408,6 +2408,71 @@ T.ellipseSolve = function (s) {
   var ecc = ea === eb ? 0 : Math.sqrt(1 - (eb * eb) / (ea * ea));
   return 'Ellipse: a = ' + mtrim(ea) + ', b = ' + mtrim(eb) + '\nArea: ' + mtrim(Math.PI * ea * eb) + '\nPerimeter: ~' + mtrim(per) + '\nEccentricity: ' + mtrim(ecc) + '\nCircle: ' + (ea === eb ? 'yes' : 'no');
 };
+/* Star-polygon solver: tip angle, circumradius, perimeter plus path count. */
+T.starSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a star \u2014 e.g. star 5 2 10 or pentagram 10');
+  function whole(tok, label) {
+    if (!/^[+-]?\d+$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseInt(tok, 10);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    return v;
+  }
+  function snum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function strim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  function gg(a, b) { while (b !== 0) { var t = a % b; a = b; b = t; } return a; }
+  var low = txt.toLowerCase();
+  var m0 = /^(star|pentagram|hexagram)\b/.exec(low);
+  if (!m0) throw new Error('Unknown star \u2014 use star 5 2 10 or pentagram 10');
+  var namedN = m0[1] === 'pentagram' ? 5 : (m0[1] === 'hexagram' ? 6 : 0);
+  var namedM = m0[1] === 'pentagram' ? 2 : (m0[1] === 'hexagram' ? 2 : 0);
+  low = low.slice(m0[0].length);
+  var brace = /\{\s*(\d+)\s*\/\s*(\d+)\s*\}/.exec(low);
+  var n, md, edge;
+  if (brace) {
+    n = whole(brace[1], 'Bad points');
+    md = whole(brace[2], 'Bad density');
+    var rest = low.slice(brace.index + brace[0].length).split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+    if (rest.length !== 1) throw new Error('Star wants one edge \u2014 e.g. star {5/2} 10');
+    var eqt = rest[0].lastIndexOf('=');
+    edge = snum(eqt >= 0 ? rest[0].slice(eqt + 1) : rest[0], 'Bad edge');
+  } else {
+    var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+    var nums = [];
+    for (var bi = 0; bi < parts.length; bi++) {
+      var pp = parts[bi];
+      var ei = pp.lastIndexOf('=');
+      var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+      if (tk === '' || tk === 'n' || tk === 'm' || tk === 's' || tk === 'edge') continue;
+      nums.push(tk);
+    }
+    if (namedN) {
+      if (nums.length !== 1) throw new Error('A named star wants one edge \u2014 e.g. pentagram 10');
+      n = namedN; md = namedM; edge = snum(nums[0], 'Bad edge');
+    } else {
+      if (nums.length !== 3) throw new Error('Star wants points, density and edge \u2014 e.g. star 5 2 10');
+      n = whole(nums[0], 'Bad points');
+      md = whole(nums[1], 'Bad density');
+      edge = snum(nums[2], 'Bad edge');
+    }
+  }
+  if (n < 5) throw new Error('Need at least 5 points \u2014 got ' + n);
+  if (n > 1000000) throw new Error('Too many points \u2014 max 1000000');
+  if (md < 2 || md * 2 >= n) throw new Error('Density must be within [2, n/2) \u2014 got m=' + md + ' for n=' + n);
+  var paths = gg(n, md);
+  var tip = 180 * (n - 2 * md) / n;
+  var rad = edge / (2 * Math.sin(md * Math.PI / n));
+  return 'Star: {' + n + '/' + md + '}\nPaths: ' + paths + (paths === 1 ? ' (single)' : ' (compound)') + '\nTip angle: ' + strim(tip) + '\u00b0\nCircumradius: ' + strim(rad) + '\nPerimeter: ' + strim(n * edge);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

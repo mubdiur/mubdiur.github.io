@@ -1475,6 +1475,14 @@ console.log('-- ellipse --');
   ok(TOOLS['ellipse-solver'].handler('ellipse 5 5') === 'Ellipse: a = 5, b = 5\nArea: 78.5398163397\nPerimeter: ~31.4159265359\nEccentricity: 0\nCircle: yes', 'ellipse circle');
   ok(TOOLS['ellipse-solver'].handler.toString().indexOf('ellipseSolve') >= 0, 'ellipse delegates');
 }
+
+console.log('-- star --');
+{
+  ok(TOOLS['star-polygon-solver'].handler('star 5 2 10') === 'Star: {5/2}\nPaths: 1 (single)\nTip angle: 36\u00b0\nCircumradius: 5.2573111212\nPerimeter: 50', 'star exact');
+  ok(TOOLS['star-polygon-solver'].handler('pentagram 10') === TOOLS['star-polygon-solver'].handler('star 5 2 10'), 'star named');
+  ok(TOOLS['star-polygon-solver'].handler('hexagram 6').indexOf('Paths: 2 (compound)') >= 0, 'star compound');
+  ok(TOOLS['star-polygon-solver'].handler.toString().indexOf('starSolve') >= 0, 'star delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
