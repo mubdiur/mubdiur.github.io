@@ -2249,6 +2249,18 @@ T.straddleDecode = function (s, key) {
 T.straddleCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'KEYWORD' : o.key; if ((o.mode || 'encode') === 'decode') return T.straddleDecode(s, k); return T.straddleEncode(s, k); };
 /* Porta cipher: reciprocal polyalphabetic with 13 alphabets (AB share 0 through YZ share 12); key A alone is ROT13, case preserved, non-letters pass through. */
 T.portaCipher = function (s, opts) {
+  var o = opts || {}; var key = String(o.key === undefined ? 'LEMON' : o.key).replace(/[^a-zA-Z]/g, '');
+  if (!key) throw new Error('Enter a letter key \u2014 AB share alphabet 0, CD share 1, and so on');
+  var ki = 0;
+  return String(s).replace(/[a-zA-Z]/g, function (c) {
+    var base = c.charCodeAt(0) >= 97 ? 97 : 65;
+    var p = c.charCodeAt(0) - base;
+    var kc = key.charCodeAt(ki++ % key.length);
+    var k = (kc >= 97 ? kc - 97 : kc - 65) >> 1;
+    var q = p < 13 ? 13 + ((p + k) % 13) : (((p - 13 - k) % 13) + 13) % 13;
+    return String.fromCharCode(base + q);
+  });
+};
 /* Bifid cores: Polybius coordinates diffused in blocks of period (rows then columns reread as pairs); length preserved, doubles allowed. */
 T.bifidPeriod = function (p) {
   var n = p === undefined ? 5 : parseInt(p, 10);
@@ -2285,18 +2297,34 @@ T.bifidDecode = function (s, squareKey, period) {
   return out;
 };
 T.bifidCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; var p = o.period === undefined ? '5' : o.period; if ((o.mode || 'encode') === 'decode') return T.bifidDecode(s, q, p); return T.bifidEncode(s, q, p); };
-  var o = opts || {}; var key = String(o.key === undefined ? 'LEMON' : o.key).replace(/[^a-zA-Z]/g, '');
-  if (!key) throw new Error('Enter a letter key \u2014 AB share alphabet 0, CD share 1, and so on');
-  var ki = 0;
-  return String(s).replace(/[a-zA-Z]/g, function (c) {
-    var base = c.charCodeAt(0) >= 97 ? 97 : 65;
-    var p = c.charCodeAt(0) - base;
-    var kc = key.charCodeAt(ki++ % key.length);
-    var k = (kc >= 97 ? kc - 97 : kc - 65) >> 1;
-    var q = p < 13 ? 13 + ((p + k) % 13) : (((p - 13 - k) % 13) + 13) % 13;
-    return String.fromCharCode(base + q);
-  });
+/* Autokey cores: Vigenere keystream extended with the text itself (plain or cipher feedback); case preserved, non-letters pass through. */
+T.autokeyVals = function (key) {
+  var k = String(key === undefined ? 'LEMON' : key).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!k) throw new Error('Enter a letter key \u2014 extended with the text itself');
+  var v = []; for (var i = 0; i < k.length; i++) v.push(k.charCodeAt(i) - 65);
+  return v;
 };
+T.autokeyEncode = function (s, key, variant) {
+  var kv = T.autokeyVals(key); var v = variant || 'plain';
+  var str = String(s); var P = [];
+  for (var i = 0; i < str.length; i++) { var ch = str.charAt(i); if (/[a-zA-Z]/.test(ch)) { var up = ch.toUpperCase().charCodeAt(0) - 65; P.push({ val: up, lower: ch.charCodeAt(0) >= 97 }); } }
+  var C = [];
+  for (var j = 0; j < P.length; j++) { var si = j < kv.length ? kv[j] : (v === 'cipher' ? C[j - kv.length] : P[j - kv.length].val); C.push((P[j].val + si) % 26); }
+  var out = ''; var li = 0;
+  for (var m = 0; m < str.length; m++) { var c = str.charAt(m); if (/[a-zA-Z]/.test(c)) { var n = C[li]; out += String.fromCharCode((P[li].lower ? 97 : 65) + n); li++; } else out += c; }
+  return out;
+};
+T.autokeyDecode = function (s, key, variant) {
+  var kv = T.autokeyVals(key); var v = variant || 'plain';
+  var str = String(s); var C = [];
+  for (var i = 0; i < str.length; i++) { var ch = str.charAt(i); if (/[a-zA-Z]/.test(ch)) { var up = ch.toUpperCase().charCodeAt(0) - 65; C.push({ val: up, lower: ch.charCodeAt(0) >= 97 }); } }
+  var P = [];
+  for (var j = 0; j < C.length; j++) { var si = j < kv.length ? kv[j] : (v === 'cipher' ? C[j - kv.length].val : P[j - kv.length]); P.push(((C[j].val - si) % 26 + 26) % 26); }
+  var out = ''; var li = 0;
+  for (var m = 0; m < str.length; m++) { var c = str.charAt(m); if (/[a-zA-Z]/.test(c)) { out += String.fromCharCode((C[li].lower ? 97 : 65) + P[li]); li++; } else out += c; }
+  return out;
+};
+T.autokeyCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'LEMON' : o.key; var v = o.variant === undefined ? 'plain' : o.variant; if ((o.mode || 'encode') === 'decode') return T.autokeyDecode(s, k, v); return T.autokeyEncode(s, k, v); };
 /* Columnar cores: keyword-ordered columns (stable for duplicate letters), no padding, uneven columns handled, code points preserved. */
 T.columnarOrder = function (key) {
   var k = String(key === undefined ? 'ZEBRAS' : key).toUpperCase().replace(/[^A-Z]/g, '');

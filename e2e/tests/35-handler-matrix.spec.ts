@@ -219,6 +219,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('porta-cipher', 'empty key throws', mustThrow(() => TOOLS['porta-cipher'].handler('ABC', { key: '' })));
     push('bifid-cipher', 'happy', TOOLS['bifid-cipher'].handler('AM', { square: 'A', period: '5' }) === 'CB');
     push('bifid-cipher', 'bad period throws', mustThrow(() => TOOLS['bifid-cipher'].handler('AB', { square: 'A', period: '1' })));
+    push('autokey-cipher', 'happy', TOOLS['autokey-cipher'].handler('HELLO', { key: 'A', variant: 'plain' }) === 'HLPWZ');
+    push('autokey-cipher', 'empty key throws', mustThrow(() => TOOLS['autokey-cipher'].handler('ABC', { key: '' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);
