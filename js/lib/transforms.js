@@ -1287,6 +1287,51 @@ T.ageCalc = function (s, opts) {
     'Next birthday: ' + unc + ' (' + away + (away === 1 ? ' day \u2014 turns ' : ' days \u2014 turns ') + turn + ')'];
   return blines.join('\n');
 };
+/* Percentages: P% of X, X is what % of Y, and change A \u2192 B. Trimmed float dust, grouped digits. */
+T.pctCalc = function (s, opts) {
+  var o = opts || {};
+  var raw = String(s === undefined || s === null ? "" : s);
+  for (var pi = 0; pi < raw.length; pi++) if (raw.charCodeAt(pi) >= 0xD800 && raw.charCodeAt(pi) <= 0xDFFF) return "";
+  var txt = raw.trim();
+  if (!txt) throw new Error("Enter a number");
+  function num(t, label) {
+    var c = String(t).replace(/[,_\s]/g, "").replace(/%$/, "");
+    if (!/^[+-]?(\d+(\.\d+)?|\.\d+)$/.test(c)) throw new Error("Bad " + label + " \u2014 got " + JSON.stringify(String(t).trim() === "" ? t : String(t).trim()));
+    var n = parseFloat(c);
+    if (!isFinite(n) || Math.abs(n) > 1e15) throw new Error(label + " out of range");
+    return n;
+  }
+  var x = num(txt, "number");
+  var mode = String(o.mode || "of");
+  if (mode !== "of" && mode !== "is" && mode !== "change") throw new Error("Bad mode \u2014 use of, is or change");
+  function fmt(n) {
+    var r = Math.round(n * 1e10) / 1e10;
+    if (r === 0) r = 0;
+    var neg = r < 0 ? "-" : "";
+    var cells = String(Math.abs(r)).split(".");
+    cells[0] = cells[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return neg + cells.join(".");
+  }
+  function sgn(n) { return (n > 0 ? "+" : "") + fmt(n); }
+  if (mode === "of") {
+    var praw = o.percent === undefined || o.percent === null || String(o.percent).trim() === "" ? "20" : o.percent;
+    var p = num(praw, "percent");
+    return fmt(p) + "% of " + fmt(x) + " = " + fmt(x * p / 100);
+  }
+  if (mode === "is") {
+    var oraw = o.of === undefined || o.of === null || String(o.of).trim() === "" ? "" : o.of;
+    if (oraw === "") throw new Error("Enter the base value \u2014 of Y");
+    var y = num(oraw, "base");
+    if (y === 0) throw new Error("Cannot divide by zero");
+    return fmt(x) + " is " + fmt(x / y * 100) + "% of " + fmt(y);
+  }
+  var traw = o.to === undefined || o.to === null || String(o.to).trim() === "" ? "" : o.to;
+  if (traw === "") throw new Error("Enter the target value \u2014 to B");
+  var b = num(traw, "target");
+  if (x === 0) throw new Error("Cannot measure change from zero");
+  var d = b - x;
+  return "Change: " + sgn(d / x * 100) + "% (" + fmt(x) + " \u2192 " + fmt(b) + ", " + sgn(d) + ")";
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

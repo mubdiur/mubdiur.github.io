@@ -1271,6 +1271,15 @@ console.log('-- age --');
   ok(TOOLS['age-calculator'].handler('1990-06-15', {}).indexOf('Age: ') === 0, 'age default asof');
   ok(TOOLS['age-calculator'].handler.toString().indexOf('ageCalc') >= 0, 'age delegates');
 }
+console.log('-- pct --');
+{
+  ok(TOOLS['percentage-calculator'].handler('150', { mode: 'of', percent: '20' }) === '20% of 150 = 30', 'pct of');
+  ok(TOOLS['percentage-calculator'].handler('30', { mode: 'is', of: '150' }) === '30 is 20% of 150', 'pct is');
+  ok(TOOLS['percentage-calculator'].handler('100', { mode: 'change', to: '120' }) === 'Change: +20% (100 \u2192 120, +20)', 'pct change up');
+  ok(TOOLS['percentage-calculator'].handler('80', { mode: 'change', to: '50' }) === 'Change: -37.5% (80 \u2192 50, -30)', 'pct change down');
+  ok(TOOLS['percentage-calculator'].handler('1', { mode: 'is', of: '3' }) === '1 is 33.3333333333% of 3', 'pct repeating');
+  ok(TOOLS['percentage-calculator'].handler.toString().indexOf('pctCalc') >= 0, 'pct delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
