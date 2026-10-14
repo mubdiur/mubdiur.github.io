@@ -687,6 +687,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('thread-solver', 'diameters', TOOLS['thread-solver'].handler('M10 1.5').indexOf('Pitch dia: 9.0257215') >= 0);
     push('thread-solver', 'coarse', TOOLS['thread-solver'].handler('M10').indexOf('Thread M10 x 1.5') >= 0);
     push('thread-solver', 'junk throws', mustThrow(() => TOOLS['thread-solver'].handler('abc')));
+    push('keyway-solver', 'key', TOOLS['keyway-solver'].handler('keyway 40').indexOf('Key: 12 x 8') >= 0);
+    push('keyway-solver', 'checks', TOOLS['keyway-solver'].handler('keyway 40').indexOf('Shaft check: 35') >= 0);
+    push('keyway-solver', 'junk throws', mustThrow(() => TOOLS['keyway-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

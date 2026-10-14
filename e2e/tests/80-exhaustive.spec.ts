@@ -291,6 +291,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'cam-solver': { good: 'cam 20 10 90 45', bad: 'abc', expectInOutput: /Max vel:/, expectError: /Unknown cam/ },
   'bolt-solver': { good: 'bolt 4 100', bad: 'abc', expectInOutput: /Spacing:/, expectError: /Unknown pattern/ },
   'thread-solver': { good: 'M10 1.5', bad: 'abc', expectInOutput: /Tap drill:/, expectError: /Unknown thread/ },
+  'keyway-solver': { good: 'keyway 40', bad: 'abc', expectInOutput: /Shaft check:/, expectError: /Unknown keyway/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

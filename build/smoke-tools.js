@@ -1607,6 +1607,14 @@ console.log('-- thread --');
   ok(TOOLS['thread-solver'].handler('M10').indexOf('Thread M10 x 1.5') >= 0, 'thread coarse default');
   ok(TOOLS['thread-solver'].handler.toString().indexOf('threadSolve') >= 0, 'thread delegates');
 }
+console.log('-- keyway --');
+{
+  ok(TOOLS['keyway-solver'].handler('keyway 40').indexOf('Key: 12 x 8') >= 0, 'keyway key section');
+  ok(TOOLS['keyway-solver'].handler('keyway 40').indexOf('Shaft check: 35') >= 0, 'keyway shaft check');
+  ok(TOOLS['keyway-solver'].handler('keyway 40').indexOf('Hub check: 43.3') >= 0, 'keyway hub check');
+  ok(TOOLS['keyway-solver'].handler('key 8').indexOf('2 x 2') >= 0, 'keyway small shaft');
+  ok(TOOLS['keyway-solver'].handler.toString().indexOf('keywaySolve') >= 0, 'keyway delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

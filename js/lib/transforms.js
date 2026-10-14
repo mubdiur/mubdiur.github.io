@@ -3187,6 +3187,39 @@ T.threadSolve = function (s) {
   var h = 0.61343 * tp;
   return 'Thread M' + ttrim(td) + ' x ' + ttrim(tp) + '\nPitch dia: ' + ttrim(d2) + '\nMinor int: ' + ttrim(d1) + '\nMinor ext: ' + ttrim(d3) + '\nTap drill: ' + ttrim(tap) + '\nDepth: ' + ttrim(h) + ' (' + ttrim(tpi) + ' TPI)';
 };
+/* Keyway solver: parallel key section plus shaft and hub depths per DIN 6885-1, with check dims. */
+T.keywaySolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a shaft dia \u2014 e.g. keyway 40');
+  var low = txt.toLowerCase();
+  var m0 = /^(keyway|key|din\s*6885|din6885)\b/.exec(low);
+  if (!m0) throw new Error('Unknown keyway \u2014 use keyway 40');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;x\u00d7]+/).filter(function (x) { return x !== ''; });
+  if (parts.length !== 1) throw new Error('Keyway wants one shaft dia \u2014 e.g. keyway 40');
+  if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(parts[0])) throw new Error('Bad dia \u2014 got ' + JSON.stringify(parts[0].slice(0, 40)));
+  var d = parseFloat(parts[0]);
+  if (!isFinite(d)) throw new Error('Dia \u2014 out of range');
+  if (!(d > 0)) throw new Error('Dia must be positive \u2014 got ' + JSON.stringify(parts[0].slice(0, 40)));
+  if (d > 1e15) throw new Error('Value too large \u2014 max 1e15');
+  if (d <= 6) throw new Error('Shaft too small \u2014 min over 6 mm');
+  if (d > 130) throw new Error('Shaft over range \u2014 max 130 mm (DIN 6885-1)');
+  var ROWS = [[6,8,2,2,1.2,1.0],[8,10,3,3,1.8,1.4],[10,12,4,4,2.5,1.8],[12,17,5,5,3.0,2.3],[17,22,6,6,3.5,2.8],[22,30,8,7,4.0,3.3],[30,38,10,8,5.0,3.3],[38,44,12,8,5.0,3.3],[44,50,14,9,5.5,3.8],[50,58,16,10,6.0,4.3],[58,65,18,11,7.0,4.4],[65,75,20,12,7.5,4.9],[75,85,22,14,9.0,5.4],[85,95,25,14,9.0,5.4],[95,110,28,16,10.0,6.4],[110,130,32,18,11.0,7.4]];
+  var row = null;
+  for (var ri = 0; ri < ROWS.length; ri++) { if (d > ROWS[ri][0] && d <= ROWS[ri][1]) { row = ROWS[ri]; break; } }
+  if (!row) throw new Error('No keyway row \u2014 max 130 mm');
+  function ktrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var out = [];
+  out.push('Shaft dia ' + ktrim(d) + ' (' + row[0] + '-' + row[1] + ' mm)');
+  out.push('Key: ' + row[2] + ' x ' + row[3] + ' (DIN 6885)');
+  out.push('Shaft t1: ' + ktrim(row[4]));
+  out.push('Hub t2: ' + ktrim(row[5]));
+  out.push('Shaft check: ' + ktrim(d - row[4]));
+  out.push('Hub check: ' + ktrim(d + row[5]));
+  return out.join('\n');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
