@@ -1460,6 +1460,13 @@ console.log('-- cap --');
   ok(TOOLS['spherical-cap-solver'].handler('cap 5 10').indexOf('Curved: 314.159265359') >= 0, 'cap sphere curved');
   ok(TOOLS['spherical-cap-solver'].handler.toString().indexOf('capSolve') >= 0, 'cap delegates');
 }
+
+console.log('-- annulus --');
+{
+  ok(TOOLS['annulus-solver'].handler('annulus 5 3') === 'Annulus: R = 5, r = 3\nArea: 50.2654824574\nOuter: 31.4159265359\nInner: 18.8495559215\nWidth: 2\nFill: 64%', 'annulus exact');
+  ok(TOOLS['annulus-solver'].handler('washer 5 3').indexOf('Area: 50.2654824574') >= 0, 'annulus alias');
+  ok(TOOLS['annulus-solver'].handler.toString().indexOf('annulusSolve') >= 0, 'annulus delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

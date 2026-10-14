@@ -631,6 +631,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('spherical-cap-solver', 'exact', TOOLS['spherical-cap-solver'].handler('cap 5 2').indexOf('Volume: 54.4542726622') >= 0);
     push('spherical-cap-solver', 'sphere', TOOLS['spherical-cap-solver'].handler('cap 5 10').indexOf('Volume: 523.5987755983') >= 0);
     push('spherical-cap-solver', 'junk throws', mustThrow(() => TOOLS['spherical-cap-solver'].handler('abc')));
+    push('annulus-solver', 'exact', TOOLS['annulus-solver'].handler('annulus 5 3').indexOf('Area: 50.2654824574') >= 0);
+    push('annulus-solver', 'alias', TOOLS['annulus-solver'].handler('washer 5 3').indexOf('Fill: 64%') >= 0);
+    push('annulus-solver', 'junk throws', mustThrow(() => TOOLS['annulus-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

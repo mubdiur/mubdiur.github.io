@@ -273,6 +273,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'polygon-solver': { good: 'hexagon 10', bad: 'abc', expectInOutput: /Area: 259/, expectError: /Unknown polygon/ },
   'circle-segment-solver': { good: 'segment 5 90', bad: 'abc', expectInOutput: /Segment area: 7/, expectError: /Unknown segment/ },
   'spherical-cap-solver': { good: 'cap 5 2', bad: 'abc', expectInOutput: /Volume: 54/, expectError: /Unknown cap/ },
+  'annulus-solver': { good: 'annulus 5 3', bad: 'abc', expectInOutput: /Area: 50/, expectError: /Unknown annulus/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

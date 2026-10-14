@@ -2335,6 +2335,41 @@ T.capSolve = function (s) {
   var total = curved + Math.PI * ba * ba;
   return 'Cap: R = ' + ctrim(sr) + ', h = ' + ctrim(sh) + '\nBase radius: ' + ctrim(ba) + '\nVolume: ' + ctrim(vol) + '\nCurved: ' + ctrim(curved) + '\nTotal: ' + ctrim(total);
 };
+/* Annulus solver: ring area, both circumferences, width plus fill. */
+T.annulusSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter an annulus \u2014 e.g. annulus 5 3');
+  function anum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function atrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(annulus|washer)\b/.exec(low);
+  if (!m0) throw new Error('Unknown annulus \u2014 use annulus 5 3');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'r') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 2) throw new Error('Annulus wants outer and inner radii \u2014 e.g. annulus 5 3');
+  var ro = anum(nums[0], 'Bad outer radius');
+  var ri = anum(nums[1], 'Bad inner radius');
+  if (!(ro > ri)) throw new Error('Outer must exceed inner \u2014 got R=' + atrim(ro) + ' r=' + atrim(ri));
+  var area = Math.PI * (ro * ro - ri * ri);
+  return 'Annulus: R = ' + atrim(ro) + ', r = ' + atrim(ri) + '\nArea: ' + atrim(area) + '\nOuter: ' + atrim(2 * Math.PI * ro) + '\nInner: ' + atrim(2 * Math.PI * ri) + '\nWidth: ' + atrim(ro - ri) + '\nFill: ' + atrim(100 * (ro * ro - ri * ri) / (ro * ro)) + '%';
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
