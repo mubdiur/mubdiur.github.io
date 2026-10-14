@@ -291,6 +291,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('pig-latin', 'bad suffix throws', mustThrow(() => TOOLS['pig-latin'].handler('hi', { suffix: 'oy' })));
     push('leet-speak', 'happy', TOOLS['leet-speak'].handler('leet') === '1337');
     push('leet-speak', 'bad level throws', mustThrow(() => TOOLS['leet-speak'].handler('hi', { level: 'ultra' })));
+    push('dancing-men', 'happy', TOOLS['dancing-men'].handler('ABC') === 'dddd uddd dudd');
+    push('dancing-men', 'digit throws', mustThrow(() => TOOLS['dancing-men'].handler('A1')));
     push('befunge', 'happy', TOOLS['befunge'].handler('"A",@') === 'A');
     push('befunge', 'div zero throws', mustThrow(() => TOOLS['befunge'].handler('50/.@')));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');

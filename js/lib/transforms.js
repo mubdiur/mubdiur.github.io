@@ -3964,6 +3964,72 @@ T.leetSpeak = function (s, opts) {
   }
   return out;
 };
+/* Dancing-men cores: Sherlock-style stick poses as four limb bits, A to M plain and N to Z flagged, slash word gaps, tight poses only. */
+T.dancingMen = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'encode';
+  if (mode !== 'encode' && mode !== 'decode') throw new Error('Bad mode \u2014 use encode or decode');
+  var ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  function poseOf(ch) {
+    var idx = ABC.indexOf(ch);
+    var n = idx < 13 ? idx : idx - 13;
+    var tok = '';
+    for (var b = 0; b < 4; b++) tok += ((n >> b) & 1) ? 'u' : 'd';
+    return idx < 13 ? tok : tok + '*';
+  }
+  function isSurrogate(cc) { return cc >= 0xD800 && cc <= 0xDFFF; }
+  if (mode === 'encode') {
+    var src = String(s).toUpperCase();
+    var out = [];
+    for (var e = 0; e < src.length; e++) {
+      var ch = src.charAt(e);
+      var cd = src.charCodeAt(e);
+      if (isSurrogate(cd)) { out.push(ch); continue; }
+      if (ch === ' ' || cd === 9 || cd === 10 || cd === 13) { out.push('/'); continue; }
+      if (ABC.indexOf(ch) >= 0) { out.push(poseOf(ch)); continue; }
+      throw new Error('No dancing pose \u2014 cannot dance ' + JSON.stringify(ch));
+    }
+    return out.join(' ');
+  }
+  var dsrc = String(s);
+  var toks = [];
+  var cur = '';
+  for (var dd = 0; dd < dsrc.length; dd++) {
+    var dch = dsrc.charAt(dd);
+    var dcc = dsrc.charCodeAt(dd);
+    if (isSurrogate(dcc)) { if (cur) { toks.push(cur); cur = ''; } toks.push(dch); continue; }
+    if (dcc === 32 || dcc === 9 || dcc === 10 || dcc === 13) { if (cur) { toks.push(cur); cur = ''; } continue; }
+    if (dcc === 47) { if (cur) { toks.push(cur); cur = ''; } toks.push('/'); continue; }
+    cur += dch;
+  }
+  if (cur) toks.push(cur);
+  var dout = '';
+  for (var tt = 0; tt < toks.length; tt++) {
+    var tk = toks[tt];
+    if (tk === '/') { dout += ' '; continue; }
+    if (tk.length === 1 && isSurrogate(tk.charCodeAt(0))) { dout += tk; continue; }
+    var low = tk.toLowerCase();
+    var flagged = false;
+    if (low.charAt(low.length - 1) === '*') { flagged = true; low = low.slice(0, -1); }
+    if (low.length !== 4) throw new Error('Unknown pose \u2014 four limbs u or d plus optional *, got ' + JSON.stringify(tk));
+    var nn = 0;
+    for (var qi = 0; qi < 4; qi++) {
+      var qc = low.charAt(qi);
+      if (qc !== 'u' && qc !== 'd') throw new Error('Unknown pose \u2014 limbs are u or d, got ' + JSON.stringify(tk));
+      if (qc === 'u') nn += (1 << qi);
+    }
+    if (nn >= 13) throw new Error('Unknown pose \u2014 no letter stands like ' + JSON.stringify(tk));
+    dout += ABC.charAt(flagged ? nn + 13 : nn);
+  }
+  var res = '';
+  var prevSp = true;
+  for (var rr = 0; rr < dout.length; rr++) {
+    var rc = dout.charAt(rr);
+    if (rc === ' ') { if (!prevSp) { res += ' '; prevSp = true; } }
+    else { res += rc; prevSp = false; }
+  }
+  return res;
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
