@@ -85,6 +85,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'iban-validator': { good: 'GB29 NWBK 6016 1331 9268 19', expectInOutput: /Valid/ },
   'gtin-validator': { good: '5901234123457', expectInOutput: /EAN-13/ },
   'verhoeff-validator': { good: '236', expectInOutput: /Valid/ },
+  'damm-validator': { good: '5724', expectInOutput: /Valid/ },
   'befunge': { good: '"A",@', expectInOutput: /A/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },

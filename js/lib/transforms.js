@@ -3830,6 +3830,37 @@ T.verhoeffCheck = function (s, opts) {
   }
   return digits + String(INV[vrun(digits + '0')]);
 };
+/* Damm cores: quasigroup table walk catching all single-digit errors and adjacent transpositions, check digit needs no tables beyond the walk itself. */
+T.dammCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var QT = [[0,3,1,7,5,9,8,6,4,2],[7,0,9,2,1,5,4,8,6,3],[4,2,0,6,8,7,1,3,5,9],[1,7,5,0,9,8,3,4,2,6],[6,1,2,3,0,4,5,9,7,8],[3,6,7,4,2,0,9,5,8,1],[5,8,6,9,7,2,0,1,3,4],[8,9,4,5,3,6,2,0,1,7],[9,4,3,8,6,1,7,2,0,5],[2,5,8,1,4,3,6,7,9,0]];
+  var raw = String(s);
+  var digits = '';
+  for (var di = 0; di < raw.length; di++) {
+    var dc = raw.charCodeAt(di);
+    if (dc >= 0xD800 && dc <= 0xDFFF) return '';
+    var dh = raw.charAt(di);
+    if (dh >= '0' && dh <= '9') digits += dh;
+    else if (dc === 32 || dc === 9 || dc === 10 || dc === 13 || dc === 45) continue;
+    else throw new Error('Digits only \u2014 0-9 with spaces or dashes ignored, got ' + JSON.stringify(dh));
+  }
+  if (!digits.length) throw new Error('Enter digits first \u2014 a Damm number or its prefix');
+  function qwalk(ds) {
+    var interim = 0;
+    for (var li = 0; li < ds.length; li++) interim = QT[interim][ds.charCodeAt(li) - 48];
+    return interim;
+  }
+  if (mode === 'validate') {
+    if (digits.length < 2) throw new Error('Too short \u2014 a Damm number needs at least 2 digits, got ' + digits.length);
+    if (qwalk(digits) !== 0) throw new Error('Invalid Damm number \u2014 checksum fails for ' + JSON.stringify(digits));
+    return 'Valid \u2014 Damm checksum passes (' + digits.length + ' digits)';
+  }
+  var tail = qwalk(digits);
+  for (var cd = 0; cd <= 9; cd++) { if (QT[tail][cd] === 0) return digits + String(cd); }
+  throw new Error('No check digit \u2014 quasigroup row has no zero, prefix ' + JSON.stringify(digits));
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');

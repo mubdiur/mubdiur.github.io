@@ -283,6 +283,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('gtin-validator', 'bad checksum throws', mustThrow(() => TOOLS['gtin-validator'].handler('5901234123456')));
     push('verhoeff-validator', 'happy', TOOLS['verhoeff-validator'].handler('236').indexOf('Valid') === 0);
     push('verhoeff-validator', 'bad checksum throws', mustThrow(() => TOOLS['verhoeff-validator'].handler('237')));
+    push('damm-validator', 'happy', TOOLS['damm-validator'].handler('5724').indexOf('Valid') === 0);
+    push('damm-validator', 'bad checksum throws', mustThrow(() => TOOLS['damm-validator'].handler('5725')));
     push('befunge', 'happy', TOOLS['befunge'].handler('"A",@') === 'A');
     push('befunge', 'div zero throws', mustThrow(() => TOOLS['befunge'].handler('50/.@')));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
