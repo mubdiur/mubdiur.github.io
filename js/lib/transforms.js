@@ -1382,6 +1382,30 @@ T.ciCalc = function (s, opts) {
     "APY: " + (Math.round(apy * 1000) / 1000).toFixed(3) + "%"];
   return clines.concat(snaps).join("\n");
 };
+/* GCD and LCM over integer lists: Euclid on absolute BigInts, exact at any width. */
+T.gcdLcm = function (s) {
+  var raw = String(s === undefined || s === null ? "" : s);
+  for (var gi = 0; gi < raw.length; gi++) if (raw.charCodeAt(gi) >= 0xD800 && raw.charCodeAt(gi) <= 0xDFFF) return "";
+  var txt = raw.trim();
+  if (!txt) throw new Error("Enter at least two integers");
+  var parts = txt.split(/[\s,;]+/).filter(function (x) { return x !== ""; });
+  if (parts.length < 2) throw new Error("Enter at least two integers \u2014 got " + parts.length + " number");
+  if (parts.length > 1000) throw new Error("Too many numbers \u2014 max 1000");
+  var nums = parts.map(function (p, ix) {
+    var c = (p.charAt(0) === "+" || p.charAt(0) === "-") ? p.slice(1) : p;
+    if (!/^\d+$/.test(c)) throw new Error("Bad integer #" + (ix + 1) + " \u2014 got " + JSON.stringify(p));
+    if ((c.replace(/^0+/, "").length || 1) > 2000) throw new Error("Integer #" + (ix + 1) + " too long \u2014 max 2000 digits");
+    return BigInt(c);
+  });
+  function gcd(a, b) { while (b !== BigInt(0)) { var r = a % b; a = b; b = r; } return a; }
+  var g = nums[0], l = nums[0];
+  for (var j = 1; j < nums.length; j++) {
+    g = gcd(g, nums[j]);
+    l = (l === BigInt(0) || nums[j] === BigInt(0)) ? BigInt(0) : (l / gcd(l, nums[j])) * nums[j];
+  }
+  function grp(x) { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+  return "GCD: " + grp(g) + "\nLCM: " + grp(l) + "\nCoprime: " + (g === BigInt(1) ? "yes" : "no");
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

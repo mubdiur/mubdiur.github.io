@@ -1288,6 +1288,15 @@ console.log('-- ci --');
   ok(TOOLS['compound-interest'].handler('10000', { rate: '5', years: '10', freq: 'monthly', contrib: '0' }).indexOf('Year 10: $16,470.09') >= 0, 'ci snapshots');
   ok(TOOLS['compound-interest'].handler.toString().indexOf('ciCalc') >= 0, 'ci delegates');
 }
+console.log('-- gcd --');
+{
+  ok(TOOLS['gcd-lcm-calculator'].handler('12 18') === 'GCD: 6\nLCM: 36\nCoprime: no', 'gcd pair');
+  ok(TOOLS['gcd-lcm-calculator'].handler('7 11') === 'GCD: 1\nLCM: 77\nCoprime: yes', 'gcd coprime');
+  ok(TOOLS['gcd-lcm-calculator'].handler('0 5') === 'GCD: 5\nLCM: 0\nCoprime: no', 'gcd zero');
+  ok(TOOLS['gcd-lcm-calculator'].handler('12, 18, 24\n36') === 'GCD: 6\nLCM: 72\nCoprime: no', 'gcd multi');
+  ok(TOOLS['gcd-lcm-calculator'].handler('123456789012345678901234567890 10').indexOf('GCD: 10') === 0, 'gcd bigint');
+  ok(TOOLS['gcd-lcm-calculator'].handler.toString().indexOf('gcdLcm') >= 0, 'gcd delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

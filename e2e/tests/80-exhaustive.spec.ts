@@ -252,6 +252,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'age-calculator': { good: '1990-06-15', bad: 'not a date', expectInOutput: /Age:/, expectError: /Unrecognized date/ },
   'percentage-calculator': { good: '150', bad: 'abc', expectInOutput: /= 30/, expectError: /Bad number/ },
   'compound-interest': { good: '10000', bad: 'abc', expectInOutput: /Final:/, expectError: /Bad principal/ },
+  'gcd-lcm-calculator': { good: '12 18', bad: '12a', expectInOutput: /GCD: 6/, expectError: /Bad integer/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

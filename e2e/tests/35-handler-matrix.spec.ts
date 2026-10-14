@@ -570,6 +570,8 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('percentage-calculator', 'junk throws', mustThrow(() => TOOLS['percentage-calculator'].handler('abc')));
     push('compound-interest', 'monthly exact', TOOLS['compound-interest'].handler('10000', { rate: '5', years: '10', freq: 'monthly', contrib: '0' }).indexOf('Final: $16,470.09') === 0);
     push('compound-interest', 'junk throws', mustThrow(() => TOOLS['compound-interest'].handler('abc')));
+    push('gcd-lcm-calculator', 'pair', TOOLS['gcd-lcm-calculator'].handler('12 18') === 'GCD: 6\nLCM: 36\nCoprime: no');
+    push('gcd-lcm-calculator', 'junk throws', mustThrow(() => TOOLS['gcd-lcm-calculator'].handler('12a 18')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));
