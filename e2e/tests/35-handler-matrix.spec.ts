@@ -657,6 +657,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('helix-solver', 'length', TOOLS['helix-solver'].handler('helix 5 10 3').indexOf('Length: ~94.7768113041') >= 0);
     push('helix-solver', 'flat stacked circles', TOOLS['helix-solver'].handler('helix 5 0 2').indexOf('Length: ~62.8318530718') >= 0);
     push('helix-solver', 'junk throws', mustThrow(() => TOOLS['helix-solver'].handler('abc')));
+    push('catenary-solver', 'parameter', TOOLS['catenary-solver'].handler('catenary 10 2').indexOf('Parameter a: 6.5586258675') >= 0);
+    push('catenary-solver', 'shallow parabola', TOOLS['catenary-solver'].handler('chain 100 0.1').indexOf('Length: ~100.0002666662') >= 0);
+    push('catenary-solver', 'junk throws', mustThrow(() => TOOLS['catenary-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

@@ -2687,6 +2687,52 @@ T.helixSolve = function (s) {
   var lead = horiz === 0 ? 90 : Math.atan(hh / horiz) * 180 / Math.PI;
   return 'Helix: r = ' + htrim(hr) + ', h = ' + htrim(hh) + ', ' + htrim(hn) + ' turns\nPitch: ' + htrim(pitch) + '/turn\nCoil: ' + htrim(circ) + '/turn\nLength: ~' + htrim(len) + '\nLead angle: ' + htrim(lead) + ' deg';
 };
+/* Catenary solver: hanging-cable parameter, length and support angle from span and sag. */
+T.catenarySolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a catenary \u2014 e.g. catenary 10 2');
+  function cnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (!(v > 0)) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function ctrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  function ccosh(u) { return (Math.exp(u) + Math.exp(-u)) / 2; }
+  function csinh(u) { return (Math.exp(u) - Math.exp(-u)) / 2; }
+  var low = txt.toLowerCase();
+  var m0 = /^(catenary|chain|cable)\b/.exec(low);
+  if (!m0) throw new Error('Unknown curve \u2014 use catenary 10 2');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 's' || tk === 'span' || tk === 'd' || tk === 'sag') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 2) throw new Error('Catenary wants span and sag \u2014 e.g. catenary 10 2');
+  var cs = cnum(nums[0], 'Bad span');
+  var cd = cnum(nums[1], 'Bad sag');
+  var kk = 2 * cd / cs;
+  function cf(u) { return (ccosh(u) - 1) / u - kk; }
+  var lo = 1e-12, hi = 1, hg = 0;
+  while (cf(hi) < 0) { hi *= 2; hg++; if (hg > 60) throw new Error('Out of range \u2014 cannot bracket curve'); }
+  for (var it = 0; it < 200; it++) { var mm = (lo + hi) / 2; if (cf(mm) < 0) lo = mm; else hi = mm; }
+  var u = (lo + hi) / 2;
+  var ca = cs / (2 * u);
+  if (!isFinite(ca)) throw new Error('Out of range \u2014 curve overflows');
+  var clen = 2 * ca * csinh(u);
+  if (!isFinite(clen)) throw new Error('Out of range \u2014 length overflows');
+  var cang = Math.atan(csinh(u)) * 180 / Math.PI;
+  return 'Catenary: span = ' + ctrim(cs) + ', sag = ' + ctrim(cd) + '\nParameter a: ' + ctrim(ca) + '\nLength: ~' + ctrim(clen) + '\nSupport angle: ' + ctrim(cang) + ' deg';
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

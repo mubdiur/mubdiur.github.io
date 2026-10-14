@@ -1526,6 +1526,14 @@ console.log('-- helix --');
   ok(TOOLS['helix-solver'].handler('spring 5 10 3').indexOf('Length: ~94.77') >= 0, 'helix alias');
   ok(TOOLS['helix-solver'].handler.toString().indexOf('helixSolve') >= 0, 'helix delegates');
 }
+console.log('-- catenary --');
+{
+  ok(TOOLS['catenary-solver'].handler('catenary 10 2').indexOf('Parameter a: 6.5586258675') >= 0, 'catenary parameter');
+  ok(TOOLS['catenary-solver'].handler('catenary 10 2').indexOf('Length: ~10.9971820882') >= 0, 'catenary length');
+  ok(TOOLS['catenary-solver'].handler('catenary 10 2').indexOf('Support angle: 39.9756431747 deg') >= 0, 'catenary angle');
+  ok(TOOLS['catenary-solver'].handler('chain 100 0.1').indexOf('Length: ~100.0002666662') >= 0, 'catenary shallow matches parabola');
+  ok(TOOLS['catenary-solver'].handler.toString().indexOf('catenarySolve') >= 0, 'catenary delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
