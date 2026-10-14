@@ -2051,7 +2051,10 @@ T.boxSolve = function (s) {
   else if (nums.length === 3) { l = nums[0]; w = nums[1]; h = nums[2]; }
   else throw new Error('Box wants three edges \u2014 e.g. 3 4 5');
   var cube = (l === w && w === h);
-  return 'Dims: ' + btrim(l) + ' \u00d7 ' + btrim(w) + ' \u00d7 ' + btrim(h) + '\nVolume: ' + btrim(l * w * h) + '\nSurface: ' + btrim(2 * (l * w + l * h + w * h)) + '\nSpace diagonal: ' + btrim(Math.sqrt(l * l + w * w + h * h)) + '\nCube: ' + (cube ? 'yes' : 'no');
+  var fLW = Math.sqrt(l * l + w * w);
+  var fLH = Math.sqrt(l * l + h * h);
+  var fWH = Math.sqrt(w * w + h * h);
+  return 'Dims: ' + btrim(l) + ' \u00d7 ' + btrim(w) + ' \u00d7 ' + btrim(h) + '\nVolume: ' + btrim(l * w * h) + '\nSurface: ' + btrim(2 * (l * w + l * h + w * h)) + '\nSpace diagonal: ' + btrim(Math.sqrt(l * l + w * w + h * h)) + '\nCube: ' + (cube ? 'yes' : 'no') + '\nFace diagonals: ' + btrim(fLW) + ' / ' + btrim(fLH) + ' / ' + btrim(fWH) + ' (lw / lh / wh)' + '\nTotal edge: ' + btrim(4 * (l + w + h));
 };
 /* Cone and square-pyramid solver: volume, surface, lateral plus slant. */
 T.conePyramid = function (s) {

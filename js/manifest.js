@@ -946,7 +946,7 @@ window.TOOLMANIFEST = [
   { slug: 'prime-factorization', name: 'Prime Factorization', desc: 'Full factor tree as powers — cached prime table to 10^6, honest remainder past it', category: 'math', tags: ['prime', 'factor', 'factorization', 'divisors'], icon: 'calculator', template: 'transform',
     placeholder: '360',
     handler: function (s) { return Transforms.primeFactors(s); } },
-  { slug: 'box-solver', name: 'Box Solver', desc: 'Cuboid math from three edges \u2014 volume, surface, space diagonal plus cube verdict', category: 'math', tags: ['box', 'cuboid', 'volume', 'surface', 'diagonal', 'geometry'], icon: 'calculator', template: 'transform',
+  { slug: 'box-solver', name: 'Box Solver', desc: 'Cuboid math from three edges \u2014 volume, surface, space diagonal plus cube verdict, face diagonals and edge sum', category: 'math', tags: ['box', 'cuboid', 'volume', 'surface', 'diagonal', 'geometry'], icon: 'calculator', template: 'transform',
     placeholder: '3 4 5',
     handler: function (s) { return Transforms.boxSolve(s); } },
   { slug: 'cone-pyramid-solver', name: 'Cone & Pyramid Solver', desc: 'Cones plus square pyramids from two measures \u2014 volume, surface, lateral and slant', category: 'math', tags: ['cone', 'pyramid', 'volume', 'surface', 'slant', 'geometry'], icon: 'calculator', template: 'transform',

@@ -1402,8 +1402,8 @@ console.log('-- fact --');
 
 console.log('-- box --');
 {
-  ok(TOOLS['box-solver'].handler('3 4 5') === 'Dims: 3 \u00d7 4 \u00d7 5\nVolume: 60\nSurface: 94\nSpace diagonal: 7.0710678119\nCube: no', 'box basic');
-  ok(TOOLS['box-solver'].handler('cube 5') === 'Dims: 5 \u00d7 5 \u00d7 5\nVolume: 125\nSurface: 150\nSpace diagonal: 8.6602540378\nCube: yes', 'box cube');
+  ok(TOOLS['box-solver'].handler('3 4 5') === 'Dims: 3 \u00d7 4 \u00d7 5\nVolume: 60\nSurface: 94\nSpace diagonal: 7.0710678119\nCube: no\nFace diagonals: 5 / 5.8309518948 / 6.4031242374 (lw / lh / wh)\nTotal edge: 48', 'box basic');
+  ok(TOOLS['box-solver'].handler('cube 5') === 'Dims: 5 \u00d7 5 \u00d7 5\nVolume: 125\nSurface: 150\nSpace diagonal: 8.6602540378\nCube: yes\nFace diagonals: 7.0710678119 / 7.0710678119 / 7.0710678119 (lw / lh / wh)\nTotal edge: 60', 'box cube');
   ok(TOOLS['box-solver'].handler('3x4x5').indexOf('Volume: 60') >= 0, 'box compact');
   ok(TOOLS['box-solver'].handler.toString().indexOf('boxSolve') >= 0, 'box delegates');
 }

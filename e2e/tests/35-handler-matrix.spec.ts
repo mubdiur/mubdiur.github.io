@@ -609,7 +609,7 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('prime-factorization', 'small', TOOLS['prime-factorization'].handler('12') === 'Factors: 2^2 \u00d7 3\nRemaining: 1\nDistinct: 2\nTotal: 3');
     push('prime-factorization', 'partial', TOOLS['prime-factorization'].handler('1000036000099').indexOf('Remaining: 1,000,036,000,099') >= 0);
     push('prime-factorization', 'junk throws', mustThrow(() => TOOLS['prime-factorization'].handler('abc')));
-    push('box-solver', 'basic', TOOLS['box-solver'].handler('3 4 5') === 'Dims: 3 \u00d7 4 \u00d7 5\nVolume: 60\nSurface: 94\nSpace diagonal: 7.0710678119\nCube: no');
+    push('box-solver', 'basic', TOOLS['box-solver'].handler('3 4 5') === 'Dims: 3 \u00d7 4 \u00d7 5\nVolume: 60\nSurface: 94\nSpace diagonal: 7.0710678119\nCube: no\nFace diagonals: 5 / 5.8309518948 / 6.4031242374 (lw / lh / wh)\nTotal edge: 48');
     push('box-solver', 'cube', TOOLS['box-solver'].handler('cube 5').indexOf('Cube: yes') >= 0);
     push('box-solver', 'junk throws', mustThrow(() => TOOLS['box-solver'].handler('abc')));
     push('cone-pyramid-solver', 'pyramid', TOOLS['cone-pyramid-solver'].handler('pyramid 4 6') === 'Solid: square pyramid, base = 4, height = 6\nVolume: 32\nSurface: 66.5964425627\nLateral: 50.5964425627\nSlant: 6.3245553203');
