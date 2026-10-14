@@ -2990,6 +2990,49 @@ T.sprocketSolve = function (s) {
   var sratio = Math.max(sn1, sn2) / Math.min(sn1, sn2);
   return 'Chain: p = ' + ptrim(sp) + ', z1 = ' + ptrim(sn1) + ', z2 = ' + ptrim(sn2) + ', C = ' + ptrim(sc) + '\nPitch dia: ' + ptrim(pd1) + ' / ' + ptrim(pd2) + '\nLinks: ~' + ptrim(slp) + ' pitches -> ' + ptrim(sl) + ' links\nCentre fit: ' + ptrim(scadj) + '\nRatio 1:' + ptrim(sratio);
 };
+/* Spring solver: compression-spring rate, index, Wahl factor and solid height. */
+T.springSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a spring \u2014 e.g. spring 2 20 8');
+  function rpos(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (!(v > 0)) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function rtrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(spring|rate|stiffness)\b/.exec(low);
+  if (!m0) throw new Error('Unknown spring \u2014 use spring 2 20 8');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'd' || tk === 'wire' || tk === 'dcoil' || tk === 'coil' || tk === 'na' || tk === 'coils' || tk === 'g' || tk === 'modulus') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 3 && nums.length !== 4) throw new Error('Spring wants wire dia, coil dia and active coils \u2014 e.g. spring 2 20 8');
+  var rd = rpos(nums[0], 'Bad wire');
+  var rc = rpos(nums[1], 'Bad coil');
+  var rn = rpos(nums[2], 'Bad coils');
+  var rg = nums.length === 4 ? rpos(nums[3], 'Bad modulus') : 79300;
+  if (rn > 1e6) throw new Error('Too many coils \u2014 max 1000000');
+  if (rc <= rd) throw new Error('Coil too small \u2014 must exceed wire dia');
+  var ci = rc / rd;
+  var rk = rg * Math.pow(rd, 4) / (8 * Math.pow(rc, 3) * rn);
+  if (!isFinite(rk)) throw new Error('Out of range \u2014 rate overflows');
+  var wahl = (4 * ci - 1) / (4 * ci - 4) + 0.615 / ci;
+  var solid = (Math.floor(rn) + 2) * rd;
+  var verdict = ci < 4 ? 'tight (aim 4-12)' : (ci > 12 ? 'loose (aim 4-12)' : 'good (4-12)');
+  return 'Spring: d = ' + rtrim(rd) + ', D = ' + rtrim(rc) + ', Na = ' + rtrim(rn) + '\nRate: ' + rtrim(rk) + '/unit (G = ' + rtrim(rg) + ')\nIndex: ' + rtrim(ci) + ' ' + verdict + '\nWahl: ' + rtrim(wahl) + '\nSolid height: ~' + rtrim(solid);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

@@ -1575,6 +1575,14 @@ console.log('-- sprocket --');
   ok(TOOLS['sprocket-solver'].handler('sprocket 12.7 17 38 450').indexOf('Ratio 1:2.2352941176') >= 0, 'sprocket ratio');
   ok(TOOLS['sprocket-solver'].handler.toString().indexOf('sprocketSolve') >= 0, 'sprocket delegates');
 }
+console.log('-- spring --');
+{
+  ok(TOOLS['spring-solver'].handler('spring 2 20 8').indexOf('Rate: 2.478125/unit') >= 0, 'spring rate');
+  ok(TOOLS['spring-solver'].handler('spring 2 20 8').indexOf('Index: 10 good (4-12)') >= 0, 'spring index');
+  ok(TOOLS['spring-solver'].handler('spring 2 20 8').indexOf('Wahl: 1.1448333333') >= 0, 'spring wahl');
+  ok(TOOLS['spring-solver'].handler('spring 2 20 8').indexOf('Solid height: ~20') >= 0, 'spring solid');
+  ok(TOOLS['spring-solver'].handler.toString().indexOf('springSolve') >= 0, 'spring delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
