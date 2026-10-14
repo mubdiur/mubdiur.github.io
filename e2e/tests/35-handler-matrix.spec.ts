@@ -640,6 +640,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('star-polygon-solver', 'exact', TOOLS['star-polygon-solver'].handler('star 5 2 10').indexOf('Circumradius: 5.2573111212') >= 0);
     push('star-polygon-solver', 'compound', TOOLS['star-polygon-solver'].handler('hexagram 6').indexOf('Paths: 2 (compound)') >= 0);
     push('star-polygon-solver', 'junk throws', mustThrow(() => TOOLS['star-polygon-solver'].handler('abc')));
+    push('conic-solver', 'parabola', TOOLS['conic-solver'].handler('parabola 2').indexOf('Latus rectum: 8') >= 0);
+    push('conic-solver', 'hyperbola', TOOLS['conic-solver'].handler('hyperbola 5 3').indexOf('Eccentricity: 1.166190379') >= 0);
+    push('conic-solver', 'junk throws', mustThrow(() => TOOLS['conic-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

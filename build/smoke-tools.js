@@ -1483,6 +1483,13 @@ console.log('-- star --');
   ok(TOOLS['star-polygon-solver'].handler('hexagram 6').indexOf('Paths: 2 (compound)') >= 0, 'star compound');
   ok(TOOLS['star-polygon-solver'].handler.toString().indexOf('starSolve') >= 0, 'star delegates');
 }
+
+console.log('-- conic --');
+{
+  ok(TOOLS['conic-solver'].handler('parabola 2') === 'Parabola: f = 2\nFocus: (0, 2)\nDirectrix: y = -2\nLatus rectum: 8\nEccentricity: 1', 'conic parabola');
+  ok(TOOLS['conic-solver'].handler('hyperbola 5 3') === 'Hyperbola: a = 5, b = 3\nFoci: (\u00b15.8309518948, 0)\nEccentricity: 1.166190379\nAsymptotes: y = \u00b10.6x\nLatus rectum: 3.6', 'conic hyperbola');
+  ok(TOOLS['conic-solver'].handler.toString().indexOf('conicSolve') >= 0, 'conic delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

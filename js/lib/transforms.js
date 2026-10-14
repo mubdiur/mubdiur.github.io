@@ -2473,6 +2473,46 @@ T.starSolve = function (s) {
   var rad = edge / (2 * Math.sin(md * Math.PI / n));
   return 'Star: {' + n + '/' + md + '}\nPaths: ' + paths + (paths === 1 ? ' (single)' : ' (compound)') + '\nTip angle: ' + strim(tip) + '\u00b0\nCircumradius: ' + strim(rad) + '\nPerimeter: ' + strim(n * edge);
 };
+/* Parabola and hyperbola solver: foci, directrix, asymptotes plus latus. */
+T.conicSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a conic \u2014 e.g. parabola 2 or hyperbola 5 3');
+  function knum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function ktrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(parabola|parab|hyperbola|hyper|hyp)\b/.exec(low);
+  if (!m0) throw new Error('Unknown conic \u2014 use parabola 2 or hyperbola 5 3');
+  var isP = m0[1].charAt(0) === 'p';
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'f' || tk === 'a' || tk === 'b') continue;
+    nums.push(tk);
+  }
+  if (isP) {
+    if (nums.length !== 1) throw new Error('Parabola wants one focal length \u2014 e.g. parabola 2');
+    var fl = knum(nums[0], 'Bad focal length');
+    return 'Parabola: f = ' + ktrim(fl) + '\nFocus: (0, ' + ktrim(fl) + ')\nDirectrix: y = ' + ktrim(-fl) + '\nLatus rectum: ' + ktrim(4 * fl) + '\nEccentricity: 1';
+  }
+  if (nums.length !== 2) throw new Error('Hyperbola wants semi-axes a and b \u2014 e.g. hyperbola 5 3');
+  var ha = knum(nums[0], 'Bad semi-axis');
+  var hb = knum(nums[1], 'Bad semi-axis');
+  var hc = Math.sqrt(ha * ha + hb * hb);
+  return 'Hyperbola: a = ' + ktrim(ha) + ', b = ' + ktrim(hb) + '\nFoci: (\u00b1' + ktrim(hc) + ', 0)\nEccentricity: ' + ktrim(hc / ha) + '\nAsymptotes: y = \u00b1' + ktrim(hb / ha) + 'x\nLatus rectum: ' + ktrim(2 * hb * hb / ha);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

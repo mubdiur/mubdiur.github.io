@@ -276,6 +276,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'annulus-solver': { good: 'annulus 5 3', bad: 'abc', expectInOutput: /Area: 50/, expectError: /Unknown annulus/ },
   'ellipse-solver': { good: 'ellipse 5 3', bad: 'abc', expectInOutput: /Area: 47/, expectError: /Unknown ellipse/ },
   'star-polygon-solver': { good: 'star 5 2 10', bad: 'abc', expectInOutput: /Tip angle: 36/, expectError: /Unknown star/ },
+  'conic-solver': { good: 'parabola 2', bad: 'abc', expectInOutput: /Latus rectum: 8/, expectError: /Unknown conic/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },
