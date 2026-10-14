@@ -86,6 +86,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'gtin-validator': { good: '5901234123457', expectInOutput: /EAN-13/ },
   'verhoeff-validator': { good: '236', expectInOutput: /Valid/ },
   'damm-validator': { good: '5724', expectInOutput: /Valid/ },
+  'xor-cipher': { good: 'hello', expectInOutput: /030015070a/ },
   'befunge': { good: '"A",@', expectInOutput: /A/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },

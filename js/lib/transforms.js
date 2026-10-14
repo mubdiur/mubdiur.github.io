@@ -3861,6 +3861,47 @@ T.dammCheck = function (s, opts) {
   for (var cd = 0; cd <= 9; cd++) { if (QT[tail][cd] === 0) return digits + String(cd); }
   throw new Error('No check digit \u2014 quasigroup row has no zero, prefix ' + JSON.stringify(digits));
 };
+/* XOR cores: byte-wise key-cycled XOR reusing the shared UTF-8 and binary-string helpers, hex parsed by hand so odd nibbles fail loudly. */
+T.xorCipher = function (s, opts) {
+  var o = opts || {};
+  var informat = o.input || 'text';
+  var outformat = o.output || 'hex';
+  if (informat !== 'text' && informat !== 'hex' && informat !== 'base64') throw new Error('Bad input format \u2014 use text, hex or base64');
+  if (outformat !== 'hex' && outformat !== 'base64' && outformat !== 'text') throw new Error('Bad output format \u2014 use hex, base64 or text');
+  var keyBytes = T._utf8Bytes(String(o.key === undefined || o.key === null ? '' : o.key));
+  if (!keyBytes.length) throw new Error('Enter a key first \u2014 XOR needs a key to mix with');
+  var raw = String(s === undefined || s === null ? '' : s);
+  var inBytes;
+  if (informat === 'text') inBytes = T._utf8Bytes(raw);
+  else if (informat === 'hex') {
+    var hx = raw.replace(/\s/g, '');
+    if (!hx.length) return '';
+    if (hx.length % 2 !== 0) throw new Error('Bad hex input \u2014 even number of nibbles, got ' + hx.length);
+    if (/[^0-9a-fA-F]/.test(hx)) throw new Error('Bad hex input \u2014 0-9 and a-f only, got ' + JSON.stringify(hx.match(/[^0-9a-fA-F]/)[0]));
+    var hb = new Uint8Array(hx.length / 2);
+    for (var hi = 0; hi < hb.length; hi++) hb[hi] = parseInt(hx.slice(hi * 2, hi * 2 + 2), 16);
+    inBytes = hb;
+  } else {
+    var b64 = raw.replace(/\s/g, '');
+    if (!b64.length) return '';
+    var bb;
+    try { bb = Uint8Array.from(atob(b64), function (c) { return c.charCodeAt(0); }); }
+    catch { throw new Error('Invalid Base64 input'); }
+    inBytes = bb;
+  }
+  if (!inBytes.length) return '';
+  var mixed = new Uint8Array(inBytes.length);
+  for (var mi = 0; mi < inBytes.length; mi++) mixed[mi] = inBytes[mi] ^ keyBytes[mi % keyBytes.length];
+  if (outformat === 'hex') {
+    var HEXD = '0123456789abcdef';
+    var hs = '';
+    for (var oi = 0; oi < mixed.length; oi++) hs += HEXD.charAt((mixed[oi] >> 4) & 15) + HEXD.charAt(mixed[oi] & 15);
+    return hs;
+  }
+  if (outformat === 'base64') return btoa(T._bytesToBinaryString(mixed));
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(mixed); }
+  catch { throw new Error('Output is not valid UTF-8 \u2014 use hex or base64 output'); }
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
