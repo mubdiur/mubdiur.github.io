@@ -2435,6 +2435,18 @@ T.columnarDecode = function (s, key) {
   for (var r = 0; r < rows; r++) for (var c2 = 0; c2 < cols; c2++) if (pos[c2] < data[c2].length) out.push(data[c2][pos[c2]++]);
   return out.join('');
 };
+/* Gronsfeld cipher: numeric-key Vigenere (digits 0-9 shift letters); key repeats, case preserved, non-letters pass through. */
+T.gronsfeldCipher = function (s, opts) {
+  var o = opts || {}; var key = String(o.key === undefined ? '31415' : o.key).replace(/[^0-9]/g, '');
+  if (!key) throw new Error('Enter a digit key \u2014 0-9 shift the letters');
+  var dir = (o.mode || 'encode') === 'decode' ? -1 : 1; var ki = 0;
+  return String(s).replace(/[a-zA-Z]/g, function (c) {
+    var base = c.charCodeAt(0) >= 97 ? 97 : 65;
+    var p = c.charCodeAt(0) - base;
+    var k = key.charCodeAt(ki++ % key.length) - 48;
+    return String.fromCharCode(base + (((p + dir * k) % 26 + 26) % 26));
+  });
+};
 T.columnarCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'ZEBRAS' : o.key; if ((o.mode || 'encode') === 'decode') return T.columnarDecode(s, k); return T.columnarEncode(s, k); };
 T.base32Encode = function (s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
