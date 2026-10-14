@@ -592,6 +592,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('circle-solver', 'radius', TOOLS['circle-solver'].handler('5') === 'Given: radius = 5\nRadius: 5\nDiameter: 10\nCircumference: 31.4159265359\nArea: 78.5398163397');
     push('circle-solver', 'area', TOOLS['circle-solver'].handler('a=78.5398163397').indexOf('Radius: 5') >= 0);
     push('circle-solver', 'junk throws', mustThrow(() => TOOLS['circle-solver'].handler('abc')));
+    push('pace-calculator', 'basic', TOOLS['pace-calculator'].handler('5km 25:00') === 'Distance: 5 km (3.10686 mi)\nTime: 25:00\nPace: 5:00 min/km (8:03 min/mi)\nSpeed: 12 km/h (7.46 mph)');
+    push('pace-calculator', 'zero-time throws', mustThrow(() => TOOLS['pace-calculator'].handler('5km 0:00')));
+    push('pace-calculator', 'junk throws', mustThrow(() => TOOLS['pace-calculator'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

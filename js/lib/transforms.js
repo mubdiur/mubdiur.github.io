@@ -1827,6 +1827,68 @@ T.circleSolve = function (s) {
   if (!isFinite(r) || r <= 0) throw new Error('No circle \u2014 result out of range');
   return 'Given: ' + mode + ' = ' + ctrim(val) + '\nRadius: ' + ctrim(r) + '\nDiameter: ' + ctrim(2 * r) + '\nCircumference: ' + ctrim(2 * Math.PI * r) + '\nArea: ' + ctrim(Math.PI * r * r);
 };
+/* Running pace calculator: distance plus time to per-km/mi pace and speed. */
+T.paceCalc = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter distance and time \u2014 e.g. 5km 25:00');
+  function pnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v) || v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e9) throw new Error(label + ' too large \u2014 max 1e9');
+    return v;
+  }
+  function cColon(t) {
+    var p = t.split(':');
+    if (p.length !== 2 && p.length !== 3) throw new Error('Bad time \u2014 use MM:SS or H:MM:SS');
+    for (var i = 0; i < p.length; i++) if (!/^\d+$/.test(p[i]) || p[i].length > 9) throw new Error('Bad time \u2014 use MM:SS or H:MM:SS');
+    var sec;
+    if (p.length === 2) {
+      if (parseInt(p[1], 10) > 59) throw new Error('Bad time \u2014 seconds run 00-59');
+      sec = parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+    } else {
+      if (parseInt(p[1], 10) > 59 || parseInt(p[2], 10) > 59) throw new Error('Bad time \u2014 minutes and seconds run 00-59');
+      sec = parseInt(p[0], 10) * 3600 + parseInt(p[1], 10) * 60 + parseInt(p[2], 10);
+    }
+    if (sec <= 0) throw new Error('Time must be positive \u2014 got ' + JSON.stringify(t.slice(0, 40)));
+    if (sec > 1e9) throw new Error('Time too large \u2014 max 1e9 seconds');
+    return sec;
+  }
+  function cUnit(numT, unitT) {
+    var v = pnum(numT, 'Bad time');
+    var u = unitT.toLowerCase();
+    if (u === '' || u === 'min' || u === 'mins' || u === 'm') return v * 60;
+    if (u === 'h' || u === 'hr' || u === 'hrs' || u === 'hour' || u === 'hours') return v * 3600;
+    if (u === 's' || u === 'sec' || u === 'secs' || u === 'second' || u === 'seconds') return v;
+    throw new Error('Bad time unit \u2014 use h, min or s');
+  }
+  function fmtMS(p) { var t = Math.round(p); var mm = Math.floor(t / 60); var ss = t - mm * 60; return mm + ':' + (ss < 10 ? '0' : '') + ss; }
+  function fmtT(s2) { var t = Math.round(s2); var h = Math.floor(t / 3600); var mm = Math.floor((t - h * 3600) / 60); var ss = t - h * 3600 - mm * 60; return (h > 0 ? h + ':' + (mm < 10 ? '0' : '') + mm : String(mm)) + ':' + (ss < 10 ? '0' : '') + ss; }
+  function fmtN(v, dp) { var f = Math.pow(10, dp); return String(Math.round(v * f) / f); }
+  var toks = txt.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  if (toks.length < 2) throw new Error('Enter distance and time \u2014 e.g. 5km 25:00');
+  if (toks.length > 3) throw new Error('Too much input \u2014 want distance plus time, e.g. 5km 25:00');
+  var dm = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*([a-zA-Z]*)$/.exec(toks[0]);
+  if (!dm) throw new Error('Bad distance \u2014 got ' + JSON.stringify(toks[0].slice(0, 40)));
+  var dVal = pnum(dm[1], 'Bad distance');
+  var du = dm[2].toLowerCase();
+  var dMeters, dUnit;
+  if (du === '' || du === 'km' || du === 'k') { dMeters = dVal * 1000; dUnit = 'km'; }
+  else if (du === 'm') { dMeters = dVal; dUnit = 'm'; }
+  else if (du === 'mi' || du === 'mile' || du === 'miles') { dMeters = dVal * 1609.344; dUnit = 'mi'; }
+  else throw new Error('Bad distance unit \u2014 use km, m or mi');
+  var tToks = toks.slice(1);
+  var sec;
+  if (tToks.length === 1 && tToks[0].indexOf(':') >= 0) sec = cColon(tToks[0]);
+  else if (tToks.length === 1) sec = cUnit(tToks[0], '');
+  else sec = cUnit(tToks[0], tToks[1]);
+  var km = dMeters / 1000;
+  var mi = dMeters / 1609.344;
+  var distLine = dUnit === 'km' ? fmtN(km, 5) + ' km (' + fmtN(mi, 5) + ' mi)' : (dUnit === 'mi' ? fmtN(mi, 5) + ' mi (' + fmtN(km, 5) + ' km)' : fmtN(dVal, 5) + ' m (' + fmtN(km, 5) + ' km)');
+  return 'Distance: ' + distLine + '\nTime: ' + fmtT(sec) + '\nPace: ' + fmtMS(sec / km) + ' min/km (' + fmtMS(sec / mi) + ' min/mi)\nSpeed: ' + fmtN(km / (sec / 3600), 2) + ' km/h (' + fmtN(mi / (sec / 3600), 2) + ' mph)';
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

@@ -1358,6 +1358,13 @@ console.log('-- circ --');
   ok(TOOLS['circle-solver'].handler.toString().indexOf('circleSolve') >= 0, 'circ delegates');
 }
 
+console.log('-- pace --');
+{
+  ok(TOOLS['pace-calculator'].handler('5km 25:00') === 'Distance: 5 km (3.10686 mi)\nTime: 25:00\nPace: 5:00 min/km (8:03 min/mi)\nSpeed: 12 km/h (7.46 mph)', 'pace basic');
+  ok(TOOLS['pace-calculator'].handler('3.1mi 24:00').indexOf('Pace: 4:49 min/km') >= 0, 'pace miles');
+  ok(TOOLS['pace-calculator'].handler.toString().indexOf('paceCalc') >= 0, 'pace delegates');
+}
+
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
