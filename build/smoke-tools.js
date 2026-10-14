@@ -1509,6 +1509,15 @@ console.log('-- spiral --');
   ok(TOOLS['spiral-solver'].handler('spiral 3 2').indexOf('Length: ~57.2') >= 0, 'spiral length');
   ok(TOOLS['spiral-solver'].handler.toString().indexOf('spiralSolve') >= 0, 'spiral delegates');
 }
+
+console.log('-- logspiral --');
+{
+  ok(TOOLS['log-spiral-solver'].handler('logspiral 2 0.1 2').indexOf('Length: ~50.5') >= 0, 'logspiral length');
+  ok(TOOLS['log-spiral-solver'].handler('logspiral 2 0.1 2').indexOf('Growth: \u00d71.874') >= 0, 'logspiral growth');
+  ok(TOOLS['log-spiral-solver'].handler('logspiral 5 0 1').indexOf('Length: ~31.4159265359') >= 0, 'logspiral zero is circle');
+  ok(TOOLS['log-spiral-solver'].handler('logspiral 5 0 1').indexOf('Endpoint: (5, 0)') >= 0, 'logspiral endpoint');
+  ok(TOOLS['log-spiral-solver'].handler.toString().indexOf('logSpiralSolve') >= 0, 'logspiral delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

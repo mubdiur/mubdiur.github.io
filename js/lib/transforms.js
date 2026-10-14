@@ -2606,6 +2606,46 @@ T.spiralSolve = function (s) {
   var rr = b * th;
   return 'Spiral: ' + ptrim(tn) + ' turns, spacing ' + ptrim(sp) + '\nOuter radius: ' + ptrim(rr) + '\nEndpoint: (' + ptrim(rr * Math.cos(th)) + ', ' + ptrim(rr * Math.sin(th)) + ')\nLength: ~' + ptrim(len);
 };
+/* Logarithmic-spiral solver: length, endpoint plus per-turn growth. */
+T.logSpiralSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a spiral \u2014 e.g. logspiral 2 0.1 2');
+  function lnum(tok, label, allowZero) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v < 0 || (!allowZero && v === 0)) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function ltrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(logspiral|log-spiral|logarithmic)\b/.exec(low);
+  if (!m0) throw new Error('Unknown spiral \u2014 use logspiral 2 0.1 2');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'a' || tk === 'b' || tk === 't' || tk === 'turns') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 3) throw new Error('Spiral wants start radius, growth and turns \u2014 e.g. logspiral 2 0.1 2');
+  var la = lnum(nums[0], 'Bad radius', false);
+  var lb = lnum(nums[1], 'Bad growth', true);
+  var lt = lnum(nums[2], 'Bad turns', false);
+  if (lt > 1e6) throw new Error('Too many turns \u2014 max 1000000');
+  var th = 2 * Math.PI * lt;
+  var r1 = la * Math.exp(lb * th);
+  if (!isFinite(r1)) throw new Error('Out of range \u2014 growth overflows');
+  var len = lb === 0 ? la * th : Math.sqrt(1 + lb * lb) / lb * (r1 - la);
+  if (!isFinite(len)) throw new Error('Out of range \u2014 length overflows');
+  return 'Log spiral: a = ' + ltrim(la) + ', b = ' + ltrim(lb) + ', ' + ltrim(lt) + ' turns\nEnd radius: ' + ltrim(r1) + '\nEndpoint: (' + ltrim(r1 * Math.cos(th)) + ', ' + ltrim(r1 * Math.sin(th)) + ')\nLength: ~' + ltrim(len) + '\nGrowth: \u00d7' + ltrim(Math.exp(lb * 2 * Math.PI)) + '/turn';
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

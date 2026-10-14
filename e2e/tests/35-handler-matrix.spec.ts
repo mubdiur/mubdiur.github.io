@@ -651,6 +651,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('spiral-solver', 'endpoint', TOOLS['spiral-solver'].handler('spiral 3 2').indexOf('Endpoint: (6, 0)') >= 0);
     push('spiral-solver', 'length', TOOLS['spiral-solver'].handler('spiral 3 2').indexOf('Length: ~57.2') >= 0);
     push('spiral-solver', 'junk throws', mustThrow(() => TOOLS['spiral-solver'].handler('abc')));
+    push('log-spiral-solver', 'length', TOOLS['log-spiral-solver'].handler('logspiral 2 0.1 2').indexOf('Length: ~50.5') >= 0);
+    push('log-spiral-solver', 'zero circle', TOOLS['log-spiral-solver'].handler('logspiral 5 0 1').indexOf('Length: ~31.4159265359') >= 0);
+    push('log-spiral-solver', 'junk throws', mustThrow(() => TOOLS['log-spiral-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));
