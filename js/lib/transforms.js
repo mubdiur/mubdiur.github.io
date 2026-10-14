@@ -2872,6 +2872,69 @@ T.beltSolve = function (s) {
   var brat = Math.max(bd1, bd2) / Math.min(bd1, bd2);
   return 'Belt: d1 = ' + btrim(bd1) + ', d2 = ' + btrim(bd2) + ', C = ' + btrim(bc) + '\nLength: ~' + btrim(blen) + '\nWrap small: ' + btrim(bw1) + ' deg\nWrap large: ' + btrim(bw2) + ' deg\nRatio 1:' + btrim(brat);
 };
+/* Superellipse solver: gamma-function area plus Simpson perimeter from axes and exponent. */
+T.superellipseSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a superellipse \u2014 e.g. superellipse 5 3 4');
+  function epos(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (!(v > 0)) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function etrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  function egamma(z) {
+    var C = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+    if (z < 0.5) return Math.PI / (Math.sin(Math.PI * z) * egamma(1 - z));
+    z -= 1;
+    var x = C[0];
+    for (var gi = 1; gi < 9; gi++) x += C[gi] / (z + gi);
+    var t = z + 7.5;
+    return Math.sqrt(2 * Math.PI) * Math.pow(t, z + 0.5) * Math.exp(-t) * x;
+  }
+  var low = txt.toLowerCase();
+  var m0 = /^(superellipse|squircle|ellipse)\b/.exec(low);
+  if (!m0) throw new Error('Unknown shape \u2014 use superellipse 5 3 4');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'a' || tk === 'b' || tk === 'n' || tk === 'exp' || tk === 'exponent') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 3) throw new Error('Superellipse wants a, b and exponent \u2014 e.g. superellipse 5 3 4');
+  var ea = epos(nums[0], 'Bad a');
+  var eb = epos(nums[1], 'Bad b');
+  var en = epos(nums[2], 'Bad exponent');
+  if (en < 0.25) throw new Error('Exponent too small \u2014 min 0.25');
+  if (en > 1e6) throw new Error('Exponent too large \u2014 max 1000000');
+  var earea = 4 * ea * eb * Math.pow(egamma(1 + 1 / en), 2) / egamma(1 + 2 / en);
+  if (!isFinite(earea)) throw new Error('Out of range \u2014 area overflows');
+  var NN = 2000, ehh = (Math.PI / 2) / NN, ee = 2 / en, esum = 0;
+  function ept(t) {
+    var c = Math.cos(t), qq = Math.sin(t);
+    return [ea * Math.pow(Math.abs(c), ee) * (c < 0 ? -1 : 1), eb * Math.pow(Math.abs(qq), ee) * (qq < 0 ? -1 : 1)];
+  }
+  function evel(t) {
+    var d = 1e-7, p1 = ept(t - d), p2 = ept(t + d);
+    return Math.sqrt(Math.pow((p2[0] - p1[0]) / (2 * d), 2) + Math.pow((p2[1] - p1[1]) / (2 * d), 2));
+  }
+  for (var si = 0; si <= NN; si++) {
+    var w = (si === 0 || si === NN) ? 1 : (si % 2 === 0 ? 2 : 4);
+    esum += w * evel(si * ehh);
+  }
+  var eper = 4 * esum * ehh / 3;
+  if (!isFinite(eper)) throw new Error('Out of range \u2014 perimeter overflows');
+  var kind = en === 2 ? 'ellipse' : (en === 4 && ea === eb ? 'squircle' : (en === 1 ? 'diamond' : 'superellipse'));
+  return 'Superellipse: a = ' + etrim(ea) + ', b = ' + etrim(eb) + ', n = ' + etrim(en) + ' (' + kind + ')\nArea: ' + etrim(earea) + '\nPerimeter: ~' + etrim(eper) + '\nSize: ' + etrim(2 * ea) + ' x ' + etrim(2 * eb);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

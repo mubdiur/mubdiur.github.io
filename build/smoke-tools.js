@@ -1559,6 +1559,14 @@ console.log('-- belt --');
   ok(TOOLS['belt-solver'].handler('belt 10 10 20').indexOf('Length: ~71.4159265359') >= 0, 'belt equal is 2C plus piD');
   ok(TOOLS['belt-solver'].handler.toString().indexOf('beltSolve') >= 0, 'belt delegates');
 }
+console.log('-- superellipse --');
+{
+  ok(TOOLS['superellipse-solver'].handler('superellipse 5 3 4').indexOf('Area: 55.622240319') >= 0, 'superellipse area');
+  ok(TOOLS['superellipse-solver'].handler('superellipse 5 3 4').indexOf('Perimeter: ~54.1914463068') >= 0, 'superellipse perimeter');
+  ok(TOOLS['superellipse-solver'].handler('superellipse 5 5 2').indexOf('Area: 78.5398163397') >= 0, 'superellipse circle area');
+  ok(TOOLS['superellipse-solver'].handler('superellipse 5 5 2').indexOf('Perimeter: ~31.41592653') >= 0, 'superellipse circle perimeter');
+  ok(TOOLS['superellipse-solver'].handler.toString().indexOf('superellipseSolve') >= 0, 'superellipse delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
