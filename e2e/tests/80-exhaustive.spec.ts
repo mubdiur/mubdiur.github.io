@@ -83,6 +83,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'pigpen-cipher': { good: 'ABC', expectInOutput: /\u2518/ },
   'isbn-validator': { good: '0-306-40615-2', expectInOutput: /ISBN-10/ },
   'iban-validator': { good: 'GB29 NWBK 6016 1331 9268 19', expectInOutput: /Valid/ },
+  'gtin-validator': { good: '5901234123457', expectInOutput: /EAN-13/ },
   'befunge': { good: '"A",@', expectInOutput: /A/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },

@@ -3761,6 +3761,40 @@ T.ibanCheck = function (s) {
   if (rem !== 1) throw new Error('Invalid IBAN \u2014 mod-97 check fails for ' + JSON.stringify(clean));
   return 'Valid \u2014 ' + clean.slice(0, 2) + ' IBAN (' + clean.length + ' characters)';
 };
+/* GTIN cores: one right-anchored 1-3-1-3 mod-10 covers GTIN-8, UPC-A, EAN-13 and GTIN-14, spaces and dashes ignored. */
+T.gtinCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var raw = String(s);
+  var digits = '';
+  for (var di = 0; di < raw.length; di++) {
+    var dc = raw.charCodeAt(di);
+    if (dc >= 0xD800 && dc <= 0xDFFF) return '';
+    var dh = raw.charAt(di);
+    if (dh >= '0' && dh <= '9') digits += dh;
+    else if (dc === 32 || dc === 9 || dc === 10 || dc === 13 || dc === 45) continue;
+    else throw new Error('Digits only \u2014 0-9 with spaces or dashes ignored, got ' + JSON.stringify(dh));
+  }
+  if (!digits.length) throw new Error('Enter digits first \u2014 a GTIN-8, UPC-A, EAN-13 or GTIN-14 barcode');
+  var NAMES = { 8: 'GTIN-8', 12: 'UPC-A', 13: 'EAN-13', 14: 'GTIN-14' };
+  function wsum(ds) {
+    var t = 0;
+    var pos = 0;
+    for (var li = ds.length - 1; li >= 0; li--) {
+      t += (ds.charCodeAt(li) - 48) * (pos % 2 === 0 ? 1 : 3);
+      pos++;
+    }
+    return t;
+  }
+  if (mode === 'validate') {
+    if (NAMES[digits.length] === undefined) throw new Error('Bad length \u2014 barcodes run 8, 12, 13 or 14 digits, got ' + digits.length);
+    if (wsum(digits) % 10 !== 0) throw new Error('Invalid barcode \u2014 checksum fails for ' + JSON.stringify(digits));
+    return 'Valid \u2014 ' + NAMES[digits.length] + ' checksum passes';
+  }
+  if (NAMES[digits.length + 1] === undefined) throw new Error('Bad prefix \u2014 7, 11, 12 or 13 digits make a barcode, got ' + digits.length);
+  return digits + String((10 - (wsum(digits + '0') % 10)) % 10);
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
