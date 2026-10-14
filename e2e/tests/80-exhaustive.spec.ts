@@ -256,6 +256,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'fraction-simplifier': { good: '6/8', bad: 'abc', expectInOutput: /Fraction: 3\/4/, expectError: /Bad fraction/ },
   'ratio-calculator': { good: '16:24', bad: '16:abc', expectInOutput: /Simplified: 2:3/, expectError: /Bad number/ },
   'scientific-notation': { good: '1234567', bad: 'abc', expectInOutput: /Scientific: 1/, expectError: /Bad number/ },
+  'quadratic-solver': { good: '1 -3 2', bad: 'abc', expectInOutput: /x1 = 1/, expectError: /three coefficients/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

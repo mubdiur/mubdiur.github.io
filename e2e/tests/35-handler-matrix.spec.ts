@@ -580,6 +580,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('scientific-notation', 'plain', TOOLS['scientific-notation'].handler('1234567') === 'Scientific: 1.234567 \u00d7 10^6\nEngineering: 1.234567 \u00d7 10^6\nPlain: 1234567\nSignificant digits: 7');
     push('scientific-notation', 'expand', TOOLS['scientific-notation'].handler('1.23e6') === 'Scientific: 1.23 \u00d7 10^6\nEngineering: 1.23 \u00d7 10^6\nPlain: 1230000\nSignificant digits: 3');
     push('scientific-notation', 'junk throws', mustThrow(() => TOOLS['scientific-notation'].handler('abc')));
+    push('quadratic-solver', 'two-real', TOOLS['quadratic-solver'].handler('1 -3 2') === 'Equation: x² - 3x + 2 = 0\nDiscriminant: 1\nRoots: x1 = 1, x2 = 2\nVertex: (1.5, -0.25)');
+    push('quadratic-solver', 'linear', TOOLS['quadratic-solver'].handler('0 2 4') === 'Equation: 2x + 4 = 0\nLinear root: x = -2');
+    push('quadratic-solver', 'junk throws', mustThrow(() => TOOLS['quadratic-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

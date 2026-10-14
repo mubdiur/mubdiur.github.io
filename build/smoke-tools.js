@@ -1327,6 +1327,15 @@ console.log('-- sci --');
   ok(TOOLS['scientific-notation'].handler.toString().indexOf('sciNota') >= 0, 'sci delegates');
 }
 
+console.log('-- quad --');
+{
+  ok(TOOLS['quadratic-solver'].handler('1 -3 2') === 'Equation: x² - 3x + 2 = 0\nDiscriminant: 1\nRoots: x1 = 1, x2 = 2\nVertex: (1.5, -0.25)', 'quad two-real');
+  ok(TOOLS['quadratic-solver'].handler('1 0 1') === 'Equation: x² + 1 = 0\nDiscriminant: -4\nRoots: x1 = i, x2 = -i\nVertex: (0, 1)', 'quad complex');
+  ok(TOOLS['quadratic-solver'].handler('0 2 4') === 'Equation: 2x + 4 = 0\nLinear root: x = -2', 'quad linear');
+  ok(TOOLS['quadratic-solver'].handler('x^2-3x+2') === TOOLS['quadratic-solver'].handler('1 -3 2'), 'quad eqform');
+  ok(TOOLS['quadratic-solver'].handler.toString().indexOf('quadSolve') >= 0, 'quad delegates');
+}
+
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

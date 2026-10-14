@@ -1649,6 +1649,89 @@ T.sciNota = function (s) {
   if (sign === '-' && plain.charAt(0) !== '(') plain = '-' + plain;
   return 'Scientific: ' + sci + '\nEngineering: ' + eng + '\nPlain: ' + plain + '\nSignificant digits: ' + bare.length;
 };
+/* Quadratic solver: ax^2+bx+c triple or equation text, real plus complex roots. */
+T.quadSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter coefficients \u2014 e.g. 1 -3 2 or x^2-3x+2');
+  function qtrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  function qnum(tok) { return /^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok); }
+  function qval(tok, label) {
+    if (!qnum(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (Math.abs(v) > 1e15) throw new Error('Coefficient too large \u2014 max 1e15');
+    return v;
+  }
+  function himpl(z) {
+    if (z === '' || z === '+') return 1;
+    if (z === '-') return -1;
+    return qval(z, 'Bad coefficient');
+  }
+  function cval(z) {
+    if (z === '') return 0;
+    return qval(z, 'Bad constant');
+  }
+  var a, b, c;
+  if (/[xX\u00b2]/.test(txt)) {
+    var t = txt.replace(/\u00b2/g, '^2').replace(/[\s\*]/g, '');
+    t = t.replace(/=0$/, '').replace(/=$/, '');
+    if (t.indexOf('=') >= 0) throw new Error('Bad equation \u2014 use one = 0 or none, e.g. x^2-3x+2');
+    var m = /^(.*?)x\^2(.*)$/.exec(t);
+    if (!m) throw new Error('Bad equation \u2014 want ax^2+bx+c, e.g. x^2-3x+2');
+    a = himpl(m[1]);
+    var rest = m[2];
+    var bm = /^([+-]?[^+-]*)x(.*)$/.exec(rest);
+    if (bm) { b = himpl(bm[1]); c = cval(bm[2]); }
+    else { b = 0; c = cval(rest); }
+  } else {
+    var parts = txt.split(/[,\s;]+/).filter(function (x) { return x !== ''; });
+    if (parts.length !== 3) throw new Error('Enter three coefficients \u2014 e.g. 1 -3 2');
+    a = qval(parts[0], 'Bad number #1');
+    b = qval(parts[1], 'Bad number #2');
+    c = qval(parts[2], 'Bad number #3');
+  }
+  function eqn() {
+    var eq = '';
+    if (a !== 0) eq = (a < 0 ? '-' : '') + (Math.abs(a) === 1 ? '' : qtrim(Math.abs(a))) + 'x\u00b2';
+    if (b !== 0) {
+      var bs = (Math.abs(b) === 1 ? '' : qtrim(Math.abs(b))) + 'x';
+      eq = eq === '' ? (b < 0 ? '-' + bs : bs) : eq + (b < 0 ? ' - ' : ' + ') + bs;
+    }
+    if (c !== 0 || eq === '') {
+      var cs = qtrim(Math.abs(c));
+      eq = eq === '' ? (c < 0 ? '-' + cs : cs) : eq + (c < 0 ? ' - ' : ' + ') + cs;
+    }
+    return eq + ' = 0';
+  }
+  if (a === 0) {
+    if (b === 0) {
+      if (c === 0) return 'Degenerate: 0 = 0\nInfinite solutions \u2014 every x works';
+      return 'Degenerate: 0 = ' + qtrim(c) + '\nNo solution \u2014 0 can never equal ' + qtrim(c);
+    }
+    return 'Equation: ' + eqn() + '\nLinear root: x = ' + qtrim(-c / b);
+  }
+  var D = b * b - 4 * a * c;
+  if (!isFinite(D)) throw new Error('Numbers too large \u2014 discriminant overflows');
+  var h = -b / (2 * a);
+  var k = -D / (4 * a);
+  var tail = '\nVertex: (' + qtrim(h) + ', ' + qtrim(k) + ')';
+  if (D > 0) {
+    var r1 = (-b - Math.sqrt(D)) / (2 * a);
+    var r2 = (-b + Math.sqrt(D)) / (2 * a);
+    var lo = Math.min(r1, r2);
+    var hi = Math.max(r1, r2);
+    return 'Equation: ' + eqn() + '\nDiscriminant: ' + qtrim(D) + '\nRoots: x1 = ' + qtrim(lo) + ', x2 = ' + qtrim(hi) + tail;
+  }
+  if (D === 0) return 'Equation: ' + eqn() + '\nDiscriminant: 0\nRoot (double): x = ' + qtrim(h) + tail;
+  var qi2 = Math.sqrt(-D) / (2 * Math.abs(a));
+  function fmtI(mm) { return mm === 1 ? 'i' : qtrim(mm) + 'i'; }
+  var pair = (b === 0)
+    ? 'x1 = ' + fmtI(qi2) + ', x2 = -' + fmtI(qi2)
+    : 'x1 = ' + qtrim(h) + ' + ' + fmtI(qi2) + ', x2 = ' + qtrim(h) + ' - ' + fmtI(qi2);
+  return 'Equation: ' + eqn() + '\nDiscriminant: ' + qtrim(D) + '\nRoots: ' + pair + tail;
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
