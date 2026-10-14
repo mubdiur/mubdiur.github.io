@@ -2942,6 +2942,47 @@ T.keywordDecode = function (s, key) {
   });
 };
 T.keywordCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'KEYWORD' : o.key; if ((o.mode || 'encode') === 'decode') return T.keywordDecode(s, k); return T.keywordEncode(s, k); };
+/* Book cores: Ottendorf word.char pointers into a shared text (1-based, per-letter occurrence rotation); decode yields uppercase, letters missing from the text throw. */
+T.bookWords = function (book) {
+  var w = String(book === undefined ? 'The quick brown fox jumps over the lazy dog while five dozen jackdaws gaze at the calm river bank' : book).trim().split(/\s+/).filter(function (x) { return x; });
+  if (!w.length) throw new Error('Paste book text \u2014 words hide the letters');
+  return w;
+};
+T.bookEncode = function (s, book) {
+  var words = T.bookWords(book);
+  var up = words.map(function (w) { return w.toUpperCase(); });
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var used = {};
+  var out = [];
+  for (var i = 0; i < t.length; i++) {
+    var ch = t.charAt(i);
+    var occ = [];
+    for (var w = 0; w < up.length; w++) for (var c = 0; c < up[w].length; c++) if (up[w].charAt(c) === ch) occ.push([w + 1, c + 1]);
+    if (!occ.length) throw new Error('Book lacks \u201C' + ch + '\u201D \u2014 paste richer text');
+    var n = used[ch] || 0;
+    var pick = occ[n % occ.length];
+    used[ch] = n + 1;
+    out.push(pick[0] + '.' + pick[1]);
+  }
+  return out.join(' ');
+};
+T.bookDecode = function (s, book) {
+  var words = T.bookWords(book);
+  var toks = String(s).trim().split(/\s+/).filter(function (x) { return x; });
+  if (!toks.length) return '';
+  var out = '';
+  for (var i = 0; i < toks.length; i++) {
+    var m = /^(\d+)\.(\d+)$/.exec(toks[i]);
+    if (!m) throw new Error('Bad book ref \u201C' + toks[i] + '\u201D \u2014 word.char numbers');
+    var w = parseInt(m[1], 10), c = parseInt(m[2], 10);
+    if (!(w >= 1 && w <= words.length)) throw new Error('Bad book ref \u201C' + toks[i] + '\u201D\u2014 ' + words.length + ' words');
+    if (!(c >= 1 && c <= words[w - 1].length)) throw new Error('Bad book ref \u201C' + toks[i] + '\u201D\u2014 word ' + w + ' has ' + words[w - 1].length + ' chars');
+    out += words[w - 1].charAt(c - 1).toUpperCase();
+  }
+  return out;
+};
+T.bookCipher = function (s, opts) { var o = opts || {}; var b = o.book === undefined ? 'The quick brown fox jumps over the lazy dog while five dozen jackdaws gaze at the calm river bank' : o.book; if ((o.mode || 'encode') === 'decode') return T.bookDecode(s, b); return T.bookEncode(s, b); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
