@@ -1246,6 +1246,14 @@ console.log('-- fletcher --');
   ok(TOOLS['fletcher-checksum'].handler('') === '0000', 'fletcher empty');
   ok(TOOLS['fletcher-checksum'].handler.toString().indexOf('fletcher') >= 0, 'fletcher delegates');
 }
+console.log('-- tip --');
+{
+  ok(TOOLS['tip-calculator'].handler('84.50', { tip: '18', tax: '8.5', people: '2', round: 'exact' }) === 'Subtotal: $84.50\nTax (8.5%): $7.18\nTip (18%): $15.21\nTotal: $106.89\nEach (2): $53.45', 'tip exact');
+  ok(TOOLS['tip-calculator'].handler('84.50', { tip: '18', tax: '8.5', people: '2', round: 'up' }) === 'Subtotal: $84.50\nTax (8.5%): $7.18\nTip (18%): $15.21\nTotal: $106.89\nEach (2): $54.00 ($1.11 over - extra tip)', 'tip round-up');
+  ok(TOOLS['tip-calculator'].handler('100', {}) === 'Subtotal: $100.00\nTax (0%): $0.00\nTip (18%): $18.00\nTotal: $118.00\nEach (1): $118.00', 'tip defaults');
+  ok(TOOLS['tip-calculator'].handler('$1,234.56', { tip: '20%', people: '1' }) === 'Subtotal: $1,234.56\nTax (0%): $0.00\nTip (20%): $246.91\nTotal: $1,481.47\nEach (1): $1,481.47', 'tip money fmt');
+  ok(TOOLS['tip-calculator'].handler.toString().indexOf('tipSplit') >= 0, 'tip delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

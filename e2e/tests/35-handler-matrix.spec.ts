@@ -559,6 +559,8 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('business-days', 'one date diff throws', mustThrow(() => TOOLS['business-days'].handler('2026-10-13', { mode: 'diff' })));
     push('sleep-cycles', 'bedtime trio', TOOLS['sleep-cycles'].handler('06:30', { mode: 'bedtime' }).split('\n').length === 5);
     push('sleep-cycles', 'junk throws', mustThrow(() => TOOLS['sleep-cycles'].handler('midnight')));
+    push('tip-calculator', 'exact split', TOOLS['tip-calculator'].handler('84.50', { tip: '18', tax: '8.5', people: '2', round: 'exact' }).indexOf('Each (2): $53.45') >= 0);
+    push('tip-calculator', 'junk throws', mustThrow(() => TOOLS['tip-calculator'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

@@ -1160,6 +1160,45 @@ T.matrixCalc = function (aText, bText, op) {
   return show(out, mode === 'subtract' ? 'Difference' : 'Sum');
 };
 /* Matrix UI contract: matrix A input plus matrixB and operation options. Moved from the manifest for single source. */
+/* Tip/split-bill: integer-cents math, tax and tip on pre-tax subtotal, exact or round-up shares. */
+T.tipSplit = function (s, opts) {
+  var o = opts || {};
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim().replace(/[$,\s]/g, '');
+  if (!txt) throw new Error('Enter a bill amount');
+  if (!/^\d+(\.\d{1,2})?$/.test(txt)) throw new Error('Bad amount \u2014 got ' + JSON.stringify(raw.trim()));
+  var subC = Math.round(parseFloat(txt) * 100);
+  if (!(subC >= 0) || subC > 100000000000) throw new Error('Amount out of range');
+  function pctVal(v, label) {
+    var pv = String(v === undefined || v === null || v === '' ? '0' : v).trim().replace(/%$/, '');
+    if (!/^\d+(\.\d+)?$/.test(pv)) throw new Error('Bad ' + label + ' \u2014 got ' + JSON.stringify(String(v)));
+    var pn = parseFloat(pv);
+    if (!(pn >= 0) || pn > 100) throw new Error(label + ' 0-100 \u2014 got ' + JSON.stringify(String(v)));
+    return pn;
+  }
+  var tipPct = pctVal(o.tip === undefined || o.tip === null || o.tip === '' ? '18' : o.tip, 'Tip');
+  var taxPct = pctVal(o.tax, 'Tax');
+  var praw = String(o.people === undefined || o.people === null || o.people === '' ? '1' : o.people).trim();
+  if (!/^\d+$/.test(praw)) throw new Error('Bad people \u2014 got ' + JSON.stringify(praw));
+  var pcount = parseInt(praw, 10);
+  if (!(pcount >= 1) || pcount > 1000) throw new Error('People 1-1000');
+  var rmode = String(o.round || 'exact');
+  if (rmode !== 'exact' && rmode !== 'up') throw new Error('Bad round \u2014 use exact or up');
+  var taxC = Math.round(subC * taxPct / 100);
+  var tipC = Math.round(subC * tipPct / 100);
+  var totalC = subC + taxC + tipC;
+  function money(c) { var neg = c < 0 ? '-' : ''; var ac = Math.abs(c); var dl = Math.floor(ac / 100); var ds = String(dl).replace(/\B(?=(\d{3})+(?!\d))/g, ','); var cs = String(ac % 100); if (cs.length < 2) cs = '0' + cs; return neg + '$' + ds + '.' + cs; }
+  var out = ['Subtotal: ' + money(subC), 'Tax (' + taxPct + '%): ' + money(taxC), 'Tip (' + tipPct + '%): ' + money(tipC), 'Total: ' + money(totalC)];
+  if (rmode === 'up' && pcount > 1) {
+    var up = Math.ceil(totalC / pcount / 100) * 100;
+    var over = up * pcount - totalC;
+    out.push('Each (' + pcount + '): ' + money(up) + (over > 0 ? ' (' + money(over) + ' over - extra tip)' : ' (exact)'));
+  } else {
+    out.push('Each (' + pcount + '): ' + money(Math.round(totalC / pcount)));
+  }
+  return out.join('\n');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

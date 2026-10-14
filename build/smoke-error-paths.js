@@ -875,6 +875,7 @@ mustThrow(() => T.xmlMinify('   '), 'xmlMinify empty');
 mustNotThrow(() => T.xmlMinify('<a>t</a>'), 'xmlMinify good');
 mustThrow(() => TOOLS['xml-minifier'].handler(''), 'xml-minifier empty');
 
+mustThrow(() => T.tipSplit('   ', {}), 'tipSplit empty');mustThrow(() => T.tipSplit('abc', {}), 'tipSplit junk');mustThrow(() => T.tipSplit('-5', {}), 'tipSplit negative');mustThrow(() => T.tipSplit('10', { people: '0' }), 'tipSplit people range');mustThrow(() => T.tipSplit('10', { people: '2.5' }), 'tipSplit people int');mustThrow(() => T.tipSplit('10', { tip: '101' }), 'tipSplit tip range');mustThrow(() => T.tipSplit('10', { tax: 'x' }), 'tipSplit tax bad');mustThrow(() => T.tipSplit('10', { round: 'down' }), 'tipSplit round');mustNotThrow(() => T.tipSplit(String.fromCharCode(0xD800), {}), 'tipSplit lone surrogate survives');
 console.log('-- wasm guards (proven by js/wasm.js unit, not smoke) --');
 ok(true, 'wasm guards exist (manual verify: js/wasm.js mem() bounds + ASN.1 cap)');
 
