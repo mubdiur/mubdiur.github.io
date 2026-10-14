@@ -3485,6 +3485,76 @@ T.natoPhonetic = function (s, opts) {
   }
   throw new Error('Bad mode \u2014 use encode or decode');
 };
+/* FEN cores: strict six-field validation, Unicode board diagram with file and rank labels plus side castling en-passant clocks. */
+T.fenView = function (s) {
+  var raw = String(s);
+  for (var zi = 0; zi < raw.length; zi++) {
+    var zc = raw.charCodeAt(zi);
+    if (zc >= 0xD800 && zc <= 0xDFFF) return '';
+  }
+  var parts = raw.split(/\s+/);
+  var fld = [];
+  for (var fi = 0; fi < parts.length; fi++) { if (parts[fi]) fld.push(parts[fi]); }
+  if (!fld.length) throw new Error('Enter a FEN string \u2014 six fields starting with the piece placement');
+  if (fld.length !== 6) throw new Error('FEN needs 6 fields \u2014 placement side castling en-passant halfmove fullmove, got ' + fld.length);
+  var GLYPH = { K: 0, Q: 1, R: 2, B: 3, N: 4, P: 5 };
+  var board = [];
+  var ranks = fld[0].split('/');
+  if (ranks.length !== 8) throw new Error('Bad placement \u2014 eight ranks separated by slashes, got ' + ranks.length);
+  for (var ri = 0; ri < 8; ri++) {
+    var row = [];
+    var rk = ranks[ri];
+    for (var ci = 0; ci < rk.length; ci++) {
+      var ch = rk.charAt(ci);
+      var up = ch.toUpperCase();
+      var isLetter = ch.toLowerCase() !== ch.toUpperCase();
+      if (isLetter && GLYPH[up] !== undefined) { row.push(ch); }
+      else if (ch >= '1' && ch <= '8') {
+        var n = ch.charCodeAt(0) - 48;
+        for (var ei = 0; ei < n; ei++) row.push(null);
+      } else throw new Error('Bad placement character \u2014 pieces are PNBRQK and empties are 1 to 8, got ' + JSON.stringify(ch));
+    }
+    if (row.length !== 8) throw new Error('Bad rank ' + (8 - ri) + ' \u2014 ranks must total 8 squares, got ' + row.length);
+    board.push(row);
+  }
+  if (fld[1] !== 'w' && fld[1] !== 'b') throw new Error('Bad side to move \u2014 use w or b, got ' + JSON.stringify(fld[1]));
+  var castle = fld[2];
+  if (castle !== '-') {
+    if (!/^[KQkq]+$/.test(castle)) throw new Error('Bad castling \u2014 use - or letters from KQkq, got ' + JSON.stringify(castle));
+    var seen = {};
+    for (var si = 0; si < castle.length; si++) {
+      if (seen[castle.charAt(si)]) throw new Error('Repeated castling letter \u2014 each of KQkq once at most');
+      seen[castle.charAt(si)] = 1;
+    }
+  }
+  var ep = fld[3];
+  if (ep !== '-') {
+    if (!/^[a-h][36]$/.test(ep)) throw new Error('Bad en-passant square \u2014 use - or a file with rank 3 or 6, got ' + JSON.stringify(ep));
+    var needRank = fld[1] === 'w' ? '6' : '3';
+    if (ep.charAt(1) !== needRank) throw new Error('En-passant rank must be ' + needRank + ' with ' + fld[1] + ' to move \u2014 got ' + JSON.stringify(ep));
+  }
+  if (!/^[0-9]+$/.test(fld[4])) throw new Error('Bad halfmove clock \u2014 a whole number of halfmoves, got ' + JSON.stringify(fld[4]));
+  if (!/^[1-9][0-9]*$/.test(fld[5])) throw new Error('Bad fullmove number \u2014 counting starts at 1, got ' + JSON.stringify(fld[5]));
+  var lines = [];
+  for (var br = 0; br < 8; br++) {
+    var cells = [];
+    for (var bc = 0; bc < 8; bc++) {
+      var pc = board[br][bc];
+      if (!pc) cells.push(String.fromCharCode(0xB7));
+      else {
+        var up2 = pc.toUpperCase();
+        cells.push(String.fromCharCode((pc === up2 ? 0x2654 : 0x265A) + GLYPH[up2]));
+      }
+    }
+    lines.push((8 - br) + '  ' + cells.join(' '));
+  }
+  lines.push('   a b c d e f g h');
+  lines.push('Side to move: ' + (fld[1] === 'w' ? 'White' : 'Black'));
+  lines.push('Castling: ' + (castle === '-' ? 'none' : castle));
+  lines.push('En passant: ' + (ep === '-' ? 'none' : ep));
+  lines.push('Halfmove: ' + fld[4] + '  Fullmove: ' + fld[5]);
+  return lines.join('\n');
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');

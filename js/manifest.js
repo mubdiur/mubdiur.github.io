@@ -501,6 +501,9 @@ window.TOOLMANIFEST = [
     handler: function (s, opts) { return Transforms.xmlToMarkdown(s, opts); },
     params: [{ key: 'align', label: 'Align', type: 'select', default: 'left', options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }] }, { key: 'nested', label: 'Nested objects', type: 'select', default: 'flatten', options: [{ value: 'flatten', label: 'Flatten (a.b)' }, { value: 'stringify', label: 'Stringify JSON' }] }] },
 
+  { slug: 'fen-viewer', name: 'FEN Chessboard Viewer', desc: 'Render a Forsyth-Edwards position \u2014 Unicode board, side, castling, en-passant and clocks', category: 'converters', tags: ['fen', 'chess', 'board', 'position'], icon: 'table-2', template: 'transform',
+    placeholder: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    handler: function (s) { return Transforms.fenView(s); } },
   { slug: 'yaml-to-json', name: 'YAML → JSON', desc: 'Convert YAML to JSON', category: 'converters', tags: ['yaml', 'json', 'convert'], icon: 'filetype', template: 'transform',
     handler: function (s) { return Transforms.yamlToJSON(s); } },
   { slug: 'table2xl', name: 'Table2xl — Table Converter', desc: 'Paste dirty HTML tables or ELK/Kibana grids — strip the noise, export as clean HTML or ASCII table', category: 'converters', tags: ['table', 'elk', 'kibana', 'ascii'], icon: 'filespreadsheet', template: 'custom' },

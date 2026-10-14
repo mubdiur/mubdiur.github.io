@@ -269,6 +269,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('braille', 'ascii decode throws', mustThrow(() => TOOLS['braille'].handler('abc', { mode: 'decode' })));
     push('nato-phonetic', 'happy', TOOLS['nato-phonetic'].handler('ABC') === 'Alfa Bravo Charlie');
     push('nato-phonetic', 'unknown word throws', mustThrow(() => TOOLS['nato-phonetic'].handler('Banana', { mode: 'decode' })));
+    push('fen-viewer', 'happy', TOOLS['fen-viewer'].handler('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1').indexOf('Side to move: White') >= 0);
+    push('fen-viewer', 'bad side throws', mustThrow(() => TOOLS['fen-viewer'].handler('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR q KQkq - 0 1')));
     push('befunge', 'happy', TOOLS['befunge'].handler('"A",@') === 'A');
     push('befunge', 'div zero throws', mustThrow(() => TOOLS['befunge'].handler('50/.@')));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');

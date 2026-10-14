@@ -78,6 +78,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'whitespace': { good: '   \t  \t   \n\t\n  \n\n', expectInOutput: /H/ },
   'braille': { good: 'abc', expectInOutput: /\u2801/ },
   'nato-phonetic': { good: 'ABC', expectInOutput: /Alfa/ },
+  'fen-viewer': { good: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', expectInOutput: /Side to move/ },
   'befunge': { good: '"A",@', expectInOutput: /A/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
