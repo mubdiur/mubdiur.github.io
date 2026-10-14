@@ -243,6 +243,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('cadenus-cipher', 'bad key throws', mustThrow(() => TOOLS['cadenus-cipher'].handler('AB', { key: '' })));
     push('redefence-cipher', 'happy', TOOLS['redefence-cipher'].handler('HELLOWORLD') === 'OOLLEDLRWH');
     push('redefence-cipher', 'bad key throws', mustThrow(() => TOOLS['redefence-cipher'].handler('AB', { key: '' })));
+    push('tap-code', 'happy', TOOLS['tap-code'].handler('A') === '.. ...');
+    push('tap-code', 'bad char throws', mustThrow(() => TOOLS['tap-code'].handler('x', { mode: 'decode' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

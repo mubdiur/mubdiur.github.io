@@ -65,6 +65,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'polybius-cipher': { good: 'HELLO', expectInOutput: /3312353515/ },
   'cadenus-cipher': { good: 'HELLO', expectInOutput: /OMICG/ },
   'redefence-cipher': { good: 'HELLOWORLD', expectInOutput: /OOLLEDLRWH/ },
+  'tap-code': { good: 'HELLO', expectInOutput: /... ... . ../ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },

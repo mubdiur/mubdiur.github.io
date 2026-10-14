@@ -2663,6 +2663,39 @@ T.redefenceDecode = function (s, key) {
   return out.join('');
 };
 T.redefenceCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'ZEBRAS' : o.key; if ((o.mode || 'encode') === 'decode') return T.redefenceDecode(s, k); return T.redefenceEncode(s, k); };
+/* Tap cores: knock-code dot groups from the keyed 5x5 square (J folds to I); letters in a word space apart, words split on /. */
+T.tapEncode = function (s, squareKey) {
+  var sq = T.playfairSquare(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var raw = String(s).toUpperCase().replace(/J/g, 'I');
+  var parts = raw.split(/[^A-Z]+/).filter(function (w) { return w; });
+  if (!parts.length) return '';
+  return parts.map(function (w) {
+    var letters = [];
+    for (var i = 0; i < w.length; i++) { var n = T.nihilistNum(w.charAt(i), sq); letters.push(new Array(((n / 10) | 0) + 1).join('.') + ' ' + new Array((n % 10) + 1).join('.')); }
+    return letters.join(' ');
+  }).join(' / ');
+};
+T.tapDecode = function (s, squareKey) {
+  var sq = T.playfairSquare(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var raw = String(s);
+  if (!raw.trim()) return '';
+  if (/[^.\s/]/.test(raw)) throw new Error('Bad Tap input \u2014 dots, spaces and / only');
+  var words = raw.trim().split(/\s*\/\s*/);
+  var out = [];
+  for (var w = 0; w < words.length; w++) {
+    var runs = words[w].trim().split(/\s+/);
+    if (runs.length === 1 && !runs[0]) { out.push(''); continue; }
+    if (runs.length % 2) throw new Error('Bad Tap input \u2014 need dot pairs, saw ' + runs.length + ' group(s)');
+    var word = '';
+    for (var i = 0; i < runs.length; i += 2) {
+      if (!/^\.{1,5}$/.test(runs[i]) || !/^\.{1,5}$/.test(runs[i + 1])) throw new Error('Bad Tap group \u2014 1 to 5 dots each');
+      word += sq.seq[(runs[i].length - 1) * 5 + (runs[i + 1].length - 1)];
+    }
+    out.push(word);
+  }
+  return out.join(' ');
+};
+T.tapCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; if ((o.mode || 'encode') === 'decode') return T.tapDecode(s, q); return T.tapEncode(s, q); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
