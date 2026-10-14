@@ -60,6 +60,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'gronsfeld-cipher': { good: 'HELLO', expectInOutput: /KFPMT/ },
   'chaocipher': { good: 'HELLOWORLD', expectInOutput: /^[A-Z]{10}$/ },
   'morbit-cipher': { good: 'HELLO', expectInOutput: /11774321859/ },
+  'pollux-cipher': { good: 'HELLO', expectInOutput: /AGTCDHO/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },

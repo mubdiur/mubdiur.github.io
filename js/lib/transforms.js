@@ -2511,6 +2511,31 @@ T.morbitDecode = function (s) {
   return out;
 };
 T.morbitCipher = function (s, opts) { var o = opts || {}; if ((o.mode || 'encode') === 'decode') return T.morbitDecode(s); return T.morbitEncode(s); };
+/* Pollux cores: Morse symbols grouped in triplets become letters A-Z plus . (... is A through xxx is .); letter separator is x, short tails padded with x. */
+T.polluxTrips = (function () { var syms = ['.', '-', 'x'], out = []; for (var a = 0; a < 3; a++) for (var b = 0; b < 3; b++) for (var cc = 0; cc < 3; cc++) out.push(syms[a] + syms[b] + syms[cc]); return out; })();
+T.polluxAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ.';
+T.polluxEncode = function (s) {
+  var t = String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!t) return '';
+  var stream = '';
+  for (var i = 0; i < t.length; i++) stream += morseMap[t.charAt(i)] + 'x';
+  while (stream.length % 3) stream += 'x';
+  var out = '';
+  for (var j = 0; j < stream.length; j += 3) out += T.polluxAlphabet.charAt(T.polluxTrips.indexOf(stream.slice(j, j + 3)));
+  return out;
+};
+T.polluxDecode = function (s) {
+  var c = String(s).toUpperCase().replace(/\s/g, '');
+  if (!c) return '';
+  if (/[^A-Z.]/.test(c)) throw new Error('Bad Pollux input \u2014 letters A-Z and . only');
+  var stream = '';
+  for (var i = 0; i < c.length; i++) { var p = T.polluxAlphabet.indexOf(c.charAt(i)); if (p < 0) throw new Error('Bad Pollux input \u2014 letters A-Z and . only'); stream += T.polluxTrips[p]; }
+  var out = '';
+  var codes = stream.split('x');
+  for (var j = 0; j < codes.length; j++) { if (!codes[j]) continue; var ch = revMorse[codes[j]]; if (!ch) throw new Error('Bad Pollux input \u2014 unknown Morse ' + codes[j]); out += ch; }
+  return out;
+};
+T.polluxCipher = function (s, opts) { var o = opts || {}; if ((o.mode || 'encode') === 'decode') return T.polluxDecode(s); return T.polluxEncode(s); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
