@@ -4193,6 +4193,58 @@ T.cusipCheck = function (s, opts) {
   }
   return clean + cusipCheck(clean);
 };
+/* LEI cores: ISO 17442 legal-entity identifiers with mod-97 check pair, spaces and dashes ignored. */
+T.leiCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var raw = String(s);
+  var clean = '';
+  for (var ci = 0; ci < raw.length; ci++) {
+    var cc = raw.charCodeAt(ci);
+    if (cc >= 0xD800 && cc <= 0xDFFF) return '';
+    var ch = raw.charAt(ci);
+    if (ch >= '0' && ch <= '9') clean += ch;
+    else if (ch >= 'A' && ch <= 'Z') clean += ch;
+    else if (ch >= 'a' && ch <= 'z') clean += ch.toUpperCase();
+    else if (cc === 32 || cc === 9 || cc === 10 || cc === 13 || cc === 45) continue;
+    else if (mode === 'check-digit' && (ch === '?' || ch === '*' || ch === '#')) continue;
+    else throw new Error('Letters and digits only \u2014 LEI with spaces or dashes ignored, got ' + JSON.stringify(ch));
+  }
+  function leiMod(st) {
+    var rr = 0;
+    for (var ii = 0; ii < st.length; ii++) {
+      var kk = st.charAt(ii);
+      if (kk >= '0' && kk <= '9') rr = (rr * 10 + (kk.charCodeAt(0) - 48)) % 97;
+      else {
+        var vv = kk.charCodeAt(0) - 55;
+        rr = (rr * 10 + Math.floor(vv / 10)) % 97;
+        rr = (rr * 10 + (vv % 10)) % 97;
+      }
+    }
+    return rr;
+  }
+  if (!clean.length) throw new Error('Enter an LEI first \u2014 eighteen entity characters and two check digits');
+  if (mode === 'validate') {
+    if (clean.length !== 20) throw new Error('Bad length \u2014 LEIs run 20 characters, got ' + clean.length);
+    for (var ni = 0; ni < 18; ni++) {
+      var nh = clean.charAt(ni);
+      if ((nh < '0' || nh > '9') && (nh < 'A' || nh > 'Z')) throw new Error('Bad entity character \u2014 letters or digits, got ' + JSON.stringify(nh));
+    }
+    var d0 = clean.charAt(18);
+    var d1 = clean.charAt(19);
+    if (d0 < '0' || d0 > '9' || d1 < '0' || d1 > '9') throw new Error('Bad check digits \u2014 two digits close the LEI');
+    if (leiMod(clean) !== 1) throw new Error('Invalid LEI \u2014 mod-97 check fails for ' + JSON.stringify(clean));
+    return 'Valid \u2014 LEI checksum passes (20 characters)';
+  }
+  if (clean.length !== 18) throw new Error('Bad prefix \u2014 18 characters make an LEI, got ' + clean.length);
+  for (var qi = 0; qi < 18; qi++) {
+    var qh = clean.charAt(qi);
+    if ((qh < '0' || qh > '9') && (qh < 'A' || qh > 'Z')) throw new Error('Bad prefix character \u2014 letters or digits, got ' + JSON.stringify(qh));
+  }
+  var cd = 98 - leiMod(clean + '00');
+  return clean + (cd < 10 ? '0' : '') + String(cd);
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
