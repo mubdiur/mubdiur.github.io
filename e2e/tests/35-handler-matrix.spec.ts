@@ -285,7 +285,9 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('verhoeff-validator', 'bad checksum throws', mustThrow(() => TOOLS['verhoeff-validator'].handler('237')));
     push('damm-validator', 'happy', TOOLS['damm-validator'].handler('5724').indexOf('Valid') === 0);
     push('damm-validator', 'bad checksum throws', mustThrow(() => TOOLS['damm-validator'].handler('5725')));
-    push('xor-cipher', 'happy', TOOLS['xor-cipher'].handler('hello', { key: 'key' }) === '030015070a');
+        push('isin-validator', 'happy', TOOLS['isin-validator'].handler('US0378331005').indexOf('Valid') === 0);
+    push('isin-validator', 'bad checksum throws', mustThrow(() => TOOLS['isin-validator'].handler('US0378331006')));
+push('xor-cipher', 'happy', TOOLS['xor-cipher'].handler('hello', { key: 'key' }) === '030015070a');
     push('xor-cipher', 'bad hex throws', mustThrow(() => TOOLS['xor-cipher'].handler('zz', { key: 'k', input: 'hex' })));
     push('pig-latin', 'happy', TOOLS['pig-latin'].handler('hello') === 'ellohay');
     push('pig-latin', 'bad suffix throws', mustThrow(() => TOOLS['pig-latin'].handler('hi', { suffix: 'oy' })));

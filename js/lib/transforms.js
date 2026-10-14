@@ -4030,6 +4030,71 @@ T.dancingMen = function (s, opts) {
   }
   return res;
 };
+/* ISIN cores: ISO 6166 securities identifiers, letters as base-10 pairs plus Luhn mod-10, spaces and dashes ignored. */
+T.isinCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var raw = String(s);
+  var clean = '';
+  for (var ci = 0; ci < raw.length; ci++) {
+    var cc = raw.charCodeAt(ci);
+    if (cc >= 0xD800 && cc <= 0xDFFF) return '';
+    var ch = raw.charAt(ci);
+    if (ch >= '0' && ch <= '9') clean += ch;
+    else if (ch >= 'A' && ch <= 'Z') clean += ch;
+    else if (ch >= 'a' && ch <= 'z') clean += ch.toUpperCase();
+    else if (cc === 32 || cc === 9 || cc === 10 || cc === 13 || cc === 45) continue;
+    else if (mode === 'check-digit' && (ch === '?' || ch === '*' || ch === '#')) continue;
+    else throw new Error('Letters and digits only \u2014 ISIN with spaces or dashes ignored, got ' + JSON.stringify(ch));
+  }
+  function isinDigits(cx) {
+    var dstr = '';
+    for (var di = 0; di < cx.length; di++) {
+      var dh = cx.charAt(di);
+      if (dh >= '0' && dh <= '9') dstr += dh;
+      else dstr += String(dh.charCodeAt(0) - 55);
+    }
+    return dstr;
+  }
+  function isinSum(ds, startDbl) {
+    var t = 0;
+    var pos = 0;
+    for (var li = ds.length - 1; li >= 0; li--) {
+      var vv = ds.charCodeAt(li) - 48;
+      if ((pos % 2 === 0) === startDbl) { vv *= 2; if (vv > 9) vv -= 9; }
+      t += vv;
+      pos++;
+    }
+    return t;
+  }
+  if (!clean.length) throw new Error('Enter an ISIN first \u2014 two letters, nine securities characters and a check digit');
+  if (mode === 'validate') {
+    if (clean.length !== 12) throw new Error('Bad length \u2014 ISINs run 12 characters, got ' + clean.length);
+    var c0 = clean.charAt(0);
+    var c1 = clean.charAt(1);
+    if (c0 < 'A' || c0 > 'Z' || c1 < 'A' || c1 > 'Z') throw new Error('Bad country code \u2014 ISIN starts with two letters, got ' + JSON.stringify(clean.slice(0, 2)));
+    for (var ni = 2; ni < 11; ni++) {
+      var nh = clean.charAt(ni);
+      if ((nh < '0' || nh > '9') && (nh < 'A' || nh > 'Z')) throw new Error('Bad securities character \u2014 letters or digits, got ' + JSON.stringify(nh));
+    }
+    var kc = clean.charAt(11);
+    if (kc < '0' || kc > '9') throw new Error('Bad check digit \u2014 a digit 0-9, got ' + JSON.stringify(kc));
+    if (isinSum(isinDigits(clean), false) % 10 !== 0) throw new Error('Invalid ISIN \u2014 checksum fails for ' + JSON.stringify(clean));
+    return 'Valid \u2014 ' + clean.slice(0, 2) + ' ISIN checksum passes';
+  }
+  if (clean.length !== 11) throw new Error('Bad prefix \u2014 11 characters make an ISIN, got ' + clean.length);
+  var q0 = clean.charAt(0);
+  var q1 = clean.charAt(1);
+  if (q0 < 'A' || q0 > 'Z' || q1 < 'A' || q1 > 'Z') throw new Error('Bad country code \u2014 ISIN starts with two letters, got ' + JSON.stringify(clean.slice(0, 2)));
+  for (var qi = 2; qi < 11; qi++) {
+    var qh = clean.charAt(qi);
+    if ((qh < '0' || qh > '9') && (qh < 'A' || qh > 'Z')) throw new Error('Bad securities character \u2014 letters or digits, got ' + JSON.stringify(qh));
+  }
+  var pds = isinDigits(clean);
+  var psum = isinSum(pds, true);
+  return clean + String((10 - (psum % 10)) % 10);
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
