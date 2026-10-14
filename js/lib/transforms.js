@@ -3033,6 +3033,60 @@ T.springSolve = function (s) {
   var verdict = ci < 4 ? 'tight (aim 4-12)' : (ci > 12 ? 'loose (aim 4-12)' : 'good (4-12)');
   return 'Spring: d = ' + rtrim(rd) + ', D = ' + rtrim(rc) + ', Na = ' + rtrim(rn) + '\nRate: ' + rtrim(rk) + '/unit (G = ' + rtrim(rg) + ')\nIndex: ' + rtrim(ci) + ' ' + verdict + '\nWahl: ' + rtrim(wahl) + '\nSolid height: ~' + rtrim(solid);
 };
+/* Cam solver: simple-harmonic follower displacement, velocity and accel from base and lift. */
+T.camSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a cam \u2014 e.g. cam 20 10 90 45');
+  function cpos(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (!(v > 0)) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function ctrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(cam|follower)\b/.exec(low);
+  if (!m0) throw new Error('Unknown cam \u2014 use cam 20 10 90 45');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'r' || tk === 'base' || tk === 'h' || tk === 'lift' || tk === 'b' || tk === 'beta' || tk === 'rise' || tk === 't' || tk === 'theta' || tk === 'angle') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 3 && nums.length !== 4) throw new Error('Cam wants base, lift and rise angle \u2014 e.g. cam 20 10 90 45');
+  var cr = cpos(nums[0], 'Bad base');
+  var ch = cpos(nums[1], 'Bad lift');
+  var cb = cpos(nums[2], 'Bad rise');
+  if (cb > 360) throw new Error('Rise too large \u2014 max 360 deg');
+  var beta = cb * Math.PI / 180;
+  var hasT = nums.length === 4;
+  var ct = 0;
+  if (hasT) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(nums[3])) throw new Error('Bad angle \u2014 got ' + JSON.stringify(nums[3].slice(0, 40)));
+    ct = parseFloat(nums[3]);
+    if (!isFinite(ct)) throw new Error('Bad angle \u2014 out of range');
+    if (ct < 0 || ct > cb) throw new Error('Angle outside rise \u2014 0 to ' + JSON.stringify(ctrim(cb)));
+  }
+  var vmax = ch * Math.PI / (2 * beta);
+  var amax = ch * Math.PI * Math.PI / (2 * beta * beta);
+  var out = 'Cam: base = ' + ctrim(cr) + ', lift = ' + ctrim(ch) + ', rise = ' + ctrim(cb) + ' deg\nMax radius: ' + ctrim(cr + ch) + '\nMax vel: ' + ctrim(vmax) + '/rad\nMax accel: ' + ctrim(amax) + '/rad2';
+  if (hasT) {
+    var th = ct * Math.PI / 180;
+    var sd = ch / 2 * (1 - Math.cos(Math.PI * th / beta));
+    var vv = ch * Math.PI / (2 * beta) * Math.sin(Math.PI * th / beta);
+    var aa = ch * Math.PI * Math.PI / (2 * beta * beta) * Math.cos(Math.PI * th / beta);
+    out += '\nAt ' + ctrim(ct) + ' deg: s = ' + ctrim(sd) + ', v = ' + ctrim(vv) + '/rad, a = ' + ctrim(aa) + '/rad2';
+  }
+  return out;
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

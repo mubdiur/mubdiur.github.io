@@ -1583,6 +1583,14 @@ console.log('-- spring --');
   ok(TOOLS['spring-solver'].handler('spring 2 20 8').indexOf('Solid height: ~20') >= 0, 'spring solid');
   ok(TOOLS['spring-solver'].handler.toString().indexOf('springSolve') >= 0, 'spring delegates');
 }
+console.log('-- cam --');
+{
+  ok(TOOLS['cam-solver'].handler('cam 20 10 90 45').indexOf('At 45 deg: s = 5, v = 10/rad, a = 0/rad2') >= 0, 'cam mid-rise');
+  ok(TOOLS['cam-solver'].handler('cam 20 10 90 0').indexOf('At 0 deg: s = 0, v = 0/rad, a = 20/rad2') >= 0, 'cam start accel');
+  ok(TOOLS['cam-solver'].handler('cam 20 10 90').indexOf('Max vel: 10/rad') >= 0, 'cam peaks');
+  ok(TOOLS['cam-solver'].handler('follower 20 10 90 90').indexOf('s = 10, v = 0/rad') >= 0, 'cam full lift');
+  ok(TOOLS['cam-solver'].handler.toString().indexOf('camSolve') >= 0, 'cam delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

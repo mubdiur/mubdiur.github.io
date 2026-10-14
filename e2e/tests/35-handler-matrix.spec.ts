@@ -678,6 +678,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('spring-solver', 'rate', TOOLS['spring-solver'].handler('spring 2 20 8').indexOf('Rate: 2.478125/unit') >= 0);
     push('spring-solver', 'wahl', TOOLS['spring-solver'].handler('spring 2 20 8').indexOf('Wahl: 1.1448333333') >= 0);
     push('spring-solver', 'junk throws', mustThrow(() => TOOLS['spring-solver'].handler('abc')));
+    push('cam-solver', 'mid-rise', TOOLS['cam-solver'].handler('cam 20 10 90 45').indexOf('At 45 deg: s = 5, v = 10/rad, a = 0/rad2') >= 0);
+    push('cam-solver', 'peaks', TOOLS['cam-solver'].handler('cam 20 10 90').indexOf('Max vel: 10/rad') >= 0);
+    push('cam-solver', 'junk throws', mustThrow(() => TOOLS['cam-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));
