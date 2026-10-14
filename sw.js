@@ -22,7 +22,7 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-var SW_VERSION = 'v311';
+var SW_VERSION = 'v312';
 var STATIC_CACHE = 'mub-static-' + SW_VERSION;
 var RUNTIME_CACHE = 'mub-runtime-v1';
 
@@ -36,8 +36,8 @@ var SHELL = [
   'js/lib/diff.js?v=27',
   'js/lib/adaptive-radix.js?v=1',
   'js/lib/qr-decode.js?v=2',
-  'js/manifest.js?v=272',
-  'js/lib/transforms.js?v=260',
+  'js/manifest.js?v=273',
+  'js/lib/transforms.js?v=261',
   'js/lib/crypto.js?v=7',
   'js/wasm.js?v=28',
   'js/core.js?v=68',

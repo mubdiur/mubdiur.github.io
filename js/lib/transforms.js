@@ -3066,6 +3066,168 @@ T.brainfuck = function (code, input) {
   }
   return out;
 };
+/* Whitespace cores: only space/tab/LF execute, every other character is a comment; stack machine with heap, labels and call stack, stdin for input ops, one million steps max. */
+T.whitespace = function (code, input) {
+  var raw = String(code);
+  var prog = '';
+  for (var w = 0; w < raw.length; w++) {
+    var wc = raw.charAt(w);
+    if (wc === ' ' || wc === '\t' || wc === '\n') prog += wc;
+  }
+  var pos = 0;
+  function atEnd() { return pos >= prog.length; }
+  function nextTok() {
+    if (atEnd()) throw new Error('Truncated program \u2014 ends mid-instruction');
+    var t = prog.charAt(pos);
+    pos++;
+    return t;
+  }
+  function parseNum() {
+    var sgn = nextTok();
+    if (sgn !== ' ' && sgn !== '\t') throw new Error('Bad number \u2014 sign must be space or tab');
+    var neg = sgn === '\t';
+    var val = 0;
+    var bits = 0;
+    for (;;) {
+      var b = nextTok();
+      if (b === '\n') break;
+      if (b !== ' ' && b !== '\t') throw new Error('Bad number \u2014 bits must be space or tab');
+      val = val * 2 + (b === '\t' ? 1 : 0);
+      bits++;
+      if (bits > 64) throw new Error('Number too long \u2014 64 bits max');
+    }
+    return neg ? -val : val;
+  }
+  function parseLabel() {
+    var lab = '';
+    for (;;) {
+      var c = nextTok();
+      if (c === '\n') break;
+      lab += c;
+    }
+    return lab;
+  }
+  var ops = [];
+  while (!atEnd()) {
+    var imp = nextTok();
+    if (imp === ' ') {
+      var sc = nextTok();
+      if (sc === ' ') ops.push(['push', parseNum()]);
+      else if (sc === '\n') {
+        var sc2 = nextTok();
+        if (sc2 === ' ') ops.push(['dup']);
+        else if (sc2 === '\t') ops.push(['swap']);
+        else ops.push(['discard']);
+      } else throw new Error('Bad stack command \u2014 expected space or linefeed');
+    } else if (imp === '\t') {
+      var tc = nextTok();
+      if (tc === ' ') {
+        var a1 = nextTok();
+        var a2 = nextTok();
+        if (a1 === ' ' && a2 === ' ') ops.push(['add']);
+        else if (a1 === ' ' && a2 === '\t') ops.push(['sub']);
+        else if (a1 === ' ' && a2 === '\n') ops.push(['mul']);
+        else if (a1 === '\t' && a2 === ' ') ops.push(['div']);
+        else if (a1 === '\t' && a2 === '\t') ops.push(['mod']);
+        else throw new Error('Bad arithmetic command \u2014 unknown operator');
+      } else if (tc === '\t') {
+        var hc = nextTok();
+        if (hc === ' ') ops.push(['store']);
+        else if (hc === '\t') ops.push(['retrieve']);
+        else throw new Error('Bad heap command \u2014 expected space or tab');
+      } else {
+        var oc = nextTok();
+        if (oc === ' ') {
+          var oc2 = nextTok();
+          if (oc2 === ' ') ops.push(['outc']);
+          else if (oc2 === '\t') ops.push(['outn']);
+          else throw new Error('Bad output command \u2014 expected space or tab');
+        } else if (oc === '\t') {
+          var oc3 = nextTok();
+          if (oc3 === ' ') ops.push(['readc']);
+          else if (oc3 === '\t') ops.push(['readn']);
+          else throw new Error('Bad input command \u2014 expected space or tab');
+        } else throw new Error('Bad IO command \u2014 expected space or tab');
+      }
+    } else {
+      var fc = nextTok();
+      if (fc === ' ') {
+        var fc2 = nextTok();
+        if (fc2 === ' ') ops.push(['mark', parseLabel()]);
+        else if (fc2 === '\t') ops.push(['call', parseLabel()]);
+        else ops.push(['jump', parseLabel()]);
+      } else if (fc === '\t') {
+        var fc3 = nextTok();
+        if (fc3 === ' ') ops.push(['jz', parseLabel()]);
+        else if (fc3 === '\t') ops.push(['jn', parseLabel()]);
+        else ops.push(['ret']);
+      } else ops.push(['exit']);
+    }
+  }
+  var marks = {};
+  for (var mi = 0; mi < ops.length; mi++) {
+    if (ops[mi][0] === 'mark') {
+      if (Object.prototype.hasOwnProperty.call(marks, ops[mi][1])) throw new Error('Duplicate label \u2014 mark defined twice');
+      marks[ops[mi][1]] = mi;
+    }
+  }
+  for (var rj = 0; rj < ops.length; rj++) {
+    var rk = ops[rj][0];
+    if (rk === 'call' || rk === 'jump' || rk === 'jz' || rk === 'jn') {
+      if (!Object.prototype.hasOwnProperty.call(marks, ops[rj][1])) throw new Error('Undefined label \u2014 no mark for this call or jump');
+    }
+  }
+  var stk = [];
+  var heap = {};
+  var calls = [];
+  var inp = String(input === undefined ? '' : input);
+  var ii = 0;
+  function popW() {
+    if (!stk.length) throw new Error('Stack underflow \u2014 needs a value but the stack is empty');
+    return stk.pop();
+  }
+  var wout = '';
+  var steps = 0;
+  var pc = 0;
+  while (pc < ops.length) {
+    if (++steps > 1000000) throw new Error('Step limit 1000000 hit \u2014 infinite loop?');
+    var op = ops[pc];
+    pc++;
+    var kind = op[0];
+    if (kind === 'push') stk.push(op[1]);
+    else if (kind === 'dup') { var d1 = popW(); stk.push(d1); stk.push(d1); }
+    else if (kind === 'swap') { var s1 = popW(); var s2 = popW(); stk.push(s1); stk.push(s2); }
+    else if (kind === 'discard') popW();
+    else if (kind === 'add') { var ab = popW(); var aa = popW(); stk.push(aa + ab); }
+    else if (kind === 'sub') { var ub = popW(); var ua = popW(); stk.push(ua - ub); }
+    else if (kind === 'mul') { var mb = popW(); var ma = popW(); stk.push(ma * mb); }
+    else if (kind === 'div') { var db = popW(); var da = popW(); if (db === 0) throw new Error('Division by zero \u2014 divisor is zero'); stk.push((da - (da % db)) / db); }
+    else if (kind === 'mod') { var ob = popW(); var oa = popW(); if (ob === 0) throw new Error('Division by zero \u2014 divisor is zero'); stk.push(oa % ob); }
+    else if (kind === 'store') { var sv = popW(); var sa = popW(); heap[sa] = sv; }
+    else if (kind === 'retrieve') { var ra = popW(); stk.push(Object.prototype.hasOwnProperty.call(heap, ra) ? heap[ra] : 0); }
+    else if (kind === 'mark') {}
+    else if (kind === 'call') { calls.push(pc); pc = marks[op[1]]; }
+    else if (kind === 'jump') pc = marks[op[1]];
+    else if (kind === 'jz') { if (popW() === 0) pc = marks[op[1]]; }
+    else if (kind === 'jn') { if (popW() < 0) pc = marks[op[1]]; }
+    else if (kind === 'ret') { if (!calls.length) throw new Error('Return without call \u2014 call stack is empty'); pc = calls.pop(); }
+    else if (kind === 'exit') pc = ops.length;
+    else if (kind === 'outc') wout += String.fromCharCode(popW());
+    else if (kind === 'outn') wout += String(popW());
+    else if (kind === 'readc') { var wa = popW(); heap[wa] = ii < inp.length ? inp.charCodeAt(ii++) % 256 : 0; }
+    else if (kind === 'readn') {
+      var na = popW();
+      var jj = ii;
+      while (jj < inp.length && (inp.charAt(jj) === ' ' || inp.charAt(jj) === '\t' || inp.charAt(jj) === '\n' || inp.charAt(jj) === '\r')) jj++;
+      var mt = /^[-+]?[0-9]+/.exec(inp.slice(jj));
+      var nv = 0;
+      if (mt) { nv = parseInt(mt[0], 10); jj += mt[0].length; }
+      ii = jj;
+      heap[na] = nv;
+    }
+  }
+  return wout;
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
