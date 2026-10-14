@@ -254,6 +254,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'compound-interest': { good: '10000', bad: 'abc', expectInOutput: /Final:/, expectError: /Bad principal/ },
   'gcd-lcm-calculator': { good: '12 18', bad: '12a', expectInOutput: /GCD: 6/, expectError: /Bad integer/ },
   'fraction-simplifier': { good: '6/8', bad: 'abc', expectInOutput: /Fraction: 3\/4/, expectError: /Bad fraction/ },
+  'ratio-calculator': { good: '16:24', bad: '16:abc', expectInOutput: /Simplified: 2:3/, expectError: /Bad number/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

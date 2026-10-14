@@ -1308,6 +1308,16 @@ console.log('-- frac --');
   ok(T.bgcd(BigInt(12), BigInt(18)) === BigInt(6), 'bgcd shared');
   ok(TOOLS['gcd-lcm-calculator'].handler('12 18') === 'GCD: 6\nLCM: 36\nCoprime: no', 'gcd still exact');
 }
+console.log('-- ratio --');
+{
+  ok(TOOLS['ratio-calculator'].handler('16:24') === 'Simplified: 2:3\nTotal parts: 5\nShares: 40.00% | 60.00%\nDivisor: 8', 'ratio basic');
+  ok(TOOLS['ratio-calculator'].handler('16:24:32') === 'Simplified: 2:3:4\nTotal parts: 9\nShares: 22.22% | 33.33% | 44.44%\nDivisor: 8', 'ratio triple');
+  ok(TOOLS['ratio-calculator'].handler('2.5:5') === 'Simplified: 1:2\nTotal parts: 3\nShares: 33.33% | 66.67%\nDivisor: 25', 'ratio decimal');
+  ok(TOOLS['ratio-calculator'].handler('3:4 = 6:x') === 'x = 8\nCheck: 3:4 = 6:8\nDecimal: 8', 'ratio proportion');
+  ok(TOOLS['ratio-calculator'].handler('2:3 = 5:x') === 'x = 15/2\nCheck: 2:3 = 5:15/2\nDecimal: 7.5', 'ratio prop frac');
+  ok(TOOLS['ratio-calculator'].handler.toString().indexOf('ratioCalc') >= 0, 'ratio delegates');
+}
+
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

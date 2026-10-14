@@ -1471,6 +1471,125 @@ T.fracSimp = function (s) {
   var decLine = (rn < BigInt(0) && arn !== BigInt(0) ? "-" : "") + decExp(arn, rd);
   return "Fraction: " + fracLine + "\nMixed: " + mixLine + "\nDecimal: " + decLine + "\nGCD: " + grp(g);
 };
+/* Ratio simplifier and proportion solver: a:b:c via scaled BigInt GCD plus cross-multiplied x. */
+T.ratioCalc = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a ratio \u2014 e.g. 16:24');
+  function rgrp(x) { var ng = x < BigInt(0) ? '-' : ''; var t = (x < BigInt(0) ? -x : x).toString(); return ng + t.replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  function rdec(n, d) {
+    var neg = (n < BigInt(0)) !== (d < BigInt(0));
+    var an = n < BigInt(0) ? -n : n;
+    var ad = d < BigInt(0) ? -d : d;
+    var qp = an / ad;
+    var rem = an % ad;
+    if (rem === BigInt(0)) return (neg && qp !== BigInt(0) ? '-' : '') + qp.toString();
+    var digs = '';
+    for (var di = 0; di < 12 && rem !== BigInt(0); di++) { rem *= BigInt(10); digs += (rem / ad).toString(); rem %= ad; }
+    return (neg ? '-' : '') + qp.toString() + '.' + digs;
+  }
+  function rnum(tok) { return /^[+-]?(\d+(\.\d+)?|\.\d+)$/.test(tok); }
+  function rdigits(tok) {
+    var u = (tok.charAt(0) === '+' || tok.charAt(0) === '-') ? tok.slice(1) : tok;
+    var dot = u.indexOf('.');
+    var ip = dot < 0 ? u : (dot === 0 ? '0' : u.slice(0, dot));
+    var fp = dot < 0 ? '' : u.slice(dot + 1);
+    var all = (ip + fp).replace(/^0+/, '');
+    if ((all.length || 1) > 2000) throw new Error('Number too long \u2014 max 2000 digits');
+    if (fp.length > 2000) throw new Error('Decimal too long \u2014 max 2000 places');
+    return { ip: ip, fp: fp, flen: fp.length, neg: tok.charAt(0) === '-' };
+  }
+  function rzero(r) { return r.n === BigInt(0); }
+  if (txt.indexOf('=') >= 0) {
+    var sides = txt.split('=');
+    if (sides.length !== 2) throw new Error('Bad proportion \u2014 use one = sign, e.g. 3:4 = 6:x');
+    function sideTerms(sx, label) {
+      var ts = sx.trim().split(/[:\/,\s;]+/).filter(function (x) { return x !== ''; });
+      if (ts.length !== 2) throw new Error('Bad ' + label + ' side \u2014 want 2 terms, e.g. 3:4');
+      return ts;
+    }
+    var lt = sideTerms(sides[0], 'left');
+    var rt = sideTerms(sides[1], 'right');
+    var terms = lt.concat(rt);
+    var xi = -1;
+    var rats = [];
+    for (var ti = 0; ti < 4; ti++) {
+      var tk = terms[ti].trim();
+      if (/^(x|\?)$/i.test(tk)) {
+        if (xi >= 0) throw new Error('Only one unknown allowed \u2014 mark a single term with x');
+        xi = ti;
+        rats.push(null);
+        continue;
+      }
+      if (!rnum(tk)) throw new Error('Bad number #' + (ti + 1) + ' \u2014 got ' + JSON.stringify(terms[ti].trim()));
+      var dg = rdigits(tk);
+      var den = BigInt(10) ** BigInt(dg.flen);
+      var num = BigInt(dg.ip) * den + (dg.fp === '' ? BigInt(0) : BigInt(dg.fp));
+      if (dg.neg) num = -num;
+      rats.push({ n: num, d: den });
+    }
+    if (xi < 0) throw new Error('Mark the unknown with x \u2014 e.g. 3:4 = 6:x');
+    if (rats[1] && rzero(rats[1])) throw new Error('Division by zero \u2014 the left divisor cannot be 0');
+    if (rats[3] && rzero(rats[3])) throw new Error('Division by zero \u2014 the right divisor cannot be 0');
+    function rmul(a, b) { return { n: a.n * b.n, d: a.d * b.d }; }
+    function rdiv(a, b) {
+      if (b.n === BigInt(0)) throw new Error('Division by zero \u2014 proportion needs a non-zero divisor');
+      return { n: a.n * b.d, d: a.d * b.n };
+    }
+    var res;
+    if (xi === 0) res = rdiv(rmul(rats[1], rats[2]), rats[3]);
+    else if (xi === 1) res = rdiv(rmul(rats[0], rats[3]), rats[2]);
+    else if (xi === 2) res = rdiv(rmul(rats[0], rats[3]), rats[1]);
+    else res = rdiv(rmul(rats[1], rats[2]), rats[0]);
+    if ((xi === 1 || xi === 3) && res.n === BigInt(0)) throw new Error('No solution \u2014 denominator cannot be zero');
+    if (res.d < BigInt(0)) { res.n = -res.n; res.d = -res.d; }
+    var an2 = res.n < BigInt(0) ? -res.n : res.n;
+    var g2 = T.bgcd(an2, res.d);
+    res.n /= g2;
+    res.d /= g2;
+    var xDisp = res.d === BigInt(1) ? rgrp(res.n) : rgrp(res.n) + '/' + rgrp(res.d);
+    var shown = terms.map(function (t, i) { return i === xi ? xDisp : t.trim(); });
+    return 'x = ' + xDisp + '\nCheck: ' + shown[0] + ':' + shown[1] + ' = ' + shown[2] + ':' + shown[3] + '\nDecimal: ' + rdec(res.n, res.d);
+  }
+  var parts = txt.split(/[:\/,\s;]+/).filter(function (x) { return x !== ''; });
+  if (parts.length < 2) throw new Error('Enter at least two numbers \u2014 e.g. 16:24');
+  if (parts.length > 100) throw new Error('Too many terms \u2014 max 100');
+  var infos = parts.map(function (p, ix) {
+    var t = p.trim();
+    if (!rnum(t)) throw new Error('Bad number #' + (ix + 1) + ' \u2014 got ' + JSON.stringify(p.trim()));
+    return { t: t, d: rdigits(t) };
+  });
+  var flen = 0;
+  infos.forEach(function (r) { if (r.d.flen > flen) flen = r.d.flen; });
+  var scale = BigInt(10) ** BigInt(flen);
+  var vals = infos.map(function (r) {
+    var den = BigInt(10) ** BigInt(r.d.flen);
+    var num = BigInt(r.d.ip) * den + (r.d.fp === '' ? BigInt(0) : BigInt(r.d.fp));
+    if (r.d.neg) num = -num;
+    return num * (scale / den);
+  });
+  var g = vals[0] < BigInt(0) ? -vals[0] : vals[0];
+  for (var vi = 1; vi < vals.length; vi++) {
+    var av = vals[vi] < BigInt(0) ? -vals[vi] : vals[vi];
+    g = T.bgcd(g, av);
+  }
+  if (g === BigInt(0)) throw new Error('All zeros \u2014 ratio is undefined');
+  var simp = vals.map(function (v) { return v / g; });
+  var simpDisp = simp.map(rgrp).join(':');
+  var hasNeg = vals.some(function (v) { return v < BigInt(0); });
+  if (hasNeg) return 'Simplified: ' + simpDisp + '\nDivisor: ' + rgrp(g);
+  var total = BigInt(0);
+  simp.forEach(function (v) { total += v; });
+  var shares = simp.map(function (v) {
+    var q = (v * BigInt(100000)) / total;
+    var bp = (q + BigInt(5)) / BigInt(10);
+    var ip2 = bp / BigInt(100);
+    var fp2 = bp % BigInt(100);
+    return ip2.toString() + '.' + (fp2 < BigInt(10) ? '0' : '') + fp2.toString();
+  });
+  return 'Simplified: ' + simpDisp + '\nTotal parts: ' + rgrp(total) + '\nShares: ' + shares.map(function (p) { return p + '%'; }).join(' | ') + '\nDivisor: ' + rgrp(g);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
