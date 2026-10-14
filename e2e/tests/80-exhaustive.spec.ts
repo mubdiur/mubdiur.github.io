@@ -56,6 +56,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'autokey-cipher': { good: 'HELLO', expectInOutput: /SIXZB/ },
   'trifid-cipher': { good: 'HELLO WORLD.', expectInOutput: /^[A-Z.]+$/ },
   'beaufort-cipher': { good: 'HELLO', expectInOutput: /EABDZ/ },
+  'running-key-cipher': { good: 'HELLO', expectInOutput: /ALPBI/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },

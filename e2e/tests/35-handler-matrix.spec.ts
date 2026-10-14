@@ -225,6 +225,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('trifid-cipher', 'bad period throws', mustThrow(() => TOOLS['trifid-cipher'].handler('AB', { square: 'A', period: '1' })));
     push('beaufort-cipher', 'happy', TOOLS['beaufort-cipher'].handler('HELLO', { key: 'A' }) === 'TWPPM');
     push('beaufort-cipher', 'empty key throws', mustThrow(() => TOOLS['beaufort-cipher'].handler('ABC', { key: '' })));
+    push('running-key-cipher', 'happy', TOOLS['running-key-cipher'].handler('AAAAA', { key: 'BCDEF' }) === 'BCDEF');
+    push('running-key-cipher', 'short key throws', mustThrow(() => TOOLS['running-key-cipher'].handler('ABC', { key: 'AB' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

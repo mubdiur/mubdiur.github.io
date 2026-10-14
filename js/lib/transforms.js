@@ -2394,6 +2394,33 @@ T.beaufortCipher = function (s, opts) {
     return String.fromCharCode(base + (((k - p) % 26 + 26) % 26));
   });
 };
+/* Running-key cores: book keystream never repeated (key must cover every letter); case preserved, non-letters pass through. */
+T.runningKeyVals = function (key, need) {
+  var k = String(key === undefined ? 'THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG' : key).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!k) throw new Error('Enter a book key \u2014 letters only, never repeated');
+  if (k.length < need) throw new Error('Book key too short \u2014 need ' + need + ' letters, saw ' + k.length);
+  var v = []; for (var i = 0; i < k.length; i++) v.push(k.charCodeAt(i) - 65);
+  return v;
+};
+T.runningKeyEncode = function (s, key) {
+  var str = String(s); var P = [];
+  for (var i = 0; i < str.length; i++) { var ch = str.charAt(i); if (/[a-zA-Z]/.test(ch)) P.push({ val: ch.toUpperCase().charCodeAt(0) - 65, lower: ch.charCodeAt(0) >= 97 }); }
+  var kv = T.runningKeyVals(key, P.length);
+  var C = []; for (var j = 0; j < P.length; j++) C.push((P[j].val + kv[j]) % 26);
+  var out = ''; var li = 0;
+  for (var m = 0; m < str.length; m++) { var c = str.charAt(m); if (/[a-zA-Z]/.test(c)) { out += String.fromCharCode((P[li].lower ? 97 : 65) + C[li]); li++; } else out += c; }
+  return out;
+};
+T.runningKeyDecode = function (s, key) {
+  var str = String(s); var C = [];
+  for (var i = 0; i < str.length; i++) { var ch = str.charAt(i); if (/[a-zA-Z]/.test(ch)) C.push({ val: ch.toUpperCase().charCodeAt(0) - 65, lower: ch.charCodeAt(0) >= 97 }); }
+  var kv = T.runningKeyVals(key, C.length);
+  var P = []; for (var j = 0; j < C.length; j++) P.push(((C[j].val - kv[j]) % 26 + 26) % 26);
+  var out = ''; var li = 0;
+  for (var m = 0; m < str.length; m++) { var c = str.charAt(m); if (/[a-zA-Z]/.test(c)) { out += String.fromCharCode((C[li].lower ? 97 : 65) + P[li]); li++; } else out += c; }
+  return out;
+};
+T.runningKeyCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG' : o.key; if ((o.mode || 'encode') === 'decode') return T.runningKeyDecode(s, k); return T.runningKeyEncode(s, k); };
 T.columnarDecode = function (s, key) {
   var o = T.columnarOrder(key); var cols = o.k.length;
   var str = Array.from(String(s)); var n = str.length;
