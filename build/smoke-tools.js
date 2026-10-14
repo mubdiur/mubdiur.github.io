@@ -1263,6 +1263,14 @@ console.log('-- bmi --');
   ok(TOOLS['bmi-calculator'].handler('70kg', { weightUnit: 'kg', height: '175cm', heightUnit: 'cm' }).indexOf('BMI: 22.9 (Healthy)') === 0, 'bmi suffix');
   ok(TOOLS['bmi-calculator'].handler.toString().indexOf('bmiCalc') >= 0, 'bmi delegates');
 }
+console.log('-- age --');
+{
+  ok(TOOLS['age-calculator'].handler('1990-06-15', { asOf: '2024-08-25' }) === 'Age: 34 years, 2 months, 10 days\nBorn: 1990-06-15 (Friday)\nAs of: 2024-08-25 (Sunday)\nTotal: 12,490 days (1,784 weeks, 410 months)\nNext birthday: 2025-06-15 (294 days \u2014 turns 35)', 'age exact');
+  ok(TOOLS['age-calculator'].handler('2000-02-29', { asOf: '2024-02-28' }) === 'Age: 23 years, 11 months, 30 days\nBorn: 2000-02-29 (Tuesday)\nAs of: 2024-02-28 (Wednesday)\nTotal: 8,765 days (1,252 weeks, 287 months)\nNext birthday: 2024-02-29 (1 day \u2014 turns 24)', 'age leap');
+  ok(TOOLS['age-calculator'].handler('2024-08-24', { asOf: '2024-08-25' }).indexOf('Age: 0 years, 0 months, 1 day') === 0, 'age singular');
+  ok(TOOLS['age-calculator'].handler('1990-06-15', {}).indexOf('Age: ') === 0, 'age default asof');
+  ok(TOOLS['age-calculator'].handler.toString().indexOf('ageCalc') >= 0, 'age delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

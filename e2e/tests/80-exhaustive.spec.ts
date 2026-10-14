@@ -249,6 +249,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
 
   'tip-calculator': { good: '84.50', expectInOutput: /Each/ },
   'bmi-calculator': { good: '70', bad: 'abc', expectInOutput: /BMI/, expectError: /Bad weight/ },
+  'age-calculator': { good: '1990-06-15', bad: 'not a date', expectInOutput: /Age:/, expectError: /Unrecognized date/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

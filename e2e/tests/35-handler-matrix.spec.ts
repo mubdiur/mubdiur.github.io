@@ -564,6 +564,8 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('tip-calculator', 'junk throws', mustThrow(() => TOOLS['tip-calculator'].handler('abc')));
     push('bmi-calculator', 'metric band', TOOLS['bmi-calculator'].handler('70', { weightUnit: 'kg', height: '175', heightUnit: 'cm' }).indexOf('BMI: 22.9 (Healthy)') === 0);
     push('bmi-calculator', 'junk throws', mustThrow(() => TOOLS['bmi-calculator'].handler('abc', { height: '175' })));
+    push('age-calculator', 'exact age', TOOLS['age-calculator'].handler('1990-06-15', { asOf: '2024-08-25' }).indexOf('Age: 34 years, 2 months, 10 days') === 0);
+    push('age-calculator', 'junk throws', mustThrow(() => TOOLS['age-calculator'].handler('not a date')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

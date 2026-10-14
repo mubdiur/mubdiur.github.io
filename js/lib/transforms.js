@@ -1238,6 +1238,55 @@ T.bmiCalc = function (s, opts) {
   var blines = ['BMI: ' + bmiR.toFixed(1) + ' (' + band + ')', 'Weight: ' + wtxt + ' ' + wuRaw, 'Height: ' + htxt + ' ' + huRaw + ' (' + hm.toFixed(2) + ' m)', 'Healthy range: ' + f1(lo) + '\u2013' + f1(hi) + ' ' + wuRaw + ' (18.5\u201324.9)'];
   return blines.join('\n');
 };
+/* Age: calendar Y/M/D via UTC day-borrow, totals plus next birthday. Reuses parseDateValue. */
+T.ageCalc = function (s, opts) {
+  var o = opts || {};
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var ai = 0; ai < raw.length; ai++) if (raw.charCodeAt(ai) >= 0xD800 && raw.charCodeAt(ai) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter birthdate \u2014 e.g. 1990-06-15');
+  var bdate = T.parseDateValue(txt, 1);
+  var asrc = String(o.asOf === undefined || o.asOf === null ? '' : o.asOf).trim();
+  var rdate = asrc ? T.parseDateValue(asrc, 2) : new Date();
+  if (isNaN(bdate.getTime()) || isNaN(rdate.getTime())) throw new Error('Out-of-range date');
+  var bd = Date.UTC(bdate.getUTCFullYear(), bdate.getUTCMonth(), bdate.getUTCDate());
+  var rd = Date.UTC(rdate.getUTCFullYear(), rdate.getUTCMonth(), rdate.getUTCDate());
+  if (bd > rd) throw new Error('Birthdate is in the future');
+  function dim2(y, m) { return new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); }
+  var Y = rdate.getUTCFullYear() - bdate.getUTCFullYear();
+  var M = rdate.getUTCMonth() - bdate.getUTCMonth();
+  var D = rdate.getUTCDate() - bdate.getUTCDate();
+  var byy = rdate.getUTCFullYear(), bmm = rdate.getUTCMonth();
+  while (D < 0) { M--; bmm--; if (bmm < 0) { bmm += 12; byy--; } D += dim2(byy, bmm); }
+  if (M < 0) { Y--; M += 12; }
+  var days = Math.round((rd - bd) / 86400000);
+  var weeks = Math.floor(days / 7);
+  var months = Y * 12 + M;
+  function grp(x) { return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  function p2(x) { return (x < 10 ? '0' : '') + x; }
+  function pl(n, one) { return n + ' ' + (n === 1 ? one : one + 's'); }
+  var WDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function leap(ly) { return (ly % 4 === 0 && ly % 100 !== 0) || ly % 400 === 0; }
+  var nm = bdate.getUTCMonth(), nd0 = bdate.getUTCDate();
+  var ny = rdate.getUTCFullYear();
+  var nd = (nm === 1 && nd0 === 29 && !leap(ny)) ? 28 : nd0;
+  var cand = Date.UTC(ny, nm, nd);
+  if (cand <= rd) {
+    ny++;
+    nd = (nm === 1 && nd0 === 29 && !leap(ny)) ? 28 : nd0;
+    cand = Date.UTC(ny, nm, nd);
+  }
+  var away = Math.round((cand - rd) / 86400000);
+  var cd = new Date(cand);
+  var unc = ny + '-' + p2(cd.getUTCMonth() + 1) + '-' + p2(cd.getUTCDate());
+  var turn = ny - bdate.getUTCFullYear();
+  var blines = ['Age: ' + pl(Y, 'year') + ', ' + pl(M, 'month') + ', ' + pl(D, 'day'),
+    'Born: ' + bdate.getUTCFullYear() + '-' + p2(bdate.getUTCMonth() + 1) + '-' + p2(bdate.getUTCDate()) + ' (' + WDAYS[bdate.getUTCDay()] + ')',
+    'As of: ' + rdate.getUTCFullYear() + '-' + p2(rdate.getUTCMonth() + 1) + '-' + p2(rdate.getUTCDate()) + ' (' + WDAYS[rdate.getUTCDay()] + ')',
+    'Total: ' + grp(days) + (days === 1 ? ' day (' : ' days (') + grp(weeks) + (weeks === 1 ? ' week, ' : ' weeks, ') + grp(months) + (months === 1 ? ' month)' : ' months)'),
+    'Next birthday: ' + unc + ' (' + away + (away === 1 ? ' day \u2014 turns ' : ' days \u2014 turns ') + turn + ')'];
+  return blines.join('\n');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
