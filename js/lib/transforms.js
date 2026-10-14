@@ -2786,6 +2786,50 @@ T.gearSolve = function (s) {
   }
   return out;
 };
+/* Cycloid solver: rolling-circle arch area, length plus tautochrone descent time. */
+T.cycloidSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a cycloid \u2014 e.g. cycloid 5');
+  function ypos(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (!(v > 0)) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function ytrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(cycloid|brachistochrone|tautochrone)\b/.exec(low);
+  if (!m0) throw new Error('Unknown curve \u2014 use cycloid 5');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'r' || tk === 'radius' || tk === 'n' || tk === 'arches') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 1 && nums.length !== 2) throw new Error('Cycloid wants radius plus optional arches \u2014 e.g. cycloid 5 3');
+  var yr = ypos(nums[0], 'Bad radius');
+  var yn = 1;
+  if (nums.length === 2) {
+    yn = ypos(nums[1], 'Bad arches');
+    if (Math.floor(yn) !== yn) throw new Error('Bad arches must be whole \u2014 got ' + JSON.stringify(nums[1].slice(0, 40)));
+    if (yn > 1e6) throw new Error('Too many arches \u2014 max 1000000');
+  }
+  var yarea = 3 * Math.PI * yr * yr * yn;
+  var ylen = 8 * yr * yn;
+  var yht = 2 * yr;
+  var ywid = 2 * Math.PI * yr * yn;
+  var ytime = Math.PI * Math.sqrt(yr / 9.81);
+  if (!isFinite(yarea) || !isFinite(ylen)) throw new Error('Out of range \u2014 radius overflows');
+  return 'Cycloid: r = ' + ytrim(yr) + ', ' + ytrim(yn) + ' arch' + (yn === 1 ? '' : 'es') + '\nArch area: ' + ytrim(yarea) + '\nArch length: ' + ytrim(ylen) + '\nHeight: ' + ytrim(yht) + '\nWidth: ' + ytrim(ywid) + '\nDescent time: ' + ytrim(ytime) + ' s';
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

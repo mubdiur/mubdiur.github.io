@@ -1543,6 +1543,14 @@ console.log('-- gear --');
   ok(TOOLS['gear-solver'].handler('gear 20 2 40').indexOf('Centre distance: 60') >= 0, 'gear mesh');
   ok(TOOLS['gear-solver'].handler.toString().indexOf('gearSolve') >= 0, 'gear delegates');
 }
+console.log('-- cycloid --');
+{
+  ok(TOOLS['cycloid-solver'].handler('cycloid 5').indexOf('Arch area: 235.6194490192') >= 0, 'cycloid area');
+  ok(TOOLS['cycloid-solver'].handler('cycloid 5').indexOf('Arch length: 40') >= 0, 'cycloid length');
+  ok(TOOLS['cycloid-solver'].handler('cycloid 5').indexOf('Descent time: 2.2428507327 s') >= 0, 'cycloid time');
+  ok(TOOLS['cycloid-solver'].handler('cycloid 5 3').indexOf('Arch length: 120') >= 0, 'cycloid arches');
+  ok(TOOLS['cycloid-solver'].handler.toString().indexOf('cycloidSolve') >= 0, 'cycloid delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
