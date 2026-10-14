@@ -3137,6 +3137,56 @@ T.boltSolve = function (s) {
   var chord = bd * Math.sin(Math.PI / bn);
   return 'Bolt circle: ' + btrim(bn) + ' holes on dia ' + btrim(bd) + ' from ' + btrim(bs) + ' deg\n' + lines.join('\n') + '\nSpacing: ' + btrim(chord);
 };
+/* Thread solver: metric ISO diameters, tap drill and TPI from size plus optional pitch. */
+T.threadSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a thread \u2014 e.g. M10 1.5');
+  function tpos(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (!(v > 0)) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function ttrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var COARSE = { 1: 0.25, 1.2: 0.25, 1.4: 0.3, 1.6: 0.35, 1.8: 0.35, 2: 0.4, 2.5: 0.45, 3: 0.5, 3.5: 0.6, 4: 0.7, 5: 0.8, 6: 1, 7: 1, 8: 1.25, 10: 1.5, 12: 1.75, 14: 2, 16: 2, 18: 2.5, 20: 2.5, 22: 2.5, 24: 3, 27: 3, 30: 3.5, 33: 3.5, 36: 4, 39: 4, 42: 4.5, 45: 4.5, 48: 5, 52: 5, 56: 5.5, 60: 5.5, 64: 6 };
+  var low = txt.toLowerCase();
+  var mm = /^m(?=\d)/.exec(low);
+  if (mm) low = low.slice(1);
+  var m0 = /^(thread|metric|tap|m)\b/.exec(low);
+  if (!m0 && !mm) throw new Error('Unknown thread \u2014 use M10 1.5');
+  if (m0) low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;x\u00d7]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ee = pp.lastIndexOf('=');
+    var tk = ee >= 0 ? pp.slice(ee + 1) : pp;
+    if (tk.charAt(0) === 'm' && tk.length > 1) tk = tk.slice(1);
+    if (tk === '' || tk === 'd' || tk === 'dia' || tk === 'p' || tk === 'pitch' || tk === 'coarse') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 1 && nums.length !== 2) throw new Error('Thread wants size plus optional pitch \u2014 e.g. M10 1.5');
+  var td = tpos(nums[0], 'Bad size');
+  var tp = 0;
+  if (nums.length === 2) tp = tpos(nums[1], 'Bad pitch');
+  else {
+    if (Object.prototype.hasOwnProperty.call(COARSE, String(td))) tp = COARSE[String(td)];
+    else throw new Error('No coarse pitch for M' + ttrim(td) + ' \u2014 give pitch, e.g. M' + ttrim(td) + ' 1.5');
+  }
+  if (tp >= td) throw new Error('Pitch too coarse \u2014 must be under size M' + ttrim(td));
+  var d2 = td - 0.649519 * tp;
+  var d1 = td - 1.082532 * tp;
+  var d3 = td - 1.226869 * tp;
+  if (!(d1 > 0) || !(d3 > 0)) throw new Error('Pitch too coarse \u2014 minor diameter undercuts to zero');
+  var tap = td - tp;
+  var tpi = 25.4 / tp;
+  var h = 0.61343 * tp;
+  return 'Thread M' + ttrim(td) + ' x ' + ttrim(tp) + '\nPitch dia: ' + ttrim(d2) + '\nMinor int: ' + ttrim(d1) + '\nMinor ext: ' + ttrim(d3) + '\nTap drill: ' + ttrim(tap) + '\nDepth: ' + ttrim(h) + ' (' + ttrim(tpi) + ' TPI)';
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

@@ -1599,6 +1599,14 @@ console.log('-- bolt --');
   ok(TOOLS['bolt-solver'].handler('bolt 2 100').indexOf('Spacing: 100') >= 0, 'bolt pair is diameter');
   ok(TOOLS['bolt-solver'].handler.toString().indexOf('boltSolve') >= 0, 'bolt delegates');
 }
+console.log('-- thread --');
+{
+  ok(TOOLS['thread-solver'].handler('M10 1.5').indexOf('Pitch dia: 9.0257215') >= 0, 'thread pitch dia');
+  ok(TOOLS['thread-solver'].handler('M10 1.5').indexOf('Minor int: 8.376202') >= 0, 'thread minor');
+  ok(TOOLS['thread-solver'].handler('M10 1.5').indexOf('Tap drill: 8.5') >= 0, 'thread tap');
+  ok(TOOLS['thread-solver'].handler('M10').indexOf('Thread M10 x 1.5') >= 0, 'thread coarse default');
+  ok(TOOLS['thread-solver'].handler.toString().indexOf('threadSolve') >= 0, 'thread delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
