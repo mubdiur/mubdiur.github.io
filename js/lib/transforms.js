@@ -1199,6 +1199,45 @@ T.tipSplit = function (s, opts) {
   }
   return out.join('\n');
 };
+/* BMI: weight over height-squared, metric/imperial units, WHO bands plus healthy range. */
+T.bmiCalc = function (s, opts) {
+  var o = opts || {};
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var bi = 0; bi < raw.length; bi++) if (raw.charCodeAt(bi) >= 0xD800 && raw.charCodeAt(bi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter weight \u2014 e.g. 70');
+  var wtxt = txt.replace(/[,_\s]/g, '');
+  wtxt = wtxt.replace(/(kgs?|lbs?|pounds?)$/i, '');
+  if (!/^\d+(\.\d+)?$/.test(wtxt)) throw new Error('Bad weight \u2014 got ' + JSON.stringify(txt));
+  var wnum = parseFloat(wtxt);
+  var wuRaw = String(o.weightUnit === undefined || o.weightUnit === null || o.weightUnit === '' ? 'kg' : o.weightUnit).trim().toLowerCase();
+  if (wuRaw === 'lbs' || wuRaw === 'pound' || wuRaw === 'pounds') wuRaw = 'lb';
+  if (wuRaw !== 'kg' && wuRaw !== 'lb') throw new Error('Bad weight unit \u2014 use kg or lb');
+  var hsrc = String(o.height === undefined || o.height === null ? '' : o.height).trim();
+  if (!hsrc) throw new Error('Enter height \u2014 e.g. 175');
+  var htxt = hsrc.replace(/[,_\s]/g, '');
+  htxt = htxt.replace(/(cm|inches|inch|feet|ft|in|m)$/i, '');
+  if (!/^\d+(\.\d+)?$/.test(htxt)) throw new Error('Bad height \u2014 got ' + JSON.stringify(hsrc));
+  var hnum = parseFloat(htxt);
+  var huRaw = String(o.heightUnit === undefined || o.heightUnit === null || o.heightUnit === '' ? 'cm' : o.heightUnit).trim().toLowerCase();
+  if (huRaw === 'inch' || huRaw === 'inches') huRaw = 'in';
+  if (huRaw === 'feet') huRaw = 'ft';
+  if (huRaw !== 'cm' && huRaw !== 'm' && huRaw !== 'in' && huRaw !== 'ft') throw new Error('Bad height unit \u2014 use cm, m, in or ft');
+  var wkg = wnum * (wuRaw === 'lb' ? 0.45359237 : 1);
+  var hm = hnum * (huRaw === 'cm' ? 0.01 : huRaw === 'm' ? 1 : huRaw === 'in' ? 0.0254 : 0.3048);
+  if (!(wkg > 0) || wkg > 1000) throw new Error('Weight out of range');
+  if (!(hm >= 0.2) || hm > 3) throw new Error('Height out of range');
+  var bmi = wkg / (hm * hm);
+  var bmiR = Math.round(bmi * 10) / 10;
+  var band = bmiR < 18.5 ? 'Underweight' : bmiR < 25 ? 'Healthy' : bmiR < 30 ? 'Overweight' : 'Obese';
+  function f1(x) { return (Math.round(x * 10) / 10).toFixed(1); }
+  var loKg = 18.5 * hm * hm;
+  var hiKg = 24.9 * hm * hm;
+  var lo = wuRaw === 'lb' ? loKg / 0.45359237 : loKg;
+  var hi = wuRaw === 'lb' ? hiKg / 0.45359237 : hiKg;
+  var blines = ['BMI: ' + bmiR.toFixed(1) + ' (' + band + ')', 'Weight: ' + wtxt + ' ' + wuRaw, 'Height: ' + htxt + ' ' + huRaw + ' (' + hm.toFixed(2) + ' m)', 'Healthy range: ' + f1(lo) + '\u2013' + f1(hi) + ' ' + wuRaw + ' (18.5\u201324.9)'];
+  return blines.join('\n');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

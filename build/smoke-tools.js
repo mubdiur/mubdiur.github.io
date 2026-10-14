@@ -1254,6 +1254,15 @@ console.log('-- tip --');
   ok(TOOLS['tip-calculator'].handler('$1,234.56', { tip: '20%', people: '1' }) === 'Subtotal: $1,234.56\nTax (0%): $0.00\nTip (20%): $246.91\nTotal: $1,481.47\nEach (1): $1,481.47', 'tip money fmt');
   ok(TOOLS['tip-calculator'].handler.toString().indexOf('tipSplit') >= 0, 'tip delegates');
 }
+console.log('-- bmi --');
+{
+  ok(TOOLS['bmi-calculator'].handler('70', { weightUnit: 'kg', height: '175', heightUnit: 'cm' }) === 'BMI: 22.9 (Healthy)\nWeight: 70 kg\nHeight: 175 cm (1.75 m)\nHealthy range: 56.7\u201376.3 kg (18.5\u201324.9)', 'bmi metric');
+  ok(TOOLS['bmi-calculator'].handler('154', { weightUnit: 'lb', height: '69', heightUnit: 'in' }) === 'BMI: 22.7 (Healthy)\nWeight: 154 lb\nHeight: 69 in (1.75 m)\nHealthy range: 125.3\u2013168.6 lb (18.5\u201324.9)', 'bmi imperial');
+  ok(TOOLS['bmi-calculator'].handler('90', { weightUnit: 'kg', height: '175', heightUnit: 'cm' }).indexOf('BMI: 29.4 (Overweight)') === 0, 'bmi overweight');
+  ok(TOOLS['bmi-calculator'].handler('110', { weightUnit: 'kg', height: '175', heightUnit: 'cm' }).indexOf('BMI: 35.9 (Obese)') === 0, 'bmi obese');
+  ok(TOOLS['bmi-calculator'].handler('70kg', { weightUnit: 'kg', height: '175cm', heightUnit: 'cm' }).indexOf('BMI: 22.9 (Healthy)') === 0, 'bmi suffix');
+  ok(TOOLS['bmi-calculator'].handler.toString().indexOf('bmiCalc') >= 0, 'bmi delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

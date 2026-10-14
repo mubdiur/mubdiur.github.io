@@ -246,7 +246,9 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'chmod-converter': { good: '755', expectInOutput: /rwxr-xr-x/ },
   'business-days': { good: '2026-10-13', expectInOutput: /2026-10-20/ },
   'sleep-cycles': { good: '06:30', expectInOutput: /21:30/ },
+
   'tip-calculator': { good: '84.50', expectInOutput: /Each/ },
+  'bmi-calculator': { good: '70', bad: 'abc', expectInOutput: /BMI/, expectError: /Bad weight/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },
