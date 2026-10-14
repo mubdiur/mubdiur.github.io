@@ -3795,6 +3795,41 @@ T.gtinCheck = function (s, opts) {
   if (NAMES[digits.length + 1] === undefined) throw new Error('Bad prefix \u2014 7, 11, 12 or 13 digits make a barcode, got ' + digits.length);
   return digits + String((10 - (wsum(digits + '0') % 10)) % 10);
 };
+/* Verhoeff cores: dihedral D5 table check catching all single-digit errors and adjacent transpositions, spaces and dashes ignored. */
+T.verhoeffCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var DT = [[0,1,2,3,4,5,6,7,8,9],[1,2,3,4,0,6,7,8,9,5],[2,3,4,0,1,7,8,9,5,6],[3,4,0,1,2,8,9,5,6,7],[4,0,1,2,3,9,5,6,7,8],[5,9,8,7,6,0,4,3,2,1],[6,5,9,8,7,1,0,4,3,2],[7,6,5,9,8,2,1,0,4,3],[8,7,6,5,9,3,2,1,0,4],[9,8,7,6,5,4,3,2,1,0]];
+  var PT = [[0,1,2,3,4,5,6,7,8,9],[1,5,7,6,2,8,3,0,9,4],[5,8,0,3,7,9,6,1,4,2],[8,9,1,6,0,4,3,7,2,5],[9,4,5,3,1,2,6,8,7,0],[4,2,8,6,5,7,3,9,0,1],[2,7,9,3,8,0,6,4,1,5],[7,0,4,6,9,1,3,2,5,8]];
+  var INV = [0,4,3,2,1,5,6,7,8,9];
+  var raw = String(s);
+  var digits = '';
+  for (var di = 0; di < raw.length; di++) {
+    var dc = raw.charCodeAt(di);
+    if (dc >= 0xD800 && dc <= 0xDFFF) return '';
+    var dh = raw.charAt(di);
+    if (dh >= '0' && dh <= '9') digits += dh;
+    else if (dc === 32 || dc === 9 || dc === 10 || dc === 13 || dc === 45) continue;
+    else throw new Error('Digits only \u2014 0-9 with spaces or dashes ignored, got ' + JSON.stringify(dh));
+  }
+  if (!digits.length) throw new Error('Enter digits first \u2014 a Verhoeff number or its prefix');
+  function vrun(ds) {
+    var c = 0;
+    var pos = 0;
+    for (var li = ds.length - 1; li >= 0; li--) {
+      c = DT[c][PT[pos % 8][ds.charCodeAt(li) - 48]];
+      pos++;
+    }
+    return c;
+  }
+  if (mode === 'validate') {
+    if (digits.length < 2) throw new Error('Too short \u2014 a Verhoeff number needs at least 2 digits, got ' + digits.length);
+    if (vrun(digits) !== 0) throw new Error('Invalid Verhoeff number \u2014 checksum fails for ' + JSON.stringify(digits));
+    return 'Valid \u2014 Verhoeff checksum passes (' + digits.length + ' digits)';
+  }
+  return digits + String(INV[vrun(digits + '0')]);
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
