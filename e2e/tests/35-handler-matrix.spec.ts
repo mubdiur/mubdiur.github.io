@@ -303,6 +303,8 @@ push('sedol-validator', 'happy', TOOLS['sedol-validator'].handler('0798059').ind
     push('npi-validator', 'bad checksum throws', mustThrow(() => TOOLS['npi-validator'].handler('1043477616')));
     push('vin-validator', 'happy', TOOLS['vin-validator'].handler('1HGCM82633A004352').indexOf('Valid') === 0);
     push('vin-validator', 'bad checksum throws', mustThrow(() => TOOLS['vin-validator'].handler('1HGCM82644A004352')));
+    push('orcid-validator', 'happy', TOOLS['orcid-validator'].handler('0000-0002-1825-0097').indexOf('Valid') === 0);
+    push('orcid-validator', 'bad checksum throws', mustThrow(() => TOOLS['orcid-validator'].handler('0000-0002-1825-0098')));
     push('xor-cipher', 'happy', TOOLS['xor-cipher'].handler('hello', { key: 'key' }) === '030015070a');
     push('xor-cipher', 'bad hex throws', mustThrow(() => TOOLS['xor-cipher'].handler('zz', { key: 'k', input: 'hex' })));
     push('pig-latin', 'happy', TOOLS['pig-latin'].handler('hello') === 'ellohay');

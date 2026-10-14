@@ -4472,6 +4472,45 @@ T.vinCheck = function (s, opts) {
   }
   return clean.slice(0, 8) + vinDigit(clean) + clean.slice(8);
 };
+/* ORCID cores: researcher identifiers with mod-11-2 check digit, dashes and spaces ignored. */
+T.orcidCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var raw = String(s);
+  var clean = '';
+  for (var ci = 0; ci < raw.length; ci++) {
+    var cc = raw.charCodeAt(ci);
+    if (cc >= 0xD800 && cc <= 0xDFFF) return '';
+    var ch = raw.charAt(ci);
+    if (ch >= '0' && ch <= '9') clean += ch;
+    else if (ch === 'X' || ch === 'x') clean += 'X';
+    else if (cc === 32 || cc === 9 || cc === 10 || cc === 13 || cc === 45) continue;
+    else if (mode === 'check-digit' && (ch === '?' || ch === '*' || ch === '#')) continue;
+    else throw new Error('ORCID characters only \u2014 digits or X with dashes or spaces ignored, got ' + JSON.stringify(ch));
+  }
+  function orcDigit(core15) {
+    var nt = 0;
+    for (var ji = 0; ji < 15; ji++) nt = (nt + (core15.charCodeAt(ji) - 48)) * 2;
+    var rr = (12 - (nt % 11)) % 11;
+    return rr === 10 ? 'X' : String(rr);
+  }
+  if (!clean.length) throw new Error('Enter an ORCID first \u2014 fifteen digits plus check digit');
+  if (mode === 'validate') {
+    if (clean.length !== 16) throw new Error('Bad length \u2014 ORCIDs run 16 characters, got ' + clean.length);
+    for (var ni = 0; ni < 15; ni++) {
+      var nh = clean.charAt(ni);
+      if (nh < '0' || nh > '9') throw new Error('Bad ORCID character \u2014 first fifteen are digits, got ' + JSON.stringify(nh));
+    }
+    var kc = clean.charAt(15);
+    if ((kc < '0' || kc > '9') && kc !== 'X') throw new Error('Bad check digit \u2014 digit or X closes the ORCID, got ' + JSON.stringify(kc));
+    if (orcDigit(clean.slice(0, 15)) !== kc) throw new Error('Invalid ORCID \u2014 checksum fails for ' + JSON.stringify(clean));
+    return 'Valid \u2014 ORCID checksum passes (16 characters)';
+  }
+  if (clean.length !== 15) throw new Error('Bad prefix \u2014 15 digits make an ORCID, got ' + clean.length);
+  if (/[^0-9]/.test(clean)) throw new Error('Bad prefix character \u2014 fifteen digits, got ' + JSON.stringify(clean));
+  return clean.slice(0, 4) + '-' + clean.slice(4, 8) + '-' + clean.slice(8, 12) + '-' + clean.slice(12) + orcDigit(clean);
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');

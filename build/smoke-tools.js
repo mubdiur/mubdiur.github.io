@@ -1498,6 +1498,11 @@ ok(TOOLS['xor-cipher'].handler('hello', { key: 'key' }) === '030015070a', 'xor h
   ok(TOOLS['vin-validator'].handler('1HGCM8263A004352', { mode: 'check-digit' }) === '1HGCM82633A004352', 'vin check digit');
   ok(TOOLS['vin-validator'].handler(TOOLS['vin-validator'].handler('JH4TB2H2CC000000', { mode: 'check-digit' })).indexOf('Valid') === 0, 'vin roundtrip');
   ok(TOOLS['vin-validator'].handler.toString().indexOf('vinCheck') >= 0, 'vin delegates');
+  ok(TOOLS['orcid-validator'].handler('0000-0002-1825-0097').indexOf('ORCID checksum') >= 0, 'orcid bp');
+  ok(TOOLS['orcid-validator'].handler('0000-0002-1694-233X').indexOf('Valid') === 0, 'orcid X check');
+  ok(TOOLS['orcid-validator'].handler('000000021825009', { mode: 'check-digit' }) === '0000-0002-1825-0097', 'orcid check digit');
+  ok(TOOLS['orcid-validator'].handler(TOOLS['orcid-validator'].handler('123456789012345', { mode: 'check-digit' })).indexOf('Valid') === 0, 'orcid roundtrip');
+  ok(TOOLS['orcid-validator'].handler.toString().indexOf('orcidCheck') >= 0, 'orcid delegates');
   ok(TOOLS['xor-cipher'].handler.toString().indexOf('xorCipher') >= 0, 'xor delegates');
   ok(TOOLS['pig-latin'].handler('hello') === 'ellohay', 'piglatin hello');
   ok(TOOLS['pig-latin'].handler('apple', { suffix: 'yay' }) === 'appleyay', 'piglatin yay');
