@@ -2915,6 +2915,33 @@ T.solitaireDecode = function (s, key) {
   return out;
 };
 T.solitaireCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'SOLITAIRE' : o.key; if ((o.mode || 'encode') === 'decode') return T.solitaireDecode(s, k); return T.solitaireEncode(s, k); };
+/* Keyword cores: mixed alphabet headed by the deduped key word; case preserved, non-letters pass through. */
+T.keywordAlphabet = function (key) {
+  var k = String(key === undefined ? 'KEYWORD' : key).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!k) throw new Error('Enter a letter key \u2014 it heads the mixed alphabet');
+  var seq = '';
+  for (var i = 0; i < k.length; i++) if (seq.indexOf(k.charAt(i)) < 0) seq += k.charAt(i);
+  for (var a = 65; a <= 90; a++) { var c = String.fromCharCode(a); if (seq.indexOf(c) < 0) seq += c; }
+  return seq;
+};
+T.keywordEncode = function (s, key) {
+  var seq = T.keywordAlphabet(key);
+  return String(s).replace(/[a-zA-Z]/g, function (c) {
+    var base = c.charCodeAt(0) >= 97 ? 97 : 65;
+    var sub = seq.charAt(c.charCodeAt(0) - base);
+    return base === 97 ? sub.toLowerCase() : sub;
+  });
+};
+T.keywordDecode = function (s, key) {
+  var seq = T.keywordAlphabet(key);
+  return String(s).replace(/[a-zA-Z]/g, function (c) {
+    var up = c.toUpperCase();
+    var p = seq.indexOf(up);
+    var plain = String.fromCharCode(65 + p);
+    return c.charCodeAt(0) >= 97 ? plain.toLowerCase() : plain;
+  });
+};
+T.keywordCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'KEYWORD' : o.key; if ((o.mode || 'encode') === 'decode') return T.keywordDecode(s, k); return T.keywordEncode(s, k); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
