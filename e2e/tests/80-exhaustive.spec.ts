@@ -66,6 +66,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'cadenus-cipher': { good: 'HELLO', expectInOutput: /OMICG/ },
   'redefence-cipher': { good: 'HELLOWORLD', expectInOutput: /OOLLEDLRWH/ },
   'tap-code': { good: 'HELLO', expectInOutput: /... ... . ../ },
+  'route-cipher': { good: 'HELLOWORLD', expectInOutput: /HELLODLROW/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },

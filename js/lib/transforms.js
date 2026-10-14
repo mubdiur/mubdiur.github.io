@@ -2696,6 +2696,60 @@ T.tapDecode = function (s, squareKey) {
   return out.join(' ');
 };
 T.tapCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; if ((o.mode || 'encode') === 'decode') return T.tapDecode(s, q); return T.tapEncode(s, q); };
+/* Route cores: text written row-wise into a cols-wide grid, read out along a route (clockwise spiral, row snake or column coil); ragged tails skipped in traversal order, all characters kept. */
+T.routeCols = function (cols) {
+  var C = cols === undefined ? 5 : parseInt(cols, 10);
+  if (isNaN(C) || C < 2) throw new Error('Columns must be 2 or more \u2014 saw ' + cols);
+  return C;
+};
+T.routeOrder = function (rows, cols, route) {
+  if (route !== 'spiral' && route !== 'snake' && route !== 'coil') throw new Error('Bad route \u2014 spiral, snake or coil');
+  var cells = [];
+  var r, c;
+  if (route === 'snake') {
+    for (r = 0; r < rows; r++) { if (r % 2) { for (c = cols - 1; c >= 0; c--) cells.push([r, c]); } else { for (c = 0; c < cols; c++) cells.push([r, c]); } }
+  } else if (route === 'coil') {
+    for (c = 0; c < cols; c++) { if (c % 2) { for (r = rows - 1; r >= 0; r--) cells.push([r, c]); } else { for (r = 0; r < rows; r++) cells.push([r, c]); } }
+  } else {
+    var top = 0, bottom = rows - 1, left = 0, right = cols - 1;
+    while (top <= bottom && left <= right) {
+      for (c = left; c <= right; c++) cells.push([top, c]);
+      top++;
+      for (r = top; r <= bottom; r++) cells.push([r, right]);
+      right--;
+      if (top <= bottom) { for (c = right; c >= left; c--) cells.push([bottom, c]); bottom--; }
+      if (left <= right) { for (r = bottom; r >= top; r--) cells.push([r, left]); left++; }
+    }
+  }
+  var order = [];
+  for (var i = 0; i < cells.length; i++) order.push(cells[i][0] * cols + cells[i][1]);
+  return order;
+};
+T.routeEncode = function (s, cols, route) {
+  var C = T.routeCols(cols);
+  var rt = route === undefined ? 'spiral' : route;
+  var str = Array.from(String(s));
+  var n = str.length;
+  if (!n) return '';
+  var rows = Math.ceil(n / C);
+  var order = T.routeOrder(rows, C, rt).filter(function (ix) { return ix < n; });
+  var out = [];
+  for (var i = 0; i < order.length; i++) out.push(str[order[i]]);
+  return out.join('');
+};
+T.routeDecode = function (s, cols, route) {
+  var C = T.routeCols(cols);
+  var rt = route === undefined ? 'spiral' : route;
+  var str = Array.from(String(s));
+  var n = str.length;
+  if (!n) return '';
+  var rows = Math.ceil(n / C);
+  var order = T.routeOrder(rows, C, rt).filter(function (ix) { return ix < n; });
+  var grid = new Array(n);
+  for (var i = 0; i < order.length; i++) grid[order[i]] = str[i];
+  return grid.join('');
+};
+T.routeCipher = function (s, opts) { var o = opts || {}; var cc = o.cols === undefined ? '5' : o.cols; var rt = o.route === undefined ? 'spiral' : o.route; if ((o.mode || 'encode') === 'decode') return T.routeDecode(s, cc, rt); return T.routeEncode(s, cc, rt); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
