@@ -598,6 +598,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('integer-sqrt', 'perfect', TOOLS['integer-sqrt'].handler('144') === 'Root (floor): 12\nSquare: 144\nRemainder: 0\nPerfect square: yes');
     push('integer-sqrt', 'remainder', TOOLS['integer-sqrt'].handler('150') === 'Root (floor): 12\nSquare: 144\nRemainder: 6\nPerfect square: no');
     push('integer-sqrt', 'junk throws', mustThrow(() => TOOLS['integer-sqrt'].handler('abc')));
+    push('solid-solver', 'sphere', TOOLS['solid-solver'].handler('sphere 5') === 'Solid: sphere, radius = 5\nVolume: 523.5987755983\nSurface: 314.159265359');
+    push('solid-solver', 'cylinder', TOOLS['solid-solver'].handler('cylinder 3 7').indexOf('Lateral: 131.9468914508') >= 0);
+    push('solid-solver', 'junk throws', mustThrow(() => TOOLS['solid-solver'].handler('cube 5')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

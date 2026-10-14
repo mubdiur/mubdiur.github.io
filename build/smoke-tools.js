@@ -1373,6 +1373,13 @@ console.log('-- isqrt --');
   ok(TOOLS['integer-sqrt'].handler.toString().indexOf('isqrtCheck') >= 0, 'isqrt delegates');
 }
 
+console.log('-- solid --');
+{
+  ok(TOOLS['solid-solver'].handler('sphere 5') === 'Solid: sphere, radius = 5\nVolume: 523.5987755983\nSurface: 314.159265359', 'solid sphere');
+  ok(TOOLS['solid-solver'].handler('cylinder 3 7') === 'Solid: cylinder, radius = 3, height = 7\nVolume: 197.9203371762\nSurface: 188.4955592154\nLateral: 131.9468914508', 'solid cylinder');
+  ok(TOOLS['solid-solver'].handler.toString().indexOf('solidSolve') >= 0, 'solid delegates');
+}
+
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

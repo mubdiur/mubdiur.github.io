@@ -1912,6 +1912,36 @@ T.isqrtCheck = function (s) {
   var sq = r * r;
   return 'Root (floor): ' + igrp(r) + '\nSquare: ' + igrp(sq) + '\nRemainder: ' + igrp(n - sq) + '\nPerfect square: ' + (n === sq ? 'yes' : 'no');
 };
+/* Sphere and cylinder solver: volume plus surface area from radius or r/h. */
+T.solidSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a solid \u2014 e.g. sphere 5 or cylinder 3 7');
+  function snum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function strim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var toks = txt.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var shape = toks[0].toLowerCase();
+  var isS = shape === 'sphere' || shape === 's' || shape === 'ball';
+  var isC = shape === 'cylinder' || shape === 'cyl' || shape === 'c';
+  if (!isS && !isC) throw new Error('Unknown solid \u2014 use sphere or cylinder, e.g. sphere 5');
+  if (isS) {
+    if (toks.length !== 2) throw new Error('Sphere wants one radius \u2014 e.g. sphere 5');
+    var r = snum(toks[1], 'Bad radius');
+    return 'Solid: sphere, radius = ' + strim(r) + '\nVolume: ' + strim(4 / 3 * Math.PI * r * r * r) + '\nSurface: ' + strim(4 * Math.PI * r * r);
+  }
+  if (toks.length !== 3) throw new Error('Cylinder wants radius and height \u2014 e.g. cylinder 3 7');
+  var cr = snum(toks[1], 'Bad radius');
+  var ch = snum(toks[2], 'Bad height');
+  return 'Solid: cylinder, radius = ' + strim(cr) + ', height = ' + strim(ch) + '\nVolume: ' + strim(Math.PI * cr * cr * ch) + '\nSurface: ' + strim(2 * Math.PI * cr * (cr + ch)) + '\nLateral: ' + strim(2 * Math.PI * cr * ch);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

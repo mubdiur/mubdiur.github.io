@@ -890,6 +890,7 @@ mustThrow(() => T.triSolve('   '), 'triSolve empty');mustThrow(() => T.triSolve(
 mustThrow(() => T.circleSolve('   '), 'circleSolve empty');mustThrow(() => T.circleSolve('abc'), 'circleSolve junk');mustThrow(() => T.circleSolve('-5'), 'circleSolve neg');mustThrow(() => T.circleSolve('x=5'), 'circleSolve badkey');mustNotThrow(() => T.circleSolve(String.fromCharCode(0xD800)), 'circleSolve lone surrogate survives');
 mustThrow(() => T.paceCalc('   '), 'paceCalc empty');mustThrow(() => T.paceCalc('5km'), 'paceCalc single');mustThrow(() => T.paceCalc('5km 0:00'), 'paceCalc zerotime');mustThrow(() => T.paceCalc('abc'), 'paceCalc junk');mustNotThrow(() => T.paceCalc(String.fromCharCode(0xD800)), 'paceCalc lone surrogate survives');
 mustThrow(() => T.isqrtCheck('   '), 'isqrtCheck empty');mustThrow(() => T.isqrtCheck('abc'), 'isqrtCheck junk');mustThrow(() => T.isqrtCheck('-4'), 'isqrtCheck neg');mustThrow(() => T.isqrtCheck('12.5'), 'isqrtCheck decimal');mustNotThrow(() => T.isqrtCheck(String.fromCharCode(0xD800)), 'isqrtCheck lone surrogate survives');
+mustThrow(() => T.solidSolve('   '), 'solidSolve empty');mustThrow(() => T.solidSolve('5'), 'solidSolve noshape');mustThrow(() => T.solidSolve('cube 5'), 'solidSolve unknown');mustThrow(() => T.solidSolve('sphere -5'), 'solidSolve neg');mustNotThrow(() => T.solidSolve(String.fromCharCode(0xD800)), 'solidSolve lone surrogate survives');
 console.log('-- wasm guards (proven by js/wasm.js unit, not smoke) --');
 ok(true, 'wasm guards exist (manual verify: js/wasm.js mem() bounds + ASN.1 cap)');
 
