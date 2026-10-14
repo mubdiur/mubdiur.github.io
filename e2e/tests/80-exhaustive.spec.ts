@@ -76,6 +76,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'dna-toolkit': { good: 'ATGC', expectInOutput: /TACG/ },
   'brainfuck': { good: ',[.,]', expectInOutput: /Hi/ },
   'whitespace': { good: '   \t  \t   \n\t\n  \n\n', expectInOutput: /H/ },
+  'befunge': { good: '"A",@', expectInOutput: /A/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },

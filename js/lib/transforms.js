@@ -3228,6 +3228,108 @@ T.whitespace = function (code, input) {
   }
   return wout;
 };
+/* Befunge cores: 2D toroidal playfield of UTF-16 cells, unknown characters are no-ops, empty stack pops zero, EOF reads zero, put/get wrap toroidally, one million steps max. */
+T.befunge = function (code, input) {
+  var raw = String(code);
+  var rows = raw.split('\n');
+  var grid = [];
+  var bw = 1;
+  for (var bi = 0; bi < rows.length; bi++) {
+    var brow = rows[bi];
+    if (brow.length && brow.charCodeAt(brow.length - 1) === 13) brow = brow.slice(0, -1);
+    var cells = brow.split('');
+    grid.push(cells);
+    if (cells.length > bw) bw = cells.length;
+  }
+  var bh = grid.length;
+  var CMDS = '<>^v?_|#":$.,pg&~!`+-*/%0123456789@';
+  var hasCode = false;
+  for (var ci = 0; ci < grid.length; ci++) {
+    var crow = grid[ci];
+    for (var cj = 0; cj < crow.length; cj++) {
+      var cch = crow[cj];
+      if (cch === ' ') continue;
+      if (cch.charCodeAt(0) === 92 || CMDS.indexOf(cch) >= 0) { hasCode = true; break; }
+    }
+    if (hasCode) break;
+  }
+  if (!hasCode) return '';
+  var stk = [];
+  function pop0() { return stk.length ? stk.pop() : 0; }
+  var inp = String(input === undefined ? '' : input);
+  var ii = 0;
+  function readNum() {
+    var jj = ii;
+    while (jj < inp.length && (inp.charAt(jj) === ' ' || inp.charAt(jj) === '\t' || inp.charAt(jj) === '\n' || inp.charAt(jj) === '\r')) jj++;
+    var mt = /^[-+]?[0-9]+/.exec(inp.slice(jj));
+    var nv = 0;
+    if (mt) { nv = parseInt(mt[0], 10); jj += mt[0].length; }
+    ii = jj;
+    return nv;
+  }
+  var wout = '';
+  var steps = 0;
+  var bx = 0, by = 0, bdx = 1, bdy = 0;
+  var bstr = false;
+  function bstep() {
+    bx = (bx + bdx + bw) % bw;
+    by = (by + bdy + bh) % bh;
+  }
+  for (;;) {
+    if (++steps > 1000000) throw new Error('Step limit 1000000 hit \u2014 infinite loop?');
+    var grow = grid[by];
+    var gch = bx < grow.length ? grow[bx] : ' ';
+    if (bstr) {
+      if (gch === '"') bstr = false;
+      else stk.push(gch.charCodeAt(0));
+    } else if (gch === ' ') {
+    } else if (gch >= '0' && gch <= '9') stk.push(gch.charCodeAt(0) - 48);
+    else if (gch === '>') { bdx = 1; bdy = 0; }
+    else if (gch === '<') { bdx = -1; bdy = 0; }
+    else if (gch === '^') { bdx = 0; bdy = -1; }
+    else if (gch === 'v') { bdx = 0; bdy = 1; }
+    else if (gch === '?') {
+      var qd = CryptoRand.int(4);
+      if (qd === 0) { bdx = 1; bdy = 0; }
+      else if (qd === 1) { bdx = -1; bdy = 0; }
+      else if (qd === 2) { bdx = 0; bdy = 1; }
+      else { bdx = 0; bdy = -1; }
+    }
+    else if (gch === '_') { if (pop0() === 0) { bdx = 1; bdy = 0; } else { bdx = -1; bdy = 0; } }
+    else if (gch === '|') { if (pop0() === 0) { bdx = 0; bdy = 1; } else { bdx = 0; bdy = -1; } }
+    else if (gch === '"') bstr = true;
+    else if (gch === ':') { var bd = pop0(); stk.push(bd); stk.push(bd); }
+    else if (gch.charCodeAt(0) === 92) { var bs1 = pop0(); var bs2 = pop0(); stk.push(bs1); stk.push(bs2); }
+    else if (gch === '$') pop0();
+    else if (gch === '.') wout += String(pop0()) + ' ';
+    else if (gch === ',') wout += String.fromCharCode(pop0());
+    else if (gch === '+') { var ba = pop0(); var bb = pop0(); stk.push(bb + ba); }
+    else if (gch === '-') { var bm = pop0(); var bn = pop0(); stk.push(bn - bm); }
+    else if (gch === '*') { var bu = pop0(); var bv = pop0(); stk.push(bv * bu); }
+    else if (gch === '/') { var bd2 = pop0(); var bd1 = pop0(); if (bd2 === 0) throw new Error('Division by zero \u2014 divisor is zero'); stk.push((bd1 - (bd1 % bd2)) / bd2); }
+    else if (gch === '%') { var bo2 = pop0(); var bo1 = pop0(); if (bo2 === 0) throw new Error('Division by zero \u2014 divisor is zero'); stk.push(bo1 % bo2); }
+    else if (gch === '!') stk.push(pop0() === 0 ? 1 : 0);
+    else if (gch === '`') { var bg2 = pop0(); var bg1 = pop0(); stk.push(bg1 > bg2 ? 1 : 0); }
+    else if (gch === 'p') {
+      var py = pop0(); var px = pop0(); var pv = pop0();
+      var ty = ((py % bh) + bh) % bh;
+      var tx = ((px % bw) + bw) % bw;
+      while (grid[ty].length <= tx) grid[ty].push(' ');
+      grid[ty][tx] = String.fromCharCode(pv);
+    }
+    else if (gch === 'g') {
+      var gy = pop0(); var gx = pop0();
+      var hy = ((gy % bh) + bh) % bh;
+      var hx = ((gx % bw) + bw) % bw;
+      stk.push(hx < grid[hy].length ? grid[hy][hx].charCodeAt(0) : 32);
+    }
+    else if (gch === '&') stk.push(readNum());
+    else if (gch === '~') stk.push(ii < inp.length ? inp.charCodeAt(ii++) % 256 : 0);
+    else if (gch === '@') return wout;
+    bstep();
+    if (gch === '#') bstep();
+  }
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
