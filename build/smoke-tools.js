@@ -1651,6 +1651,16 @@ console.log('-- tolfit --');
   ok(TOOLS['tolerance-fit-solver'].handler('30g6').indexOf('Deviations: -7/-20 um') >= 0, 'tolfit combined');
   ok(TOOLS['tolerance-fit-solver'].handler.toString().indexOf('tolfitSolve') >= 0, 'tolfit delegates');
 }
+console.log('-- shim --');
+{
+  ok(TOOLS['shim-stack-solver'].handler('shim 2.35 from 1 0.5 0.2 0.1 0.05').indexOf('exact (5 pcs)') >= 0, 'shim exact count');
+  ok(TOOLS['shim-stack-solver'].handler('shim 2.35 from 1 0.5 0.2 0.1 0.05').indexOf('2 x 1 + 1 x 0.2 + 1 x 0.1 + 1 x 0.05') >= 0, 'shim exact combo');
+  ok(TOOLS['shim-stack-solver'].handler('shim 1 from 0.5 1').indexOf('exact (1 pc)') >= 0, 'shim fewest wins');
+  ok(TOOLS['shim-stack-solver'].handler('shim 2.33 from 1 0.5').indexOf('Under 2 (gap 0.33, 2 pcs)') >= 0, 'shim under');
+  ok(TOOLS['shim-stack-solver'].handler('shim 2.33 from 1 0.5').indexOf('Over 2.5 (gap 0.17, 3 pcs)') >= 0, 'shim over');
+  ok(TOOLS['shim-stack-solver'].handler('feeler 0.3 from 0.1').indexOf('exact (3 pcs)') >= 0, 'shim alias');
+  ok(TOOLS['shim-stack-solver'].handler.toString().indexOf('shimSolve') >= 0, 'shim delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

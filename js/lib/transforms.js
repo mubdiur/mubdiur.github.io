@@ -3448,6 +3448,92 @@ T.tolfitSolve = function (s) {
   else out.push('Fit: transition (clear ' + ftrim(maxC) + ', interf ' + ftrim(-minC) + ' mm)');
   return out.join('\n');
 };
+/* Shim-stack solver: fewest-piece unbounded-knapsack stack for a target thickness from up to 8 stock sizes (mm, max 3 decimals). Exact DP over integer um up to target plus one stock step, so the nearest under/over answers are optimal too. */
+T.shimSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a target plus stock \u2014 e.g. shim 2.35 from 1 0.5 0.2 0.1');
+  var low = txt.toLowerCase();
+  var m0 = /^(shim|shims|shimstack|shim\s*stack|feeler)\b/.exec(low);
+  var body = (m0 ? txt.slice(m0[0].length) : txt).trim();
+  if (!body) throw new Error('Enter a target plus stock \u2014 e.g. shim 2.35 from 1 0.5 0.2 0.1');
+  var toks = body.split(/[\s,;:\u00d7]+/).filter(function (x) { return x !== ''; });
+  if (toks.length < 2) throw new Error('Shim wants target plus stock \u2014 e.g. shim 2.35 from 1 0.5 0.2 0.1');
+  function isNum(t) { return /^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(t); }
+  function toUm(v, what) {
+    var scaled = v * 1000;
+    if (!isFinite(scaled)) throw new Error(what + ' \u2014 out of range');
+    if (Math.abs(scaled - Math.round(scaled)) > 1e-6) throw new Error('Max 3 decimals \u2014 got ' + JSON.stringify(String(v).slice(0, 40)));
+    return Math.round(scaled);
+  }
+  if (!isNum(toks[0])) throw new Error('Target first \u2014 e.g. shim 2.35 from 1 0.5 0.2 0.1');
+  var target = parseFloat(toks[0]);
+  if (!isFinite(target)) throw new Error('Target \u2014 out of range');
+  if (!(target > 0)) throw new Error('Target must be positive \u2014 got ' + JSON.stringify(toks[0].slice(0, 40)));
+  if (target > 500) throw new Error('Target to 500 mm \u2014 got ' + JSON.stringify(toks[0].slice(0, 40)));
+  var SKIP = { from: 1, using: 1, with: 1, of: 1, mm: 1 };
+  var stock = [];
+  var seen = {};
+  for (var ti = 1; ti < toks.length; ti++) {
+    var w = toks[ti].toLowerCase();
+    if (SKIP[w]) continue;
+    if (!isNum(toks[ti])) throw new Error('Bad stock \u2014 got ' + JSON.stringify(toks[ti].slice(0, 40)));
+    var sv = parseFloat(toks[ti]);
+    if (!(sv > 0)) throw new Error('Stock must be positive \u2014 got ' + JSON.stringify(toks[ti].slice(0, 40)));
+    if (sv > 1000) throw new Error('Stock to 1000 mm \u2014 got ' + JSON.stringify(toks[ti].slice(0, 40)));
+    var um = toUm(sv, 'Stock');
+    if (um <= 0) throw new Error('Stock too fine \u2014 min 0.001 mm');
+    if (!seen[um]) { seen[um] = 1; stock.push(um); }
+  }
+  if (stock.length < 1) throw new Error('Shim wants target plus stock \u2014 e.g. shim 2.35 from 1 0.5 0.2 0.1');
+  if (stock.length > 8) throw new Error('Stock 1\u20138 sizes \u2014 got ' + stock.length);
+  stock.sort(function (a, b) { return b - a; });
+  var T2 = toUm(target, 'Target');
+  var maxS = stock[0];
+  var lim = T2 + maxS;
+  var INF = 1e18;
+  var dp = new Array(lim + 1);
+  var pick = new Array(lim + 1);
+  for (var zi = 0; zi <= lim; zi++) { dp[zi] = INF; pick[zi] = -1; }
+  dp[0] = 0;
+  for (var amt = 0; amt <= lim; amt++) {
+    if (dp[amt] === INF || dp[amt] > 10000) continue;
+    for (var si2 = 0; si2 < stock.length; si2++) {
+      var nx = amt + stock[si2];
+      if (nx > lim) continue;
+      if (dp[amt] + 1 < dp[nx]) { dp[nx] = dp[amt] + 1; pick[nx] = si2; }
+    }
+  }
+  function ftrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  function pcs(n) { return n + (n === 1 ? ' pc' : ' pcs'); }
+  function combo(amt2) {
+    var counts = {};
+    var c = amt2;
+    while (c > 0) {
+      var px = pick[c];
+      if (px < 0) break;
+      counts[stock[px]] = (counts[stock[px]] || 0) + 1;
+      c -= stock[px];
+    }
+    var keys = Object.keys(counts).map(function (k) { return parseInt(k, 10); });
+    keys.sort(function (a, b) { return b - a; });
+    return keys.map(function (k) { return counts[k] + ' x ' + ftrim(k / 1000); }).join(' + ');
+  }
+  var tname = ftrim(target);
+  if (dp[T2] !== INF && dp[T2] <= 10000) {
+    return 'Shim ' + tname + ' mm \u2014 exact (' + pcs(dp[T2]) + ')\n' + combo(T2);
+  }
+  var under = -1;
+  for (var u = T2 - 1; u >= 0; u--) { if (dp[u] !== INF) { under = u; break; } }
+  var over = -1;
+  for (var o = T2 + 1; o <= lim; o++) { if (dp[o] !== INF) { over = o; break; } }
+  var out = [];
+  out.push('Shim ' + tname + ' mm \u2014 no exact stack');
+  if (under >= 0) out.push('Under ' + ftrim(under / 1000) + ' (gap ' + ftrim((T2 - under) / 1000) + ', ' + pcs(dp[under]) + '): ' + combo(under));
+  if (over >= 0) out.push('Over ' + ftrim(over / 1000) + ' (gap ' + ftrim((over - T2) / 1000) + ', ' + pcs(dp[over]) + '): ' + combo(over));
+  return out.join('\n');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

@@ -699,6 +699,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('tolerance-fit-solver', 'shaft', TOOLS['tolerance-fit-solver'].handler('30 g6').indexOf('Deviations: -7/-20 um') >= 0);
     push('tolerance-fit-solver', 'pair', TOOLS['tolerance-fit-solver'].handler('30 H7/g6').indexOf('clearance fit') >= 0);
     push('tolerance-fit-solver', 'junk throws', mustThrow(() => TOOLS['tolerance-fit-solver'].handler('abc')));
+    push('shim-stack-solver', 'exact', TOOLS['shim-stack-solver'].handler('shim 2.35 from 1 0.5 0.2 0.1 0.05').indexOf('exact (5 pcs)') >= 0);
+    push('shim-stack-solver', 'bracket', TOOLS['shim-stack-solver'].handler('shim 2.33 from 1 0.5').indexOf('Over 2.5 (gap 0.17, 3 pcs)') >= 0);
+    push('shim-stack-solver', 'junk throws', mustThrow(() => TOOLS['shim-stack-solver'].handler('abc')));
 
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 

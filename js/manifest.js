@@ -1036,6 +1036,9 @@ window.TOOLMANIFEST = [
   { slug: 'tolerance-fit-solver', name: 'Tolerance Fit Solver', desc: 'ISO 286 limits from size plus zone \u2014 shaft and hole deviations plus clearance for pairs', category: 'math', tags: ['tolerance', 'fit', 'iso286', 'limits', 'clearance', 'cnc', 'geometry'], icon: 'calculator', template: 'transform',
     placeholder: '30 H7/g6',
     handler: function (s) { return Transforms.tolfitSolve(s); } },
+  { slug: 'shim-stack-solver', name: 'Shim Stack Solver', desc: 'Fewest-piece shim stack for a target thickness \u2014 exact combo or nearest under plus over', category: 'math', tags: ['shim', 'stack', 'feeler', 'tolerance', 'cnc', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'shim 2.35 from 1 0.5 0.2 0.1',
+    handler: function (s) { return Transforms.shimSolve(s); } },
 
   { slug: 'loan-calculator', name: 'Loan Calculator', desc: 'Fixed-rate loan math — monthly payment, total interest, yearly schedule plus a full monthly CSV', category: 'math', tags: ['loan', 'mortgage', 'amortization', 'interest', 'finance'], icon: 'calculator', template: 'custom' },
   { slug: 'number-to-words', name: 'Number to Words', desc: 'Convert numbers to English word representation', category: 'math', tags: ['number', 'words'], icon: 'calculator', template: 'transform',

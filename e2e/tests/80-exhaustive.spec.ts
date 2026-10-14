@@ -295,6 +295,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'circlip-solver': { good: 'circlip 30', bad: 'abc', expectInOutput: /Groove dia:/, expectError: /Unknown circlip/ },
   'oring-solver': { good: 'oring 2.62', bad: 'abc', expectInOutput: /Groove depth:/, expectError: /Unknown o-ring/ },
   'tolerance-fit-solver': { good: '30 H7/g6', bad: 'abc', expectInOutput: /clearance fit/, expectError: /Unknown fit/ },
+  'shim-stack-solver': { good: 'shim 2.35 from 1 0.5 0.2 0.1 0.05', bad: 'abc', expectInOutput: /exact \(5 pcs\)/, expectError: /Unknown fit|Enter a target|Shim wants/ },
 
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
