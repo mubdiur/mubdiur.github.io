@@ -259,6 +259,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('keyword-cipher', 'bad key throws', mustThrow(() => TOOLS['keyword-cipher'].handler('AB', { key: '' })));
     push('book-cipher', 'happy', TOOLS['book-cipher'].handler('HELLO') === '1.2 1.3 8.1 10.4 3.3');
     push('book-cipher', 'bad ref throws', mustThrow(() => TOOLS['book-cipher'].handler('hello', { mode: 'decode' })));
+    push('dna-toolkit', 'happy', TOOLS['dna-toolkit'].handler('ATGC') === 'TACG');
+    push('dna-toolkit', 'bad base throws', mustThrow(() => TOOLS['dna-toolkit'].handler('ATXG')));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

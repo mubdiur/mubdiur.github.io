@@ -2983,6 +2983,50 @@ T.bookDecode = function (s, book) {
   return out;
 };
 T.bookCipher = function (s, opts) { var o = opts || {}; var b = o.book === undefined ? 'The quick brown fox jumps over the lazy dog while five dozen jackdaws gaze at the calm river bank' : o.book; if ((o.mode || 'encode') === 'decode') return T.bookDecode(s, b); return T.bookEncode(s, b); };
+/* DNA cores: strict unambiguous bases (letters only, uppercased); complement pairs A-T C-G, transcription swaps T-U, GC reports one-decimal content. */
+T.dnaBases = function (s, alpha, label) {
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  for (var i = 0; i < t.length; i++) if (alpha.indexOf(t.charAt(i)) < 0) throw new Error('Bad ' + label + ' base \u201C' + t.charAt(i) + '\u201D \u2014 ' + alpha.split('').join(' ') + ' only');
+  return t;
+};
+T.dnaComplement = function (s) {
+  var t = T.dnaBases(s, 'ACGT', 'DNA');
+  if (!t) return '';
+  var map = { A: 'T', T: 'A', C: 'G', G: 'C' };
+  return t.replace(/[ACGT]/g, function (c) { return map[c]; });
+};
+T.dnaRevComp = function (s) {
+  var c = T.dnaComplement(s);
+  return c.split('').reverse().join('');
+};
+T.dnaTranscribe = function (s) {
+  var t = T.dnaBases(s, 'ACGT', 'DNA');
+  if (!t) return '';
+  return t.replace(/T/g, 'U');
+};
+T.dnaUntranscribe = function (s) {
+  var t = T.dnaBases(s, 'ACGU', 'RNA');
+  if (!t) return '';
+  return t.replace(/U/g, 'T');
+};
+T.dnaGC = function (s) {
+  var t = T.dnaBases(s, 'ACGT', 'DNA');
+  if (!t) return '';
+  var g = 0;
+  for (var i = 0; i < t.length; i++) if (t.charAt(i) === 'G' || t.charAt(i) === 'C') g++;
+  return 'GC ' + (g * 100 / t.length).toFixed(1) + '% (' + g + ' of ' + t.length + ')';
+};
+T.dnaToolkit = function (s, opts) {
+  var o = opts || {};
+  var job = o.job === undefined ? 'complement' : o.job;
+  if (job === 'complement') return T.dnaComplement(s);
+  if (job === 'reverse-complement') return T.dnaRevComp(s);
+  if (job === 'transcribe') return T.dnaTranscribe(s);
+  if (job === 'untranscribe') return T.dnaUntranscribe(s);
+  if (job === 'gc-content') return T.dnaGC(s);
+  throw new Error('Bad DNA job \u2014 complement, reverse-complement, transcribe, untranscribe or gc-content');
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');

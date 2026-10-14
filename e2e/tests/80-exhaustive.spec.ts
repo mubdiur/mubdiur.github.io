@@ -73,6 +73,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'solitaire-cipher': { good: 'HELLO', expectInOutput: /NZGAE/ },
   'keyword-cipher': { good: 'HELLO', expectInOutput: /AOGGJ/ },
   'book-cipher': { good: 'HELLO', expectInOutput: /1\.2 1\.3 8\.1 10\.4 3\.3/ },
+  'dna-toolkit': { good: 'ATGC', expectInOutput: /TACG/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },
