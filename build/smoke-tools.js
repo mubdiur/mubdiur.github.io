@@ -1452,6 +1452,14 @@ console.log('-- segment --');
   ok(TOOLS['circle-segment-solver'].handler('segment 5 h=2').indexOf('Angle: 106.2602047083') >= 0, 'segment angle');
   ok(TOOLS['circle-segment-solver'].handler.toString().indexOf('segmentSolve') >= 0, 'segment delegates');
 }
+
+console.log('-- cap --');
+{
+  ok(TOOLS['spherical-cap-solver'].handler('cap 5 2') === 'Cap: R = 5, h = 2\nBase radius: 4\nVolume: 54.4542726622\nCurved: 62.8318530718\nTotal: 113.0973355292', 'cap exact');
+  ok(TOOLS['spherical-cap-solver'].handler('cap 5 10').indexOf('Volume: 523.5987755983') >= 0, 'cap sphere volume');
+  ok(TOOLS['spherical-cap-solver'].handler('cap 5 10').indexOf('Curved: 314.159265359') >= 0, 'cap sphere curved');
+  ok(TOOLS['spherical-cap-solver'].handler.toString().indexOf('capSolve') >= 0, 'cap delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

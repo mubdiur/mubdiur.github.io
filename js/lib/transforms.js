@@ -2296,6 +2296,45 @@ T.segmentSolve = function (s) {
   var height = r * (1 - Math.cos(half));
   return 'Segment: R = ' + gtrim(r) + '\nAngle: ' + gtrim(theta * 180 / Math.PI) + '\u00b0\nChord: ' + gtrim(chord) + '\nArc: ' + gtrim(arc) + '\nSector: ' + gtrim(sector) + '\nSegment area: ' + gtrim(segArea) + '\nHeight: ' + gtrim(height);
 };
+/* Spherical-cap solver: volume plus curved surface from radius and height. */
+T.capSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a cap \u2014 e.g. cap 5 2');
+  function cnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function ctrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(spherical|cap)\b/.exec(low);
+  if (!m0) throw new Error('Unknown cap \u2014 use cap 5 2');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  if (parts[0] === 'cap') parts = parts.slice(1);
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'r' || tk === 'h') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 2) throw new Error('Cap wants sphere radius and height \u2014 e.g. cap 5 2');
+  var sr = cnum(nums[0], 'Bad radius');
+  var sh = cnum(nums[1], 'Bad height');
+  if (sh > 2 * sr) throw new Error('Height must be within (0, 2R] \u2014 got ' + JSON.stringify(nums[1].slice(0, 40)));
+  var ba = Math.sqrt(Math.max(0, sh * (2 * sr - sh)));
+  var vol = Math.PI * sh * sh * (sr - sh / 3);
+  var curved = 2 * Math.PI * sr * sh;
+  var total = curved + Math.PI * ba * ba;
+  return 'Cap: R = ' + ctrim(sr) + ', h = ' + ctrim(sh) + '\nBase radius: ' + ctrim(ba) + '\nVolume: ' + ctrim(vol) + '\nCurved: ' + ctrim(curved) + '\nTotal: ' + ctrim(total);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
