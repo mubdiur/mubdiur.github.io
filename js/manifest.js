@@ -928,7 +928,7 @@ window.TOOLMANIFEST = [
   { slug: 'triangle-solver', name: 'Triangle Solver', desc: 'Sides to area, angles, type, radii and altitudes — Heron plus law of cosines, inequality guards', category: 'math', tags: ['triangle', 'geometry', 'area', 'angles', 'heron'], icon: 'calculator', template: 'transform',
     placeholder: '3 4 5',
     handler: function (s) { return Transforms.triSolve(s); } },
-  { slug: 'circle-solver', name: 'Circle Solver', desc: 'Radius, diameter, circumference, area — solve from any one, trimmed to 10 decimals', category: 'math', tags: ['circle', 'geometry', 'radius', 'area', 'circumference'], icon: 'calculator', template: 'transform',
+  { slug: 'circle-solver', name: 'Circle Solver', desc: 'Radius, diameter, circumference, area — solve from any one, optional angle adds segment lines', category: 'math', tags: ['circle', 'geometry', 'radius', 'area', 'circumference'], icon: 'calculator', template: 'transform',
     placeholder: '5',
     handler: function (s) { return Transforms.circleSolve(s); } },
   { slug: 'pace-calculator', name: 'Running Pace Calculator', desc: 'Distance plus time to pace and speed — km, mi and m with MM:SS, per-km and per-mile splits', category: 'math', tags: ['pace', 'running', 'speed', 'marathon', 'split'], icon: 'calculator', template: 'transform',

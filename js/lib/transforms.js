@@ -1799,6 +1799,8 @@ T.circleSolve = function (s) {
   for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
   var txt = raw.trim();
   if (!txt) throw new Error('Enter a radius \u2014 e.g. 5 or d=10');
+  txt = txt.replace(/^(circle|circ)\s+/i, '');
+  if (!txt) throw new Error('Enter a radius \u2014 e.g. 5 or d=10');
   function cnum(tok, label) {
     if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
     var v = parseFloat(tok);
@@ -1808,6 +1810,11 @@ T.circleSolve = function (s) {
     return v;
   }
   function ctrim(v) { var rr = Math.round(v * 1e10) / 1e10; return String(rr === 0 ? 0 : rr); }
+  function segBlock(sr, dg) {
+    var th = dg * Math.PI / 180;
+    var hf = th / 2;
+    return '\nAngle: ' + ctrim(dg) + '\u00b0\nChord: ' + ctrim(2 * sr * Math.sin(hf)) + '\nArc: ' + ctrim(sr * th) + '\nSector: ' + ctrim(sr * sr * th / 2) + '\nSegment area: ' + ctrim(sr * sr * (th - Math.sin(th)) / 2) + '\nHeight: ' + ctrim(sr * (1 - Math.cos(hf)));
+  }
   var mode = 'radius';
   var numTok = txt;
   var eqm = /^([a-zA-Z]+)\s*=\s*(.+)$/.exec(txt);
@@ -1819,15 +1826,25 @@ T.circleSolve = function (s) {
     else if (kk === 'a' || kk === 'area') mode = 'area';
     else throw new Error('Bad input \u2014 use r=, d=, c= or a=, e.g. d=10');
     numTok = eqm[2].trim();
-  } else if (/[=a-zA-Z]/.test(txt)) throw new Error('Bad input \u2014 enter a number like 5 or d=10');
-  var val = cnum(numTok, 'Bad number');
+  } else if (/[=a-zA-Z]/.test(txt.replace(/(\u00b0|deg)\s*$/i, ''))) throw new Error('Bad input \u2014 enter a number like 5 or d=10');
+  var cset = numTok;
+  var segDeg = 0;
+  var vtoks = numTok.split(/\s+/).filter(function (x) { return x !== ''; });
+  if (vtoks.length === 2) {
+    var atok = vtoks[1].replace(/(\u00b0|deg)$/i, '');
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(atok)) throw new Error('Bad angle \u2014 got ' + JSON.stringify(vtoks[1].slice(0, 40)));
+    segDeg = parseFloat(atok);
+    if (!(segDeg > 0 && segDeg <= 360)) throw new Error('Angle must be within (0, 360] degrees \u2014 got ' + JSON.stringify(vtoks[1].slice(0, 40)));
+    cset = vtoks[0];
+  } else if (vtoks.length !== 1) throw new Error('Bad input \u2014 enter a number like 5 or d=10');
+  var val = cnum(cset, 'Bad number');
   var r;
   if (mode === 'radius') r = val;
   else if (mode === 'diameter') r = val / 2;
   else if (mode === 'circumference') r = val / (2 * Math.PI);
   else r = Math.sqrt(val / Math.PI);
   if (!isFinite(r) || r <= 0) throw new Error('No circle \u2014 result out of range');
-  return 'Given: ' + mode + ' = ' + ctrim(val) + '\nRadius: ' + ctrim(r) + '\nDiameter: ' + ctrim(2 * r) + '\nCircumference: ' + ctrim(2 * Math.PI * r) + '\nArea: ' + ctrim(Math.PI * r * r);
+  return 'Given: ' + mode + ' = ' + ctrim(val) + '\nRadius: ' + ctrim(r) + '\nDiameter: ' + ctrim(2 * r) + '\nCircumference: ' + ctrim(2 * Math.PI * r) + '\nArea: ' + ctrim(Math.PI * r * r) + (segDeg ? segBlock(r, segDeg) : '');
 };
 /* Running pace calculator: distance plus time to per-km/mi pace and speed. */
 T.paceCalc = function (s) {

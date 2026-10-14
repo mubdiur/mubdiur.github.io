@@ -1357,6 +1357,9 @@ console.log('-- circ --');
   ok(TOOLS['circle-solver'].handler('5') === 'Given: radius = 5\nRadius: 5\nDiameter: 10\nCircumference: 31.4159265359\nArea: 78.5398163397', 'circ radius');
   ok(TOOLS['circle-solver'].handler('d=10').indexOf('Radius: 5') >= 0, 'circ diameter');
   ok(TOOLS['circle-solver'].handler.toString().indexOf('circleSolve') >= 0, 'circ delegates');
+  ok(TOOLS['circle-solver'].handler('5 90') === 'Given: radius = 5\nRadius: 5\nDiameter: 10\nCircumference: 31.4159265359\nArea: 78.5398163397\nAngle: 90\u00b0\nChord: 7.0710678119\nArc: 7.853981634\nSector: 19.6349540849\nSegment area: 7.1349540849\nHeight: 1.4644660941', 'circ angle');
+  ok(TOOLS['circle-solver'].handler('circle 5 90').indexOf('Segment area: 7.1349540849') >= 0, 'circ shape word');
+  ok(TOOLS['circle-solver'].handler('5 90').indexOf(TOOLS['circle-segment-solver'].handler('segment 5 90').split('\n').slice(1).join('\n')) >= 0, 'circ matches segment');
 }
 
 console.log('-- pace --');
