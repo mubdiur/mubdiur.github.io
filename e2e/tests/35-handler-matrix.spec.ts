@@ -277,6 +277,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('pigpen-cipher', 'digit throws', mustThrow(() => TOOLS['pigpen-cipher'].handler('A1')));
     push('isbn-validator', 'happy', TOOLS['isbn-validator'].handler('0-306-40615-2').indexOf('ISBN-10') >= 0);
     push('isbn-validator', 'bad checksum throws', mustThrow(() => TOOLS['isbn-validator'].handler('0-306-40615-3')));
+    push('iban-validator', 'happy', TOOLS['iban-validator'].handler('GB29 NWBK 6016 1331 9268 19').indexOf('Valid') === 0);
+    push('iban-validator', 'bad mod97 throws', mustThrow(() => TOOLS['iban-validator'].handler('GB29 NWBK 6016 1331 9268 18')));
     push('befunge', 'happy', TOOLS['befunge'].handler('"A",@') === 'A');
     push('befunge', 'div zero throws', mustThrow(() => TOOLS['befunge'].handler('50/.@')));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');

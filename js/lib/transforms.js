@@ -3721,6 +3721,46 @@ T.isbnCheck = function (s, opts) {
   }
   throw new Error('Bad prefix \u2014 9 digits make an ISBN-10 or 12 make an ISBN-13, got ' + clean.length);
 };
+/* IBAN cores: generic structural check plus iterative mod-97, spaces ignored, lowercase folded, no country table so no valid IBAN is ever rejected. */
+T.ibanCheck = function (s) {
+  var raw = String(s);
+  var clean = '';
+  for (var di = 0; di < raw.length; di++) {
+    var dc = raw.charCodeAt(di);
+    if (dc >= 0xD800 && dc <= 0xDFFF) return '';
+    var dh = raw.charAt(di);
+    if (dh >= '0' && dh <= '9') clean += dh;
+    else if (dh >= 'A' && dh <= 'Z') clean += dh;
+    else if (dh >= 'a' && dh <= 'z') clean += dh.toUpperCase();
+    else if (dc === 32 || dc === 9 || dc === 10 || dc === 13 || dc === 45) continue;
+    else throw new Error('Letters and digits only \u2014 IBAN with spaces or dashes ignored, got ' + JSON.stringify(dh));
+  }
+  if (!clean.length) throw new Error('Enter an IBAN first \u2014 country code, check digits and BBAN');
+  if (clean.length < 15 || clean.length > 34) throw new Error('Bad length \u2014 IBANs run 15 to 34 characters, got ' + clean.length);
+  var cc0 = clean.charAt(0);
+  var cc1 = clean.charAt(1);
+  if (cc0 < 'A' || cc0 > 'Z' || cc1 < 'A' || cc1 > 'Z') throw new Error('Bad country code \u2014 IBAN starts with two letters, got ' + JSON.stringify(clean.slice(0, 2)));
+  var cd0 = clean.charAt(2);
+  var cd1 = clean.charAt(3);
+  if (cd0 < '0' || cd0 > '9' || cd1 < '0' || cd1 > '9') throw new Error('Bad check digits \u2014 two digits follow the country code');
+  for (var bi = 4; bi < clean.length; bi++) {
+    var bh = clean.charAt(bi);
+    if ((bh < '0' || bh > '9') && (bh < 'A' || bh > 'Z')) throw new Error('Bad BBAN character \u2014 letters or digits, got ' + JSON.stringify(bh));
+  }
+  var rearr = clean.slice(4) + clean.slice(0, 4);
+  var rem = 0;
+  for (var ri = 0; ri < rearr.length; ri++) {
+    var rh = rearr.charAt(ri);
+    if (rh >= '0' && rh <= '9') rem = (rem * 10 + (rh.charCodeAt(0) - 48)) % 97;
+    else {
+      var vv = rh.charCodeAt(0) - 55;
+      rem = (rem * 10 + Math.floor(vv / 10)) % 97;
+      rem = (rem * 10 + (vv % 10)) % 97;
+    }
+  }
+  if (rem !== 1) throw new Error('Invalid IBAN \u2014 mod-97 check fails for ' + JSON.stringify(clean));
+  return 'Valid \u2014 ' + clean.slice(0, 2) + ' IBAN (' + clean.length + ' characters)';
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
