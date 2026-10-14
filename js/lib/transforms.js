@@ -2370,6 +2370,44 @@ T.annulusSolve = function (s) {
   var area = Math.PI * (ro * ro - ri * ri);
   return 'Annulus: R = ' + atrim(ro) + ', r = ' + atrim(ri) + '\nArea: ' + atrim(area) + '\nOuter: ' + atrim(2 * Math.PI * ro) + '\nInner: ' + atrim(2 * Math.PI * ri) + '\nWidth: ' + atrim(ro - ri) + '\nFill: ' + atrim(100 * (ro * ro - ri * ri) / (ro * ro)) + '%';
 };
+/* Ellipse solver: area, Ramanujan perimeter plus eccentricity. */
+T.ellipseSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter an ellipse \u2014 e.g. ellipse 5 3');
+  function mnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function mtrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(ellipse|oval)\b/.exec(low);
+  if (!m0) throw new Error('Unknown ellipse \u2014 use ellipse 5 3');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'a' || tk === 'b') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 2) throw new Error('Ellipse wants two semi-axes \u2014 e.g. ellipse 5 3');
+  var e0 = mnum(nums[0], 'Bad semi-axis');
+  var e1 = mnum(nums[1], 'Bad semi-axis');
+  var ea = e0 >= e1 ? e0 : e1;
+  var eb = e0 >= e1 ? e1 : e0;
+  var h = (ea - eb) * (ea - eb) / ((ea + eb) * (ea + eb));
+  var per = Math.PI * (ea + eb) * (1 + 3 * h / (10 + Math.sqrt(4 - 3 * h)));
+  var ecc = ea === eb ? 0 : Math.sqrt(1 - (eb * eb) / (ea * ea));
+  return 'Ellipse: a = ' + mtrim(ea) + ', b = ' + mtrim(eb) + '\nArea: ' + mtrim(Math.PI * ea * eb) + '\nPerimeter: ~' + mtrim(per) + '\nEccentricity: ' + mtrim(ecc) + '\nCircle: ' + (ea === eb ? 'yes' : 'no');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

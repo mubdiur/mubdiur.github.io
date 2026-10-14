@@ -1467,6 +1467,14 @@ console.log('-- annulus --');
   ok(TOOLS['annulus-solver'].handler('washer 5 3').indexOf('Area: 50.2654824574') >= 0, 'annulus alias');
   ok(TOOLS['annulus-solver'].handler.toString().indexOf('annulusSolve') >= 0, 'annulus delegates');
 }
+
+console.log('-- ellipse --');
+{
+  ok(TOOLS['ellipse-solver'].handler('ellipse 5 3').indexOf('Area: 47.1238898038') >= 0, 'ellipse area');
+  ok(TOOLS['ellipse-solver'].handler('ellipse 5 3').indexOf('Eccentricity: 0.8') >= 0, 'ellipse ecc');
+  ok(TOOLS['ellipse-solver'].handler('ellipse 5 5') === 'Ellipse: a = 5, b = 5\nArea: 78.5398163397\nPerimeter: ~31.4159265359\nEccentricity: 0\nCircle: yes', 'ellipse circle');
+  ok(TOOLS['ellipse-solver'].handler.toString().indexOf('ellipseSolve') >= 0, 'ellipse delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
