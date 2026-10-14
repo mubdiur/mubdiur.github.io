@@ -619,6 +619,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('ellipsoid-solver', 'volume', TOOLS['ellipsoid-solver'].handler('ellipsoid 3 4 5').indexOf('Volume: 251.3274122872') >= 0);
     push('ellipsoid-solver', 'sphere', TOOLS['ellipsoid-solver'].handler('ellipsoid 5 5 5').indexOf('Type: sphere') >= 0);
     push('ellipsoid-solver', 'junk throws', mustThrow(() => TOOLS['ellipsoid-solver'].handler('abc')));
+    push('capsule-frustum-solver', 'capsule', TOOLS['capsule-frustum-solver'].handler('capsule 3 7') === 'Solid: capsule, radius = 3, length = 7\nVolume: 311.0176727054\nSurface: 245.04422698');
+    push('capsule-frustum-solver', 'cylinder', TOOLS['capsule-frustum-solver'].handler('frustum 3 3 7').indexOf('Volume: 197.9203371762') >= 0);
+    push('capsule-frustum-solver', 'junk throws', mustThrow(() => TOOLS['capsule-frustum-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

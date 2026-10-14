@@ -2152,6 +2152,49 @@ T.ellipsoidSolve = function (s) {
   var type = (ea === eb && eb === ec) ? 'sphere' : ((ea === eb || ea === ec || eb === ec) ? 'spheroid' : 'scalene');
   return 'Solid: ellipsoid, a = ' + etrim(ea) + ', b = ' + etrim(eb) + ', c = ' + etrim(ec) + '\nVolume: ' + etrim(4 / 3 * Math.PI * ea * eb * ec) + '\nSurface: ~' + etrim(sur) + '\nType: ' + type;
 };
+/* Capsule and cone-frustum solver: volume, surface, lateral plus slant. */
+T.capsuleFrustum = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a solid \u2014 e.g. capsule 3 7 or frustum 5 3 7');
+  function fnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function ftrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(capsule|cap|frustum|frus|truncated)\b/.exec(low);
+  if (!m0) throw new Error('Unknown solid \u2014 use capsule or frustum, e.g. frustum 5 3 7');
+  var isC = m0[1].charAt(0) === 'c';
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'r' || tk === 'l' || tk === 'h') continue;
+    nums.push(tk);
+  }
+  if (isC) {
+    if (nums.length !== 2) throw new Error('Capsule wants radius and cylinder length \u2014 e.g. capsule 3 7');
+    var cr = fnum(nums[0], 'Bad radius');
+    var cl = fnum(nums[1], 'Bad length');
+    return 'Solid: capsule, radius = ' + ftrim(cr) + ', length = ' + ftrim(cl) + '\nVolume: ' + ftrim(Math.PI * cr * cr * cl + 4 / 3 * Math.PI * cr * cr * cr) + '\nSurface: ' + ftrim(2 * Math.PI * cr * cl + 4 * Math.PI * cr * cr);
+  }
+  if (nums.length !== 3) throw new Error('Frustum wants base, top and height \u2014 e.g. frustum 5 3 7');
+  var fr = fnum(nums[0], 'Bad base');
+  var ft = fnum(nums[1], 'Bad top');
+  var fh = fnum(nums[2], 'Bad height');
+  var fs = Math.sqrt((fr - ft) * (fr - ft) + fh * fh);
+  var flat = Math.PI * (fr + ft) * fs;
+  return 'Solid: frustum, R = ' + ftrim(fr) + ', r = ' + ftrim(ft) + ', height = ' + ftrim(fh) + '\nVolume: ' + ftrim(Math.PI * fh / 3 * (fr * fr + fr * ft + ft * ft)) + '\nSurface: ' + ftrim(flat + Math.PI * fr * fr + Math.PI * ft * ft) + '\nLateral: ' + ftrim(flat) + '\nSlant: ' + ftrim(fs);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

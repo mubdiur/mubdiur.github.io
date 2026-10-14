@@ -1428,6 +1428,14 @@ console.log('-- ellipsoid --');
   ok(TOOLS['ellipsoid-solver'].handler('ellipsoid 5 5 5').indexOf('Type: sphere') >= 0, 'ellipsoid sphere type');
   ok(TOOLS['ellipsoid-solver'].handler.toString().indexOf('ellipsoidSolve') >= 0, 'ellipsoid delegates');
 }
+
+console.log('-- capfrus --');
+{
+  ok(TOOLS['capsule-frustum-solver'].handler('capsule 3 7') === 'Solid: capsule, radius = 3, length = 7\nVolume: 311.0176727054\nSurface: 245.04422698', 'capfrus capsule');
+  ok(TOOLS['capsule-frustum-solver'].handler('frustum 3 3 7') === 'Solid: frustum, R = 3, r = 3, height = 7\nVolume: 197.9203371762\nSurface: 188.4955592154\nLateral: 131.9468914508\nSlant: 7', 'capfrus cylinder check');
+  ok(TOOLS['capsule-frustum-solver'].handler('frustum 5 3 7').indexOf('Slant: ') >= 0, 'capfrus frustum');
+  ok(TOOLS['capsule-frustum-solver'].handler.toString().indexOf('capsuleFrustum') >= 0, 'capfrus delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
