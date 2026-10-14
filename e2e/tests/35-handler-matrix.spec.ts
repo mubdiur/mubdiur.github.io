@@ -231,6 +231,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('gronsfeld-cipher', 'non-digit key throws', mustThrow(() => TOOLS['gronsfeld-cipher'].handler('ABC', { key: 'ABC' })));
     push('chaocipher', 'happy', TOOLS['chaocipher'].handler('A', { key1: 'A', key2: 'A' }) === 'A');
     push('chaocipher', 'bad key throws', mustThrow(() => TOOLS['chaocipher'].handler('AB', { key1: '', key2: 'A' })));
+    push('morbit-cipher', 'happy', TOOLS['morbit-cipher'].handler('E') === '3');
+    push('morbit-cipher', 'bad digit throws', mustThrow(() => TOOLS['morbit-cipher'].handler('0', { mode: 'decode' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

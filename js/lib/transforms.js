@@ -2487,6 +2487,30 @@ T.base32Encode = function (s) {
   while (result.length % 8 !== 0) result += '=';
   return result;
 };
+/* Morbit cores: Morse symbols grouped in pairs become digits 1-9 (.. is 1 through xx is 9); letter separator is x, odd tails padded with x. */
+T.morbitPairs = ['..', '.-', '.x', '-.', '--', '-x', 'x.', 'x-', 'xx'];
+T.morbitEncode = function (s) {
+  var t = String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!t) return '';
+  var stream = '';
+  for (var i = 0; i < t.length; i++) stream += morseMap[t.charAt(i)] + 'x';
+  if (stream.length % 2) stream += 'x';
+  var out = '';
+  for (var j = 0; j < stream.length; j += 2) out += String(T.morbitPairs.indexOf(stream.slice(j, j + 2)) + 1);
+  return out;
+};
+T.morbitDecode = function (s) {
+  var c = String(s).replace(/[^0-9]/g, '');
+  if (!c) return '';
+  if (!/^[1-9]*$/.test(c)) throw new Error('Bad Morbit input \u2014 digits 1-9 only');
+  var stream = '';
+  for (var i = 0; i < c.length; i++) stream += T.morbitPairs[c.charAt(i) - 1];
+  var out = '';
+  var codes = stream.split('x');
+  for (var j = 0; j < codes.length; j++) { if (!codes[j]) continue; var ch = revMorse[codes[j]]; if (!ch) throw new Error('Bad Morbit input \u2014 unknown Morse ' + codes[j]); out += ch; }
+  return out;
+};
+T.morbitCipher = function (s, opts) { var o = opts || {}; if ((o.mode || 'encode') === 'decode') return T.morbitDecode(s); return T.morbitEncode(s); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
