@@ -446,6 +446,8 @@ push('sedol-validator', 'happy', TOOLS['sedol-validator'].handler('0798059').ind
     push('hex-encode', 'happy', TOOLS['hex-encode'].handler('A') === '41');
     push('hex-decode', 'happy', TOOLS['hex-decode'].handler('41') === 'A');
     push('binary-encode', 'happy', TOOLS['binary-encode'].handler('A').includes('01000001'));
+    push('hexdump-viewer', 'happy', TOOLS['hexdump-viewer'].handler('A').indexOf('00000000  41') === 0);
+    push('hexdump-viewer', 'empty throws', mustThrow(() => TOOLS['hexdump-viewer'].handler('')));
     push('binary-decode', 'happy', TOOLS['binary-decode'].handler('01000001') === 'A');
     push('base32-encode', 'happy', TOOLS['base32-encode'].handler('hello').length > 0);
     push('base32-decode', 'happy', TOOLS['base32-decode'].handler(TOOLS['base32-encode'].handler('hello')) === 'hello');

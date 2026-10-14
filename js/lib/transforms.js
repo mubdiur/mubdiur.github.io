@@ -1920,6 +1920,31 @@ T.hexDecode = function (s) {
   for (var i = 0; i < hex.length; i += 2) bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16);
   return new TextDecoder().decode(bytes);
 };
+/* Hexdump views: classic offset plus hex plus ASCII panes over the UTF-8 bytes, pipes stay aligned on short rows. */
+T.hexdump = function (s, opts) {
+  var o = opts || {};
+  var width = String(o.width) === '8' ? 8 : 16;
+  var upper = !!o.upper;
+  var raw = String(s);
+  if (!raw.length) throw new Error('Enter text first \u2014 hexdump needs input bytes');
+  var bytes = new TextEncoder().encode(raw);
+  function dumpHx(nn) { var hh = nn.toString(16).padStart(2, '0'); return upper ? hh.toUpperCase() : hh; }
+  var rows = [];
+  for (var di = 0; di < bytes.length; di += width) {
+    var cells = [];
+    var asc = '';
+    for (var dj = 0; dj < width; dj++) {
+      if (di + dj < bytes.length) {
+        var bb = bytes[di + dj];
+        cells.push(dumpHx(bb));
+        asc += (bb >= 32 && bb <= 126) ? String.fromCharCode(bb) : '.';
+      } else { cells.push('  '); asc += ' '; }
+    }
+    var hexfield = width > 8 ? cells.slice(0, 8).join(' ') + '  ' + cells.slice(8).join(' ') : cells.join(' ');
+    rows.push(di.toString(16).padStart(8, '0') + '  ' + hexfield + '  |' + asc + '|');
+  }
+  return rows.join('\n');
+};
 T.binaryEncode = function (s) { return Array.from(new TextEncoder().encode(s)).map(function (b) { return b.toString(2).padStart(8, '0'); }).join(' '); };
 T.binaryDecode = function (s) {
   var bits = unquote(s).replace(/\s/g, '');

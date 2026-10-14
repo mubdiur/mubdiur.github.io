@@ -145,6 +145,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'html-decode': { good: '&lt;b&gt;', expectInOutput: /<b>/ },
   'hex-encode': { good: 'A', expectInOutput: /41/ },
   'hex-decode': { good: '41', expectInOutput: /A/ },
+  'hexdump-viewer': { good: 'A', expectInOutput: /00000000/ },
   'binary-encode': { good: 'A', expectInOutput: /01000001/ },
   'binary-decode': { good: '01000001', expectInOutput: /A/ },
   'base32-encode': { good: 'hello', expectInOutput: /NBSWY/ },
