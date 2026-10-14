@@ -1632,6 +1632,25 @@ console.log('-- circlip --');
   ok(TOOLS['circlip-solver'].handler('din472 30').indexOf('DIN 472') >= 0, 'circlip din472');
   ok(TOOLS['circlip-solver'].handler.toString().indexOf('circlipSolve') >= 0, 'circlip delegates');
 }
+console.log('-- tolfit --');
+{
+  ok(TOOLS['tolerance-fit-solver'].handler('30 g6').indexOf('Deviations: -7/-20 um') >= 0, 'tolfit shaft dev');
+  ok(TOOLS['tolerance-fit-solver'].handler('30 g6').indexOf('Limits: 29.98 - 29.993 mm') >= 0, 'tolfit shaft limits');
+  ok(TOOLS['tolerance-fit-solver'].handler('30 H7').indexOf('Deviations: 21/0 um') >= 0, 'tolfit hole dev');
+  ok(TOOLS['tolerance-fit-solver'].handler('30 H7').indexOf('Limits: 30 - 30.021 mm') >= 0, 'tolfit hole limits');
+  ok(TOOLS['tolerance-fit-solver'].handler('25 f7').indexOf('Deviations: -20/-41 um') >= 0, 'tolfit f7');
+  ok(TOOLS['tolerance-fit-solver'].handler('30 k6').indexOf('Deviations: 15/2 um') >= 0, 'tolfit k6');
+  ok(TOOLS['tolerance-fit-solver'].handler('30 m6').indexOf('Deviations: 21/8 um') >= 0, 'tolfit m6');
+  ok(TOOLS['tolerance-fit-solver'].handler('30 n6').indexOf('Deviations: 28/15 um') >= 0, 'tolfit n6');
+  ok(TOOLS['tolerance-fit-solver'].handler('30 G7').indexOf('Deviations: 28/7 um') >= 0, 'tolfit mirror');
+  ok(TOOLS['tolerance-fit-solver'].handler('fit 30 H7/g6').indexOf('clearance fit') >= 0, 'tolfit pair kind');
+  ok(TOOLS['tolerance-fit-solver'].handler('30 H7/g6').indexOf('Fit: clearance 0.007-0.041 mm') >= 0, 'tolfit pair clear');
+  ok(TOOLS['tolerance-fit-solver'].handler('30 H7/n6').indexOf('transition fit') >= 0, 'tolfit pair trans');
+  ok(TOOLS['tolerance-fit-solver'].handler('30 H6/n6').indexOf('Fit: interference 0.002-0.028 mm') >= 0, 'tolfit pair interf');
+  ok(TOOLS['tolerance-fit-solver'].handler('g6 30').indexOf('Deviations: -7/-20 um') >= 0, 'tolfit zone first');
+  ok(TOOLS['tolerance-fit-solver'].handler('30g6').indexOf('Deviations: -7/-20 um') >= 0, 'tolfit combined');
+  ok(TOOLS['tolerance-fit-solver'].handler.toString().indexOf('tolfitSolve') >= 0, 'tolfit delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

@@ -1033,6 +1033,10 @@ window.TOOLMANIFEST = [
   { slug: 'oring-solver', name: 'O-Ring Groove Solver', desc: 'Static face-seal gland from O-ring CS per Parker \u2014 depth, width, squeeze plus fill', category: 'math', tags: ['oring', 'o-ring', 'gland', 'seal', 'parker', 'cnc', 'geometry'], icon: 'calculator', template: 'transform',
     placeholder: 'oring 2.62',
     handler: function (s) { return Transforms.oringSolve(s); } },
+  { slug: 'tolerance-fit-solver', name: 'Tolerance Fit Solver', desc: 'ISO 286 limits from size plus zone \u2014 shaft and hole deviations plus clearance for pairs', category: 'math', tags: ['tolerance', 'fit', 'iso286', 'limits', 'clearance', 'cnc', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: '30 H7/g6',
+    handler: function (s) { return Transforms.tolfitSolve(s); } },
+
   { slug: 'loan-calculator', name: 'Loan Calculator', desc: 'Fixed-rate loan math — monthly payment, total interest, yearly schedule plus a full monthly CSV', category: 'math', tags: ['loan', 'mortgage', 'amortization', 'interest', 'finance'], icon: 'calculator', template: 'custom' },
   { slug: 'number-to-words', name: 'Number to Words', desc: 'Convert numbers to English word representation', category: 'math', tags: ['number', 'words'], icon: 'calculator', template: 'transform',
     handler: function (s) { return Transforms.numberToWordsText(s); } },

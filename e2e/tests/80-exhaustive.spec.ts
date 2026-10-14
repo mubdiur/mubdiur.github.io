@@ -294,6 +294,8 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'keyway-solver': { good: 'keyway 40', bad: 'abc', expectInOutput: /Shaft check:/, expectError: /Unknown keyway/ },
   'circlip-solver': { good: 'circlip 30', bad: 'abc', expectInOutput: /Groove dia:/, expectError: /Unknown circlip/ },
   'oring-solver': { good: 'oring 2.62', bad: 'abc', expectInOutput: /Groove depth:/, expectError: /Unknown o-ring/ },
+  'tolerance-fit-solver': { good: '30 H7/g6', bad: 'abc', expectInOutput: /clearance fit/, expectError: /Unknown fit/ },
+
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

@@ -696,6 +696,10 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('oring-solver', 'groove', TOOLS['oring-solver'].handler('oring 2.62').indexOf('Groove depth: 1.96') >= 0);
     push('oring-solver', 'inch', TOOLS['oring-solver'].handler('oring 0.103').indexOf('O-ring CS 2.62') >= 0);
     push('oring-solver', 'junk throws', mustThrow(() => TOOLS['oring-solver'].handler('abc')));
+    push('tolerance-fit-solver', 'shaft', TOOLS['tolerance-fit-solver'].handler('30 g6').indexOf('Deviations: -7/-20 um') >= 0);
+    push('tolerance-fit-solver', 'pair', TOOLS['tolerance-fit-solver'].handler('30 H7/g6').indexOf('clearance fit') >= 0);
+    push('tolerance-fit-solver', 'junk throws', mustThrow(() => TOOLS['tolerance-fit-solver'].handler('abc')));
+
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

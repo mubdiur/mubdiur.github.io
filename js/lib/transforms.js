@@ -3320,6 +3320,134 @@ T.circlipSolve = function (s) {
   out.push('Groove depth: ' + ctrim(depth) + '/side');
   return out.join('\n');
 };
+/* ISO 286 tolerance-fit solver: limit dimensions for shafts a-h/k/m/n and holes A-H (IT5-IT11, over 3 to 500 mm), plus clearance math for hole/shaft pairs. IT widths are ISO 286-1 Table 1; deviations use the standard formulas with D = geometric mean of the size step, rounded to whole um. Zones j/p/r/s and t-zc need step tables beyond the formulas, K-ZC holes need delta rules, and miniature sizes to 3 mm are special \u2014 all rejected with a pointer. */
+T.tolfitSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a size plus zone \u2014 e.g. 30 g6 or 30 H7/g6');
+  var low = txt.toLowerCase();
+  var m0 = /^(fit|fits|tolerance|tolerances|limit|limits|iso\s*286|iso286)\b/.exec(low);
+  var body = (m0 ? txt.slice(m0[0].length) : txt).trim();
+  if (!body) throw new Error('Enter a size plus zone \u2014 e.g. 30 g6 or 30 H7/g6');
+  function toks(str) { return str.split(/[\s,;]+/).filter(function (x) { return x !== ''; }); }
+  function isNum(t) { return /^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(t); }
+  var sizeTok = null, zoneToks = [];
+  if (body.indexOf('/') >= 0) {
+    var sides = body.split('/');
+    if (sides.length !== 2) throw new Error('One slash per pair \u2014 e.g. 30 H7/g6');
+    var all = toks(sides[0]).concat(toks(sides[1]));
+    for (var ai = 0; ai < all.length; ai++) {
+      if (sizeTok === null && isNum(all[ai])) sizeTok = all[ai];
+      else zoneToks.push(all[ai]);
+    }
+    if (sizeTok === null) throw new Error('Add a size \u2014 e.g. 30 H7/g6');
+    if (zoneToks.length !== 2) throw new Error('Pair wants two zones \u2014 e.g. 30 H7/g6');
+  } else {
+    var tp = toks(body);
+    if (tp.length === 1) {
+      var m1 = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))([A-Za-z]{1,2}\d{1,2})$/.exec(tp[0]);
+      var m2 = /^([A-Za-z]{1,2}\d{1,2})([+-]?(?:\d+(?:\.\d*)?|\.\d+))$/.exec(tp[0]);
+      if (m1) { sizeTok = m1[1]; zoneToks = [m1[2]]; }
+      else if (m2) { sizeTok = m2[2]; zoneToks = [m2[1]]; }
+      else throw new Error('Unknown fit \u2014 e.g. 30 g6 or 30 H7/g6');
+    } else if (tp.length === 2) {
+      for (var bi = 0; bi < tp.length; bi++) {
+        if (sizeTok === null && isNum(tp[bi])) sizeTok = tp[bi];
+        else zoneToks.push(tp[bi]);
+      }
+      if (sizeTok === null || zoneToks.length !== 1) throw new Error('Unknown fit \u2014 e.g. 30 g6 or 30 H7/g6');
+    } else throw new Error('Unknown fit \u2014 e.g. 30 g6 or 30 H7/g6');
+  }
+  var size = parseFloat(sizeTok);
+  if (!isFinite(size)) throw new Error('Size \u2014 out of range');
+  if (!(size > 3)) throw new Error('Size over 3 mm \u2014 miniature sizes use special tables');
+  if (size > 500) throw new Error('Size to 500 mm \u2014 ISO 286 steps end at 500');
+  var STEPS = [[3,6],[6,10],[10,18],[18,30],[30,50],[50,80],[80,120],[120,180],[180,250],[250,315],[315,400],[400,500]];
+  var ITT = [[5,8,12,18,30,48,75],[6,9,15,22,36,58,90],[8,11,18,27,43,70,110],[9,13,21,33,52,84,130],[11,16,25,39,62,100,160],[13,19,30,46,74,120,190],[15,22,35,54,87,140,220],[18,25,40,63,100,160,250],[20,29,46,72,115,185,290],[23,32,52,81,130,210,320],[25,36,57,89,140,230,360],[27,40,63,97,155,250,400]];
+  var si = -1;
+  for (var gi = 0; gi < STEPS.length; gi++) { if (size > STEPS[gi][0] && size <= STEPS[gi][1]) { si = gi; break; } }
+  if (si < 0) throw new Error('Size to 500 mm \u2014 ISO 286 steps end at 500');
+  var D = Math.sqrt(STEPS[si][0] * STEPS[si][1]);
+  function itOf(gr) { return ITT[si][gr - 5]; }
+  function devKey(L) {
+    var k = L.toLowerCase();
+    if (k === 'js') return 'js';
+    if (k.length !== 1) return null;
+    return k;
+  }
+  function shaftDev(key, gr) {
+    var IT = itOf(gr);
+    var es = 0, ei = 0;
+    if (key === 'h') { es = 0; ei = -IT; }
+    else if (key === 'js') { es = IT / 2; ei = -IT / 2; }
+    else if (key === 'a') {
+      if (D > 120) throw new Error('Zone a over 120 mm needs tables \u2014 formulas end at D 120');
+      es = Math.round(-(265 + 1.3 * D)); ei = es - IT;
+    } else if (key === 'b') {
+      if (D > 160) throw new Error('Zone b over 160 mm needs tables \u2014 formulas end at D 160');
+      es = Math.round(-(140 + 0.85 * D)); ei = es - IT;
+    } else if (key === 'c') {
+      es = D <= 40 ? Math.round(-52 * Math.pow(D, 0.2)) : Math.round(-(95 + 0.8 * D)); ei = es - IT;
+    } else if (key === 'd') { es = Math.round(-16 * Math.pow(D, 0.44)); ei = es - IT; }
+    else if (key === 'e') { es = Math.round(-11 * Math.pow(D, 0.41)); ei = es - IT; }
+    else if (key === 'f') { es = Math.round(-5.5 * Math.pow(D, 0.41)); ei = es - IT; }
+    else if (key === 'g') { es = Math.round(-2.5 * Math.pow(D, 0.34)); ei = es - IT; }
+    else if (key === 'k') {
+      ei = gr <= 7 ? Math.round(0.6 * Math.pow(D, 1 / 3)) : 0; es = ei + IT;
+    } else if (key === 'm') { ei = itOf(7) - itOf(6); es = ei + IT; }
+    else if (key === 'n') { ei = Math.round(5 * Math.pow(D, 0.34)); es = ei + IT; }
+    else if (key === 'j' || key === 'p' || key === 'r' || key === 's' || key === 't' || key === 'u' || key === 'v' || key === 'x' || key === 'y' || key === 'z') throw new Error('Zone ' + key + ' needs tabulated deltas \u2014 shafts a\u2013h, k, m, n');
+    else throw new Error('No zone ' + key + ' in ISO 286 \u2014 letters skip i, l, o, q, w');
+    return { es: es, ei: ei, IT: IT };
+  }
+  function zoneDev(ztok) {
+    var mz = /^(za|zb|zc|ZA|ZB|ZC|js|JS|[A-Za-z])(\d{1,2})$/.exec(ztok);
+    if (!mz) throw new Error('Unknown zone \u2014 got ' + JSON.stringify(ztok.slice(0, 40)));
+    var L = mz[1], gr = parseInt(mz[2], 10);
+    if (!(gr >= 5 && gr <= 11)) throw new Error('Grades IT5\u2013IT11 \u2014 got IT' + mz[2].slice(0, 8));
+    var hole = (L === L.toUpperCase()) && L !== L.toLowerCase();
+    var key = devKey(L);
+    if (key === null) throw new Error('Zone ' + L.toLowerCase() + ' needs tabulated deltas \u2014 shafts a\u2013h, k, m, n');
+    if (hole) {
+      if (key !== 'js' && (key < 'a' || key > 'h')) throw new Error('Hole zones J\u2013ZC need delta rules \u2014 holes A\u2013H');
+      var sd = shaftDev(key, gr);
+      return { hi: -sd.ei, lo: -sd.es, IT: sd.IT, hole: true, label: ztok };
+    }
+    var dd = shaftDev(key, gr);
+    return { hi: dd.es, lo: dd.ei, IT: dd.IT, hole: false, label: ztok };
+  }
+  function ftrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  function single(z) {
+    var d = zoneDev(z);
+    var up = size + d.hi / 1000, lo2 = size + d.lo / 1000;
+    var out = [];
+    out.push(ftrim(size) + ' ' + d.label + ' \u2014 ' + (d.hole ? 'hole' : 'shaft'));
+    out.push('Limits: ' + ftrim(lo2) + ' - ' + ftrim(up) + ' mm');
+    out.push('Deviations: ' + ftrim(d.hi) + '/' + ftrim(d.lo) + ' um (IT' + zoneGrade(z) + ' = ' + d.IT + ' um)');
+    return out.join('\n');
+  }
+  function zoneGrade(ztok) {
+    var mz = /^(?:za|zb|zc|ZA|ZB|ZC|js|JS|[A-Za-z])(\d{1,2})$/.exec(ztok);
+    return String(parseInt(mz[1], 10));
+  }
+  if (zoneToks.length === 1) return single(zoneToks[0]);
+  var A = zoneDev(zoneToks[0]), B = zoneDev(zoneToks[1]);
+  if (A.hole === B.hole) throw new Error('Pair needs one hole plus one shaft \u2014 e.g. 30 H7/g6');
+  var H = A.hole ? A : B, S = A.hole ? B : A;
+  var hUp = size + H.hi / 1000, hLo = size + H.lo / 1000;
+  var sUp = size + S.hi / 1000, sLo = size + S.lo / 1000;
+  var minC = (H.lo - S.hi) / 1000, maxC = (H.hi - S.lo) / 1000;
+  var kind = minC >= 0 ? 'clearance fit' : (maxC < 0 ? 'interference fit' : 'transition fit');
+  var out = [];
+  out.push(ftrim(size) + ' ' + H.label + '/' + S.label + ' \u2014 ' + kind);
+  out.push('Hole ' + H.label + ': ' + ftrim(hLo) + ' - ' + ftrim(hUp) + ' mm');
+  out.push('Shaft ' + S.label + ': ' + ftrim(sLo) + ' - ' + ftrim(sUp) + ' mm');
+  if (kind === 'clearance fit') out.push('Fit: clearance ' + ftrim(minC) + '-' + ftrim(maxC) + ' mm');
+  else if (kind === 'interference fit') out.push('Fit: interference ' + ftrim(-maxC) + '-' + ftrim(-minC) + ' mm');
+  else out.push('Fit: transition (clear ' + ftrim(maxC) + ', interf ' + ftrim(-minC) + ' mm)');
+  return out.join('\n');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
