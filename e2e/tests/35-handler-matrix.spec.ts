@@ -253,6 +253,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('one-time-pad', 'short key throws', mustThrow(() => TOOLS['one-time-pad'].handler('HELLO', { key: 'LE' })));
     push('jefferson-disk', 'happy', TOOLS['jefferson-disk'].handler('HELLO') === 'WZQGB');
     push('jefferson-disk', 'bad disk throws', mustThrow(() => TOOLS['jefferson-disk'].handler('AB', { disks: 'ABC' })));
+    push('solitaire-cipher', 'happy', TOOLS['solitaire-cipher'].handler('HELLO') === 'NZGAE');
+    push('solitaire-cipher', 'bad key throws', mustThrow(() => TOOLS['solitaire-cipher'].handler('AB', { key: '' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

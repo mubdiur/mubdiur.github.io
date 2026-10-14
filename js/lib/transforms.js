@@ -2846,6 +2846,75 @@ T.jeffersonDecode = function (s, disks, off) {
   return out;
 };
 T.jeffersonCipher = function (s, opts) { var o = opts || {}; var dd = o.disks === undefined ? 'JGRKQUZBAOXNMDTFLVIYEHWSPC,CYGPAQOMRLXWEZDIVKBFJTNSHU,BLQMAVUKGOTSXPZNRWICFEYHJD,URSATLGIKFZHDBVPMQCNOWEYXJ,ZVAFPSDJUNCQLOBWXYRKEGHIMT,GTLKZPNMYAFROIDWSQUCEHBXJV' : o.disks; var oo = o.offset === undefined ? '1' : o.offset; if ((o.mode || 'encode') === 'decode') return T.jeffersonDecode(s, dd, oo); return T.jeffersonEncode(s, dd, oo); };
+/* Solitaire cores: Schneier's 54-card keystream (A joker 53 creeps one, B joker 54 creeps two, triple cut, count cut with jokers as 53, output card read down from the top card; joker outputs rerun); deck keyed per key letter, text added mod 26, output grouped in fives. */
+T.solitaireNewDeck = function () {
+  var d = [];
+  for (var i = 1; i <= 54; i++) d.push(i);
+  return d;
+};
+T.solitaireVal = function (c) { return c >= 53 ? 53 : c; };
+T.solitaireStep = function (deck) {
+  var a = deck.indexOf(53);
+  deck.splice(a, 1);
+  deck.splice(a >= 53 ? 1 : a + 1, 0, 53);
+  var b = deck.indexOf(54);
+  deck.splice(b, 1);
+  deck.splice(b >= 52 ? b - 51 : b + 2, 0, 54);
+  var i1 = deck.indexOf(53), i2 = deck.indexOf(54);
+  var lo = i1 < i2 ? i1 : i2, hi = i1 < i2 ? i2 : i1;
+  var cut = deck.slice(hi + 1).concat(deck.slice(lo, hi + 1), deck.slice(0, lo));
+  for (var i = 0; i < 54; i++) deck[i] = cut[i];
+  var n = T.solitaireVal(deck[53]);
+  var cc = deck.slice(n, 53).concat(deck.slice(0, n), [deck[53]]);
+  for (var j = 0; j < 54; j++) deck[j] = cc[j];
+  return deck;
+};
+T.solitaireKeyedDeck = function (key) {
+  var k = String(key === undefined ? 'SOLITAIRE' : key).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!k) throw new Error('Enter a letter key \u2014 it orders the 54-card deck');
+  var deck = T.solitaireNewDeck();
+  for (var i = 0; i < k.length; i++) {
+    T.solitaireStep(deck);
+    var n = k.charCodeAt(i) - 64;
+    var cc = deck.slice(n, 53).concat(deck.slice(0, n), [deck[53]]);
+    for (var j = 0; j < 54; j++) deck[j] = cc[j];
+  }
+  return deck;
+};
+T.solitaireStream = function (deck, need) {
+  var out = [];
+  var guard = 0;
+  while (out.length < need) {
+    if (++guard > need * 20 + 100) throw new Error('Keystream stalled \u2014 try another key');
+    T.solitaireStep(deck);
+    var tv = T.solitaireVal(deck[0]);
+    var card = deck[tv];
+    if (card >= 53) continue;
+    out.push((card - 1) % 26);
+  }
+  return out;
+};
+T.solitaireEncode = function (s, key) {
+  var deck = T.solitaireKeyedDeck(key);
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var ks = T.solitaireStream(deck, t.length);
+  var raw = '';
+  for (var i = 0; i < t.length; i++) raw += String.fromCharCode(65 + ((t.charCodeAt(i) - 65 + ks[i]) % 26));
+  var groups = [];
+  for (var g = 0; g < raw.length; g += 5) groups.push(raw.slice(g, g + 5));
+  return groups.join(' ');
+};
+T.solitaireDecode = function (s, key) {
+  var deck = T.solitaireKeyedDeck(key);
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var ks = T.solitaireStream(deck, t.length);
+  var out = '';
+  for (var i = 0; i < t.length; i++) out += String.fromCharCode(65 + (((t.charCodeAt(i) - 65 - ks[i] + 26) % 26)));
+  return out;
+};
+T.solitaireCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'SOLITAIRE' : o.key; if ((o.mode || 'encode') === 'decode') return T.solitaireDecode(s, k); return T.solitaireEncode(s, k); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
