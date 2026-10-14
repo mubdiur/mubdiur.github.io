@@ -8111,6 +8111,68 @@ T.b64 = function (s) {
   }
   return out;
 };
+/* MIME lookup: extension to IANA type and back, filenames tolerated, one result per line. */
+var MIMEDB = {
+html: ['text/html', 'HTML page'], htm: ['text/html', 'HTML page'], xhtml: ['application/xhtml+xml', 'XHTML page'],
+css: ['text/css', 'Stylesheet'], csv: ['text/csv', 'CSV data'], txt: ['text/plain', 'Plain text'], log: ['text/plain', 'Log file'],
+md: ['text/markdown', 'Markdown'], xml: ['application/xml', 'XML data'], js: ['text/javascript', 'JavaScript'], mjs: ['text/javascript', 'ES module'],
+json: ['application/json', 'JSON data'], map: ['application/json', 'Source map'], geojson: ['application/geo+json', 'GeoJSON'], jsonld: ['application/ld+json', 'JSON-LD'],
+webmanifest: ['application/manifest+json', 'Web app manifest'], yaml: ['application/yaml', 'YAML data'], rss: ['application/rss+xml', 'RSS feed'], atom: ['application/atom+xml', 'Atom feed'],
+sql: ['application/sql', 'SQL dump'], ics: ['text/calendar', 'Calendar'], vcf: ['text/vcard', 'Contact card'], vtt: ['text/vtt', 'Subtitles'],
+png: ['image/png', 'PNG image'], jpg: ['image/jpeg', 'JPEG image'], jpeg: ['image/jpeg', 'JPEG image'], gif: ['image/gif', 'GIF image'],
+webp: ['image/webp', 'WebP image'], avif: ['image/avif', 'AVIF image'], apng: ['image/apng', 'Animated PNG'], svg: ['image/svg+xml', 'SVG vector'],
+ico: ['image/x-icon', 'Icon'], bmp: ['image/bmp', 'Bitmap'], tif: ['image/tiff', 'TIFF image'], tiff: ['image/tiff', 'TIFF image'],
+heic: ['image/heic', 'HEIC image'], heif: ['image/heif', 'HEIF image'], jxl: ['image/jxl', 'JPEG XL image'],
+mp3: ['audio/mpeg', 'MP3 audio'], wav: ['audio/wav', 'WAV audio'], ogg: ['audio/ogg', 'Ogg audio'], opus: ['audio/ogg', 'Opus audio'],
+flac: ['audio/flac', 'FLAC audio'], m4a: ['audio/mp4', 'M4A audio'], mid: ['audio/midi', 'MIDI'], midi: ['audio/midi', 'MIDI'], aac: ['audio/aac', 'AAC audio'],
+mp4: ['video/mp4', 'MP4 video'], m4v: ['video/mp4', 'M4V video'], webm: ['video/webm', 'WebM video'], ogv: ['video/ogg', 'Ogg video'],
+mov: ['video/quicktime', 'QuickTime'], avi: ['video/x-msvideo', 'AVI video'], mkv: ['video/x-matroska', 'Matroska'], flv: ['video/x-flv', 'Flash video'],
+wmv: ['video/x-ms-wmv', 'WMV video'], mpg: ['video/mpeg', 'MPEG video'], mpeg: ['video/mpeg', 'MPEG video'], '3gp': ['video/3gpp', '3GP video'], ts: ['video/mp2t', 'MPEG transport'],
+pdf: ['application/pdf', 'PDF document'], doc: ['application/msword', 'Word document'], docx: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'Word document'],
+xls: ['application/vnd.ms-excel', 'Excel sheet'], xlsx: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Excel sheet'],
+ppt: ['application/vnd.ms-powerpoint', 'Slides'], pptx: ['application/vnd.openxmlformats-officedocument.presentationml.presentation', 'Slides'],
+odt: ['application/vnd.oasis.opendocument.text', 'ODT document'], ods: ['application/vnd.oasis.opendocument.spreadsheet', 'ODS sheet'], odp: ['application/vnd.oasis.opendocument.presentation', 'ODP slides'],
+rtf: ['application/rtf', 'Rich text'], epub: ['application/epub+zip', 'EPUB ebook'],
+zip: ['application/zip', 'ZIP archive'], rar: ['application/vnd.rar', 'RAR archive'], '7z': ['application/x-7z-compressed', '7-Zip archive'],
+tar: ['application/x-tar', 'Tarball'], gz: ['application/gzip', 'Gzip'], bz2: ['application/x-bzip2', 'Bzip2'], xz: ['application/x-xz', 'XZ data'],
+wasm: ['application/wasm', 'WASM module'], ttf: ['font/ttf', 'TrueType'], ttc: ['font/collection', 'Font collection'], otf: ['font/otf', 'OpenType'],
+woff: ['font/woff', 'WOFF font'], woff2: ['font/woff2', 'WOFF2 font'], eot: ['application/vnd.ms-fontobject', 'Embedded font'],
+exe: ['application/vnd.microsoft.portable-executable', 'Windows binary'], dmg: ['application/x-apple-diskimage', 'Disk image'],
+deb: ['application/vnd.debian.binary-package', 'Debian package'], rpm: ['application/x-rpm', 'RPM package'], apk: ['application/vnd.android.package-archive', 'Android package'],
+jar: ['application/java-archive', 'Java archive'], iso: ['application/x-iso9660-image', 'ISO image'], msi: ['application/x-msi', 'Installer'],
+sh: ['application/x-sh', 'Shell script'], sqlite3: ['application/vnd.sqlite3', 'SQLite DB'],
+pem: ['application/x-pem-file', 'PEM key'], crt: ['application/x-x509-ca-cert', 'Certificate'], cer: ['application/x-x509-ca-cert', 'Certificate'],
+p12: ['application/x-pkcs12', 'PKCS12 store'], pfx: ['application/x-pkcs12', 'PKCS12 store']
+};
+T.mimeLookup = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var si = 0; si < raw.length; si++) { var cc = raw.charCodeAt(si); if (cc >= 0xD800 && cc <= 0xDFFF) return ''; }
+  var rows = raw.split(/\r?\n/);
+  var out = [];
+  var seen = 0;
+  for (var n = 0; n < rows.length; n++) {
+    var line = rows[n].trim().toLowerCase();
+    if (!line) continue;
+    seen++;
+    out.push('Line ' + (n + 1) + ': ' + one(line));
+  }
+  if (!seen) throw new Error('Enter an extension or MIME type');
+  function one(line) {
+    if (line.indexOf('/') >= 0) {
+      var parts = line.split('/');
+      if (parts.length !== 2 || !parts[0] || !parts[1] || /\s/.test(line)) throw new Error('Unrecognized MIME, got ' + JSON.stringify(line));
+      var exts = [];
+      for (var k in MIMEDB) if (MIMEDB[k][0] === line) exts.push(k);
+      if (!exts.length) throw new Error('Unknown MIME, got ' + JSON.stringify(line));
+      return line + ' → ' + exts.join(', ') + ' (' + MIMEDB[exts[0]][1] + ')';
+    }
+    var ext = line.charAt(0) === '.' ? line.slice(1) : line;
+    if (ext.indexOf('.') >= 0) ext = ext.slice(ext.lastIndexOf('.') + 1);
+    if (!ext || !/^[a-z0-9]+$/.test(ext) || !MIMEDB[ext]) throw new Error('Unknown extension, got ' + JSON.stringify(line));
+    return ext + ' → ' + MIMEDB[ext][0] + ' (' + MIMEDB[ext][1] + ')';
+  }
+  return out.length === 1 ? out[0].slice(out[0].indexOf(': ') + 2) : out.join('\n');
+};
 T.filenameSanitize = function (s) {
   var text = String(s === undefined ? '' : (s === null ? '' : s));
   var RESERVED = ['CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'];

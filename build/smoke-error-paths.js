@@ -46,7 +46,7 @@ mustThrow(() => T.envToYAML(''), 'envToYAML empty');
 mustThrow(() => T.envToYAML('NOEQUALS'), 'envToYAML missing equals');
 mustThrow(() => T.envToYAML('9BAD=1'), 'envToYAML bad key');
 mustNotThrow(() => T.envToYAML('A=1'), 'envToYAML good');
-mustNotThrow(() => T.filenameSanitize('ok name'), 'sanitize delegates');mustThrow(() => T.curlToFetch('', 'async'), 'curl empty throws');
+mustNotThrow(() => T.filenameSanitize('ok name'), 'sanitize delegates');mustThrow(() => T.mimeLookup('   '), 'mimeLookup empty');mustThrow(() => T.mimeLookup('xyzzy'), 'mimeLookup unknown ext');mustThrow(() => T.mimeLookup('image/xyzzy'), 'mimeLookup unknown MIME');mustNotThrow(() => T.mimeLookup(String.fromCharCode(0xD800)), 'mimeLookup lone surrogate survives');mustThrow(() => T.curlToFetch('', 'async'), 'curl empty throws');
 mustThrow(() => T.curlToFetch('curl -X POST', 'async'), 'curl no url throws');
 mustThrow(() => T.curlToFetch('hello world', 'async'), 'curl non-curl throws');
 mustNotThrow(() => T.curlToFetch('curl https://example.com', 'async'), 'curl basic fine');

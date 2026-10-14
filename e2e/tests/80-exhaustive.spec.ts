@@ -107,6 +107,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'json-escape': { good: 'a"b', expectInOutput: /\\"/ },
   'json-unescape': { good: 'a\\"b', expectInOutput: /a"b/ },
   'filename-sanitizer': { good: 'my file?.txt', expectInOutput: /my_file/ },
+  'mime-lookup': { good: 'photo.png', expectInOutput: /image\/png/ },
   'phone-extractor': { good: 'call 415-555-1234', expectInOutput: /415/ },
   'url-extractor': { good: 'see https://example.com', expectInOutput: /example/ },
   'ip-extractor': { good: 'ip 1.2.3.4', expectInOutput: /1\.2\.3\.4/ },

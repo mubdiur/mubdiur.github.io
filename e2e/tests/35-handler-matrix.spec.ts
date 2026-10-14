@@ -420,6 +420,8 @@ push('sedol-validator', 'happy', TOOLS['sedol-validator'].handler('0798059').ind
     push('regex-tester', 'bad regex throws', mustThrow(() => TOOLS['regex-tester'].handler('hi', { pattern: '[', flags: 'g' })));
     push('word-counter', 'counts', TOOLS['word-counter'].handler('hello world').includes('Words:'));
     push('slug-generator', 'slug', TOOLS['slug-generator'].handler('Hello World!').includes('hello-world'));
+    push('mime-lookup', 'forward', TOOLS['mime-lookup'].handler('png') === 'png → image/png (PNG image)');
+    push('mime-lookup', 'unknown throws', mustThrow(() => TOOLS['mime-lookup'].handler('xyzzy')));
     push('phone-extractor', 'delimiter newline', TOOLS['phone-extractor'].handler('call 415-555-1234 and 415-555-9999', { delimiter: 'newline' }).includes('415'));
     push('phone-extractor', 'delimiter comma', TOOLS['phone-extractor'].handler('415-555-1234', { delimiter: 'comma' }).length > 0);
 
