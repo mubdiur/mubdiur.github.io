@@ -3555,6 +3555,43 @@ T.fenView = function (s) {
   lines.push('Halfmove: ' + fld[4] + '  Fullmove: ' + fld[5]);
   return lines.join('\n');
 };
+/* Luhn cores: mod-10 checksum for cards and IMEIs, spaces and dashes ignored, trailing ? * or # accepted as the missing check slot. */
+T.luhnCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var raw = String(s);
+  var digits = '';
+  for (var di = 0; di < raw.length; di++) {
+    var dc = raw.charCodeAt(di);
+    if (dc >= 0xD800 && dc <= 0xDFFF) return '';
+    var dh = raw.charAt(di);
+    if (dh >= '0' && dh <= '9') digits += dh;
+    else if (dc === 32 || dc === 9 || dc === 10 || dc === 13 || dc === 45) continue;
+    else if (mode === 'check-digit' && (dh === '?' || dh === '*' || dh === '#')) continue;
+    else throw new Error('Digits only \u2014 0-9 with spaces or dashes ignored, got ' + JSON.stringify(dh));
+  }
+  function lsum(ds, startDbl) {
+    var t = 0;
+    var pos = 0;
+    for (var li = ds.length - 1; li >= 0; li--) {
+      var v = ds.charCodeAt(li) - 48;
+      if ((pos % 2 === 0) === startDbl) { v *= 2; if (v > 9) v -= 9; }
+      t += v;
+      pos++;
+    }
+    return t;
+  }
+  if (!digits.length) throw new Error('Enter digits first \u2014 card, IMEI or serial digits to check');
+  if (mode === 'validate') {
+    if (digits.length < 2) throw new Error('Too short \u2014 a Luhn number needs at least 2 digits, got ' + digits.length);
+    if (lsum(digits, false) % 10 !== 0) throw new Error('Invalid Luhn number \u2014 checksum fails for ' + JSON.stringify(digits));
+    return 'Valid \u2014 Luhn checksum passes (' + digits.length + ' digits)';
+  }
+  var sum = lsum(digits, true);
+  var d = (10 - (sum % 10)) % 10;
+  return digits + d;
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
