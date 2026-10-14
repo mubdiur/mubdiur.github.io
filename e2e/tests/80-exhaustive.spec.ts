@@ -88,6 +88,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'damm-validator': { good: '5724', expectInOutput: /Valid/ },
     'isin-validator': { good: 'US0378331005', expectInOutput: /Valid/ },
   'issn-validator': { good: '0317-8471', expectInOutput: /ISSN/ },
+  'cusip-validator': { good: '037833100', expectInOutput: /CUSIP/ },
 'xor-cipher': { good: 'hello', expectInOutput: /030015070a/ },
   'pig-latin': { good: 'hello', expectInOutput: /ellohay/ },
   'leet-speak': { good: 'leet', expectInOutput: /1337/ },

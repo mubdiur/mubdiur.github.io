@@ -4138,6 +4138,61 @@ T.issnCheck = function (s, opts) {
   var cd = (11 - (psum % 11)) % 11;
   return clean + (cd === 10 ? "X" : String(cd));
 };
+/* CUSIP cores: North-American securities numbers with doubled seconds and star-at-hash issue marks, spaces and dashes ignored. */
+T.cusipCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var raw = String(s);
+  var clean = '';
+  for (var ci = 0; ci < raw.length; ci++) {
+    var cc = raw.charCodeAt(ci);
+    if (cc >= 0xD800 && cc <= 0xDFFF) return '';
+    var ch = raw.charAt(ci);
+    if (ch >= '0' && ch <= '9') clean += ch;
+    else if (ch >= 'A' && ch <= 'Z') clean += ch;
+    else if (ch >= 'a' && ch <= 'z') clean += ch.toUpperCase();
+    else if (ch === '*' || ch === '@' || ch === '#') clean += ch;
+    else if (cc === 32 || cc === 9 || cc === 10 || cc === 13 || cc === 45) continue;
+    else if (mode === 'check-digit' && ch === '?') continue;
+    else throw new Error('Letters, digits and *@# only \u2014 CUSIP with spaces or dashes ignored, got ' + JSON.stringify(ch));
+  }
+  function cusipVal(kx) {
+    if (kx >= '0' && kx <= '9') return kx.charCodeAt(0) - 48;
+    if (kx >= 'A' && kx <= 'Z') return kx.charCodeAt(0) - 55;
+    if (kx === '*') return 36;
+    if (kx === '@') return 37;
+    return 38;
+  }
+  function cusipDigit(vv) { return vv < 10 ? vv : Math.floor(vv / 10) + (vv % 10); }
+  function cusipCheck(px) {
+    var tt = 0;
+    for (var ji = 0; ji < 8; ji++) {
+      var wd = cusipVal(px.charAt(ji));
+      if (ji % 2 === 1) wd *= 2;
+      tt += cusipDigit(wd);
+    }
+    return String((10 - (tt % 10)) % 10);
+  }
+  if (!clean.length) throw new Error('Enter a CUSIP first \u2014 eight securities characters and a check digit');
+  if (mode === 'validate') {
+    if (clean.length !== 9) throw new Error('Bad length \u2014 CUSIPs run 9 characters, got ' + clean.length);
+    for (var ni = 0; ni < 8; ni++) {
+      var nh = clean.charAt(ni);
+      if ((nh < '0' || nh > '9') && (nh < 'A' || nh > 'Z') && nh !== '*' && nh !== '@' && nh !== '#') throw new Error('Bad CUSIP character \u2014 letters, digits or *@#, got ' + JSON.stringify(nh));
+    }
+    var kc = clean.charAt(8);
+    if (kc < '0' || kc > '9') throw new Error('Bad check digit \u2014 a digit 0-9, got ' + JSON.stringify(kc));
+    if (cusipCheck(clean.slice(0, 8)) !== kc) throw new Error('Invalid CUSIP \u2014 checksum fails for ' + JSON.stringify(clean));
+    return 'Valid \u2014 CUSIP checksum passes';
+  }
+  if (clean.length !== 8) throw new Error('Bad prefix \u2014 8 characters make a CUSIP, got ' + clean.length);
+  for (var qi = 0; qi < 8; qi++) {
+    var qh = clean.charAt(qi);
+    if ((qh < '0' || qh > '9') && (qh < 'A' || qh > 'Z') && qh !== '*' && qh !== '@' && qh !== '#') throw new Error('Bad prefix character \u2014 letters, digits or *@#, got ' + JSON.stringify(qh));
+  }
+  return clean + cusipCheck(clean);
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');

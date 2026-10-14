@@ -289,6 +289,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('isin-validator', 'bad checksum throws', mustThrow(() => TOOLS['isin-validator'].handler('US0378331006')));
     push('issn-validator', 'happy', TOOLS['issn-validator'].handler('0317-8471').indexOf('Valid') === 0);
     push('issn-validator', 'bad checksum throws', mustThrow(() => TOOLS['issn-validator'].handler('0317-8472')));
+    push('cusip-validator', 'happy', TOOLS['cusip-validator'].handler('037833100').indexOf('Valid') === 0);
+    push('cusip-validator', 'bad checksum throws', mustThrow(() => TOOLS['cusip-validator'].handler('037833101')));
 push('xor-cipher', 'happy', TOOLS['xor-cipher'].handler('hello', { key: 'key' }) === '030015070a');
     push('xor-cipher', 'bad hex throws', mustThrow(() => TOOLS['xor-cipher'].handler('zz', { key: 'k', input: 'hex' })));
     push('pig-latin', 'happy', TOOLS['pig-latin'].handler('hello') === 'ellohay');
