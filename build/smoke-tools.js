@@ -1228,6 +1228,14 @@ console.log('-- adler32 --');
   ok((function () { var s = ''; for (var ai = 0; ai < 6000; ai++) s += 'x'; var a = 1, b = 0; for (var aj = 0; aj < s.length; aj++) { a = (a + s.charCodeAt(aj)) % 65521; b = (b + a) % 65521; } return TOOLS['adler32-checksum'].handler(s) === (((b << 16) | a) >>> 0).toString(16).padStart(8, '0'); })(), 'adler chunked matches naive');
   ok(TOOLS['adler32-checksum'].handler.toString().indexOf('adler32') >= 0, 'adler delegates');
 }
+console.log('-- fletcher --');
+{
+  ok(TOOLS['fletcher-checksum'].handler('abcde') === 'c8f0', 'fletcher16 canonical');
+  ok(TOOLS['fletcher-checksum'].handler('abcdef') === '2057', 'fletcher16 second');
+  ok(TOOLS['fletcher-checksum'].handler('abcde', { size: '32' }) === '4ff029c7', 'fletcher32 BE words');
+  ok(TOOLS['fletcher-checksum'].handler('') === '0000', 'fletcher empty');
+  ok(TOOLS['fletcher-checksum'].handler.toString().indexOf('fletcher') >= 0, 'fletcher delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

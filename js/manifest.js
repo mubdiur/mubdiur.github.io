@@ -362,6 +362,10 @@ window.TOOLMANIFEST = [
       { key: 'key', label: 'Secret Key', type: 'password', default: 'secret' },
       { key: 'algorithm', label: 'Algorithm', type: 'select', default: 'SHA-256', options: [{ value: 'SHA-256', label: 'SHA-256' }, { value: 'SHA-1', label: 'SHA-1' }] }
     ] },
+  { slug: 'fletcher-checksum', name: 'Fletcher Checksum', desc: 'Generate Fletcher-16 or Fletcher-32 checksums \u2014 byte sums or big-endian words, zero pad', category: 'crypto', tags: ['fletcher', 'checksum'], icon: 'hash', template: 'transform',
+    placeholder: 'abcde',
+    handler: function (s, opts) { return Transforms.fletcher(s, opts); },
+    params: [{ key: 'size', label: 'Width', type: 'select', default: '16', options: [{ value: '16', label: 'Fletcher-16' }, { value: '32', label: 'Fletcher-32' }] }] },
   { slug: 'adler32-checksum', name: 'Adler-32 Checksum', desc: 'Generate Adler-32 checksum \u2014 zlib-style rolling sums, pure-JS NMAX chunks', category: 'crypto', tags: ['adler32', 'checksum', 'zlib'], icon: 'hash', template: 'transform',
     placeholder: 'Wikipedia',
     handler: function (s) { return Transforms.adler32(s); } },

@@ -7839,6 +7839,27 @@ T.adler32 = function (s) {
   }
   return (((b << 16) | a) >>> 0).toString(16).padStart(8, '0');
 };
+/* Fletcher checksums: 16-bit byte sums plus 32-bit big-endian word sums with zero pad, both modulo one-less-than-base. */
+T.fletcher = function (s, opts) {
+  var o = opts || {};
+  var size = String(o.size) === '32' ? 32 : 16;
+  var bytes = new TextEncoder().encode(String(s));
+  function fl16() {
+    var s1 = 0, s2 = 0;
+    for (var i = 0; i < bytes.length; i++) { s1 = (s1 + bytes[i]) % 255; s2 = (s2 + s1) % 255; }
+    return (((s2 << 8) | s1) >>> 0).toString(16).padStart(4, '0');
+  }
+  function fl32() {
+    var t1 = 0, t2 = 0;
+    for (var k = 0; k < bytes.length; k += 2) {
+      var w = (bytes[k] << 8) | (k + 1 < bytes.length ? bytes[k + 1] : 0);
+      t1 = (t1 + w) % 65535;
+      t2 = (t2 + t1) % 65535;
+    }
+    return ((t2 * 65536 + t1) >>> 0).toString(16).padStart(8, '0');
+  }
+  return size === 32 ? fl32() : fl16();
+};
 T.passwordEntropy = function (s) {
   var text = String(s === undefined ? '' : (s === null ? '' : s));
   var pool = 0;

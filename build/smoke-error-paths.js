@@ -50,7 +50,7 @@ mustNotThrow(() => T.filenameSanitize('ok name'), 'sanitize delegates');mustThro
 mustThrow(() => T.curlToFetch('curl -X POST', 'async'), 'curl no url throws');
 mustThrow(() => T.curlToFetch('hello world', 'async'), 'curl non-curl throws');
 mustNotThrow(() => T.curlToFetch('curl https://example.com', 'async'), 'curl basic fine');
-mustNotThrow(() => T.passwordEntropy('abc123'), 'entropy delegates');mustNotThrow(() => T.adler32(''), 'adler32 empty fine');mustNotThrow(() => T.adler32(String.fromCharCode(0xD800)), 'adler32 lone surrogate survives');mustThrow(() => T.jsonPath('', '$'), 'jsonpath empty throws');
+mustNotThrow(() => T.passwordEntropy('abc123'), 'entropy delegates');mustNotThrow(() => T.adler32(''), 'adler32 empty fine');mustNotThrow(() => T.fletcher('abcde', { size: '32' }), 'fletcher32 fine');mustNotThrow(() => T.fletcher(String.fromCharCode(0xD800)), 'fletcher lone surrogate survives');mustNotThrow(() => T.adler32(String.fromCharCode(0xD800)), 'adler32 lone surrogate survives');mustThrow(() => T.jsonPath('', '$'), 'jsonpath empty throws');
 mustThrow(() => T.loanSchedule(0, 5, 10), 'loan zero principal throws');
 mustThrow(() => T.loanSchedule(1000, -1, 10), 'loan negative rate throws');
 mustThrow(() => T.loanSchedule(1000, 5, 0), 'loan zero years throws');

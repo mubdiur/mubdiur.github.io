@@ -493,7 +493,9 @@ push('sedol-validator', 'happy', TOOLS['sedol-validator'].handler('0798059').ind
     push('uuid-v4-validate', 'garbage invalid', TOOLS['uuid-v4-validate'].handler('nope').includes('\u2717'));
     push('password-entropy', 'happy', TOOLS['password-entropy'].handler('correct horse battery staple').toLowerCase().includes('entropy'));
     push('password-entropy', 'pool line', TOOLS['password-entropy'].handler('abc123').indexOf('Char Pool:  36 chars') >= 0);
-    push('adler32-checksum', 'canonical', TOOLS['adler32-checksum'].handler('Wikipedia') === '11e60398');
+push('fletcher-checksum', 'f16 canonical', TOOLS['fletcher-checksum'].handler('abcde') === 'c8f0');
+    push('fletcher-checksum', 'f32 BE words', TOOLS['fletcher-checksum'].handler('abcde', { size: '32' }) === '4ff029c7');
+        push('adler32-checksum', 'canonical', TOOLS['adler32-checksum'].handler('Wikipedia') === '11e60398');
     push('adler32-checksum', 'empty is one', TOOLS['adler32-checksum'].handler('') === '00000001');
     push('case-converter', 'snake vector', TOOLS['case-converter'].handler('foo BAR baz', {style:'snake'}) === 'foo_bar_baz');
     push('slug-generator', 'hello vector', TOOLS['slug-generator'].handler('Hello, World!') === 'hello-world');
