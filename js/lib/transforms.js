@@ -4350,6 +4350,38 @@ T.figiCheck = function (s, opts) {
   if (clean.charAt(2) !== 'G') throw new Error('Third character \u2014 FIGIs carry G in third place, got ' + JSON.stringify(clean.charAt(2)));
   return clean + figDigit(clean);
 };
+/* ABA cores: US routing transit numbers with 3-7-1 weighted checksum, spaces and dashes ignored. */
+T.abaCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var raw = String(s);
+  var clean = '';
+  for (var ci = 0; ci < raw.length; ci++) {
+    var cc = raw.charCodeAt(ci);
+    if (cc >= 0xD800 && cc <= 0xDFFF) return '';
+    var ch = raw.charAt(ci);
+    if (ch >= '0' && ch <= '9') clean += ch;
+    else if (cc === 32 || cc === 9 || cc === 10 || cc === 13 || cc === 45) continue;
+    else if (mode === 'check-digit' && (ch === '?' || ch === '*' || ch === '#')) continue;
+    else throw new Error('ABA digits only \u2014 nine digits with spaces or dashes ignored, got ' + JSON.stringify(ch));
+  }
+  var abaW = [3, 7, 1];
+  function abaSum(px) {
+    var at = 0;
+    for (var ji = 0; ji < 8; ji++) at += (px.charCodeAt(ji) - 48) * abaW[ji % 3];
+    return at;
+  }
+  if (!clean.length) throw new Error('Enter an ABA number first \u2014 eight digits plus check digit');
+  if (mode === 'validate') {
+    if (clean.length !== 9) throw new Error('Bad length \u2014 ABAs run 9 digits, got ' + clean.length);
+    var full = abaSum(clean.slice(0, 8)) + (clean.charCodeAt(8) - 48);
+    if (full % 10 !== 0) throw new Error('Invalid ABA \u2014 checksum fails for ' + JSON.stringify(clean));
+    return 'Valid \u2014 ABA checksum passes (9 digits)';
+  }
+  if (clean.length !== 8) throw new Error('Bad prefix \u2014 8 digits make an ABA, got ' + clean.length);
+  return clean + String((10 - (abaSum(clean) % 10)) % 10);
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');

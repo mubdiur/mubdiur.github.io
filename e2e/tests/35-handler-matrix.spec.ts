@@ -297,6 +297,8 @@ push('sedol-validator', 'happy', TOOLS['sedol-validator'].handler('0798059').ind
     push('sedol-validator', 'bad checksum throws', mustThrow(() => TOOLS['sedol-validator'].handler('1234567')));
     push('figi-validator', 'happy', TOOLS['figi-validator'].handler('BBG000BLNNH6').indexOf('Valid') === 0);
     push('figi-validator', 'bad checksum throws', mustThrow(() => TOOLS['figi-validator'].handler('BBG000BLNNH7')));
+    push('aba-validator', 'happy', TOOLS['aba-validator'].handler('021000021').indexOf('Valid') === 0);
+    push('aba-validator', 'bad checksum throws', mustThrow(() => TOOLS['aba-validator'].handler('021000022')));
     push('xor-cipher', 'happy', TOOLS['xor-cipher'].handler('hello', { key: 'key' }) === '030015070a');
     push('xor-cipher', 'bad hex throws', mustThrow(() => TOOLS['xor-cipher'].handler('zz', { key: 'k', input: 'hex' })));
     push('pig-latin', 'happy', TOOLS['pig-latin'].handler('hello') === 'ellohay');
