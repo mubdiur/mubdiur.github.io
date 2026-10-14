@@ -9278,6 +9278,54 @@ T.parseDateValue = function (t, ln) {
   if (isNaN(ms)) throw new Error('Line ' + ln + ': Unrecognized date \u2014 try 2024-06-10 or 1718035200');
   return new Date(ms);
 };
+/* Business-day math: add, subtract or diff weekdays with configurable weekends plus holiday lines, NETWORKDAYS-inclusive diffs. */
+T.bizDays = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'add';
+  if (mode !== 'add' && mode !== 'subtract' && mode !== 'diff') throw new Error('Bad mode \u2014 use add, subtract or diff');
+  var wk = o.weekend || 'sat-sun';
+  if (wk !== 'sat-sun' && wk !== 'fri-sat' && wk !== 'sun') throw new Error('Bad weekend \u2014 use sat-sun, fri-sat or sun');
+  var WDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function dayNum(d) { return Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / 86400000); }
+  function isWk(dn) { var dow = new Date(dn * 86400000).getUTCDay(); if (wk === 'fri-sat') return dow === 5 || dow === 6; if (wk === 'sun') return dow === 0; return dow === 0 || dow === 6; }
+  function fmtDay(dn) { var d = new Date(dn * 86400000); function pp(x) { return String(x).padStart(2, '0'); } return d.getUTCFullYear() + '-' + pp(d.getUTCMonth() + 1) + '-' + pp(d.getUTCDate()) + ' (' + WDAYS[d.getUTCDay()] + ')'; }
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var si = 0; si < raw.length; si++) if (raw.charCodeAt(si) >= 0xD800 && raw.charCodeAt(si) <= 0xDFFF) return '';
+  var rows = raw.split(/\r?\n/);
+  var dates = [];
+  for (var n = 0; n < rows.length; n++) {
+    if (!rows[n].trim()) continue;
+    dates.push({ d: dayNum(T.parseDateValue(rows[n], n + 1)), ln: n + 1 });
+  }
+  if (!dates.length) throw new Error('Enter a start date \u2014 YYYY-MM-DD on line one');
+  var hols = {};
+  var hraw = String(o.holidays === undefined || o.holidays === null ? '' : o.holidays);
+  var hrows = hraw.split(/\r?\n/);
+  for (var k = 0; k < hrows.length; k++) {
+    if (!hrows[k].trim()) continue;
+    hols[dayNum(T.parseDateValue(hrows[k], 'holiday ' + (k + 1)))] = 1;
+  }
+  function biz(dn) { return !isWk(dn) && !hols[dn]; }
+  if (mode === 'diff') {
+    if (dates.length < 2) throw new Error('Diff needs two dates \u2014 start and end on separate lines');
+    if (dates.length > 2) throw new Error('Line ' + dates[2].ln + ': diff takes two dates \u2014 extra input');
+    var a = dates[0].d, b = dates[1].d;
+    var sgn = b < a ? -1 : 1;
+    var lo = Math.min(a, b), hi = Math.max(a, b);
+    var cnt = 0;
+    for (var dd = lo; dd <= hi; dd++) if (biz(dd)) cnt++;
+    var cal = hi - lo + 1;
+    return fmtDay(lo) + ' to ' + fmtDay(hi) + '\n' + (sgn < 0 ? '-' : '') + cnt + ' business days (' + cal + ' calendar, ' + (cal - cnt) + ' skipped)';
+  }
+  if (dates.length > 1) throw new Error('Line ' + dates[1].ln + ': add and subtract take one start date \u2014 extra input');
+  var draw = (o.days === undefined || o.days === null || o.days === '') ? '5' : o.days;
+  var nd = parseInt(draw, 10);
+  if (!(nd >= 0) || nd > 36500) throw new Error('Days \u2014 0 to 36500 business days, got ' + JSON.stringify(draw));
+  var step = mode === 'subtract' ? -1 : 1;
+  var cur = dates[0].d, moved = 0;
+  while (moved < nd) { cur += step; if (biz(cur)) moved++; }
+  return fmtDay(cur) + ' is ' + nd + ' business day' + (nd === 1 ? '' : 's') + ' ' + (mode === 'subtract' ? 'before' : 'after') + ' ' + fmtDay(dates[0].d);
+};
 T.dateDiff = function (s) {
   function dim(y, m) { return new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); }
   function tod(d) { return d.getUTCHours() * 3600000 + d.getUTCMinutes() * 60000 + d.getUTCSeconds() * 1000 + d.getUTCMilliseconds(); }

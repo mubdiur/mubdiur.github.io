@@ -241,6 +241,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'javascript-minifier': { good: 'var a = 1; // strip', expectInOutput: /var a=1/ }, // blank clears UI by design (run() short-circuits); empty-throw covered in handler matrix,
   'sha384-hash': { good: 'hello', expectInOutput: /[0-9a-f]{96}/i },
   'chmod-converter': { good: '755', expectInOutput: /rwxr-xr-x/ },
+  'business-days': { good: '2026-10-13', expectInOutput: /2026-10-20/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

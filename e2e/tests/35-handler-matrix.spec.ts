@@ -549,7 +549,9 @@ push('sedol-validator', 'happy', TOOLS['sedol-validator'].handler('0798059').ind
     push('mac-address-generator', 'count 3', TOOLS['mac-address-generator'].genHandler({ count: '3' }).split('\n').length === 3);
     push('chmod-converter', 'octal', TOOLS['chmod-converter'].handler('755').includes('rwxr-xr-x'));
     push('chmod-converter', 'symbolic', TOOLS['chmod-converter'].handler('rwxr-xr-x').includes('755'));
-    push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
+push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-10-16', { mode: 'add', days: '1' }).indexOf('2026-10-19 (Monday)') === 0);
+    push('business-days', 'one date diff throws', mustThrow(() => TOOLS['business-days'].handler('2026-10-13', { mode: 'diff' })));
+        push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));
     push('cron-builder', 'custom fields', T.cronBuild({ preset: 'custom', minute: '*/5' }).includes('*/5'));
