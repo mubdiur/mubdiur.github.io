@@ -2333,6 +2333,46 @@ T.columnarOrder = function (key) {
   idx.sort(function (a, b) { var ca = k.charAt(a), cb = k.charAt(b); if (ca < cb) return -1; if (ca > cb) return 1; return a - b; });
   return { k: k, order: idx };
 };
+/* Trifid cores: 3x3x3 cube (A-Z plus .) diffused in blocks of period; length preserved, period reuses the Bifid guard. */
+T.trifidCube = function (key) {
+  var k = String(key === undefined ? 'KEYWORD' : key).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!k) throw new Error('Enter a letter key \u2014 A-Z builds the cube');
+  var seen = {}; var seq = [];
+  var full = k + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ.';
+  for (var i = 0; i < full.length; i++) { var c = full.charAt(i); if (!seen[c]) { seen[c] = 1; seq.push(c); } }
+  var pos = {}; for (var j = 0; j < seq.length; j++) pos[seq[j]] = j;
+  return { seq: seq, pos: pos };
+};
+T.trifidEncode = function (s, squareKey, period) {
+  var sq = T.trifidCube(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var per = T.bifidPeriod(period === undefined ? 5 : period);
+  var t = String(s).toUpperCase().replace(/[^A-Z.]/g, '');
+  if (!t) return '';
+  var out = '';
+  for (var st = 0; st < t.length; st += per) {
+    var blk = t.slice(st, st + per); var n = blk.length;
+    var lay = [], row = [], col = [];
+    for (var i = 0; i < n; i++) { var q = sq.pos[blk.charAt(i)]; lay.push((q / 9) | 0); row.push(((q % 9) / 3) | 0); col.push(q % 3); }
+    var combo = lay.concat(row, col);
+    for (var j = 0; j < n; j++) out += sq.seq[combo[3 * j] * 9 + combo[3 * j + 1] * 3 + combo[3 * j + 2]];
+  }
+  return out;
+};
+T.trifidDecode = function (s, squareKey, period) {
+  var sq = T.trifidCube(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var per = T.bifidPeriod(period === undefined ? 5 : period);
+  var t = String(s).toUpperCase().replace(/[^A-Z.]/g, '');
+  if (!t) return '';
+  var out = '';
+  for (var st = 0; st < t.length; st += per) {
+    var blk = t.slice(st, st + per); var n = blk.length;
+    var flat = [];
+    for (var i = 0; i < n; i++) { var q = sq.pos[blk.charAt(i)]; flat.push((q / 9) | 0); flat.push(((q % 9) / 3) | 0); flat.push(q % 3); }
+    for (var j = 0; j < n; j++) out += sq.seq[flat[j] * 9 + flat[n + j] * 3 + flat[2 * n + j]];
+  }
+  return out;
+};
+T.trifidCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; var p = o.period === undefined ? '5' : o.period; if ((o.mode || 'encode') === 'decode') return T.trifidDecode(s, q, p); return T.trifidEncode(s, q, p); };
 T.columnarEncode = function (s, key) {
   var o = T.columnarOrder(key); var cols = o.k.length;
   var str = Array.from(String(s)); var n = str.length;
