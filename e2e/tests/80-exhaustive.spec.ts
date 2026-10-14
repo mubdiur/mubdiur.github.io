@@ -91,6 +91,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'cusip-validator': { good: '037833100', expectInOutput: /CUSIP/ },
   'lei-validator': { good: '5493006MHB84DD0ZWV18', expectInOutput: /LEI/ },
 'sedol-validator': { good: '0798059', expectInOutput: /SEDOL/ },
+  'figi-validator': { good: 'BBG000BLNNH6', expectInOutput: /FIGI/ },
   'xor-cipher': { good: 'hello', expectInOutput: /030015070a/ },
   'pig-latin': { good: 'hello', expectInOutput: /ellohay/ },
   'leet-speak': { good: 'leet', expectInOutput: /1337/ },

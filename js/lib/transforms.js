@@ -4295,6 +4295,61 @@ T.sedolCheck = function (s, opts) {
   }
   return clean + sedDigit(clean);
 };
+/* FIGI cores: OpenFIGI global identifiers, consonants plus digits with G in third place and doubled-evens check digit, spaces and dashes ignored. */
+T.figiCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var raw = String(s);
+  var clean = '';
+  for (var ci = 0; ci < raw.length; ci++) {
+    var cc = raw.charCodeAt(ci);
+    if (cc >= 0xD800 && cc <= 0xDFFF) return '';
+    var ch = raw.charAt(ci);
+    if (ch >= '0' && ch <= '9') clean += ch;
+    else if (ch >= 'A' && ch <= 'Z') clean += ch;
+    else if (ch >= 'a' && ch <= 'z') clean += ch.toUpperCase();
+    else if (cc === 32 || cc === 9 || cc === 10 || cc === 13 || cc === 45) continue;
+    else if (mode === 'check-digit' && (ch === '?' || ch === '*' || ch === '#')) continue;
+    else throw new Error('FIGI characters only \u2014 letters or digits with spaces or dashes ignored, got ' + JSON.stringify(ch));
+  }
+  function figVal(kk) {
+    if (kk >= '0' && kk <= '9') return kk.charCodeAt(0) - 48;
+    return kk.charCodeAt(0) - 55;
+  }
+  function figVowel(kk) { return kk === 'A' || kk === 'E' || kk === 'I' || kk === 'O' || kk === 'U'; }
+  function figDigit(px) {
+    var tt = 0;
+    for (var ji = 0; ji < 11; ji++) {
+      var vv = figVal(px.charAt(ji));
+      if ((ji + 1) % 2 === 0) vv = vv * 2;
+      tt += Math.floor(vv / 10) + (vv % 10);
+    }
+    return String((10 - (tt % 10)) % 10);
+  }
+  if (!clean.length) throw new Error('Enter a FIGI first \u2014 eleven characters plus check digit');
+  if (mode === 'validate') {
+    if (clean.length !== 12) throw new Error('Bad length \u2014 FIGIs run 12 characters, got ' + clean.length);
+    for (var ni = 0; ni < 11; ni++) {
+      var nh = clean.charAt(ni);
+      if ((nh < '0' || nh > '9') && (nh < 'A' || nh > 'Z')) throw new Error('Bad FIGI character \u2014 letters or digits, got ' + JSON.stringify(nh));
+      if (figVowel(nh)) throw new Error('No vowels \u2014 FIGI skips AEIOU, got ' + JSON.stringify(nh));
+    }
+    if (clean.charAt(2) !== 'G') throw new Error('Third character \u2014 FIGIs carry G in third place, got ' + JSON.stringify(clean.charAt(2)));
+    var kc = clean.charAt(11);
+    if (kc < '0' || kc > '9') throw new Error('Bad check digit \u2014 one digit closes the FIGI, got ' + JSON.stringify(kc));
+    if (figDigit(clean.slice(0, 11)) !== kc) throw new Error('Invalid FIGI \u2014 checksum fails for ' + JSON.stringify(clean));
+    return 'Valid \u2014 FIGI checksum passes (12 characters)';
+  }
+  if (clean.length !== 11) throw new Error('Bad prefix \u2014 11 characters make a FIGI, got ' + clean.length);
+  for (var qi = 0; qi < 11; qi++) {
+    var qh = clean.charAt(qi);
+    if ((qh < '0' || qh > '9') && (qh < 'A' || qh > 'Z')) throw new Error('Bad prefix character \u2014 letters or digits, got ' + JSON.stringify(qh));
+    if (figVowel(qh)) throw new Error('No vowels in prefix \u2014 FIGI skips AEIOU, got ' + JSON.stringify(qh));
+  }
+  if (clean.charAt(2) !== 'G') throw new Error('Third character \u2014 FIGIs carry G in third place, got ' + JSON.stringify(clean.charAt(2)));
+  return clean + figDigit(clean);
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');

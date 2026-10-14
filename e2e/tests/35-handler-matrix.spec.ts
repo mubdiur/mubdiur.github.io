@@ -295,6 +295,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('lei-validator', 'bad checksum throws', mustThrow(() => TOOLS['lei-validator'].handler('5493006MHB84DD0ZWV19')));
 push('sedol-validator', 'happy', TOOLS['sedol-validator'].handler('0798059').indexOf('Valid') === 0);
     push('sedol-validator', 'bad checksum throws', mustThrow(() => TOOLS['sedol-validator'].handler('1234567')));
+    push('figi-validator', 'happy', TOOLS['figi-validator'].handler('BBG000BLNNH6').indexOf('Valid') === 0);
+    push('figi-validator', 'bad checksum throws', mustThrow(() => TOOLS['figi-validator'].handler('BBG000BLNNH7')));
     push('xor-cipher', 'happy', TOOLS['xor-cipher'].handler('hello', { key: 'key' }) === '030015070a');
     push('xor-cipher', 'bad hex throws', mustThrow(() => TOOLS['xor-cipher'].handler('zz', { key: 'k', input: 'hex' })));
     push('pig-latin', 'happy', TOOLS['pig-latin'].handler('hello') === 'ellohay');

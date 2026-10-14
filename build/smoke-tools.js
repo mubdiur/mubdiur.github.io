@@ -1478,6 +1478,11 @@ ok(TOOLS['xor-cipher'].handler('hello', { key: 'key' }) === '030015070a', 'xor h
   ok(TOOLS['sedol-validator'].handler('079805', { mode: 'check-digit' }) === '0798059', 'sedol check digit');
   ok(TOOLS['sedol-validator'].handler(TOOLS['sedol-validator'].handler('B16GWD', { mode: 'check-digit' })).indexOf('Valid') === 0, 'sedol roundtrip');
   ok(TOOLS['sedol-validator'].handler.toString().indexOf('sedolCheck') >= 0, 'sedol delegates');
+  ok(TOOLS['figi-validator'].handler('BBG000BLNNH6').indexOf('FIGI checksum') >= 0, 'figi bp');
+  ok(TOOLS['figi-validator'].handler('BBG000B9XRY4').indexOf('Valid') === 0, 'figi aapl');
+  ok(TOOLS['figi-validator'].handler('BBG000BLNNH', { mode: 'check-digit' }) === 'BBG000BLNNH6', 'figi check digit');
+  ok(TOOLS['figi-validator'].handler(TOOLS['figi-validator'].handler('BBG000MM2P6', { mode: 'check-digit' })).indexOf('Valid') === 0, 'figi roundtrip');
+  ok(TOOLS['figi-validator'].handler.toString().indexOf('figiCheck') >= 0, 'figi delegates');
   ok(TOOLS['xor-cipher'].handler.toString().indexOf('xorCipher') >= 0, 'xor delegates');
   ok(TOOLS['pig-latin'].handler('hello') === 'ellohay', 'piglatin hello');
   ok(TOOLS['pig-latin'].handler('apple', { suffix: 'yay' }) === 'appleyay', 'piglatin yay');
