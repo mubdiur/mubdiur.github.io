@@ -287,6 +287,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('damm-validator', 'bad checksum throws', mustThrow(() => TOOLS['damm-validator'].handler('5725')));
     push('xor-cipher', 'happy', TOOLS['xor-cipher'].handler('hello', { key: 'key' }) === '030015070a');
     push('xor-cipher', 'bad hex throws', mustThrow(() => TOOLS['xor-cipher'].handler('zz', { key: 'k', input: 'hex' })));
+    push('pig-latin', 'happy', TOOLS['pig-latin'].handler('hello') === 'ellohay');
+    push('pig-latin', 'bad suffix throws', mustThrow(() => TOOLS['pig-latin'].handler('hi', { suffix: 'oy' })));
     push('befunge', 'happy', TOOLS['befunge'].handler('"A",@') === 'A');
     push('befunge', 'div zero throws', mustThrow(() => TOOLS['befunge'].handler('50/.@')));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');

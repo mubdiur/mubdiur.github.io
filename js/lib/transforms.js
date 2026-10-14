@@ -3902,6 +3902,48 @@ T.xorCipher = function (s, opts) {
   try { return new TextDecoder('utf-8', { fatal: true }).decode(mixed); }
   catch { throw new Error('Output is not valid UTF-8 \u2014 use hex or base64 output'); }
 };
+/* Pig Latin cores: consonant clusters with qu glued, y as vowel only when no vowel exists, title and shouty case preserved, apostrophes ride along. */
+T.pigLatin = function (s, opts) {
+  var o = opts || {};
+  var suffix = o.suffix || 'way';
+  if (suffix !== 'way' && suffix !== 'yay' && suffix !== 'ay') throw new Error('Bad suffix \u2014 use way, yay or ay');
+  var raw = String(s === undefined || s === null ? '' : s);
+  var APOS = String.fromCharCode(39);
+  function isLetter(ch) { return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'); }
+  function isSurrogate(cc) { return cc >= 0xD800 && cc <= 0xDFFF; }
+  function latinWord(word) {
+    var low = word.toLowerCase();
+    if (word.length === 1) { var sv = low === 'a' || low === 'e' || low === 'i' || low === 'o' || low === 'u'; if (!sv) return word; var sp = low + suffix; return word === low ? sp : sp.charAt(0).toUpperCase() + sp.slice(1); }
+    var hasVowel = false;
+    for (var vi = 0; vi < low.length; vi++) { var vc = low.charAt(vi); if (vc === 'a' || vc === 'e' || vc === 'i' || vc === 'o' || vc === 'u') { hasVowel = true; break; } }
+    var si = 0;
+    while (si < low.length) {
+      var sc = low.charAt(si);
+      var vowel = sc === 'a' || sc === 'e' || sc === 'i' || sc === 'o' || sc === 'u' || (!hasVowel && sc === 'y');
+      if (vowel) break;
+      if (sc === 'q' && low.charAt(si + 1) === 'u') si += 2;
+      else si++;
+    }
+    var pig = si === 0 ? low + suffix : low.slice(si) + low.slice(0, si) + 'ay';
+    if (word === word.toUpperCase()) return pig.toUpperCase();
+    if (word.charAt(0) === word.charAt(0).toUpperCase()) return pig.charAt(0).toUpperCase() + pig.slice(1);
+    return pig;
+  }
+  var out = '';
+  var wi = 0;
+  while (wi < raw.length) {
+    var wc = raw.charCodeAt(wi);
+    if (isSurrogate(wc)) { out += raw.charAt(wi); wi++; continue; }
+    var wh = raw.charAt(wi);
+    if (isLetter(wh)) {
+      var wj = wi;
+      while (wj < raw.length && (isLetter(raw.charAt(wj)) || (raw.charAt(wj) === APOS && wj + 1 < raw.length && isLetter(raw.charAt(wj + 1))))) wj++;
+      out += latinWord(raw.slice(wi, wj));
+      wi = wj;
+    } else { out += wh; wi++; }
+  }
+  return out;
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
