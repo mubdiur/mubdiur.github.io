@@ -718,6 +718,13 @@ mustThrow(() => T.uuidV7(1.5), 'uuidV7 fractional time');
 mustThrow(() => T.uuidV7(281474976710656), 'uuidV7 time past 2^48-1');
 mustThrow(() => global.CryptoRand.bytes(0), 'CryptoRand.bytes zero');
 mustThrow(() => TOOLS['passphrase-generator'].genHandler({ words: '2', separator: '-' }), 'passphrase-generator two words');
+for (var di = 0; di < 50; di++) { var dr = T.rollDiceOpts({ notation: '2d6+3' }); var dt = parseInt(dr.split('=')[1], 10); if (!(dt >= 5 && dt <= 15)) throw new Error('dice out of range: ' + dr); }
+ok(true, 'dice 50 rolls in range');
+mustThrow(() => T.rollDiceOpts({ notation: 'bogus' }), 'dice junk');
+mustThrow(() => T.rollDiceOpts({ notation: '0d6' }), 'dice zero count');
+mustThrow(() => T.rollDiceOpts({ notation: '2d1' }), 'dice one side');
+mustThrow(() => T.rollDiceOpts({ notation: '101d6' }), 'dice too many');
+mustThrow(() => T.rollDiceOpts({ notation: '2d1001' }), 'dice too big');
 mustThrow(() => T.totp('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 59000, 5), 'totp bad digits');
 mustThrow(() => T.totp('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 59000, 6, 0), 'totp bad period');
 mustThrow(() => T.totp('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', -1), 'totp bad time');

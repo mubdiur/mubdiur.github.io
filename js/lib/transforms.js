@@ -7518,6 +7518,31 @@ T.randomString = function (length, charset) {
   return CryptoRand.string(length, pool);
 };
 /* Random-string UI contract: length and charset options. Moved from the manifest for single source. */
+/* Dice roller: NdS+M notation over rejection-sampled CryptoRand draws, totals plus per-die detail. */
+T.rollDiceOpts = function (opts) {
+  var o = opts || {};
+  var rawN = (o.notation === undefined || o.notation === null) ? '2d6' : String(o.notation);
+  var spec = rawN.replace(/\s+/g, '');
+  var dv = o.detail;
+  var detail = (dv === undefined || dv === null) ? true : (dv === true || dv === 'true');
+  var dm = /^(\d*)d(\d+)([+-]\d+)?$/i.exec(spec);
+  if (!dm) throw new Error('Bad notation \u2014 use NdS+M like 2d6+3, got ' + JSON.stringify(rawN));
+  var dc = dm[1] === '' ? 1 : parseInt(dm[1], 10);
+  var ds = parseInt(dm[2], 10);
+  var dmod = dm[3] ? parseInt(dm[3], 10) : 0;
+  if (!(dc >= 1) || dc > 100) throw new Error('Dice count \u2014 1 to 100 dice, got ' + JSON.stringify(dm[1]));
+  if (!(ds >= 2) || ds > 1000) throw new Error('Dice sides \u2014 2 to 1000 sides, got ' + JSON.stringify(dm[2]));
+  if (!(Math.abs(dmod) <= 1000000)) throw new Error('Modifier too large \u2014 within a million, got ' + JSON.stringify(dm[3]));
+  var rolls = [];
+  var total = dmod;
+  for (var ri = 0; ri < dc; ri++) { var rv = CryptoRand.int(ds) + 1; rolls.push(rv); total += rv; }
+  if (!detail) return String(total);
+  var expr = String(dc) + 'd' + String(ds) + (dmod > 0 ? '+' + dmod : (dmod < 0 ? String(dmod) : ''));
+  var parts = rolls.join(' + ');
+  if (dmod > 0) parts += ' + ' + dmod;
+  if (dmod < 0) parts += ' - ' + Math.abs(dmod);
+  return expr + ' = ' + total + '  (' + parts + ')';
+};
 T.randomStringOpts = function (opts) {
   return T.randomString((opts && opts.length) || '16', (opts && opts.charset) || 'alphanumeric');
 };

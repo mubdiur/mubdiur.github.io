@@ -564,7 +564,9 @@ push('sedol-validator', 'happy', TOOLS['sedol-validator'].handler('0798059').ind
     push('totp', 'RFC6238 T=1111111109', T.totp('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 1111111109000).code === '081804');
     push('totp', 'RFC6238 8-digit', T.totp('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 59000, 8).code === '94287082');
     push('totp', 'bad secret throws', mustThrow(() => T.totp('!!!!', 59000)));
-    push('passphrase-generator', '6 words hyphen', TOOLS['passphrase-generator'].genHandler({ words: '6', separator: '-' }).split('-').length === 6);
+push('dice-roller', 'd20 shape', /^1d20 = \d+  \(\d+\)$/.test(TOOLS['dice-roller'].genHandler({ notation: 'd20' })));
+    push('dice-roller', 'bad notation throws', mustThrow(() => TOOLS['dice-roller'].genHandler({ notation: 'bogus' })));
+        push('passphrase-generator', '6 words hyphen', TOOLS['passphrase-generator'].genHandler({ words: '6', separator: '-' }).split('-').length === 6);
     push('passphrase-generator', 'space separator', TOOLS['passphrase-generator'].genHandler({ words: '4', separator: ' ' }).split(' ').length === 4);
     push('passphrase-generator', 'entropy 48 bits', T.passphraseEntropyBits(6) === 48);
     push('passphrase-generator', 'two words throws', mustThrow(() => TOOLS['passphrase-generator'].genHandler({ words: '2', separator: '-' })));

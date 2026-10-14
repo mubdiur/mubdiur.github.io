@@ -34,6 +34,11 @@ console.log('-- generators --');
   ok(out.length === 64 && /^[a-zA-Z0-9]+$/.test(out), 'random-string length+charset');
   const hexs = TOOLS['random-string'].genHandler({ length: '32', charset: 'hex' });
   ok(/^[0-9a-f]{32}$/.test(hexs), 'random-string hex');
+  ok(/^1d6 = \d+  \(\d+\)$/.test(TOOLS['dice-roller'].genHandler({ notation: '1d6' })), 'dice shape');
+  ok(/^\d+$/.test(TOOLS['dice-roller'].genHandler({ notation: '2d6+3', detail: 'false' })), 'dice plain total');
+  ok((function () { var r = TOOLS['dice-roller'].genHandler({ notation: '2d6+3' }); var tot = parseInt(r.split('=')[1], 10); return tot >= 5 && tot <= 15; })(), 'dice total in range');
+  ok((function () { try { TOOLS['dice-roller'].genHandler({ notation: 'bogus' }); return false; } catch (e) { return true; } })(), 'dice bad notation throws');
+  ok(TOOLS['dice-roller'].genHandler.toString().indexOf('rollDiceOpts') >= 0, 'dice delegates');
 }
 {
   const lines = TOOLS['uuid-generator'].genHandler({ count: '200' }).split('\n');

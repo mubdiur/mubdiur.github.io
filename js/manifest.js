@@ -119,6 +119,9 @@ window.TOOLMANIFEST = [
         { value: 'numeric', label: 'Digits only' }, { value: 'hex', label: 'Hexadecimal' }, { value: 'all', label: 'All characters' }
       ] }
     ] },
+  { slug: 'dice-roller', name: 'Dice Roller', desc: 'Roll NdS+M dice notation \u2014 rejection-sampled, zero modulo bias, per-die detail', category: 'generators', tags: ['dice', 'random', 'd20', 'rpg'], icon: 'shuffle', template: 'generator',
+    genHandler: function (opts) { return Transforms.rollDiceOpts(opts); },
+    params: [{ key: 'notation', label: 'Notation', type: 'text', default: '2d6' }, { key: 'detail', label: 'Show dice', type: 'boolean', default: 'true' }] },
   { slug: 'uuid-generator', name: 'UUID v4 Generator', desc: 'RFC 4122 UUID v4 from the Web Crypto CSPRNG — 122 secure random bits, bulk mode available', category: 'generators', tags: ['uuid', 'identifier'], icon: 'key', template: 'generator',
     genHandler: function (opts) { return Transforms.uuidV4BatchOpts(opts); },
     params: [{ key: 'count', label: 'Count', type: 'number', default: '1', min: 1, max: 1000 }] },
