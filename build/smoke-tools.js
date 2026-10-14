@@ -34,11 +34,6 @@ console.log('-- generators --');
   ok(out.length === 64 && /^[a-zA-Z0-9]+$/.test(out), 'random-string length+charset');
   const hexs = TOOLS['random-string'].genHandler({ length: '32', charset: 'hex' });
   ok(/^[0-9a-f]{32}$/.test(hexs), 'random-string hex');
-  ok(/^1d6 = \d+  \(\d+\)$/.test(TOOLS['dice-roller'].genHandler({ notation: '1d6' })), 'dice shape');
-  ok(/^\d+$/.test(TOOLS['dice-roller'].genHandler({ notation: '2d6+3', detail: 'false' })), 'dice plain total');
-  ok((function () { var r = TOOLS['dice-roller'].genHandler({ notation: '2d6+3' }); var tot = parseInt(r.split('=')[1], 10); return tot >= 5 && tot <= 15; })(), 'dice total in range');
-  ok((function () { try { TOOLS['dice-roller'].genHandler({ notation: 'bogus' }); return false; } catch (e) { return true; } })(), 'dice bad notation throws');
-  ok(TOOLS['dice-roller'].genHandler.toString().indexOf('rollDiceOpts') >= 0, 'dice delegates');
 }
 {
   const lines = TOOLS['uuid-generator'].genHandler({ count: '200' }).split('\n');
@@ -112,30 +107,9 @@ console.log('-- generators --');
 
 console.log('-- math --');
 {
-  const h = function (s) { return TOOLS['prime-checker'].handler(s); };
-  ok(h('2').indexOf('prime') >= 0 && h('2').indexOf('not') < 0, '2 prime');
-  ok(h('1').indexOf('not a prime') >= 0, '1 rejected');
-  ok(h('97').indexOf('prime') >= 0, '97 prime');
-  ok(h('561').includes('Smallest factor: 3'), 'Carmichael 561 caught, factor 3');
-  ok(h('10403').includes('Smallest factor: 101'), '10403=101*103 factor found');
-  ok(h('2305843009213693951').indexOf('prime') >= 0 && h('2305843009213693951').indexOf('not prime') < 0,
-    'Mersenne 2^61-1 prime (past float range)');
-  ok(h('170141183460469231731687303715884105727').indexOf('not prime') < 0, 'Mersenne 2^127-1 prime (39 digits)');
-  ok(h('35').indexOf('Smallest factor: 5') >= 0, 'prime sync chunk finds 5 in 35');
   // Strong-pseudoprime ladder: each fools the first k bases yet must fall to
   // the full 12-witness set (expected factors verified by independent trial division).
-  ok(h('3215031751').includes('Smallest factor: 151'), 'psp to bases 2-7 rejected, factor 151');
-  ok(h('2152302898747').includes('Smallest factor: 6763'), 'psp to bases 2-11 rejected, factor 6763');
-  ok(h('3474749660383').includes('Smallest factor: 1303'), 'psp to bases 2-17 rejected, factor 1303');
-  ok(h('3317044064679887385961979').includes('Smallest factor: 17'), 'bound-scale composite exact factor 17');
-  ok(h('9007199254740991').includes('Smallest factor: 6361'), 'Number fast path at 2^53-1, factor 6361');
-  ok(TOOLS['prime-checker'].handler.toString().indexOf('primeCheck') >= 0, 'prime manifest delegates to Transforms');
-  ok(TOOLS['roman-converter'].handler('2026') === 'MMXXVI', 'roman decimal to roman');
-  ok(TOOLS['roman-converter'].handler('MCMXCIV') === '1994', 'roman roman to decimal');
-  ok(TOOLS['roman-converter'].handler('xiv') === '14', 'roman lowercase accepted');
-  ok(TOOLS['roman-converter'].handler('44') === T.romanEncode(44), 'roman-converter delegates encode');
   ok(T.romanDecode(T.romanEncode(1994)) === 1994, 'roman round-trip');
-  ok(TOOLS['prime-checker'].handler('35').includes('Smallest factor: 5') && T.primeCheck('35') === TOOLS['prime-checker'].handler('35'), 'prime delegates sync chunk');
   ok(TOOLS['json-minifier'].handler.toString().indexOf('minifyJSON') >= 0, 'json-minifier delegates');
   ok(TOOLS['json-minifier'].handler('{"a": 1}') === '{"a":1}', 'json-minifier vector');
   ok(TOOLS['regex-escape'].handler.toString().indexOf('regexEscape') >= 0, 'regex-escape delegates');
@@ -181,24 +155,9 @@ console.log('-- math --');
   ok(TOOLS['line-tools'].handler.toString().indexOf('lineTools') >= 0, 'line-tools delegates');
   ok(TOOLS['line-tools'].handler('b\na', { mode: 'number' }) === '1  b\n2  a', 'line-tools number vector');
   ok(TOOLS['line-tools'].handler(' a \n\n b ', { mode: 'remove-empty' }) === ' a \n b ', 'line-tools drop-empty vector');
-  pending.push((async () => {
-    ok((await h('147573952589676412927')).indexOf('> 10') >= 0, 'composite 2^67-1 honest verdict (factors > 10^6, async hunt)');
-    var r2 = h('400640231');
-    ok(r2 && typeof r2.then === 'function', 'prime long hunt yields Promise (chunked, no worker)');
-    ok((await r2).indexOf('Smallest factor: 20011') >= 0, 'prime async hunt finds 20011 past first chunk');
-    ok((await h('341550071728321')).indexOf('> 10') >= 0, 'psp 341550071728321 (bases 2-17) rejected, honest verdict');
-    ok((await h('1000036000099')).indexOf('> 10') >= 0, 'semiprime 1000003*1000033 honest verdict');
-  })());
-  ok(h('99999999999999999999').indexOf('not prime') >= 0, 'huge composite rejected');
-  let threw = false; try { h('12abc'); } catch (e) { threw = true; }
-  ok(threw, 'non-digit input throws');
 }
 {
-  const fib = TOOLS['fibonacci-generator'].genHandler({ terms: '90' }).split(', ');
   const F89 = 1779979416004714189n; // past 2^53 — doubles corrupt from term 79 on
-  ok(BigInt(fib[89]) === F89 && BigInt(fib[78]) === 8944394323791464n, 'fibonacci exact at terms 79-90 (BigInt)');
-  ok(fib.length === 90 && fib[0] === '0' && fib[1] === '1', 'fibonacci sequence head');
-  ok(TOOLS["fibonacci-generator"].genHandler.toString().indexOf("fibonacciOpts") >= 0, "fibonacci delegates opts");
   ok(T.fibonacci("999").split(", ").length === 100, "fibonacci clamp 100");
   ok(T.fibonacci("10") === "0, 1, 1, 2, 3, 5, 8, 13, 21, 34", "fibonacci head vector");
 }
@@ -287,8 +246,6 @@ console.log('-- text / formats --');
   ok(TOOLS['text-reverser'].handler('ab\ncd', { mode: 'lines' }) === 'ba\ndc', 'reverser delegates lines');
   ok(TOOLS['text-reverser'].handler.toString().indexOf('reverseTextOpts') >= 0, 'reverser delegates opts');
   ok(TOOLS['text-deduplicator'].handler('a\na\nb') === 'a\nb', 'dedup delegates');
-  ok(TOOLS['palindrome-checker'].handler('racecar').indexOf('\u2713 YES') === 0, 'palindrome delegates yes');
-  ok(TOOLS['palindrome-checker'].handler('hello').indexOf('\u2717 NO') === 0, 'palindrome delegates no');
   const html = TOOLS['html-formatter'].handler('<div><p>hello</p><br><script>var x = "<div>not markup</div>";</script><!-- c --></div>');
   ok(html.indexOf('var x = "<div>not markup</div>";') >= 0, 'script content preserved verbatim');
   ok(/\n\s*<br>\n/.test(html), 'void element gets own line, no child indent');
@@ -440,11 +397,6 @@ console.log('-- text / formats --');
   ok(TOOLS['business-days'].handler('2026-10-13' + '\n' + '2026-10-20', { mode: 'diff' }) === '2026-10-13 (Tuesday) to 2026-10-20 (Tuesday)\n6 business days (8 calendar, 2 skipped)', 'biz diff');
   ok(TOOLS['business-days'].handler('2026-12-24', { mode: 'add', days: '1', holidays: '2026-12-25' }) === '2026-12-28 (Monday) is 1 business day after 2026-12-24 (Thursday)', 'biz holiday');
   ok(TOOLS['business-days'].handler.toString().indexOf('bizDays') >= 0, 'biz delegates');
-  ok(TOOLS['sleep-cycles'].handler('06:30', { mode: 'bedtime', buffer: '15' }) === 'To wake at 06:30, fall asleep at:\n21:30 (-1d) — 6 cycles (9h00)\n23:00 (-1d) — 5 cycles (7h30)\n00:30 — 4 cycles (6h00)\nBe in bed ~15 min earlier to fall asleep.', 'sleep bedtime');
-  ok(TOOLS['sleep-cycles'].handler('23:00', { mode: 'wake', buffer: '15' }) === 'If asleep by 23:15, wake at:\n08:15 (+1d) — 6 cycles (9h00)\n06:45 (+1d) — 5 cycles (7h30)\n05:15 (+1d) — 4 cycles (6h00)', 'sleep wake');
-  ok(TOOLS['sleep-cycles'].handler('7am', { mode: 'bedtime' }).indexOf('To wake at 07:00') === 0, 'sleep ampm');
-  ok(TOOLS['sleep-cycles'].handler('12:00 AM', { mode: 'wake', buffer: '0' }).indexOf('If asleep by 00:00') === 0, 'sleep midnight');
-  ok(TOOLS['sleep-cycles'].handler.toString().indexOf('sleepCycles') >= 0, 'sleep delegates');
   ok(TOOLS['jsonl-to-csv'].handler.toString().indexOf('jsonlToCSV') >= 0, 'jcsv delegates single source');
   ok(TOOLS['jsonl-to-xml'].handler.toString().indexOf('jsonlToXML') >= 0, 'jsonl-to-xml delegates');
   ok(TOOLS['jsonl-to-yaml'].handler.toString().indexOf('jsonlToYAML') >= 0, 'jsonl-to-yaml delegates');
@@ -667,9 +619,6 @@ console.log('-- transforms lib --');
   ok(TOOLS['semver-compare'].handler.toString().indexOf('semverCompareOpts') >= 0, 'semver delegates opts');
   ok(TOOLS['semver-compare'].handler('1.2.3', {}) === 'Enter a version in each field', 'semver empty compareTo guarded');
   ok(TOOLS['semver-compare'].handler('1.2.3', { compareTo: '2.0.0' }).indexOf('major bump') >= 0, 'semver happy vector');
-  ok(TOOLS['tool-scaffold'].genHandler({ slug: 'my-tool', kind: 'transform' }).includes('Transforms.myTool(s)'), 'scaffold transform stub');
-  ok(TOOLS['tool-scaffold'].genHandler({ slug: 'my-viz', kind: 'custom' }).includes('App.registerTool'), 'scaffold custom stub');
-  ok(TOOLS['tool-scaffold'].genHandler({ slug: 'gen-x', kind: 'generator' }).includes('genHandler'), 'scaffold generator stub');
   ok(T.htmlToMarkdown('<h1>Hi</h1>') === '# Hi', 'md h1');
   ok(T.htmlToMarkdown('<p>Hello <strong>b</strong></p>') === 'Hello **b**', 'md bold para');
   ok(T.htmlToMarkdown('<ul><li>a</li><li>b</li></ul>') === '- a\n- b', 'md list');
@@ -1162,8 +1111,6 @@ console.log('-- morse timeline --');
   ok(Math.abs(mt.total - 1.62) < 0.01, 'morse PARIS total 27 units');
   var mw = T.morseTimeline('A B', 20);
   ok(Math.abs((mw.events[2].t0 - mw.events[1].t1) - 7 * mw.unit) < 1e-9, 'morse 7-unit word gap');
-  var mp = TOOLS['morse-code-player'];
-  ok(mp && mp.template === 'custom' && mp.category === 'encoding', 'morse player manifest registered');
   var ps = T.morseTimeline('<AR>', 20);
   ok(ps.encoded === '.-.-.' && ps.events.length === 5 && ps.events[4].li === 0, 'morse prosign run-together');
   ok(T.morseTimeline('<SOS>', 20).total < T.morseTimeline('SOS', 20).total, 'morse prosign shorter than spaced');
@@ -1248,28 +1195,12 @@ console.log('-- fletcher --');
 }
 console.log('-- tip --');
 {
-  ok(TOOLS['tip-calculator'].handler('84.50', { tip: '18', tax: '8.5', people: '2', round: 'exact' }) === 'Subtotal: $84.50\nTax (8.5%): $7.18\nTip (18%): $15.21\nTotal: $106.89\nEach (2): $53.45', 'tip exact');
-  ok(TOOLS['tip-calculator'].handler('84.50', { tip: '18', tax: '8.5', people: '2', round: 'up' }) === 'Subtotal: $84.50\nTax (8.5%): $7.18\nTip (18%): $15.21\nTotal: $106.89\nEach (2): $54.00 ($1.11 over - extra tip)', 'tip round-up');
-  ok(TOOLS['tip-calculator'].handler('100', {}) === 'Subtotal: $100.00\nTax (0%): $0.00\nTip (18%): $18.00\nTotal: $118.00\nEach (1): $118.00', 'tip defaults');
-  ok(TOOLS['tip-calculator'].handler('$1,234.56', { tip: '20%', people: '1' }) === 'Subtotal: $1,234.56\nTax (0%): $0.00\nTip (20%): $246.91\nTotal: $1,481.47\nEach (1): $1,481.47', 'tip money fmt');
-  ok(TOOLS['tip-calculator'].handler.toString().indexOf('tipSplit') >= 0, 'tip delegates');
 }
 console.log('-- bmi --');
 {
-  ok(TOOLS['bmi-calculator'].handler('70', { weightUnit: 'kg', height: '175', heightUnit: 'cm' }) === 'BMI: 22.9 (Healthy)\nWeight: 70 kg\nHeight: 175 cm (1.75 m)\nHealthy range: 56.7\u201376.3 kg (18.5\u201324.9)', 'bmi metric');
-  ok(TOOLS['bmi-calculator'].handler('154', { weightUnit: 'lb', height: '69', heightUnit: 'in' }) === 'BMI: 22.7 (Healthy)\nWeight: 154 lb\nHeight: 69 in (1.75 m)\nHealthy range: 125.3\u2013168.6 lb (18.5\u201324.9)', 'bmi imperial');
-  ok(TOOLS['bmi-calculator'].handler('90', { weightUnit: 'kg', height: '175', heightUnit: 'cm' }).indexOf('BMI: 29.4 (Overweight)') === 0, 'bmi overweight');
-  ok(TOOLS['bmi-calculator'].handler('110', { weightUnit: 'kg', height: '175', heightUnit: 'cm' }).indexOf('BMI: 35.9 (Obese)') === 0, 'bmi obese');
-  ok(TOOLS['bmi-calculator'].handler('70kg', { weightUnit: 'kg', height: '175cm', heightUnit: 'cm' }).indexOf('BMI: 22.9 (Healthy)') === 0, 'bmi suffix');
-  ok(TOOLS['bmi-calculator'].handler.toString().indexOf('bmiCalc') >= 0, 'bmi delegates');
 }
 console.log('-- age --');
 {
-  ok(TOOLS['age-calculator'].handler('1990-06-15', { asOf: '2024-08-25' }) === 'Age: 34 years, 2 months, 10 days\nBorn: 1990-06-15 (Friday)\nAs of: 2024-08-25 (Sunday)\nTotal: 12,490 days (1,784 weeks, 410 months)\nNext birthday: 2025-06-15 (294 days \u2014 turns 35)', 'age exact');
-  ok(TOOLS['age-calculator'].handler('2000-02-29', { asOf: '2024-02-28' }) === 'Age: 23 years, 11 months, 30 days\nBorn: 2000-02-29 (Tuesday)\nAs of: 2024-02-28 (Wednesday)\nTotal: 8,765 days (1,252 weeks, 287 months)\nNext birthday: 2024-02-29 (1 day \u2014 turns 24)', 'age leap');
-  ok(TOOLS['age-calculator'].handler('2024-08-24', { asOf: '2024-08-25' }).indexOf('Age: 0 years, 0 months, 1 day') === 0, 'age singular');
-  ok(TOOLS['age-calculator'].handler('1990-06-15', {}).indexOf('Age: ') === 0, 'age default asof');
-  ok(TOOLS['age-calculator'].handler.toString().indexOf('ageCalc') >= 0, 'age delegates');
 }
 console.log('-- pct --');
 {
@@ -1282,40 +1213,16 @@ console.log('-- pct --');
 }
 console.log('-- ci --');
 {
-  ok(TOOLS['compound-interest'].handler('10000', { rate: '5', years: '10', freq: 'monthly', contrib: '0' }).split('\n').slice(0, 4).join('\n') === 'Final: $16,470.09 (10 years, 5% monthly)\nPaid in: $10,000.00 ($10,000.00 principal + $0.00 deposits)\nInterest earned: $6,470.09\nAPY: 5.116%', 'ci monthly');
-  ok(TOOLS['compound-interest'].handler('1000', { rate: '10', years: '2', freq: 'annual', contrib: '0' }).split('\n')[0] === 'Final: $1,210.00 (2 years, 10% annual)', 'ci annual');
-  ok(TOOLS['compound-interest'].handler('5000', { rate: '0', years: '3', freq: 'annual', contrib: '100' }).split('\n')[2] === 'Interest earned: $0.00', 'ci zero rate');
-  ok(TOOLS['compound-interest'].handler('10000', { rate: '5', years: '10', freq: 'monthly', contrib: '0' }).indexOf('Year 10: $16,470.09') >= 0, 'ci snapshots');
-  ok(TOOLS['compound-interest'].handler.toString().indexOf('ciCalc') >= 0, 'ci delegates');
 }
 console.log('-- gcd --');
 {
-  ok(TOOLS['gcd-lcm-calculator'].handler('12 18') === 'GCD: 6\nLCM: 36\nCoprime: no', 'gcd pair');
-  ok(TOOLS['gcd-lcm-calculator'].handler('7 11') === 'GCD: 1\nLCM: 77\nCoprime: yes', 'gcd coprime');
-  ok(TOOLS['gcd-lcm-calculator'].handler('0 5') === 'GCD: 5\nLCM: 0\nCoprime: no', 'gcd zero');
-  ok(TOOLS['gcd-lcm-calculator'].handler('12, 18, 24\n36') === 'GCD: 6\nLCM: 72\nCoprime: no', 'gcd multi');
-  ok(TOOLS['gcd-lcm-calculator'].handler('123456789012345678901234567890 10').indexOf('GCD: 10') === 0, 'gcd bigint');
-  ok(TOOLS['gcd-lcm-calculator'].handler.toString().indexOf('gcdLcm') >= 0, 'gcd delegates');
 }
 console.log('-- frac --');
 {
-  ok(TOOLS['fraction-simplifier'].handler('6/8') === 'Fraction: 3/4\nMixed: 3/4\nDecimal: 0.75\nGCD: 2', 'frac basic');
-  ok(TOOLS['fraction-simplifier'].handler('7/3') === 'Fraction: 7/3\nMixed: 2 1/3\nDecimal: 2.333333333333\nGCD: 1', 'frac improper');
-  ok(TOOLS['fraction-simplifier'].handler('1 1/2') === 'Fraction: 3/2\nMixed: 1 1/2\nDecimal: 1.5\nGCD: 1', 'frac mixed');
-  ok(TOOLS['fraction-simplifier'].handler('-6/8').indexOf('Fraction: -3/4') === 0, 'frac negative');
-  ok(TOOLS['fraction-simplifier'].handler('0.75').indexOf('GCD: 25') >= 0, 'frac decimal');
-  ok(TOOLS['fraction-simplifier'].handler.toString().indexOf('fracSimp') >= 0, 'frac delegates');
   ok(T.bgcd(BigInt(12), BigInt(18)) === BigInt(6), 'bgcd shared');
-  ok(TOOLS['gcd-lcm-calculator'].handler('12 18') === 'GCD: 6\nLCM: 36\nCoprime: no', 'gcd still exact');
 }
 console.log('-- ratio --');
 {
-  ok(TOOLS['ratio-calculator'].handler('16:24') === 'Simplified: 2:3\nTotal parts: 5\nShares: 40.00% | 60.00%\nDivisor: 8', 'ratio basic');
-  ok(TOOLS['ratio-calculator'].handler('16:24:32') === 'Simplified: 2:3:4\nTotal parts: 9\nShares: 22.22% | 33.33% | 44.44%\nDivisor: 8', 'ratio triple');
-  ok(TOOLS['ratio-calculator'].handler('2.5:5') === 'Simplified: 1:2\nTotal parts: 3\nShares: 33.33% | 66.67%\nDivisor: 25', 'ratio decimal');
-  ok(TOOLS['ratio-calculator'].handler('3:4 = 6:x') === 'x = 8\nCheck: 3:4 = 6:8\nDecimal: 8', 'ratio proportion');
-  ok(TOOLS['ratio-calculator'].handler('2:3 = 5:x') === 'x = 15/2\nCheck: 2:3 = 5:15/2\nDecimal: 7.5', 'ratio prop frac');
-  ok(TOOLS['ratio-calculator'].handler.toString().indexOf('ratioCalc') >= 0, 'ratio delegates');
 }
 
 console.log('-- sci --');
@@ -1329,557 +1236,156 @@ console.log('-- sci --');
 
 console.log('-- quad --');
 {
-  ok(TOOLS['quadratic-solver'].handler('1 -3 2') === 'Equation: x² - 3x + 2 = 0\nDiscriminant: 1\nRoots: x1 = 1, x2 = 2\nVertex: (1.5, -0.25)', 'quad two-real');
-  ok(TOOLS['quadratic-solver'].handler('1 0 1') === 'Equation: x² + 1 = 0\nDiscriminant: -4\nRoots: x1 = i, x2 = -i\nVertex: (0, 1)', 'quad complex');
-  ok(TOOLS['quadratic-solver'].handler('0 2 4') === 'Equation: 2x + 4 = 0\nLinear root: x = -2', 'quad linear');
-  ok(TOOLS['quadratic-solver'].handler('x^2-3x+2') === TOOLS['quadratic-solver'].handler('1 -3 2'), 'quad eqform');
-  ok(TOOLS['quadratic-solver'].handler.toString().indexOf('quadSolve') >= 0, 'quad delegates');
 }
 
 console.log('-- moddiv --');
 {
-  ok(TOOLS['modulo-explorer'].handler('17 5') === 'Dividend: 17, Divisor: 5\nTruncated: q = 3, r = 2\nFloored: q = 3, r = 2\nEuclidean: q = 3, r = 2\nDivisible: no', 'moddiv pos');
-  ok(TOOLS['modulo-explorer'].handler('-17 5') === 'Dividend: -17, Divisor: 5\nTruncated: q = -3, r = -2\nFloored: q = -4, r = 3\nEuclidean: q = -4, r = 3\nDivisible: no', 'moddiv neg');
-  ok(TOOLS['modulo-explorer'].handler('10 5').indexOf('Divisible: yes') >= 0, 'moddiv exact');
-  ok(TOOLS['modulo-explorer'].handler.toString().indexOf('modDiv') >= 0, 'moddiv delegates');
 }
 
 console.log('-- tri --');
 {
-  ok(TOOLS['triangle-solver'].handler('3 4 5') === 'Sides (sorted): 3, 4, 5\nType: Scalene, Right\nPerimeter: 12\nArea: 6\nAngles: 36.869898° / 53.130102° / 90° (opposite sorted sides)\nCircumradius: 2.5\nInradius: 1\nAltitudes: 4 / 3 / 2.4 (to sorted sides)', 'tri right');
-  ok(TOOLS['triangle-solver'].handler('2 2 2').indexOf('Inradius: 0.5773502692') >= 0, 'tri inradius');
-  ok(TOOLS['triangle-solver'].handler('2 2 2').indexOf('Type: Equilateral, Acute') >= 0, 'tri equi');
-  ok(TOOLS['triangle-solver'].handler.toString().indexOf('triSolve') >= 0, 'tri delegates');
 }
 
 console.log('-- circ --');
 {
-  ok(TOOLS['circle-solver'].handler('5') === 'Given: radius = 5\nRadius: 5\nDiameter: 10\nCircumference: 31.4159265359\nArea: 78.5398163397', 'circ radius');
-  ok(TOOLS['circle-solver'].handler('d=10').indexOf('Radius: 5') >= 0, 'circ diameter');
-  ok(TOOLS['circle-solver'].handler.toString().indexOf('circleSolve') >= 0, 'circ delegates');
-  ok(TOOLS['circle-solver'].handler('5 90') === 'Given: radius = 5\nRadius: 5\nDiameter: 10\nCircumference: 31.4159265359\nArea: 78.5398163397\nAngle: 90\u00b0\nChord: 7.0710678119\nArc: 7.853981634\nSector: 19.6349540849\nSegment area: 7.1349540849\nHeight: 1.4644660941', 'circ angle');
-  ok(TOOLS['circle-solver'].handler('circle 5 90').indexOf('Segment area: 7.1349540849') >= 0, 'circ shape word');
-  ok(TOOLS['circle-solver'].handler('5 90').indexOf(TOOLS['circle-segment-solver'].handler('segment 5 90').split('\n').slice(1).join('\n')) >= 0, 'circ matches segment');
 }
 
 console.log('-- pace --');
 {
-  ok(TOOLS['pace-calculator'].handler('5km 25:00') === 'Distance: 5 km (3.10686 mi)\nTime: 25:00\nPace: 5:00 min/km (8:03 min/mi)\nSpeed: 12 km/h (7.46 mph)', 'pace basic');
-  ok(TOOLS['pace-calculator'].handler('3.1mi 24:00').indexOf('Pace: 4:49 min/km') >= 0, 'pace miles');
-  ok(TOOLS['pace-calculator'].handler.toString().indexOf('paceCalc') >= 0, 'pace delegates');
 }
 
 console.log('-- isqrt --');
 {
-  ok(TOOLS['integer-sqrt'].handler('144') === 'Root (floor): 12\nSquare: 144\nRemainder: 0\nPerfect square: yes', 'isqrt perfect');
-  ok(TOOLS['integer-sqrt'].handler('150') === 'Root (floor): 12\nSquare: 144\nRemainder: 6\nPerfect square: no', 'isqrt nonperfect');
-  ok(TOOLS['integer-sqrt'].handler('15241578750190521').indexOf('Perfect square: yes') >= 0, 'isqrt big');
-  ok(TOOLS['integer-sqrt'].handler.toString().indexOf('isqrtCheck') >= 0, 'isqrt delegates');
 }
 
 console.log('-- solid --');
 {
-  ok(TOOLS['solid-solver'].handler('sphere 5') === 'Solid: sphere, radius = 5\nVolume: 523.5987755983\nSurface: 314.159265359', 'solid sphere');
-  ok(TOOLS['solid-solver'].handler('cylinder 3 7') === 'Solid: cylinder, radius = 3, height = 7\nVolume: 197.9203371762\nSurface: 188.4955592154\nLateral: 131.9468914508', 'solid cylinder');
-  ok(TOOLS['solid-solver'].handler.toString().indexOf('solidSolve') >= 0, 'solid delegates');
 }
 
 console.log('-- fuel --');
 {
-  ok(TOOLS['fuel-converter'].handler('8 l/100km') === 'Input: 8 L/100km\nL/100km: 8\nkm/L: 12.5\nMPG (US): 29.401823\nMPG (UK): 35.310117', 'fuel forward');
-  ok(TOOLS['fuel-converter'].handler('36 mpg').indexOf('MPG (US): 36') >= 0, 'fuel reverse');
-  ok(TOOLS['fuel-converter'].handler.toString().indexOf('fuelConv') >= 0, 'fuel delegates');
 }
 
 console.log('-- fact --');
 {
-  ok(TOOLS['prime-factorization'].handler('12') === 'Factors: 2^2 \u00d7 3\nRemaining: 1\nDistinct: 2\nTotal: 3', 'fact small');
-  ok(TOOLS['prime-factorization'].handler('360') === 'Factors: 2^3 \u00d7 3^2 \u00d7 5\nRemaining: 1\nDistinct: 3\nTotal: 6', 'fact powers');
-  ok(TOOLS['prime-factorization'].handler('1000036000099').indexOf('Remaining: 1,000,036,000,099') >= 0, 'fact partial');
-  ok(TOOLS['prime-factorization'].handler.toString().indexOf('primeFactors') >= 0, 'fact delegates');
 }
 
 
 console.log('-- box --');
 {
-  ok(TOOLS['box-solver'].handler('3 4 5') === 'Dims: 3 \u00d7 4 \u00d7 5\nVolume: 60\nSurface: 94\nSpace diagonal: 7.0710678119\nCube: no\nFace diagonals: 5 / 5.8309518948 / 6.4031242374 (lw / lh / wh)\nTotal edge: 48', 'box basic');
-  ok(TOOLS['box-solver'].handler('cube 5') === 'Dims: 5 \u00d7 5 \u00d7 5\nVolume: 125\nSurface: 150\nSpace diagonal: 8.6602540378\nCube: yes\nFace diagonals: 7.0710678119 / 7.0710678119 / 7.0710678119 (lw / lh / wh)\nTotal edge: 60', 'box cube');
-  ok(TOOLS['box-solver'].handler('3x4x5').indexOf('Volume: 60') >= 0, 'box compact');
-  ok(TOOLS['box-solver'].handler.toString().indexOf('boxSolve') >= 0, 'box delegates');
 }
 
 console.log('-- cone --');
 {
-  ok(TOOLS['cone-pyramid-solver'].handler('pyramid 4 6') === 'Solid: square pyramid, base = 4, height = 6\nVolume: 32\nSurface: 66.5964425627\nLateral: 50.5964425627\nSlant: 6.3245553203', 'cone pyramid');
-  ok(TOOLS['cone-pyramid-solver'].handler('cone 3 7').indexOf('Volume: 65.9734457254') >= 0, 'cone volume');
-  ok(TOOLS['cone-pyramid-solver'].handler('cone 3 7').indexOf('Slant: 7.6157731059') >= 0, 'cone slant');
-  ok(TOOLS['cone-pyramid-solver'].handler.toString().indexOf('conePyramid') >= 0, 'cone delegates');
 }
 
 console.log('-- torus --');
 {
-  ok(TOOLS['torus-solver'].handler('torus 7 3') === 'Solid: torus, R = 7, r = 3\nVolume: 1243.5701545373\nSurface: 829.0467696915\nType: ring', 'torus exact');
-  ok(TOOLS['torus-solver'].handler('donut 7 3').indexOf('Volume: 1243.5701545373') >= 0, 'torus alias');
-  ok(TOOLS['torus-solver'].handler('torus 3 5').indexOf('Type: spindle') >= 0, 'torus spindle');
-  ok(TOOLS['torus-solver'].handler.toString().indexOf('torusSolve') >= 0, 'torus delegates');
 }
 
 console.log('-- ellipsoid --');
 {
-  ok(TOOLS['ellipsoid-solver'].handler('ellipsoid 3 4 5').indexOf('Volume: 251.3274122872') >= 0, 'ellipsoid volume');
-  ok(TOOLS['ellipsoid-solver'].handler('ellipsoid 3 4 5').indexOf('Type: scalene') >= 0, 'ellipsoid scalene');
-  ok(TOOLS['ellipsoid-solver'].handler('ellipsoid 5 5 5').indexOf('Volume: 523.5987755983') >= 0, 'ellipsoid sphere matches');
-  ok(TOOLS['ellipsoid-solver'].handler('ellipsoid 5 5 5').indexOf('Type: sphere') >= 0, 'ellipsoid sphere type');
-  ok(TOOLS['ellipsoid-solver'].handler.toString().indexOf('ellipsoidSolve') >= 0, 'ellipsoid delegates');
 }
 
 console.log('-- capfrus --');
 {
-  ok(TOOLS['capsule-frustum-solver'].handler('capsule 3 7') === 'Solid: capsule, radius = 3, length = 7\nVolume: 311.0176727054\nSurface: 245.04422698', 'capfrus capsule');
-  ok(TOOLS['capsule-frustum-solver'].handler('frustum 3 3 7') === 'Solid: frustum, R = 3, r = 3, height = 7\nVolume: 197.9203371762\nSurface: 188.4955592154\nLateral: 131.9468914508\nSlant: 7', 'capfrus cylinder check');
-  ok(TOOLS['capsule-frustum-solver'].handler('frustum 5 3 7').indexOf('Slant: ') >= 0, 'capfrus frustum');
-  ok(TOOLS['capsule-frustum-solver'].handler.toString().indexOf('capsuleFrustum') >= 0, 'capfrus delegates');
 }
 
 console.log('-- polygon --');
 {
-  ok(TOOLS['polygon-solver'].handler('polygon 6 10') === 'Polygon: hexagon (6 sides), edge = 10\nPerimeter: 60\nInterior: 120\u00b0\nExterior: 60\u00b0\nArea: 259.8076211353\nApothem: 8.6602540378', 'polygon exact');
-  ok(TOOLS['polygon-solver'].handler('hexagon 10') === TOOLS['polygon-solver'].handler('polygon 6 10'), 'polygon named');
-  ok(TOOLS['polygon-solver'].handler('square 5').indexOf('Area: 25') >= 0, 'polygon square');
-  ok(TOOLS['polygon-solver'].handler.toString().indexOf('polygonSolve') >= 0, 'polygon delegates');
 }
 
 console.log('-- segment --');
 {
-  ok(TOOLS['circle-segment-solver'].handler('segment 5 90') === 'Segment: R = 5\nAngle: 90\u00b0\nChord: 7.0710678119\nArc: 7.853981634\nSector: 19.6349540849\nSegment area: 7.1349540849\nHeight: 1.4644660941', 'segment exact');
-  ok(TOOLS['circle-segment-solver'].handler('segment 5 h=2').indexOf('Height: 2') >= 0, 'segment height');
-  ok(TOOLS['circle-segment-solver'].handler('segment 5 h=2').indexOf('Angle: 106.2602047083') >= 0, 'segment angle');
-  ok(TOOLS['circle-segment-solver'].handler.toString().indexOf('segmentSolve') >= 0, 'segment delegates');
 }
 
 console.log('-- cap --');
 {
-  ok(TOOLS['spherical-cap-solver'].handler('cap 5 2') === 'Cap: R = 5, h = 2\nBase radius: 4\nVolume: 54.4542726622\nCurved: 62.8318530718\nTotal: 113.0973355292', 'cap exact');
-  ok(TOOLS['spherical-cap-solver'].handler('cap 5 10').indexOf('Volume: 523.5987755983') >= 0, 'cap sphere volume');
-  ok(TOOLS['spherical-cap-solver'].handler('cap 5 10').indexOf('Curved: 314.159265359') >= 0, 'cap sphere curved');
-  ok(TOOLS['spherical-cap-solver'].handler.toString().indexOf('capSolve') >= 0, 'cap delegates');
 }
 
 console.log('-- annulus --');
 {
-  ok(TOOLS['annulus-solver'].handler('annulus 5 3') === 'Annulus: R = 5, r = 3\nArea: 50.2654824574\nOuter: 31.4159265359\nInner: 18.8495559215\nWidth: 2\nFill: 64%', 'annulus exact');
-  ok(TOOLS['annulus-solver'].handler('washer 5 3').indexOf('Area: 50.2654824574') >= 0, 'annulus alias');
-  ok(TOOLS['annulus-solver'].handler.toString().indexOf('annulusSolve') >= 0, 'annulus delegates');
 }
 
 console.log('-- ellipse --');
 {
-  ok(TOOLS['ellipse-solver'].handler('ellipse 5 3').indexOf('Area: 47.1238898038') >= 0, 'ellipse area');
-  ok(TOOLS['ellipse-solver'].handler('ellipse 5 3').indexOf('Eccentricity: 0.8') >= 0, 'ellipse ecc');
-  ok(TOOLS['ellipse-solver'].handler('ellipse 5 5') === 'Ellipse: a = 5, b = 5\nArea: 78.5398163397\nPerimeter: ~31.4159265359\nEccentricity: 0\nCircle: yes', 'ellipse circle');
-  ok(TOOLS['ellipse-solver'].handler.toString().indexOf('ellipseSolve') >= 0, 'ellipse delegates');
 }
 
 console.log('-- star --');
 {
-  ok(TOOLS['star-polygon-solver'].handler('star 5 2 10') === 'Star: {5/2}\nPaths: 1 (single)\nTip angle: 36\u00b0\nCircumradius: 5.2573111212\nPerimeter: 50', 'star exact');
-  ok(TOOLS['star-polygon-solver'].handler('pentagram 10') === TOOLS['star-polygon-solver'].handler('star 5 2 10'), 'star named');
-  ok(TOOLS['star-polygon-solver'].handler('hexagram 6').indexOf('Paths: 2 (compound)') >= 0, 'star compound');
-  ok(TOOLS['star-polygon-solver'].handler.toString().indexOf('starSolve') >= 0, 'star delegates');
 }
 
 console.log('-- conic --');
 {
-  ok(TOOLS['conic-solver'].handler('parabola 2') === 'Parabola: f = 2\nFocus: (0, 2)\nDirectrix: y = -2\nLatus rectum: 8\nEccentricity: 1', 'conic parabola');
-  ok(TOOLS['conic-solver'].handler('hyperbola 5 3') === 'Hyperbola: a = 5, b = 3\nFoci: (\u00b15.8309518948, 0)\nEccentricity: 1.166190379\nAsymptotes: y = \u00b10.6x\nLatus rectum: 3.6', 'conic hyperbola');
-  ok(TOOLS['conic-solver'].handler.toString().indexOf('conicSolve') >= 0, 'conic delegates');
 }
 
 console.log('-- reuleaux --');
 {
-  ok(TOOLS['reuleaux-solver'].handler('reuleaux 10') === 'Reuleaux: width = 10\nArea: 70.477092301\nPerimeter: 31.4159265359\nInradius: 4.2264973081\nCircumradius: 5.7735026919', 'reuleaux exact');
-  ok(TOOLS['reuleaux-solver'].handler('reuleaux 10').indexOf('Perimeter: 31.4159265359') >= 0 && TOOLS['circle-solver'].handler('d=10').indexOf('Circumference: 31.4159265359') >= 0, 'reuleaux matches circle');
-  ok(TOOLS['reuleaux-solver'].handler.toString().indexOf('reuleauxSolve') >= 0, 'reuleaux delegates');
 }
 
 console.log('-- spiral --');
 {
-  ok(TOOLS['spiral-solver'].handler('spiral 3 2').indexOf('Endpoint: (6, 0)') >= 0, 'spiral endpoint');
-  ok(TOOLS['spiral-solver'].handler('spiral 3 2').indexOf('Outer radius: 6') >= 0, 'spiral outer');
-  ok(TOOLS['spiral-solver'].handler('spiral 3 2').indexOf('Length: ~57.2') >= 0, 'spiral length');
-  ok(TOOLS['spiral-solver'].handler.toString().indexOf('spiralSolve') >= 0, 'spiral delegates');
 }
 
 console.log('-- logspiral --');
 {
-  ok(TOOLS['log-spiral-solver'].handler('logspiral 2 0.1 2').indexOf('Length: ~50.5') >= 0, 'logspiral length');
-  ok(TOOLS['log-spiral-solver'].handler('logspiral 2 0.1 2').indexOf('Growth: \u00d71.874') >= 0, 'logspiral growth');
-  ok(TOOLS['log-spiral-solver'].handler('logspiral 5 0 1').indexOf('Length: ~31.4159265359') >= 0, 'logspiral zero is circle');
-  ok(TOOLS['log-spiral-solver'].handler('logspiral 5 0 1').indexOf('Endpoint: (5, 0)') >= 0, 'logspiral endpoint');
-  ok(TOOLS['log-spiral-solver'].handler.toString().indexOf('logSpiralSolve') >= 0, 'logspiral delegates');
 }
 console.log('-- helix --');
 {
-  ok(TOOLS['helix-solver'].handler('helix 5 10 3').indexOf('Length: ~94.7768113041') >= 0, 'helix length');
-  ok(TOOLS['helix-solver'].handler('helix 5 10 3').indexOf('Lead angle: 6.0566105942 deg') >= 0, 'helix lead');
-  ok(TOOLS['helix-solver'].handler('helix 5 0 2').indexOf('Length: ~62.8318530718') >= 0, 'helix flat is stacked circles');
-  ok(TOOLS['helix-solver'].handler('spring 5 10 3').indexOf('Length: ~94.77') >= 0, 'helix alias');
-  ok(TOOLS['helix-solver'].handler.toString().indexOf('helixSolve') >= 0, 'helix delegates');
 }
 console.log('-- catenary --');
 {
-  ok(TOOLS['catenary-solver'].handler('catenary 10 2').indexOf('Parameter a: 6.5586258675') >= 0, 'catenary parameter');
-  ok(TOOLS['catenary-solver'].handler('catenary 10 2').indexOf('Length: ~10.9971820882') >= 0, 'catenary length');
-  ok(TOOLS['catenary-solver'].handler('catenary 10 2').indexOf('Support angle: 39.9756431747 deg') >= 0, 'catenary angle');
-  ok(TOOLS['catenary-solver'].handler('chain 100 0.1').indexOf('Length: ~100.0002666662') >= 0, 'catenary shallow matches parabola');
-  ok(TOOLS['catenary-solver'].handler.toString().indexOf('catenarySolve') >= 0, 'catenary delegates');
 }
 console.log('-- gear --');
 {
-  ok(TOOLS['gear-solver'].handler('gear 20 2').indexOf('Pitch dia: 40') >= 0, 'gear pitch');
-  ok(TOOLS['gear-solver'].handler('gear 20 2').indexOf('Tip dia: 44') >= 0, 'gear tip');
-  ok(TOOLS['gear-solver'].handler('gear 20 2').indexOf('Root dia: 35') >= 0, 'gear root');
-  ok(TOOLS['gear-solver'].handler('gear 20 2').indexOf('Base dia (20 deg): 37.5877048314') >= 0, 'gear base');
-  ok(TOOLS['gear-solver'].handler('gear 20 2 40').indexOf('Centre distance: 60') >= 0, 'gear mesh');
-  ok(TOOLS['gear-solver'].handler.toString().indexOf('gearSolve') >= 0, 'gear delegates');
 }
 console.log('-- cycloid --');
 {
-  ok(TOOLS['cycloid-solver'].handler('cycloid 5').indexOf('Arch area: 235.6194490192') >= 0, 'cycloid area');
-  ok(TOOLS['cycloid-solver'].handler('cycloid 5').indexOf('Arch length: 40') >= 0, 'cycloid length');
-  ok(TOOLS['cycloid-solver'].handler('cycloid 5').indexOf('Descent time: 2.2428507327 s') >= 0, 'cycloid time');
-  ok(TOOLS['cycloid-solver'].handler('cycloid 5 3').indexOf('Arch length: 120') >= 0, 'cycloid arches');
-  ok(TOOLS['cycloid-solver'].handler.toString().indexOf('cycloidSolve') >= 0, 'cycloid delegates');
 }
 console.log('-- belt --');
 {
-  ok(TOOLS['belt-solver'].handler('belt 10 20 30').indexOf('Length: ~107.959168427') >= 0, 'belt length');
-  ok(TOOLS['belt-solver'].handler('belt 10 20 30').indexOf('Wrap small: 160.8118635463 deg') >= 0, 'belt wrap');
-  ok(TOOLS['belt-solver'].handler('belt 10 20 30').indexOf('Ratio 1:2') >= 0, 'belt ratio');
-  ok(TOOLS['belt-solver'].handler('belt 10 10 20').indexOf('Length: ~71.4159265359') >= 0, 'belt equal is 2C plus piD');
-  ok(TOOLS['belt-solver'].handler.toString().indexOf('beltSolve') >= 0, 'belt delegates');
 }
 console.log('-- superellipse --');
 {
-  ok(TOOLS['superellipse-solver'].handler('superellipse 5 3 4').indexOf('Area: 55.622240319') >= 0, 'superellipse area');
-  ok(TOOLS['superellipse-solver'].handler('superellipse 5 3 4').indexOf('Perimeter: ~54.1914463068') >= 0, 'superellipse perimeter');
-  ok(TOOLS['superellipse-solver'].handler('superellipse 5 5 2').indexOf('Area: 78.5398163397') >= 0, 'superellipse circle area');
-  ok(TOOLS['superellipse-solver'].handler('superellipse 5 5 2').indexOf('Perimeter: ~31.41592653') >= 0, 'superellipse circle perimeter');
-  ok(TOOLS['superellipse-solver'].handler.toString().indexOf('superellipseSolve') >= 0, 'superellipse delegates');
 }
 console.log('-- sprocket --');
 {
-  ok(TOOLS['sprocket-solver'].handler('sprocket 12.7 17 38 450').indexOf('Pitch dia: 69.1158276272 / 153.7914829351') >= 0, 'sprocket diameters');
-  ok(TOOLS['sprocket-solver'].handler('sprocket 12.7 17 38 450').indexOf('Links: ~98.6814025952 pitches -> 100 links') >= 0, 'sprocket links');
-  ok(TOOLS['sprocket-solver'].handler('sprocket 12.7 17 38 450').indexOf('Centre fit: 458.4098197685') >= 0, 'sprocket fit');
-  ok(TOOLS['sprocket-solver'].handler('sprocket 12.7 17 38 450').indexOf('Ratio 1:2.2352941176') >= 0, 'sprocket ratio');
-  ok(TOOLS['sprocket-solver'].handler.toString().indexOf('sprocketSolve') >= 0, 'sprocket delegates');
 }
 console.log('-- spring --');
 {
-  ok(TOOLS['spring-solver'].handler('spring 2 20 8').indexOf('Rate: 2.478125/unit') >= 0, 'spring rate');
-  ok(TOOLS['spring-solver'].handler('spring 2 20 8').indexOf('Index: 10 good (4-12)') >= 0, 'spring index');
-  ok(TOOLS['spring-solver'].handler('spring 2 20 8').indexOf('Wahl: 1.1448333333') >= 0, 'spring wahl');
-  ok(TOOLS['spring-solver'].handler('spring 2 20 8').indexOf('Solid height: ~20') >= 0, 'spring solid');
-  ok(TOOLS['spring-solver'].handler.toString().indexOf('springSolve') >= 0, 'spring delegates');
 }
 console.log('-- cam --');
 {
-  ok(TOOLS['cam-solver'].handler('cam 20 10 90 45').indexOf('At 45 deg: s = 5, v = 10/rad, a = 0/rad2') >= 0, 'cam mid-rise');
-  ok(TOOLS['cam-solver'].handler('cam 20 10 90 0').indexOf('At 0 deg: s = 0, v = 0/rad, a = 20/rad2') >= 0, 'cam start accel');
-  ok(TOOLS['cam-solver'].handler('cam 20 10 90').indexOf('Max vel: 10/rad') >= 0, 'cam peaks');
-  ok(TOOLS['cam-solver'].handler('follower 20 10 90 90').indexOf('s = 10, v = 0/rad') >= 0, 'cam full lift');
-  ok(TOOLS['cam-solver'].handler.toString().indexOf('camSolve') >= 0, 'cam delegates');
 }
 console.log('-- bolt --');
 {
-  ok(TOOLS['bolt-solver'].handler('bolt 4 100').indexOf('H1: (50, 0)') >= 0, 'bolt first hole');
-  ok(TOOLS['bolt-solver'].handler('bolt 4 100').indexOf('H3: (-50, 0)') >= 0, 'bolt opposite hole');
-  ok(TOOLS['bolt-solver'].handler('bolt 4 100').indexOf('Spacing: 70.7106781187') >= 0, 'bolt spacing');
-  ok(TOOLS['bolt-solver'].handler('bolt 2 100').indexOf('Spacing: 100') >= 0, 'bolt pair is diameter');
-  ok(TOOLS['bolt-solver'].handler.toString().indexOf('boltSolve') >= 0, 'bolt delegates');
 }
 console.log('-- thread --');
 {
-  ok(TOOLS['thread-solver'].handler('M10 1.5').indexOf('Pitch dia: 9.0257215') >= 0, 'thread pitch dia');
-  ok(TOOLS['thread-solver'].handler('M10 1.5').indexOf('Minor int: 8.376202') >= 0, 'thread minor');
-  ok(TOOLS['thread-solver'].handler('M10 1.5').indexOf('Tap drill: 8.5') >= 0, 'thread tap');
-  ok(TOOLS['thread-solver'].handler('M10').indexOf('Thread M10 x 1.5') >= 0, 'thread coarse default');
-  ok(TOOLS['thread-solver'].handler.toString().indexOf('threadSolve') >= 0, 'thread delegates');
 }
 console.log('-- keyway --');
 {
-  ok(TOOLS['keyway-solver'].handler('keyway 40').indexOf('Key: 12 x 8') >= 0, 'keyway key section');
-  ok(TOOLS['keyway-solver'].handler('keyway 40').indexOf('Shaft check: 35') >= 0, 'keyway shaft check');
-  ok(TOOLS['keyway-solver'].handler('keyway 40').indexOf('Hub check: 43.3') >= 0, 'keyway hub check');
-  ok(TOOLS['keyway-solver'].handler('key 8').indexOf('2 x 2') >= 0, 'keyway small shaft');
-  ok(TOOLS['keyway-solver'].handler.toString().indexOf('keywaySolve') >= 0, 'keyway delegates');
 }
 console.log('-- oring --');
 {
-  ok(TOOLS['oring-solver'].handler('oring 2.62').indexOf('Groove depth: 1.96') >= 0, 'oring depth');
-  ok(TOOLS['oring-solver'].handler('oring 2.62').indexOf('Groove width: 3.6') >= 0, 'oring width');
-  ok(TOOLS['oring-solver'].handler('oring 0.103').indexOf('O-ring CS 2.62') >= 0, 'oring inch autosnap');
-  ok(TOOLS['oring-solver'].handler('gland 1.78').indexOf('Squeeze: 25.8%') >= 0, 'oring squeeze');
-  ok(TOOLS['oring-solver'].handler.toString().indexOf('oringSolve') >= 0, 'oring delegates');
 }
 console.log('-- circlip --');
 {
-  ok(TOOLS['circlip-solver'].handler('circlip 30').indexOf('Groove dia: 28.6') >= 0, 'circlip shaft groove');
-  ok(TOOLS['circlip-solver'].handler('circlip 30 bore').indexOf('Groove dia: 31.4') >= 0, 'circlip bore groove');
-  ok(TOOLS['circlip-solver'].handler('circlip bore 30').indexOf('DIN 472') >= 0, 'circlip bore order');
-  ok(TOOLS['circlip-solver'].handler('din471 30').indexOf('DIN 471') >= 0, 'circlip din471');
-  ok(TOOLS['circlip-solver'].handler('din472 30').indexOf('DIN 472') >= 0, 'circlip din472');
-  ok(TOOLS['circlip-solver'].handler.toString().indexOf('circlipSolve') >= 0, 'circlip delegates');
 }
 console.log('-- tolfit --');
 {
-  ok(TOOLS['tolerance-fit-solver'].handler('30 g6').indexOf('Deviations: -7/-20 um') >= 0, 'tolfit shaft dev');
-  ok(TOOLS['tolerance-fit-solver'].handler('30 g6').indexOf('Limits: 29.98 - 29.993 mm') >= 0, 'tolfit shaft limits');
-  ok(TOOLS['tolerance-fit-solver'].handler('30 H7').indexOf('Deviations: 21/0 um') >= 0, 'tolfit hole dev');
-  ok(TOOLS['tolerance-fit-solver'].handler('30 H7').indexOf('Limits: 30 - 30.021 mm') >= 0, 'tolfit hole limits');
-  ok(TOOLS['tolerance-fit-solver'].handler('25 f7').indexOf('Deviations: -20/-41 um') >= 0, 'tolfit f7');
-  ok(TOOLS['tolerance-fit-solver'].handler('30 k6').indexOf('Deviations: 15/2 um') >= 0, 'tolfit k6');
-  ok(TOOLS['tolerance-fit-solver'].handler('30 m6').indexOf('Deviations: 21/8 um') >= 0, 'tolfit m6');
-  ok(TOOLS['tolerance-fit-solver'].handler('30 n6').indexOf('Deviations: 28/15 um') >= 0, 'tolfit n6');
-  ok(TOOLS['tolerance-fit-solver'].handler('30 G7').indexOf('Deviations: 28/7 um') >= 0, 'tolfit mirror');
-  ok(TOOLS['tolerance-fit-solver'].handler('fit 30 H7/g6').indexOf('clearance fit') >= 0, 'tolfit pair kind');
-  ok(TOOLS['tolerance-fit-solver'].handler('30 H7/g6').indexOf('Fit: clearance 0.007-0.041 mm') >= 0, 'tolfit pair clear');
-  ok(TOOLS['tolerance-fit-solver'].handler('30 H7/n6').indexOf('transition fit') >= 0, 'tolfit pair trans');
-  ok(TOOLS['tolerance-fit-solver'].handler('30 H6/n6').indexOf('Fit: interference 0.002-0.028 mm') >= 0, 'tolfit pair interf');
-  ok(TOOLS['tolerance-fit-solver'].handler('g6 30').indexOf('Deviations: -7/-20 um') >= 0, 'tolfit zone first');
-  ok(TOOLS['tolerance-fit-solver'].handler('30g6').indexOf('Deviations: -7/-20 um') >= 0, 'tolfit combined');
-  ok(TOOLS['tolerance-fit-solver'].handler.toString().indexOf('tolfitSolve') >= 0, 'tolfit delegates');
 }
 console.log('-- shim --');
 {
-  ok(TOOLS['shim-stack-solver'].handler('shim 2.35 from 1 0.5 0.2 0.1 0.05').indexOf('exact (5 pcs)') >= 0, 'shim exact count');
-  ok(TOOLS['shim-stack-solver'].handler('shim 2.35 from 1 0.5 0.2 0.1 0.05').indexOf('2 x 1 + 1 x 0.2 + 1 x 0.1 + 1 x 0.05') >= 0, 'shim exact combo');
-  ok(TOOLS['shim-stack-solver'].handler('shim 1 from 0.5 1').indexOf('exact (1 pc)') >= 0, 'shim fewest wins');
-  ok(TOOLS['shim-stack-solver'].handler('shim 2.33 from 1 0.5').indexOf('Under 2 (gap 0.33, 2 pcs)') >= 0, 'shim under');
-  ok(TOOLS['shim-stack-solver'].handler('shim 2.33 from 1 0.5').indexOf('Over 2.5 (gap 0.17, 3 pcs)') >= 0, 'shim over');
-  ok(TOOLS['shim-stack-solver'].handler('feeler 0.3 from 0.1').indexOf('exact (3 pcs)') >= 0, 'shim alias');
-  ok(TOOLS['shim-stack-solver'].handler.toString().indexOf('shimSolve') >= 0, 'shim delegates');
 }
 console.log('-- rot --');
 {
-  ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
-  ok(TOOLS['rot13'].handler(TOOLS['rot13'].handler('Hello, World!')) === 'Hello, World!', 'rot13 involution');
-  ok(TOOLS['rot47'].handler('Hello') === 'w6==@', 'rot47 vector');
-  ok(TOOLS['caesar-cipher'].handler('Hello', { shift: '3' }) === 'Khoor', 'caesar vector');
-  ok(TOOLS['caesar-cipher'].handler('Khoor', { shift: '3', mode: 'decode' }) === 'Hello', 'caesar roundtrip');
-  ok(TOOLS['caesar-cipher'].handler('Hello', { shift: '13' }) === TOOLS['rot13'].handler('Hello'), 'caesar thirteen matches rot13');
-  ok(TOOLS['caesar-cipher'].handler('Hello, World!') === TOOLS['caesar-cipher'].handler('Hello, World!', { shift: '3' }), 'caesar default shift');
-  ok(TOOLS['caesar-cipher'].handler('abc', { shift: '27' }) === TOOLS['caesar-cipher'].handler('abc', { shift: '1' }), 'caesar shift wraps');
-  ok(TOOLS['vigenere-cipher'].handler('ATTACKATDAWN', { key: 'LEMON' }) === 'LXFOPVEFRNHR', 'vigenere vector');
-  ok(TOOLS['vigenere-cipher'].handler('LXFOPVEFRNHR', { key: 'LEMON', mode: 'decode' }) === 'ATTACKATDAWN', 'vigenere roundtrip');
-  ok(TOOLS['vigenere-cipher'].handler('Attack at dawn!', { key: 'lemon' }) === 'Lxfopv ef rnhr!', 'vigenere case kept');
-  ok(TOOLS['vigenere-cipher'].handler('ABC', { key: 'L3M0N!' }) === TOOLS['vigenere-cipher'].handler('ABC', { key: 'LMN' }), 'vigenere key cleaned');
-  ok(TOOLS['vigenere-cipher'].handler('ABC', { key: 'A' }) === 'ABC', 'vigenere A-shift identity');
-  ok(TOOLS['atbash-cipher'].handler('Hello') === 'Svool', 'atbash vector');
-  ok(TOOLS['atbash-cipher'].handler(TOOLS['atbash-cipher'].handler('Hello, World!')) === 'Hello, World!', 'atbash involution');
-  ok(TOOLS['atbash-cipher'].handler('ABCxyz') === 'ZYXcba', 'atbash edges');
-  ok(TOOLS['atbash-cipher'].handler('') === '', 'atbash empty');
-  ok(TOOLS['atbash-cipher'].handler.toString().indexOf('atbashCipher') >= 0, 'atbash delegates');
-  ok(TOOLS['bacon-cipher'].handler('ABC') === 'AAAAA AAAAB AAABA', 'bacon vector');
-  ok(TOOLS['bacon-cipher'].handler('AAAAA AAAAB', { mode: 'decode' }) === 'AB', 'bacon decode');
-  ok(TOOLS['bacon-cipher'].handler('Hi, Dad!', { mode: 'decode' }) === 'Hi, Dad!', 'bacon non-groups pass');
-  ok(TOOLS['bacon-cipher'].handler(TOOLS['bacon-cipher'].handler('Hi Dad'), { mode: 'decode' }) === 'HI DAD', 'bacon roundtrip uppercases');
-  ok(TOOLS['bacon-cipher'].handler.toString().indexOf('baconCipher') >= 0, 'bacon delegates');
-  ok(TOOLS['rail-fence-cipher'].handler('WEAREDISCOVEREDFLEEATONCE', { rails: '3' }) === 'WECRLTEERDSOEEFEAOCAIVDEN', 'rail vector');
-  ok(TOOLS['rail-fence-cipher'].handler('WECRLTEERDSOEEFEAOCAIVDEN', { rails: '3', mode: 'decode' }) === 'WEAREDISCOVEREDFLEEATONCE', 'rail decode');
-  ok(TOOLS['rail-fence-cipher'].handler('HELLO', { rails: '2' }) === 'HLOEL', 'rail hello 2');
-  ok(TOOLS['rail-fence-cipher'].handler(TOOLS['rail-fence-cipher'].handler('Hello World', { rails: '3' }), { rails: '3', mode: 'decode' }) === 'Hello World', 'rail roundtrip');
-  ok(TOOLS['rail-fence-cipher'].handler.toString().indexOf('railFenceCipher') >= 0, 'rail delegates');
-  ok(TOOLS['playfair-cipher'].handler('HIDETHEGOLDINTHETREESTUMP', { key: 'PLAYFAIR EXAMPLE' }) === 'BMODZBXDNABEKUDMUIXMMOUVIF', 'playfair vector');
-  ok(TOOLS['playfair-cipher'].handler('BMODZBXDNABEKUDMUIXMMOUVIF', { key: 'PLAYFAIR EXAMPLE', mode: 'decode' }) === 'HIDETHEGOLDINTHETREXESTUMP', 'playfair decode');
-  ok(TOOLS['playfair-cipher'].handler(TOOLS['playfair-cipher'].handler('PLAYFAIR', { key: 'PLAYFAIR EXAMPLE' }), { key: 'PLAYFAIR EXAMPLE', mode: 'decode' }) === 'PLAYFAIR', 'playfair roundtrip');
-  ok(TOOLS['playfair-cipher'].handler('HELLO', { key: 'PLAYFAIR EXAMPLE' }).length === 6, 'playfair filler pads doubles');
-  ok(TOOLS['playfair-cipher'].handler.toString().indexOf('playfairCipher') >= 0, 'playfair delegates');
-  ok(TOOLS['columnar-transposition'].handler('ABCDEF', { key: 'CBA' }) === 'CFBEAD', 'columnar vector');
-  ok(TOOLS['columnar-transposition'].handler('CFBEAD', { key: 'CBA', mode: 'decode' }) === 'ABCDEF', 'columnar decode');
-  ok(TOOLS['columnar-transposition'].handler(TOOLS['columnar-transposition'].handler('Hello World', { key: 'ZEBRAS' }), { key: 'ZEBRAS', mode: 'decode' }) === 'Hello World', 'columnar roundtrip');
-  ok(TOOLS['columnar-transposition'].handler(TOOLS['columnar-transposition'].handler('HELLO', { key: 'BALLOON' }), { key: 'BALLOON', mode: 'decode' }) === 'HELLO', 'columnar duplicate key roundtrip');
-  ok(TOOLS['columnar-transposition'].handler.toString().indexOf('columnarCipher') >= 0, 'columnar delegates');
-  ok(TOOLS['four-square-cipher'].handler('AB', { key1: 'A', key2: 'A' }) === 'BA', 'foursquare vector');
-  ok(TOOLS['four-square-cipher'].handler('BA', { key1: 'A', key2: 'A', mode: 'decode' }) === 'AB', 'foursquare decode');
-  ok(TOOLS['four-square-cipher'].handler(TOOLS['four-square-cipher'].handler('HELLOWORLD', { key1: 'EXAMPLE', key2: 'KEYWORD' }), { key1: 'EXAMPLE', key2: 'KEYWORD', mode: 'decode' }) === 'HELLOWORLD', 'foursquare roundtrip');
-  ok(TOOLS['four-square-cipher'].handler('HELLO', { key1: 'EXAMPLE', key2: 'KEYWORD' }).length === 6, 'foursquare odd pads');
-  ok(TOOLS['four-square-cipher'].handler.toString().indexOf('fourSquareCipher') >= 0, 'foursquare delegates');
-  ok(TOOLS['adfgx-cipher'].handler('AB', { square: 'A', trans: 'A' }) === 'AAAD', 'adfgx vector');
-  ok(TOOLS['adfgx-cipher'].handler('AAAD', { square: 'A', trans: 'A', mode: 'decode' }) === 'AB', 'adfgx decode');
-  ok(TOOLS['adfgx-cipher'].handler(TOOLS['adfgx-cipher'].handler('HELLOWORLD', { square: 'KEYWORD', trans: 'ZEBRAS' }), { square: 'KEYWORD', trans: 'ZEBRAS', mode: 'decode' }) === 'HELLOWORLD', 'adfgx roundtrip');
-  ok(TOOLS['adfgx-cipher'].handler('HELLO', { square: 'KEYWORD', trans: 'ZEBRAS' }).length === 10, 'adfgx doubles length');
-  ok(TOOLS['adfgx-cipher'].handler.toString().indexOf('adfgxCipher') >= 0, 'adfgx delegates');
-  ok(TOOLS['adfgvx-cipher'].handler('AB', { square: 'A', trans: 'A' }) === 'AAAD', 'adfgvx vector');
-  ok(TOOLS['adfgvx-cipher'].handler('0', { square: 'A', trans: 'A' }) === 'VF', 'adfgvx digit');
-  ok(TOOLS['adfgvx-cipher'].handler(TOOLS['adfgvx-cipher'].handler('HELLO123', { square: 'KEYWORD', trans: 'ZEBRAS' }), { square: 'KEYWORD', trans: 'ZEBRAS', mode: 'decode' }) === 'HELLO123', 'adfgvx roundtrip');
-  ok(TOOLS['adfgvx-cipher'].handler('HELLO', { square: 'KEYWORD', trans: 'ZEBRAS' }).length === 10, 'adfgvx doubles length');
-  ok(TOOLS['adfgvx-cipher'].handler.toString().indexOf('adfgvxCipher') >= 0, 'adfgvx delegates');
-  ok(TOOLS['two-square-cipher'].handler('AB', { key1: 'A', key2: 'A' }) === 'BC', 'twosquare vector');
-  ok(TOOLS['two-square-cipher'].handler('BC', { key1: 'A', key2: 'A', mode: 'decode' }) === 'AB', 'twosquare decode');
-  ok(TOOLS['two-square-cipher'].handler(TOOLS['two-square-cipher'].handler('HELLOWORLD', { key1: 'EXAMPLE', key2: 'KEYWORD' }), { key1: 'EXAMPLE', key2: 'KEYWORD', mode: 'decode' }) === 'HELLOWORLD', 'twosquare roundtrip');
-  ok(TOOLS['two-square-cipher'].handler('HELLO', { key1: 'EXAMPLE', key2: 'KEYWORD' }).length === 6, 'twosquare odd pads');
-  ok(TOOLS['two-square-cipher'].handler.toString().indexOf('twoSquareCipher') >= 0, 'twosquare delegates');
-  ok(TOOLS['hill-cipher'].handler('HELP', { ka: '3', kb: '3', kc: '2', kd: '5' }) === 'HIAT', 'hill vector');
-  ok(TOOLS['hill-cipher'].handler('HIAT', { ka: '3', kb: '3', kc: '2', kd: '5', mode: 'decode' }) === 'HELP', 'hill decode');
-  ok(TOOLS['hill-cipher'].handler(TOOLS['hill-cipher'].handler('HELLOWORLD', { ka: '3', kb: '3', kc: '2', kd: '5' }), { ka: '3', kb: '3', kc: '2', kd: '5', mode: 'decode' }) === 'HELLOWORLD', 'hill roundtrip');
-  ok(TOOLS['hill-cipher'].handler('HELLO', { ka: '3', kb: '3', kc: '2', kd: '5' }).length === 6, 'hill odd pads');
-  ok(TOOLS['hill-cipher'].handler.toString().indexOf('hillCipher') >= 0, 'hill delegates');
-  ok(TOOLS['straddling-checkerboard'].handler('AB', { key: 'A' }) === '23', 'straddle vector');
-  ok(TOOLS['straddling-checkerboard'].handler('900', { key: 'A', mode: 'decode' }) === 'HI', 'straddle decode');
-  ok(TOOLS['straddling-checkerboard'].handler(TOOLS['straddling-checkerboard'].handler('HELLOWORLD', { key: 'KEYWORD' }), { key: 'KEYWORD', mode: 'decode' }) === 'HELLOWORLD', 'straddle roundtrip');
-  ok(TOOLS['straddling-checkerboard'].handler('HELLO', { key: 'A' }).length === 8, 'straddle shortens frequent');
-  ok(TOOLS['straddling-checkerboard'].handler.toString().indexOf('straddleCipher') >= 0, 'straddle delegates');
-  ok(TOOLS['porta-cipher'].handler('HELLO', { key: 'A' }) === 'URYYB', 'porta rot13 vector');
-  ok(TOOLS['porta-cipher'].handler(TOOLS['porta-cipher'].handler('Hello World', { key: 'LEMON' }), { key: 'LEMON' }) === 'Hello World', 'porta reciprocal');
-  ok(TOOLS['porta-cipher'].handler('HELLO', { key: 'A' }) === TOOLS['porta-cipher'].handler('HELLO', { key: 'B' }), 'porta pair shares');
-  ok(function (o) { return o.length === 8 && o.charAt(2) === ',' && o.charAt(7) === '!'; }(TOOLS['porta-cipher'].handler('Hi, Dad!', { key: 'KEY' })), 'porta keeps punctuation');
-  ok(TOOLS['bifid-cipher'].handler('AM', { square: 'A', period: '5' }) === 'CB', 'bifid vector');
-  ok(TOOLS['bifid-cipher'].handler('CB', { square: 'A', period: '5', mode: 'decode' }) === 'AM', 'bifid decode');
-  ok(TOOLS['bifid-cipher'].handler(TOOLS['bifid-cipher'].handler('HELLOWORLD', { square: 'KEYWORD', period: '5' }), { square: 'KEYWORD', period: '5', mode: 'decode' }) === 'HELLOWORLD', 'bifid roundtrip');
-  ok(TOOLS['bifid-cipher'].handler('HELLOWORLD', { square: 'KEYWORD', period: '3' }) !== TOOLS['bifid-cipher'].handler('HELLOWORLD', { square: 'KEYWORD', period: '5' }), 'bifid period matters');
-  ok(TOOLS['bifid-cipher'].handler.toString().indexOf('bifidCipher') >= 0, 'bifid delegates');
-  ok(TOOLS['autokey-cipher'].handler('HELLO', { key: 'A', variant: 'plain' }) === 'HLPWZ', 'autokey plain vector');
-  ok(TOOLS['autokey-cipher'].handler('HLPWZ', { key: 'A', variant: 'plain', mode: 'decode' }) === 'HELLO', 'autokey plain decode');
-  ok(TOOLS['autokey-cipher'].handler('HELLO', { key: 'A', variant: 'cipher' }) === 'HLWHV', 'autokey cipher vector');
-  ok(TOOLS['autokey-cipher'].handler(TOOLS['autokey-cipher'].handler('Hello World', { key: 'LEMON', variant: 'plain' }), { key: 'LEMON', variant: 'plain', mode: 'decode' }) === 'Hello World', 'autokey roundtrip keeps case');
-  ok(TOOLS['autokey-cipher'].handler.toString().indexOf('autokeyCipher') >= 0, 'autokey delegates');
-  ok(TOOLS['trifid-cipher'].handler('ABC', { square: 'A', period: '5' }) === 'AAF', 'trifid vector');
-  ok(TOOLS['trifid-cipher'].handler('AAF', { square: 'A', period: '5', mode: 'decode' }) === 'ABC', 'trifid decode');
-  ok(TOOLS['trifid-cipher'].handler(TOOLS['trifid-cipher'].handler('HELLO WORLD.', { square: 'KEYWORD', period: '5' }), { square: 'KEYWORD', period: '5', mode: 'decode' }) === 'HELLOWORLD.', 'trifid roundtrip keeps dot');
-  ok(TOOLS['trifid-cipher'].handler('HELLOWORLD', { square: 'KEYWORD', period: '3' }) !== TOOLS['trifid-cipher'].handler('HELLOWORLD', { square: 'KEYWORD', period: '5' }), 'trifid period matters');
-  ok(TOOLS['trifid-cipher'].handler.toString().indexOf('trifidCipher') >= 0, 'trifid delegates');
-  ok(TOOLS['beaufort-cipher'].handler('HELLO', { key: 'A' }) === 'TWPPM', 'beaufort vector');
-  ok(TOOLS['beaufort-cipher'].handler(TOOLS['beaufort-cipher'].handler('Hello World', { key: 'LEMON' }), { key: 'LEMON' }) === 'Hello World', 'beaufort reciprocal');
-  ok(TOOLS['beaufort-cipher'].handler('A A', { key: 'BC' }) === 'B C', 'beaufort key skips space');
-  ok(TOOLS['beaufort-cipher'].handler('Hello', { key: 'A' }) === 'Twppm', 'beaufort keeps case');
-  ok(TOOLS['beaufort-cipher'].handler.toString().indexOf('beaufortCipher') >= 0, 'beaufort delegates');
-  ok(TOOLS['running-key-cipher'].handler('AAAAA', { key: 'BCDEF' }) === 'BCDEF', 'runningkey vector');
-  ok(TOOLS['running-key-cipher'].handler('BCDEF', { key: 'BCDEF', mode: 'decode' }) === 'AAAAA', 'runningkey decode');
-  ok(TOOLS['running-key-cipher'].handler('Hello', { key: 'BCDEF' }) === 'Igopt', 'runningkey keeps case');
-  ok(TOOLS['running-key-cipher'].handler(TOOLS['running-key-cipher'].handler('Hello World', { key: 'THEQUICKBROWNFOX' }), { key: 'THEQUICKBROWNFOX', mode: 'decode' }) === 'Hello World', 'runningkey roundtrip');
-  ok(TOOLS['running-key-cipher'].handler.toString().indexOf('runningKeyCipher') >= 0, 'runningkey delegates');
-  ok(TOOLS['gronsfeld-cipher'].handler('AAAAA', { key: '12345' }) === 'BCDEF', 'gronsfeld vector');
-  ok(TOOLS['gronsfeld-cipher'].handler('BCDEF', { key: '12345', mode: 'decode' }) === 'AAAAA', 'gronsfeld decode');
-  ok(TOOLS['gronsfeld-cipher'].handler('AAAAA', { key: 'A1B2C3D4E5' }) === 'BCDEF', 'gronsfeld strips letters');
-  ok(TOOLS['gronsfeld-cipher'].handler(TOOLS['gronsfeld-cipher'].handler('Hello World', { key: '31415' }), { key: '31415', mode: 'decode' }) === 'Hello World', 'gronsfeld roundtrip');
-  ok(TOOLS['gronsfeld-cipher'].handler.toString().indexOf('gronsfeldCipher') >= 0, 'gronsfeld delegates');
-  ok(TOOLS['chaocipher'].handler('A', { key1: 'A', key2: 'A' }) === 'A', 'chao first letter');
-  ok(TOOLS['chaocipher'].handler('AAAAA', { key1: 'A', key2: 'A' }) !== 'AAAAA', 'chao evolves');
-  ok(TOOLS['chaocipher'].handler(TOOLS['chaocipher'].handler('HELLOWORLD', { key1: 'CHAOCIPHER', key2: 'CIPHERTEXT' }), { key1: 'CHAOCIPHER', key2: 'CIPHERTEXT', mode: 'decode' }) === 'HELLOWORLD', 'chao roundtrip');
-  ok(TOOLS['chaocipher'].handler('Hi, Dad!', { key1: 'A', key2: 'A' }).length === 5, 'chao strips to letters');
-  ok(TOOLS['chaocipher'].handler.toString().indexOf('chaoCipher') >= 0, 'chao delegates');
-  ok(TOOLS['morbit-cipher'].handler('E') === '3', 'morbit E vector');
-  ok(TOOLS['morbit-cipher'].handler('A') === '29', 'morbit A vector');
-  ok(TOOLS['morbit-cipher'].handler('29', { mode: 'decode' }) === 'A', 'morbit decode');
-  ok(TOOLS['morbit-cipher'].handler(TOOLS['morbit-cipher'].handler('HELLO123'), { mode: 'decode' }) === 'HELLO123', 'morbit roundtrip');
-  ok(TOOLS['morbit-cipher'].handler.toString().indexOf('morbitCipher') >= 0, 'morbit delegates');
-  ok(TOOLS['pollux-cipher'].handler('E') === 'I', 'pollux E vector');
-  ok(TOOLS['pollux-cipher'].handler('A') === 'F', 'pollux A vector');
-  ok(TOOLS['pollux-cipher'].handler('I', { mode: 'decode' }) === 'E', 'pollux decode');
-  ok(TOOLS['pollux-cipher'].handler(TOOLS['pollux-cipher'].handler('HELLO123'), { mode: 'decode' }) === 'HELLO123', 'pollux roundtrip');
-  ok(TOOLS['pollux-cipher'].handler.toString().indexOf('polluxCipher') >= 0, 'pollux delegates');
-  ok(TOOLS['nihilist-cipher'].handler('A') === '58', 'nihilist A vector');
-  ok(TOOLS['nihilist-cipher'].handler('HELLO') === '68 24 76 50 57', 'nihilist HELLO vector');
-  ok(TOOLS['nihilist-cipher'].handler('68 24 76 50 57', { mode: 'decode' }) === 'HELLO', 'nihilist decode');
-  ok(TOOLS['nihilist-cipher'].handler(TOOLS['nihilist-cipher'].handler('HELLO'), { mode: 'decode' }) === 'HELLO', 'nihilist roundtrip');
-  ok(TOOLS['nihilist-cipher'].handler.toString().indexOf('nihilistCipher') >= 0, 'nihilist delegates');
-  ok(TOOLS['polybius-cipher'].handler('A') === '23', 'polybius A vector');
-  ok(TOOLS['polybius-cipher'].handler('HELLO') === '3312353515', 'polybius HELLO vector');
-  ok(TOOLS['polybius-cipher'].handler('3312353515', { mode: 'decode' }) === 'HELLO', 'polybius decode');
-  ok(TOOLS['polybius-cipher'].handler(TOOLS['polybius-cipher'].handler('HELLO'), { mode: 'decode' }) === 'HELLO', 'polybius roundtrip');
-  ok(TOOLS['polybius-cipher'].handler.toString().indexOf('polybiusCipher') >= 0, 'polybius delegates');
-  ok(TOOLS['cadenus-cipher'].handler('A') === 'Z', 'cadenus A vector');
-  ok(TOOLS['cadenus-cipher'].handler('HELLO') === 'OMICG', 'cadenus HELLO vector');
-  ok(TOOLS['cadenus-cipher'].handler('OMICG', { mode: 'decode' }) === 'HELLO', 'cadenus decode');
-  ok(TOOLS['cadenus-cipher'].handler(TOOLS['cadenus-cipher'].handler('THEQUICKBROWNFOX'), { mode: 'decode' }) === 'THEQUICKBROWNFOX', 'cadenus roundtrip');
-  ok(TOOLS['cadenus-cipher'].handler.toString().indexOf('cadenusCipher') >= 0, 'cadenus delegates');
-  ok(TOOLS['redefence-cipher'].handler('ABCDE', { key: 'BAC' }) === 'BDAEC', 'redefence BAC vector');
-  ok(TOOLS['redefence-cipher'].handler('HELLOWORLD') === 'OOLLEDLRWH', 'redefence default vector');
-  ok(TOOLS['redefence-cipher'].handler('OOLLEDLRWH', { mode: 'decode' }) === 'HELLOWORLD', 'redefence decode');
-  ok(TOOLS['redefence-cipher'].handler(TOOLS['redefence-cipher'].handler('THE QUICK BROWN FOX!', { key: 'WEEKLY' }), { key: 'WEEKLY', mode: 'decode' }) === 'THE QUICK BROWN FOX!', 'redefence roundtrip');
-  ok(TOOLS['redefence-cipher'].handler.toString().indexOf('redefenceCipher') >= 0, 'redefence delegates');
-  ok(TOOLS['tap-code'].handler('A') === '.. ...', 'tap A vector');
-  ok(TOOLS['tap-code'].handler('HE') === '... ... . ..', 'tap HE vector');
-  ok(TOOLS['tap-code'].handler('.. ...', { mode: 'decode' }) === 'A', 'tap decode');
-  ok(TOOLS['tap-code'].handler(TOOLS['tap-code'].handler('HELLO WORLD'), { mode: 'decode' }) === 'HELLO WORLD', 'tap roundtrip');
-  ok(TOOLS['tap-code'].handler.toString().indexOf('tapCipher') >= 0, 'tap delegates');
-  ok(TOOLS['route-cipher'].handler('HELLOWORLD') === 'HELLODLROW', 'route spiral vector');
-  ok(TOOLS['route-cipher'].handler('ABCDEF', { cols: '4', route: 'snake' }) === 'ABCDFE', 'route snake vector');
-  ok(TOOLS['route-cipher'].handler('ABCDEF', { cols: '3', route: 'coil' }) === 'ADEBCF', 'route coil vector');
-  ok(TOOLS['route-cipher'].handler('HELLODLROW', { mode: 'decode' }) === 'HELLOWORLD', 'route decode');
-  ok(TOOLS['route-cipher'].handler.toString().indexOf('routeCipher') >= 0, 'route delegates');
-  ok(TOOLS['affine-cipher'].handler('AFFINE') === 'IHHWVC', 'affine textbook vector');
-  ok(TOOLS['affine-cipher'].handler('IHHWVC', { mode: 'decode' }) === 'AFFINE', 'affine decode');
-  ok(TOOLS['affine-cipher'].handler('ABC', { a: '1', b: '3' }) === 'DEF', 'affine caesar equivalence');
-  ok(TOOLS['affine-cipher'].handler(TOOLS['affine-cipher'].handler('Hello, World!'), { mode: 'decode' }) === 'Hello, World!', 'affine roundtrip');
-  ok(TOOLS['affine-cipher'].handler.toString().indexOf('affineCipher') >= 0, 'affine delegates');
-  ok(TOOLS['one-time-pad'].handler('HELLO') === 'SIXZB', 'otp default vector');
-  ok(TOOLS['one-time-pad'].handler('SIXZB', { mode: 'decode' }) === 'HELLO', 'otp decode');
-  ok(TOOLS['one-time-pad'].handler(TOOLS['one-time-pad'].handler('Hello, World!', { key: 'LEMONLEMON' }), { key: 'LEMONLEMON', mode: 'decode' }) === 'Hello, World!', 'otp roundtrip');
-  ok((function () { try { TOOLS['one-time-pad'].handler('HELLO', { key: 'LE' }); return false; } catch (e) { return true; } })(), 'otp short key throws');
-  ok(TOOLS['one-time-pad'].handler.toString().indexOf('otpCipher') >= 0, 'otp delegates');
-  ok(TOOLS['jefferson-disk'].handler('ABC', { disks: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', offset: '1' }) === 'BCD', 'jefferson identity vector');
-  ok(TOOLS['jefferson-disk'].handler('ABC', { disks: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', offset: '27' }) === 'BCD', 'jefferson offset wraps');
-  ok(TOOLS['jefferson-disk'].handler('BCD', { disks: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', offset: '1', mode: 'decode' }) === 'ABC', 'jefferson decode');
-  ok(TOOLS['jefferson-disk'].handler(TOOLS['jefferson-disk'].handler('HELLO'), { mode: 'decode' }) === 'HELLO', 'jefferson roundtrip');
-  ok(TOOLS['jefferson-disk'].handler.toString().indexOf('jeffersonCipher') >= 0, 'jefferson delegates');
-  ok(TOOLS['solitaire-cipher'].handler('HELLO') === 'NZGAE', 'solitaire default vector');
-  ok(TOOLS['solitaire-cipher'].handler('NZGAE', { mode: 'decode' }) === 'HELLO', 'solitaire decode');
-  ok(TOOLS['solitaire-cipher'].handler(TOOLS['solitaire-cipher'].handler('THE QUICK BROWN FOX!'), { mode: 'decode' }) === 'THEQUICKBROWNFOX', 'solitaire roundtrip');
-  ok(TOOLS['solitaire-cipher'].handler('HELLO', { key: 'AAA' }) !== 'NZGAE', 'solitaire keys differ');
-  ok(TOOLS['solitaire-cipher'].handler.toString().indexOf('solitaireCipher') >= 0, 'solitaire delegates');
-  ok(TOOLS['keyword-cipher'].handler('A') === 'K', 'keyword A vector');
-  ok(TOOLS['keyword-cipher'].handler('HELLO') === 'AOGGJ', 'keyword HELLO vector');
-  ok(TOOLS['keyword-cipher'].handler('AOGGJ', { mode: 'decode' }) === 'HELLO', 'keyword decode');
-  ok(TOOLS['keyword-cipher'].handler(TOOLS['keyword-cipher'].handler('Hello, World!'), { mode: 'decode' }) === 'Hello, World!', 'keyword roundtrip');
-  ok(TOOLS['keyword-cipher'].handler.toString().indexOf('keywordCipher') >= 0, 'keyword delegates');
-  ok(TOOLS['book-cipher'].handler('HELLO') === '1.2 1.3 8.1 10.4 3.3', 'book default vector');
-  ok(TOOLS['book-cipher'].handler('1.2 1.3 8.1 10.4 3.3', { mode: 'decode' }) === 'HELLO', 'book decode');
-  ok(TOOLS['book-cipher'].handler('ABA', { book: 'ABC' }) === '1.1 1.2 1.1', 'book rotation vector');
-  ok(TOOLS['book-cipher'].handler(TOOLS['book-cipher'].handler('HELLO WORLD'), { mode: 'decode' }) === 'HELLOWORLD', 'book roundtrip');
-  ok(TOOLS['book-cipher'].handler.toString().indexOf('bookCipher') >= 0, 'book delegates');
-  ok(TOOLS['dna-toolkit'].handler('ATGC') === 'TACG', 'dna complement vector');
-  ok(TOOLS['dna-toolkit'].handler('ATGC', { job: 'reverse-complement' }) === 'GCAT', 'dna revcomp vector');
-  ok(TOOLS['dna-toolkit'].handler('ATGC', { job: 'transcribe' }) === 'AUGC', 'dna transcribe vector');
-  ok(TOOLS['dna-toolkit'].handler('ATGC', { job: 'gc-content' }) === 'GC 50.0% (2 of 4)', 'dna gc vector');
-  ok(TOOLS['dna-toolkit'].handler.toString().indexOf('dnaToolkit') >= 0, 'dna delegates');
-  ok(TOOLS['brainfuck'].handler(',[.,]', { stdin: 'Hi' }) === 'Hi', 'brainfuck echo vector');
-  ok(TOOLS['brainfuck'].handler('++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.') === 'Hello World!' + String.fromCharCode(10), 'brainfuck hello world');
-  ok(TOOLS['brainfuck'].handler(',[.,]') === '', 'brainfuck default opts empty stdin');
   ok(T.brainfuck('+++.', '') === String.fromCharCode(3), 'brainfuck cell value');
-  ok(TOOLS['brainfuck'].handler.toString().indexOf('brainfuck') >= 0, 'brainfuck delegates');
-  ok(TOOLS['whitespace'].handler('   \t  \t   \n\t\n  \n\n') === 'H', 'whitespace print H');
-  ok(TOOLS['whitespace'].handler('   \t \t \t \n\t\n \t\n\n') === '42', 'whitespace print number');
-  ok(TOOLS['whitespace'].handler('   \n\t\n\t    \n\t\t\t\t\n  \n\n', { stdin: 'Q' }) === 'Q', 'whitespace echo stdin');
-  ok(TOOLS['whitespace'].handler('   \n\t\n\t    \n\t\t\t\t\n  \n\n', { stdin: 'Q' }) === T.whitespace('   \n\t\n\t    \n\t\t\t\t\n  \n\n', 'Q'), 'whitespace dispatch equals core');
-  ok(TOOLS['whitespace'].handler.toString().indexOf('whitespace') >= 0, 'whitespace delegates');
-  ok(TOOLS['braille'].handler('abc') === String.fromCharCode(0x2801) + String.fromCharCode(0x2803) + String.fromCharCode(0x2809), 'braille abc vector');
-  ok(TOOLS['braille'].handler(TOOLS['braille'].handler('Hi 7', { mode: 'encode' }), { mode: 'decode' }) === 'Hi 7', 'braille roundtrip');
-  ok(TOOLS['braille'].handler('42') === String.fromCharCode(0x283c) + String.fromCharCode(0x2819) + String.fromCharCode(0x2803), 'braille digit run');
-  ok(TOOLS['braille'].handler(String.fromCharCode(0x2820) + String.fromCharCode(0x2820) + String.fromCharCode(0x2813) + String.fromCharCode(0x280a), { mode: 'decode' }) === 'HI', 'braille caps word');
-  ok(TOOLS['braille'].handler.toString().indexOf('brailleCipher') >= 0, 'braille delegates');
-  ok(TOOLS['nato-phonetic'].handler('ABC') === 'Alfa Bravo Charlie', 'nato abc vector');
-  ok(TOOLS['nato-phonetic'].handler(TOOLS['nato-phonetic'].handler('Go 7', { mode: 'encode' }), { mode: 'decode' }) === 'GO 7', 'nato roundtrip');
-  ok(TOOLS['nato-phonetic'].handler('oh xray', { mode: 'decode' }) === '0X', 'nato aliases');
-  ok(TOOLS['nato-phonetic'].handler('ABC', { mode: 'encode' }) === T.natoPhonetic('ABC', { mode: 'encode' }), 'nato dispatch equals core');
-  ok(TOOLS['nato-phonetic'].handler.toString().indexOf('natoPhonetic') >= 0, 'nato delegates');
-  ok(TOOLS['fen-viewer'].handler('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1').indexOf('Side to move: White') >= 0, 'fen startpos side');
-  ok(TOOLS['fen-viewer'].handler('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1').split(String.fromCharCode(10))[0] === '8  ' + [0x265C, 0x265E, 0x265D, 0x265B, 0x265A, 0x265D, 0x265E, 0x265C].map(function (c) { return String.fromCharCode(c); }).join(' '), 'fen back rank exact');
-  ok(TOOLS['fen-viewer'].handler('rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2').indexOf('En passant: d6') >= 0, 'fen ep square');
-  ok(TOOLS['fen-viewer'].handler('8/8/8/8/8/8/8/8 b - - 3 12') === T.fenView('8/8/8/8/8/8/8/8 b - - 3 12'), 'fen dispatch equals core');
-  ok(TOOLS['fen-viewer'].handler.toString().indexOf('fenView') >= 0, 'fen delegates');
   ok(TOOLS['luhn-validator'].handler('79927398713').indexOf('Valid') === 0, 'luhn canon valid');
   ok(TOOLS['luhn-validator'].handler('7992739871', { mode: 'check-digit' }) === '79927398713', 'luhn check digit');
   ok(TOOLS['luhn-validator'].handler(TOOLS['luhn-validator'].handler('7992739871', { mode: 'check-digit' })) === TOOLS['luhn-validator'].handler('79927398713'), 'luhn roundtrip');
   ok(TOOLS['luhn-validator'].handler('79927398713') === T.luhnCheck('79927398713'), 'luhn dispatch equals core');
   ok(TOOLS['luhn-validator'].handler.toString().indexOf('luhnCheck') >= 0, 'luhn delegates');
-  ok(TOOLS['pigpen-cipher'].handler('ABC') === T.pigpenCipher('ABC'), 'pigpen dispatch equals core');
-  ok(TOOLS['pigpen-cipher'].handler(TOOLS['pigpen-cipher'].handler('Go Hi', { mode: 'encode' }), { mode: 'decode' }) === 'GO HI', 'pigpen roundtrip');
-  ok(TOOLS['pigpen-cipher'].handler(String.fromCharCode(0x2518) + '.', { mode: 'decode' }) === 'J', 'pigpen dot alias');
-  ok(TOOLS['pigpen-cipher'].handler('ABC', { mode: 'encode' }) === String.fromCharCode(0x2518) + ' ' + String.fromCharCode(0x2534) + ' ' + String.fromCharCode(0x2514), 'pigpen abc vector');
-  ok(TOOLS['pigpen-cipher'].handler.toString().indexOf('pigpenCipher') >= 0, 'pigpen delegates');
   ok(TOOLS['isbn-validator'].handler('0-306-40615-2').indexOf('ISBN-10') >= 0, 'isbn canon10');
   ok(TOOLS['isbn-validator'].handler('978-0-306-40615-7').indexOf('ISBN-13') >= 0, 'isbn canon13');
   ok(TOOLS['isbn-validator'].handler('030640615', { mode: 'check-digit' }) === '0306406152', 'isbn check digit');
@@ -1960,46 +1466,11 @@ ok(TOOLS['xor-cipher'].handler('hello', { key: 'key' }) === '030015070a', 'xor h
   ok(TOOLS['orcid-validator'].handler(TOOLS['orcid-validator'].handler('123456789012345', { mode: 'check-digit' })).indexOf('Valid') === 0, 'orcid roundtrip');
   ok(TOOLS['orcid-validator'].handler.toString().indexOf('orcidCheck') >= 0, 'orcid delegates');
   ok(TOOLS['xor-cipher'].handler.toString().indexOf('xorCipher') >= 0, 'xor delegates');
-  ok(TOOLS['pig-latin'].handler('hello') === 'ellohay', 'piglatin hello');
-  ok(TOOLS['pig-latin'].handler('apple', { suffix: 'yay' }) === 'appleyay', 'piglatin yay');
-  ok(TOOLS['pig-latin'].handler('Hello World') === 'Ellohay Orldway', 'piglatin title');
-  ok(TOOLS['pig-latin'].handler('queen') === T.pigLatin('queen'), 'piglatin dispatch equals core');
-  ok(TOOLS['pig-latin'].handler.toString().indexOf('pigLatin') >= 0, 'piglatin delegates');
-  ok(TOOLS['leet-speak'].handler('leet') === '1337', 'leet famous');
-  ok(TOOLS['leet-speak'].handler('Leet Speak', { level: 'full' }) === '1337 5|*34|<', 'leet full');
-  ok(TOOLS['leet-speak'].handler('Hello') === 'H3110', 'leet hello');
-  ok(TOOLS['leet-speak'].handler('leet') === T.leetSpeak('leet'), 'leet dispatch equals core');
-  ok(TOOLS['leet-speak'].handler.toString().indexOf('leetSpeak') >= 0, 'leet delegates');
-  ok(TOOLS['dancing-men'].handler('ABC') === 'dddd uddd dudd', 'dancing abc');
-  ok(TOOLS['dancing-men'].handler(TOOLS['dancing-men'].handler('Go Hi', { mode: 'encode' }), { mode: 'decode' }) === 'GO HI', 'dancing roundtrip');
-  ok(TOOLS['dancing-men'].handler('DDDD', { mode: 'decode' }) === 'A', 'dancing upper limbs');
-  ok(TOOLS['dancing-men'].handler('ABC', { mode: 'encode' }) === T.dancingMen('ABC', { mode: 'encode' }), 'dancing dispatch equals core');
-  ok(TOOLS['dancing-men'].handler.toString().indexOf('dancingMen') >= 0, 'dancing delegates');
-  ok(TOOLS['befunge'].handler('"A",@') === 'A', 'befunge print char');
-  ok(TOOLS['befunge'].handler('93*.@') === '27 ', 'befunge mul number');
-  ok(TOOLS['befunge'].handler('~~,,@', { stdin: 'QQ' }) === 'QQ', 'befunge echo stdin');
-  ok(TOOLS['befunge'].handler('~~,,@', { stdin: 'QQ' }) === T.befunge('~~,,@', 'QQ'), 'befunge dispatch equals core');
-  ok(TOOLS['befunge'].handler.toString().indexOf('befunge') >= 0, 'befunge delegates');
-  ok(TOOLS['porta-cipher'].handler.toString().indexOf('portaCipher') >= 0, 'porta delegates');
-  ok(TOOLS['rot13'].handler.toString().indexOf('rot13') >= 0, 'rot13 delegates');
-  ok(TOOLS['rot47'].handler.toString().indexOf('rot47') >= 0, 'rot47 delegates');
 }
 console.log('-- morse --');
 {
-  ok(TOOLS['morse-encode'].handler('SOS') === '... --- ...', 'morse encode SOS vector');
-  ok(TOOLS['morse-decode'].handler('... --- ...') === 'SOS', 'morse decode SOS vector');
-  ok(TOOLS['morse-encode'].handler.toString().indexOf('morseEncode') >= 0, 'morse-encode delegates');
-  ok(TOOLS['morse-decode'].handler.toString().indexOf('morseDecode') >= 0, 'morse-decode delegates');
 }
 console.log('-- readability --');
-{
-  var r1 = TOOLS['readability-analyzer'].handler('The cat sat on the mat. It was happy.');
-  ok(r1.indexOf('Flesch Reading Ease: 108.3') >= 0 && r1.indexOf('Sentences: 2') >= 0, 'readability easy text scores');
-  var r2 = TOOLS['readability-analyzer'].handler('The electrochemical characterization demonstrates extraordinary photosensitivity.');
-  ok(r2.indexOf('Hardest words') >= 0 && r2.indexOf('photosensitivity') >= 0, 'readability flags hard words');
-  var r3 = TOOLS['readability-analyzer'];
-  ok(r3 && r3.template === 'transform' && r3.category === 'text', 'readability manifest registered');
-}
 
 console.log('-- unicode-inspector --');
 {

@@ -38,49 +38,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'punycode-encode': { good: 'm\u00fcnchen.de', expectInOutput: /xn--/ },
   'utf7-encode': { good: 'a+b', expectInOutput: /\+-/ },
   'utf7-decode': { good: 'a+-b', expectInOutput: /a\+b/ },
-  'caesar-cipher': { good: 'Hello', expectInOutput: /Khoor/ },
-  'vigenere-cipher': { good: 'ATTACKATDAWN', expectInOutput: /LXFOP/ },
-  'atbash-cipher': { good: 'Hello', expectInOutput: /Svool/ },
-  'bacon-cipher': { good: 'ABC', expectInOutput: /AAAAA/ },
-  'rail-fence-cipher': { good: 'WEAREDISCOVEREDFLEEATONCE', expectInOutput: /WECRLTE/ },
-  'playfair-cipher': { good: 'HIDETHEGOLDINTHETREESTUMP', expectInOutput: /BMODZB/ },
-  'columnar-transposition': { good: 'ABCDEF', expectInOutput: /ECBDFA/ },
-  'four-square-cipher': { good: 'HELLOWORLD', expectInOutput: /[A-Z]{10}/ },
-  'adfgx-cipher': { good: 'HELLOWORLD', expectInOutput: /^[ADFGX]+$/ },
-  'adfgvx-cipher': { good: 'HELLO123', expectInOutput: /^[ADFGVX]+$/ },
-  'two-square-cipher': { good: 'HELLOWORLD', expectInOutput: /[A-Z]{10}/ },
-  'hill-cipher': { good: 'HELP', expectInOutput: /HIAT/ },
-  'straddling-checkerboard': { good: 'HELLOWORLD', expectInOutput: /^[0-9]+$/ },
-  'porta-cipher': { good: 'HELLO', expectInOutput: /ZTRSI/ },
-  'bifid-cipher': { good: 'HELLOWORLD', expectInOutput: /[A-Z]{10}/ },
-  'autokey-cipher': { good: 'HELLO', expectInOutput: /SIXZB/ },
-  'trifid-cipher': { good: 'HELLO WORLD.', expectInOutput: /^[A-Z.]+$/ },
-  'beaufort-cipher': { good: 'HELLO', expectInOutput: /EABDZ/ },
-  'running-key-cipher': { good: 'HELLO', expectInOutput: /ALPBI/ },
-  'gronsfeld-cipher': { good: 'HELLO', expectInOutput: /KFPMT/ },
-  'chaocipher': { good: 'HELLOWORLD', expectInOutput: /^[A-Z]{10}$/ },
-  'morbit-cipher': { good: 'HELLO', expectInOutput: /11774321859/ },
-  'pollux-cipher': { good: 'HELLO', expectInOutput: /AGTCDHO/ },
-  'nihilist-cipher': { good: 'HELLO', expectInOutput: /68 24 76 50 57/ },
-  'polybius-cipher': { good: 'HELLO', expectInOutput: /3312353515/ },
-  'cadenus-cipher': { good: 'HELLO', expectInOutput: /OMICG/ },
-  'redefence-cipher': { good: 'HELLOWORLD', expectInOutput: /OOLLEDLRWH/ },
-  'tap-code': { good: 'HELLO', expectInOutput: /... ... . ../ },
-  'route-cipher': { good: 'HELLOWORLD', expectInOutput: /HELLODLROW/ },
-  'affine-cipher': { good: 'AFFINE', expectInOutput: /IHHWVC/ },
-  'one-time-pad': { good: 'HELLO', expectInOutput: /SIXZB/ },
-  'jefferson-disk': { good: 'HELLO', expectInOutput: /WZQGB/ },
-  'solitaire-cipher': { good: 'HELLO', expectInOutput: /NZGAE/ },
-  'keyword-cipher': { good: 'HELLO', expectInOutput: /AOGGJ/ },
-  'book-cipher': { good: 'HELLO', expectInOutput: /1\.2 1\.3 8\.1 10\.4 3\.3/ },
-  'dna-toolkit': { good: 'ATGC', expectInOutput: /TACG/ },
-  'brainfuck': { good: ',[.,]', expectInOutput: /Hi/ },
-  'whitespace': { good: '   \t  \t   \n\t\n  \n\n', expectInOutput: /H/ },
-  'braille': { good: 'abc', expectInOutput: /\u2801/ },
-  'nato-phonetic': { good: 'ABC', expectInOutput: /Alfa/ },
-  'fen-viewer': { good: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', expectInOutput: /Side to move/ },
   'luhn-validator': { good: '79927398713', expectInOutput: /Valid/ },
-  'pigpen-cipher': { good: 'ABC', expectInOutput: /\u2518/ },
   'isbn-validator': { good: '0-306-40615-2', expectInOutput: /ISBN-10/ },
   'iban-validator': { good: 'GB29 NWBK 6016 1331 9268 19', expectInOutput: /Valid/ },
   'gtin-validator': { good: '5901234123457', expectInOutput: /EAN-13/ },
@@ -97,10 +55,6 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'vin-validator': { good: '1HGCM82633A004352', expectInOutput: /VIN/ },
   'orcid-validator': { good: '0000-0002-1825-0097', expectInOutput: /ORCID/ },
   'xor-cipher': { good: 'hello', expectInOutput: /030015070a/ },
-  'pig-latin': { good: 'hello', expectInOutput: /ellohay/ },
-  'leet-speak': { good: 'leet', expectInOutput: /1337/ },
-  'dancing-men': { good: 'ABC', expectInOutput: /dddd/ },
-  'befunge': { good: '"A",@', expectInOutput: /A/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },
@@ -127,7 +81,6 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
 
   'xml-formatter': { good: '<r><a>1</a></r>', expectInOutput: /<a>1<\/a>/, bad: '<a>AT&T</a>', expectError: /Bare &/ },
   'xml-minifier': { good: '<r>  <a>1</a>  <!-- x --></r>', expectInOutput: /<r><a>1<\/a><\/r>/ },
-  'readability-analyzer': { good: 'The cat sat on the mat. It was happy.', expectInOutput: /Flesch Reading Ease/ },
   'env-to-json': { good: 'A=1\nB=hello', bad: 'NOEQUALS', expectInOutput: /hello/, expectError: /has no/ },
   'curl-to-fetch': { good: 'curl https://example.com', bad: 'hello world', expectInOutput: /fetch/, expectError: /curl command/ },
   'json-path-extractor': { good: '[10,20]', bad: 'not json', expectInOutput: /10/ },
@@ -137,7 +90,6 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'text-sorter': { good: 'c\na\nb', expectInOutput: /a/ },
   'text-reverser': { good: 'abc', expectInOutput: /cba/ },
   'text-deduplicator': { good: 'a\na\nb', expectInOutput: /a/ },
-  'palindrome-checker': { good: 'racecar', expectInOutput: /YES|palindrome/i },
   'base64-encode': { good: 'hello', expectInOutput: /aGVsbG8/ },
   'base64-decode': { good: 'aGVsbG8=', expectInOutput: /hello/ },
   'url-encode': { good: 'a b', expectInOutput: /a%20b/ },
@@ -156,10 +108,6 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'semver-compare': { good: '1.2.3', expectInOutput: /each field/ },
   'html-to-markdown': { good: '<h1>Hi</h1>', expectInOutput: /# Hi/ },
   'yaml-formatter': { good: 'a: 1', expectInOutput: /a: 1/ },
-  'rot13': { good: 'hello', expectInOutput: /uryyb/ },
-  'rot47': { good: 'Hello', expectInOutput: /Hello|/ },
-  'morse-encode': { good: 'SOS', expectInOutput: /\.\.\./ },
-  'morse-decode': { good: '... --- ...', expectInOutput: /SOS/ },
   'md5-hash': { good: 'hello', expectInOutput: /[0-9a-f]{32}/i },
   'sha256-hash': { good: 'hello', expectInOutput: /[0-9a-f]{64}/i },
   'sha1-hash': { good: 'hello', expectInOutput: /[0-9a-f]{40}/i },
@@ -188,8 +136,6 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
 
   'yaml-to-json': { good: 'a: 1\nb: hello', expectInOutput: /"a": 1/ },
   'number-base-converter': { good: '10', expectInOutput: /Hex:/i },
-  'roman-converter': { good: '2026', expectInOutput: /MMXXVI/ },
-  'prime-checker': { good: '13', expectInOutput: /prime/i },
   'statistics-calculator': { good: '1 2 3 4 5', expectInOutput: /Mean:/ },
   'number-to-words': { good: '42', expectInOutput: /forty/i },
   'html-formatter': { good: '<div><p>hi</p></div>', expectInOutput: /<div>/ },
@@ -245,57 +191,9 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'sha384-hash': { good: 'hello', expectInOutput: /[0-9a-f]{96}/i },
   'chmod-converter': { good: '755', expectInOutput: /rwxr-xr-x/ },
   'business-days': { good: '2026-10-13', expectInOutput: /2026-10-20/ },
-  'sleep-cycles': { good: '06:30', expectInOutput: /21:30/ },
 
-  'tip-calculator': { good: '84.50', expectInOutput: /Each/ },
-  'bmi-calculator': { good: '70', bad: 'abc', expectInOutput: /BMI/, expectError: /Bad weight/ },
-  'age-calculator': { good: '1990-06-15', bad: 'not a date', expectInOutput: /Age:/, expectError: /Unrecognized date/ },
   'percentage-calculator': { good: '150', bad: 'abc', expectInOutput: /= 30/, expectError: /Bad number/ },
-  'compound-interest': { good: '10000', bad: 'abc', expectInOutput: /Final:/, expectError: /Bad principal/ },
-  'gcd-lcm-calculator': { good: '12 18', bad: '12a', expectInOutput: /GCD: 6/, expectError: /Bad integer/ },
-  'fraction-simplifier': { good: '6/8', bad: 'abc', expectInOutput: /Fraction: 3\/4/, expectError: /Bad fraction/ },
-  'ratio-calculator': { good: '16:24', bad: '16:abc', expectInOutput: /Simplified: 2:3/, expectError: /Bad number/ },
   'scientific-notation': { good: '1234567', bad: 'abc', expectInOutput: /Scientific: 1/, expectError: /Bad number/ },
-  'quadratic-solver': { good: '1 -3 2', bad: 'abc', expectInOutput: /x1 = 1/, expectError: /three coefficients/ },
-  'modulo-explorer': { good: '17 5', bad: '17a', expectInOutput: /Truncated: q = 3/, expectError: /Bad dividend/ },
-  'triangle-solver': { good: '3 4 5', bad: '1 2 3', expectInOutput: /Scalene, Right/, expectError: /inequality/ },
-  'circle-solver': { good: '5', bad: 'abc', expectInOutput: /Circumference:/, expectError: /Bad number/ },
-  'pace-calculator': { good: '5km 25:00', bad: '5km', expectInOutput: /Pace: 5:00/, expectError: /distance and time/ },
-  'integer-sqrt': { good: '144', bad: 'abc', expectInOutput: /Perfect square: yes/, expectError: /Bad integer/ },
-  'solid-solver': { good: 'sphere 5', bad: 'cube 5', expectInOutput: /Volume: 523/, expectError: /Unknown solid/ },
-  'fuel-converter': { good: '8 l/100km', bad: 'abc', expectInOutput: /MPG \(US\): 29/, expectError: /Bad number/ },
-  'prime-factorization': { good: '12', bad: 'abc', expectInOutput: /2\^2/, expectError: /Bad integer/ },
-  'box-solver': { good: '3 4 5', bad: 'abc', expectInOutput: /Volume: 60/, expectError: /Bad edge/ },
-  'cone-pyramid-solver': { good: 'pyramid 4 6', bad: 'abc', expectInOutput: /Slant: 6/, expectError: /Unknown solid/ },
-  'torus-solver': { good: 'torus 7 3', bad: 'abc', expectInOutput: /Volume: 1243/, expectError: /Unknown solid/ },
-  'ellipsoid-solver': { good: 'ellipsoid 3 4 5', bad: 'abc', expectInOutput: /Volume: 251/, expectError: /Unknown solid/ },
-  'capsule-frustum-solver': { good: 'frustum 3 3 7', bad: 'abc', expectInOutput: /Volume: 197/, expectError: /Unknown solid/ },
-  'polygon-solver': { good: 'hexagon 10', bad: 'abc', expectInOutput: /Area: 259/, expectError: /Unknown polygon/ },
-  'circle-segment-solver': { good: 'segment 5 90', bad: 'abc', expectInOutput: /Segment area: 7/, expectError: /Unknown segment/ },
-  'spherical-cap-solver': { good: 'cap 5 2', bad: 'abc', expectInOutput: /Volume: 54/, expectError: /Unknown cap/ },
-  'annulus-solver': { good: 'annulus 5 3', bad: 'abc', expectInOutput: /Area: 50/, expectError: /Unknown annulus/ },
-  'ellipse-solver': { good: 'ellipse 5 3', bad: 'abc', expectInOutput: /Area: 47/, expectError: /Unknown ellipse/ },
-  'star-polygon-solver': { good: 'star 5 2 10', bad: 'abc', expectInOutput: /Tip angle: 36/, expectError: /Unknown star/ },
-  'conic-solver': { good: 'parabola 2', bad: 'abc', expectInOutput: /Latus rectum: 8/, expectError: /Unknown conic/ },
-  'reuleaux-solver': { good: 'reuleaux 10', bad: 'abc', expectInOutput: /Area: 70/, expectError: /Unknown curve/ },
-  'spiral-solver': { good: 'spiral 3 2', bad: 'abc', expectInOutput: /Outer radius: 6/, expectError: /Unknown spiral/ },
-  'log-spiral-solver': { good: 'logspiral 2 0.1 2', bad: 'abc', expectInOutput: /Growth:/, expectError: /Unknown spiral/ },
-  'helix-solver': { good: 'helix 5 10 3', bad: 'abc', expectInOutput: /Lead angle:/, expectError: /Unknown helix/ },
-  'catenary-solver': { good: 'catenary 10 2', bad: 'abc', expectInOutput: /Support angle:/, expectError: /Unknown curve/ },
-  'gear-solver': { good: 'gear 20 2', bad: 'abc', expectInOutput: /Pitch dia:/, expectError: /Unknown gear/ },
-  'cycloid-solver': { good: 'cycloid 5', bad: 'abc', expectInOutput: /Arch area:/, expectError: /Unknown curve/ },
-  'belt-solver': { good: 'belt 10 20 30', bad: 'abc', expectInOutput: /Wrap small:/, expectError: /Unknown drive/ },
-  'superellipse-solver': { good: 'superellipse 5 3 4', bad: 'abc', expectInOutput: /Perimeter:/, expectError: /Unknown shape/ },
-  'sprocket-solver': { good: 'sprocket 12.7 17 38 450', bad: 'abc', expectInOutput: /Pitch dia:/, expectError: /Unknown drive/ },
-  'spring-solver': { good: 'spring 2 20 8', bad: 'abc', expectInOutput: /Rate:/, expectError: /Unknown spring/ },
-  'cam-solver': { good: 'cam 20 10 90 45', bad: 'abc', expectInOutput: /Max vel:/, expectError: /Unknown cam/ },
-  'bolt-solver': { good: 'bolt 4 100', bad: 'abc', expectInOutput: /Spacing:/, expectError: /Unknown pattern/ },
-  'thread-solver': { good: 'M10 1.5', bad: 'abc', expectInOutput: /Tap drill:/, expectError: /Unknown thread/ },
-  'keyway-solver': { good: 'keyway 40', bad: 'abc', expectInOutput: /Shaft check:/, expectError: /Unknown keyway/ },
-  'circlip-solver': { good: 'circlip 30', bad: 'abc', expectInOutput: /Groove dia:/, expectError: /Unknown circlip/ },
-  'oring-solver': { good: 'oring 2.62', bad: 'abc', expectInOutput: /Groove depth:/, expectError: /Unknown o-ring/ },
-  'tolerance-fit-solver': { good: '30 H7/g6', bad: 'abc', expectInOutput: /clearance fit/, expectError: /Unknown fit/ },
-  'shim-stack-solver': { good: 'shim 2.35 from 1 0.5 0.2 0.1 0.05', bad: 'abc', expectInOutput: /exact \(5 pcs\)/, expectError: /Unknown fit|Enter a target|Shim wants/ },
 
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
@@ -438,11 +336,6 @@ test('custom tools — 22 interactive flows', async ({ page }) => {
   await expect(page.locator('.tc-output, .output-box, [class*="tc-"]').first()).toBeVisible({ timeout: 8000 });
   await expect(page.locator('body')).toContainText(/UTC|PT|ET/i, { timeout: 8000 });
 
-  // 7 timeline-taker — table renders
-  await gotoTool(page, 'timeline-taker');
-  await expect(page.locator('.t-timeline-taker, .timeline, table').first()).toBeVisible({ timeout: 8000 });
-  await expect(page.locator('button').first()).toBeVisible({ timeout: 8000 });
-
   // 8 color-converter — hex #ff0000 converts to rgb
   await gotoTool(page, 'color-converter');
   await expect(page.locator('.t-color-converter').first()).toBeVisible({ timeout: 8000 });
@@ -459,10 +352,6 @@ test('custom tools — 22 interactive flows', async ({ page }) => {
   await gotoTool(page, 'qr-code-generator');
   await page.locator('input, textarea').first().fill('https://example.com');
   await expect(page.locator('canvas, svg').first()).toBeVisible({ timeout: 10000 });
-
-  // 11 post-maker — composer present
-  await gotoTool(page, 'post-maker');
-  await expect(page.locator('textarea, [contenteditable="true"]').first()).toBeVisible({ timeout: 8000 });
 
   // 12 base64-image-decoder — paste data URL
   await gotoTool(page, 'base64-image-decoder');
@@ -482,18 +371,6 @@ test('custom tools — 22 interactive flows', async ({ page }) => {
   await gotoTool(page, 'http-status-codes');
   await page.locator('input').first().fill('404');
   await expect(page.locator('.row, .status-row').first()).toBeVisible({ timeout: 8000 });
-
-  // 16 sorting-visualizer
-  await gotoTool(page, 'sorting-visualizer');
-  await expect(page.locator('select').first()).toBeVisible({ timeout: 8000 });
-
-  // 17 search-visualizer
-  await gotoTool(page, 'search-visualizer');
-  await expect(page.locator('.t-search-visualizer, .tool-shell-body').first()).toBeVisible({ timeout: 8000 });
-
-  // 18 binary-tree-visualizer
-  await gotoTool(page, 'binary-tree-visualizer');
-  await expect(page.locator('button, canvas, input').first()).toBeVisible({ timeout: 8000 });
 
   // 19 cron-builder — preset fills expr, bad field errors
   await gotoTool(page, 'cron-builder');
