@@ -4419,6 +4419,59 @@ T.npiCheck = function (s, opts) {
   if (clean.length !== 9) throw new Error('Bad prefix \u2014 9 digits make an NPI, got ' + clean.length);
   return clean + String((10 - (npiLuhn(clean + '0') % 10)) % 10);
 };
+/* VIN cores: ISO 3779 vehicle identifiers with transliterated mod-11 check letter, spaces and dashes ignored. */
+T.vinCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var raw = String(s);
+  var clean = '';
+  for (var ci = 0; ci < raw.length; ci++) {
+    var cc = raw.charCodeAt(ci);
+    if (cc >= 0xD800 && cc <= 0xDFFF) return '';
+    var ch = raw.charAt(ci);
+    if (ch >= '0' && ch <= '9') clean += ch;
+    else if (ch >= 'A' && ch <= 'Z') clean += ch;
+    else if (ch >= 'a' && ch <= 'z') clean += ch.toUpperCase();
+    else if (cc === 32 || cc === 9 || cc === 10 || cc === 13 || cc === 45) continue;
+    else if (mode === 'check-digit' && (ch === '?' || ch === '*' || ch === '#')) continue;
+    else throw new Error('VIN characters only \u2014 letters or digits with spaces or dashes ignored, got ' + JSON.stringify(ch));
+  }
+  var vinT = { A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8, J: 1, K: 2, L: 3, M: 4, N: 5, P: 7, R: 9, S: 2, T: 3, U: 4, V: 5, W: 6, X: 7, Y: 8, Z: 9 };
+  var vinW = [8, 7, 6, 5, 4, 3, 2, 10, 0, 9, 8, 7, 6, 5, 4, 3, 2];
+  function vinVal(kk) {
+    if (kk >= '0' && kk <= '9') return kk.charCodeAt(0) - 48;
+    return vinT[kk];
+  }
+  function vinIOQ(kk) { return kk === 'I' || kk === 'O' || kk === 'Q'; }
+  function vinDigit(core16) {
+    var nt = 0;
+    for (var ji = 0; ji < 17; ji++) {
+      if (ji === 8) continue;
+      nt += vinVal(core16.charAt(ji < 8 ? ji : ji - 1)) * vinW[ji];
+    }
+    var rr = nt % 11;
+    return rr === 10 ? 'X' : String(rr);
+  }
+  if (!clean.length) throw new Error('Enter a VIN first \u2014 seventeen characters with check letter ninth');
+  if (mode === 'validate') {
+    if (clean.length !== 17) throw new Error('Bad length \u2014 VINs run 17 characters, got ' + clean.length);
+    for (var ni = 0; ni < 17; ni++) {
+      var nh = clean.charAt(ni);
+      if ((nh < '0' || nh > '9') && (nh < 'A' || nh > 'Z')) throw new Error('Bad VIN character \u2014 letters or digits, got ' + JSON.stringify(nh));
+      if (vinIOQ(nh)) throw new Error('No IOQ \u2014 VINs skip I, O and Q, got ' + JSON.stringify(nh));
+    }
+    if (vinDigit(clean.slice(0, 8) + clean.slice(9)) !== clean.charAt(8)) throw new Error('Invalid VIN \u2014 checksum fails for ' + JSON.stringify(clean));
+    return 'Valid \u2014 VIN checksum passes (17 characters)';
+  }
+  if (clean.length !== 16) throw new Error('Bad prefix \u2014 16 characters make a VIN, got ' + clean.length);
+  for (var qi = 0; qi < 16; qi++) {
+    var qh = clean.charAt(qi);
+    if ((qh < '0' || qh > '9') && (qh < 'A' || qh > 'Z')) throw new Error('Bad prefix character \u2014 letters or digits, got ' + JSON.stringify(qh));
+    if (vinIOQ(qh)) throw new Error('No IOQ in prefix \u2014 VINs skip I, O and Q, got ' + JSON.stringify(qh));
+  }
+  return clean.slice(0, 8) + vinDigit(clean) + clean.slice(8);
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');

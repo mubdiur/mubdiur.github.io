@@ -94,6 +94,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'figi-validator': { good: 'BBG000BLNNH6', expectInOutput: /FIGI/ },
   'aba-validator': { good: '021000021', expectInOutput: /ABA/ },
   'npi-validator': { good: '1043477615', expectInOutput: /NPI/ },
+  'vin-validator': { good: '1HGCM82633A004352', expectInOutput: /VIN/ },
   'xor-cipher': { good: 'hello', expectInOutput: /030015070a/ },
   'pig-latin': { good: 'hello', expectInOutput: /ellohay/ },
   'leet-speak': { good: 'leet', expectInOutput: /1337/ },
