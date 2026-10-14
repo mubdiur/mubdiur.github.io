@@ -3220,6 +3220,51 @@ T.keywaySolve = function (s) {
   out.push('Hub check: ' + ktrim(d + row[5]));
   return out.join('\n');
 };
+/* O-ring groove solver: static face-seal gland depth and width per Parker handbook (~25% squeeze). */
+T.oringSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter an O-ring CS \u2014 e.g. oring 2.62');
+  var low = txt.toLowerCase();
+  var m0 = /^(o-ring|oring|o\s+ring|gland)\b/.exec(low);
+  if (!m0) throw new Error('Unknown o-ring \u2014 use oring 2.62');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;x\u00d7]+/).filter(function (x) { return x !== ''; });
+  if (parts.length !== 1) throw new Error('O-ring wants one CS \u2014 e.g. oring 2.62');
+  var tok0 = parts[0];
+  var tok = tok0;
+  var forceIn = false;
+  var forceMm = false;
+  if (tok.length > 2 && tok.slice(tok.length - 2) === 'in') { forceIn = true; tok = tok.slice(0, tok.length - 2); }
+  else if (tok.charAt(tok.length - 1) === '"') { forceIn = true; tok = tok.slice(0, tok.length - 1); }
+  else if (tok.length > 2 && tok.slice(tok.length - 2) === 'mm') { forceMm = true; tok = tok.slice(0, tok.length - 2); }
+  if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error('Bad CS \u2014 got ' + JSON.stringify(tok0.slice(0, 40)));
+  var v = parseFloat(tok);
+  if (!isFinite(v)) throw new Error('CS \u2014 out of range');
+  if (!(v > 0)) throw new Error('CS must be positive \u2014 got ' + JSON.stringify(tok0.slice(0, 40)));
+  if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+  var csmm = v;
+  if (forceIn) csmm = v * 25.4;
+  else if (forceMm) csmm = v;
+  else if (v < 1) csmm = v * 25.4;
+  var ROWS = [[1.78, 1.32, 2.4], [2.62, 1.96, 3.6], [3.53, 2.64, 4.8], [5.33, 3.99, 7.2], [6.99, 5.23, 9.5]];
+  var best = null;
+  var bestD = 1e99;
+  for (var ri = 0; ri < ROWS.length; ri++) { var dd = Math.abs(csmm - ROWS[ri][0]); if (dd < bestD) { bestD = dd; best = ROWS[ri]; } }
+  if (!best || bestD > 0.0100001) throw new Error('Unknown CS \u2014 standards 1.78, 2.62, 3.53, 5.33, 6.99 mm');
+  function otrim(x) { var r = Math.round(x * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var sq = (best[0] - best[1]) / best[0] * 100;
+  var fill = Math.PI / 4 * best[0] * best[0] / (best[2] * best[1]) * 100;
+  var inch = best[0] / 25.4;
+  var out = [];
+  out.push('O-ring CS ' + otrim(best[0]) + ' mm (' + inch.toFixed(3) + ' in)');
+  out.push('Groove depth: ' + otrim(best[1]) + ' (static)');
+  out.push('Groove width: ' + otrim(best[2]));
+  out.push('Squeeze: ' + sq.toFixed(1) + '%');
+  out.push('Groove fill: ' + fill.toFixed(1) + '%');
+  return out.join('\n');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

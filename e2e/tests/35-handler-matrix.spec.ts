@@ -690,6 +690,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('keyway-solver', 'key', TOOLS['keyway-solver'].handler('keyway 40').indexOf('Key: 12 x 8') >= 0);
     push('keyway-solver', 'checks', TOOLS['keyway-solver'].handler('keyway 40').indexOf('Shaft check: 35') >= 0);
     push('keyway-solver', 'junk throws', mustThrow(() => TOOLS['keyway-solver'].handler('abc')));
+    push('oring-solver', 'groove', TOOLS['oring-solver'].handler('oring 2.62').indexOf('Groove depth: 1.96') >= 0);
+    push('oring-solver', 'inch', TOOLS['oring-solver'].handler('oring 0.103').indexOf('O-ring CS 2.62') >= 0);
+    push('oring-solver', 'junk throws', mustThrow(() => TOOLS['oring-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

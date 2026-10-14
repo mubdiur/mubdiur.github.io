@@ -1615,6 +1615,14 @@ console.log('-- keyway --');
   ok(TOOLS['keyway-solver'].handler('key 8').indexOf('2 x 2') >= 0, 'keyway small shaft');
   ok(TOOLS['keyway-solver'].handler.toString().indexOf('keywaySolve') >= 0, 'keyway delegates');
 }
+console.log('-- oring --');
+{
+  ok(TOOLS['oring-solver'].handler('oring 2.62').indexOf('Groove depth: 1.96') >= 0, 'oring depth');
+  ok(TOOLS['oring-solver'].handler('oring 2.62').indexOf('Groove width: 3.6') >= 0, 'oring width');
+  ok(TOOLS['oring-solver'].handler('oring 0.103').indexOf('O-ring CS 2.62') >= 0, 'oring inch autosnap');
+  ok(TOOLS['oring-solver'].handler('gland 1.78').indexOf('Squeeze: 25.8%') >= 0, 'oring squeeze');
+  ok(TOOLS['oring-solver'].handler.toString().indexOf('oringSolve') >= 0, 'oring delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
