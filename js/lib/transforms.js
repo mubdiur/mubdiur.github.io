@@ -4382,6 +4382,43 @@ T.abaCheck = function (s, opts) {
   if (clean.length !== 8) throw new Error('Bad prefix \u2014 8 digits make an ABA, got ' + clean.length);
   return clean + String((10 - (abaSum(clean) % 10)) % 10);
 };
+/* NPI cores: US National Provider Identifiers with 80840-prefixed Luhn check digit, spaces and dashes ignored. */
+T.npiCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var raw = String(s);
+  var clean = '';
+  for (var ci = 0; ci < raw.length; ci++) {
+    var cc = raw.charCodeAt(ci);
+    if (cc >= 0xD800 && cc <= 0xDFFF) return '';
+    var ch = raw.charAt(ci);
+    if (ch >= '0' && ch <= '9') clean += ch;
+    else if (cc === 32 || cc === 9 || cc === 10 || cc === 13 || cc === 45) continue;
+    else if (mode === 'check-digit' && (ch === '?' || ch === '*' || ch === '#')) continue;
+    else throw new Error('NPI digits only \u2014 ten digits with spaces or dashes ignored, got ' + JSON.stringify(ch));
+  }
+  function npiLuhn(px) {
+    var str = '80840' + px;
+    var nt = 0;
+    var dbl = false;
+    for (var ji = str.length - 1; ji >= 0; ji--) {
+      var nd = str.charCodeAt(ji) - 48;
+      if (dbl) { nd = nd * 2; if (nd > 9) nd -= 9; }
+      nt += nd;
+      dbl = !dbl;
+    }
+    return nt;
+  }
+  if (!clean.length) throw new Error('Enter an NPI first \u2014 nine digits plus check digit');
+  if (mode === 'validate') {
+    if (clean.length !== 10) throw new Error('Bad length \u2014 NPIs run 10 digits, got ' + clean.length);
+    if (npiLuhn(clean) % 10 !== 0) throw new Error('Invalid NPI \u2014 checksum fails for ' + JSON.stringify(clean));
+    return 'Valid \u2014 NPI checksum passes (10 digits)';
+  }
+  if (clean.length !== 9) throw new Error('Bad prefix \u2014 9 digits make an NPI, got ' + clean.length);
+  return clean + String((10 - (npiLuhn(clean + '0') % 10)) % 10);
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
