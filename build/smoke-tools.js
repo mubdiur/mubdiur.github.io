@@ -1518,6 +1518,14 @@ console.log('-- logspiral --');
   ok(TOOLS['log-spiral-solver'].handler('logspiral 5 0 1').indexOf('Endpoint: (5, 0)') >= 0, 'logspiral endpoint');
   ok(TOOLS['log-spiral-solver'].handler.toString().indexOf('logSpiralSolve') >= 0, 'logspiral delegates');
 }
+console.log('-- helix --');
+{
+  ok(TOOLS['helix-solver'].handler('helix 5 10 3').indexOf('Length: ~94.7768113041') >= 0, 'helix length');
+  ok(TOOLS['helix-solver'].handler('helix 5 10 3').indexOf('Lead angle: 6.0566105942 deg') >= 0, 'helix lead');
+  ok(TOOLS['helix-solver'].handler('helix 5 0 2').indexOf('Length: ~62.8318530718') >= 0, 'helix flat is stacked circles');
+  ok(TOOLS['helix-solver'].handler('spring 5 10 3').indexOf('Length: ~94.77') >= 0, 'helix alias');
+  ok(TOOLS['helix-solver'].handler.toString().indexOf('helixSolve') >= 0, 'helix delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
