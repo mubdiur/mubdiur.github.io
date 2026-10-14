@@ -1758,6 +1758,39 @@ T.modDiv = function (s) {
   if (re < BigInt(0)) { var absb = b < BigInt(0) ? -b : b; re += absb; qe -= (b < BigInt(0) ? BigInt(-1) : BigInt(1)); }
   return 'Dividend: ' + mgrp(a) + ', Divisor: ' + mgrp(b) + '\nTruncated: q = ' + mgrp(qt) + ', r = ' + mgrp(rt) + '\nFloored: q = ' + mgrp(qf) + ', r = ' + mgrp(rf) + '\nEuclidean: q = ' + mgrp(qe) + ', r = ' + mgrp(re) + '\nDivisible: ' + (rt === BigInt(0) ? 'yes' : 'no');
 };
+/* Triangle solver: three sides to type, perimeter, area and angles. */
+T.triSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter three sides \u2014 e.g. 3 4 5');
+  function ttrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  function tdeg(v) { var r = Math.round(v * 1e6) / 1e6; return String(r === 0 ? 0 : r); }
+  function tnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Side too large \u2014 max 1e15');
+    return v;
+  }
+  var parts = txt.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  if (parts.length !== 3) throw new Error('Enter three sides \u2014 got ' + parts.length + ', e.g. 3 4 5');
+  var sd = parts.map(function (p, ix) { return tnum(p.trim(), 'Bad side #' + (ix + 1)); });
+  sd.sort(function (p, q) { return p - q; });
+  var x = sd[0], y = sd[1], z = sd[2];
+  if (!(x + y > z)) throw new Error('Not a triangle \u2014 ' + ttrim(x) + ' + ' + ttrim(y) + ' must exceed ' + ttrim(z) + ' (triangle inequality)');
+  var per = x + y + z;
+  var sp = per / 2;
+  var area = Math.sqrt(sp * (sp - x) * (sp - y) * (sp - z));
+  var sideType = (x === z) ? 'Equilateral' : ((x === y || y === z) ? 'Isosceles' : 'Scalene');
+  var lhs = x * x + y * y;
+  var rhs = z * z;
+  var angType = (Math.abs(lhs - rhs) <= 1e-9 * rhs) ? 'Right' : ((lhs < rhs) ? 'Obtuse' : 'Acute');
+  function ang(op, a1, a2) { var q = (a1 * a1 + a2 * a2 - op * op) / (2 * a1 * a2); if (q > 1) q = 1; if (q < -1) q = -1; return tdeg(Math.acos(q) * 180 / Math.PI); }
+  var A = ang(x, y, z), B = ang(y, x, z), C = ang(z, x, y);
+  return 'Sides (sorted): ' + ttrim(x) + ', ' + ttrim(y) + ', ' + ttrim(z) + '\nType: ' + sideType + ', ' + angType + '\nPerimeter: ' + ttrim(per) + '\nArea: ' + ttrim(area) + '\nAngles: ' + A + '\u00b0 / ' + B + '\u00b0 / ' + C + '\u00b0 (opposite sorted sides)';
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

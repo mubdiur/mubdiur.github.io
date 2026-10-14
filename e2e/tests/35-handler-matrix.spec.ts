@@ -586,6 +586,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('modulo-explorer', 'pos', TOOLS['modulo-explorer'].handler('17 5') === 'Dividend: 17, Divisor: 5\nTruncated: q = 3, r = 2\nFloored: q = 3, r = 2\nEuclidean: q = 3, r = 2\nDivisible: no');
     push('modulo-explorer', 'neg', TOOLS['modulo-explorer'].handler('-17 5') === 'Dividend: -17, Divisor: 5\nTruncated: q = -3, r = -2\nFloored: q = -4, r = 3\nEuclidean: q = -4, r = 3\nDivisible: no');
     push('modulo-explorer', 'junk throws', mustThrow(() => TOOLS['modulo-explorer'].handler('12a 18')));
+    push('triangle-solver', 'right', TOOLS['triangle-solver'].handler('3 4 5') === 'Sides (sorted): 3, 4, 5\nType: Scalene, Right\nPerimeter: 12\nArea: 6\nAngles: 36.869898° / 53.130102° / 90° (opposite sorted sides)');
+    push('triangle-solver', 'violation throws', mustThrow(() => TOOLS['triangle-solver'].handler('1 2 3')));
+    push('triangle-solver', 'junk throws', mustThrow(() => TOOLS['triangle-solver'].handler('a b c')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));
