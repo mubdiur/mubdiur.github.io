@@ -1942,6 +1942,30 @@ T.solidSolve = function (s) {
   var ch = snum(toks[2], 'Bad height');
   return 'Solid: cylinder, radius = ' + strim(cr) + ', height = ' + strim(ch) + '\nVolume: ' + strim(Math.PI * cr * cr * ch) + '\nSurface: ' + strim(2 * Math.PI * cr * (cr + ch)) + '\nLateral: ' + strim(2 * Math.PI * cr * ch);
 };
+/* Fuel efficiency converter: L/100km, km/L and MPG both ways, exact constants. */
+T.fuelConv = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter efficiency \u2014 e.g. 8 l/100km or 36 mpg');
+  function ftrim(v) { var r = Math.round(v * 1e6) / 1e6; return String(r === 0 ? 0 : r); }
+  var t = txt.toLowerCase().replace(/\s+/g, '');
+  var m = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))([a-z0-9\/\-]*)$/.exec(t);
+  if (!m) throw new Error('Bad number \u2014 got ' + JSON.stringify(txt.slice(0, 40)));
+  var v = parseFloat(m[1]);
+  if (!isFinite(v) || v <= 0) throw new Error('Efficiency must be positive \u2014 got ' + JSON.stringify(txt.slice(0, 40)));
+  if (v > 1e9) throw new Error('Value too large \u2014 max 1e9');
+  var u = m[2];
+  var l, canon;
+  var CUS = 100 * 3.785411784 / 1.609344;
+  var CUK = 100 * 4.54609 / 1.609344;
+  if (u === '' || u === 'l/100km') { l = v; canon = 'L/100km'; }
+  else if (u === 'mpg' || u === 'mpgus' || u === 'mpg-us') { l = CUS / v; canon = 'MPG (US)'; }
+  else if (u === 'mpguk' || u === 'mpg-uk' || u === 'mpgimp' || u === 'mpg-imp') { l = CUK / v; canon = 'MPG (UK)'; }
+  else if (u === 'km/l' || u === 'kml' || u === 'kmpl' || u === 'kmpl') { l = 100 / v; canon = 'km/L'; }
+  else throw new Error('Bad unit \u2014 use l/100km, mpg, mpg-uk or km/l');
+  return 'Input: ' + ftrim(v) + ' ' + canon + '\nL/100km: ' + ftrim(l) + '\nkm/L: ' + ftrim(100 / l) + '\nMPG (US): ' + ftrim(CUS / l) + '\nMPG (UK): ' + ftrim(CUK / l);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

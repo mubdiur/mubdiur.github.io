@@ -1380,6 +1380,13 @@ console.log('-- solid --');
   ok(TOOLS['solid-solver'].handler.toString().indexOf('solidSolve') >= 0, 'solid delegates');
 }
 
+console.log('-- fuel --');
+{
+  ok(TOOLS['fuel-converter'].handler('8 l/100km') === 'Input: 8 L/100km\nL/100km: 8\nkm/L: 12.5\nMPG (US): 29.401823\nMPG (UK): 35.310117', 'fuel forward');
+  ok(TOOLS['fuel-converter'].handler('36 mpg').indexOf('MPG (US): 36') >= 0, 'fuel reverse');
+  ok(TOOLS['fuel-converter'].handler.toString().indexOf('fuelConv') >= 0, 'fuel delegates');
+}
+
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

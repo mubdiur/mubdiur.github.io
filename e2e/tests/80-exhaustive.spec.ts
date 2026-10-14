@@ -263,6 +263,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'pace-calculator': { good: '5km 25:00', bad: '5km', expectInOutput: /Pace: 5:00/, expectError: /distance and time/ },
   'integer-sqrt': { good: '144', bad: 'abc', expectInOutput: /Perfect square: yes/, expectError: /Bad integer/ },
   'solid-solver': { good: 'sphere 5', bad: 'cube 5', expectInOutput: /Volume: 523/, expectError: /Unknown solid/ },
+  'fuel-converter': { good: '8 l/100km', bad: 'abc', expectInOutput: /MPG \(US\): 29/, expectError: /Bad number/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

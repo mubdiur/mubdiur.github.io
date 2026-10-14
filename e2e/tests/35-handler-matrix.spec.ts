@@ -601,6 +601,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('solid-solver', 'sphere', TOOLS['solid-solver'].handler('sphere 5') === 'Solid: sphere, radius = 5\nVolume: 523.5987755983\nSurface: 314.159265359');
     push('solid-solver', 'cylinder', TOOLS['solid-solver'].handler('cylinder 3 7').indexOf('Lateral: 131.9468914508') >= 0);
     push('solid-solver', 'junk throws', mustThrow(() => TOOLS['solid-solver'].handler('cube 5')));
+    push('fuel-converter', 'forward', TOOLS['fuel-converter'].handler('8 l/100km') === 'Input: 8 L/100km\nL/100km: 8\nkm/L: 12.5\nMPG (US): 29.401823\nMPG (UK): 35.310117');
+    push('fuel-converter', 'reverse', TOOLS['fuel-converter'].handler('36 mpg').indexOf('MPG (US): 36') >= 0);
+    push('fuel-converter', 'junk throws', mustThrow(() => TOOLS['fuel-converter'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));
