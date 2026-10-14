@@ -1436,6 +1436,14 @@ console.log('-- capfrus --');
   ok(TOOLS['capsule-frustum-solver'].handler('frustum 5 3 7').indexOf('Slant: ') >= 0, 'capfrus frustum');
   ok(TOOLS['capsule-frustum-solver'].handler.toString().indexOf('capsuleFrustum') >= 0, 'capfrus delegates');
 }
+
+console.log('-- polygon --');
+{
+  ok(TOOLS['polygon-solver'].handler('polygon 6 10') === 'Polygon: hexagon (6 sides), edge = 10\nPerimeter: 60\nInterior: 120\u00b0\nExterior: 60\u00b0\nArea: 259.8076211353\nApothem: 8.6602540378', 'polygon exact');
+  ok(TOOLS['polygon-solver'].handler('hexagon 10') === TOOLS['polygon-solver'].handler('polygon 6 10'), 'polygon named');
+  ok(TOOLS['polygon-solver'].handler('square 5').indexOf('Area: 25') >= 0, 'polygon square');
+  ok(TOOLS['polygon-solver'].handler.toString().indexOf('polygonSolve') >= 0, 'polygon delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

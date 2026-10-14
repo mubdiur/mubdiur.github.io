@@ -270,6 +270,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'torus-solver': { good: 'torus 7 3', bad: 'abc', expectInOutput: /Volume: 1243/, expectError: /Unknown solid/ },
   'ellipsoid-solver': { good: 'ellipsoid 3 4 5', bad: 'abc', expectInOutput: /Volume: 251/, expectError: /Unknown solid/ },
   'capsule-frustum-solver': { good: 'frustum 3 3 7', bad: 'abc', expectInOutput: /Volume: 197/, expectError: /Unknown solid/ },
+  'polygon-solver': { good: 'hexagon 10', bad: 'abc', expectInOutput: /Area: 259/, expectError: /Unknown polygon/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

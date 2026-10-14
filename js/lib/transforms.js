@@ -2195,6 +2195,59 @@ T.capsuleFrustum = function (s) {
   var flat = Math.PI * (fr + ft) * fs;
   return 'Solid: frustum, R = ' + ftrim(fr) + ', r = ' + ftrim(ft) + ', height = ' + ftrim(fh) + '\nVolume: ' + ftrim(Math.PI * fh / 3 * (fr * fr + fr * ft + ft * ft)) + '\nSurface: ' + ftrim(flat + Math.PI * fr * fr + Math.PI * ft * ft) + '\nLateral: ' + ftrim(flat) + '\nSlant: ' + ftrim(fs);
 };
+/* Regular-polygon solver: perimeter, angles, area plus apothem. */
+T.polygonSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a polygon \u2014 e.g. polygon 6 10 or hexagon 10');
+  function ynum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    return v;
+  }
+  function ytrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var NAMES = { triangle: 3, square: 4, pentagon: 5, hexagon: 6, heptagon: 7, octagon: 8, nonagon: 9, decagon: 10, dodecagon: 12 };
+  var BACK = { 3: 'triangle', 4: 'square', 5: 'pentagon', 6: 'hexagon', 7: 'heptagon', 8: 'octagon', 9: 'nonagon', 10: 'decagon', 12: 'dodecagon' };
+  var low = txt.toLowerCase();
+  var m0 = /^(polygon|poly|regular|triangle|square|pentagon|hexagon|heptagon|octagon|nonagon|decagon|dodecagon)\b/.exec(low);
+  if (!m0) throw new Error('Unknown polygon \u2014 use polygon 6 10 or a name like hexagon 10');
+  var named = NAMES[m0[1]] || 0;
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'n' || tk === 's' || tk === 'side' || tk === 'edge') continue;
+    nums.push(tk);
+  }
+  var n, sd;
+  if (named) {
+    if (nums.length !== 1) throw new Error('A named polygon wants one edge \u2014 e.g. hexagon 10');
+    n = named;
+    sd = ynum(nums[0], 'Bad edge');
+  } else {
+    if (nums.length !== 2) throw new Error('Polygon wants side count and edge \u2014 e.g. polygon 6 10');
+    var nv = ynum(nums[0], 'Bad side count');
+    if (Math.floor(nv) !== nv) throw new Error('Side count must be whole \u2014 got ' + JSON.stringify(nums[0].slice(0, 40)));
+    n = nv;
+    sd = ynum(nums[1], 'Bad edge');
+  }
+  if (n < 3) throw new Error('Need at least 3 sides \u2014 got ' + n);
+  if (n > 1000000) throw new Error('Too many sides \u2014 max 1000000');
+  if (sd <= 0) throw new Error('Edge must be positive \u2014 got ' + JSON.stringify(String(sd).slice(0, 40)));
+  if (sd > 1e15) throw new Error('Value too large \u2014 max 1e15');
+  var name = BACK[n] || (n + '-gon');
+  var per = n * sd;
+  var interior = (n - 2) * 180 / n;
+  var exterior = 360 / n;
+  var area = n * sd * sd / (4 * Math.tan(Math.PI / n));
+  var apothem = sd / (2 * Math.tan(Math.PI / n));
+  return 'Polygon: ' + name + ' (' + n + ' sides), edge = ' + ytrim(sd) + '\nPerimeter: ' + ytrim(per) + '\nInterior: ' + ytrim(interior) + '\u00b0\nExterior: ' + ytrim(exterior) + '\u00b0\nArea: ' + ytrim(area) + '\nApothem: ' + ytrim(apothem);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
