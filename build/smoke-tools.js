@@ -1419,6 +1419,15 @@ console.log('-- torus --');
   ok(TOOLS['torus-solver'].handler('torus 3 5').indexOf('Type: spindle') >= 0, 'torus spindle');
   ok(TOOLS['torus-solver'].handler.toString().indexOf('torusSolve') >= 0, 'torus delegates');
 }
+
+console.log('-- ellipsoid --');
+{
+  ok(TOOLS['ellipsoid-solver'].handler('ellipsoid 3 4 5').indexOf('Volume: 251.3274122872') >= 0, 'ellipsoid volume');
+  ok(TOOLS['ellipsoid-solver'].handler('ellipsoid 3 4 5').indexOf('Type: scalene') >= 0, 'ellipsoid scalene');
+  ok(TOOLS['ellipsoid-solver'].handler('ellipsoid 5 5 5').indexOf('Volume: 523.5987755983') >= 0, 'ellipsoid sphere matches');
+  ok(TOOLS['ellipsoid-solver'].handler('ellipsoid 5 5 5').indexOf('Type: sphere') >= 0, 'ellipsoid sphere type');
+  ok(TOOLS['ellipsoid-solver'].handler.toString().indexOf('ellipsoidSolve') >= 0, 'ellipsoid delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

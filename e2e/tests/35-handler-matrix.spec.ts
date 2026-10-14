@@ -616,6 +616,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('torus-solver', 'exact', TOOLS['torus-solver'].handler('torus 7 3') === 'Solid: torus, R = 7, r = 3\nVolume: 1243.5701545373\nSurface: 829.0467696915\nType: ring');
     push('torus-solver', 'spindle', TOOLS['torus-solver'].handler('torus 3 5').indexOf('Type: spindle') >= 0);
     push('torus-solver', 'junk throws', mustThrow(() => TOOLS['torus-solver'].handler('abc')));
+    push('ellipsoid-solver', 'volume', TOOLS['ellipsoid-solver'].handler('ellipsoid 3 4 5').indexOf('Volume: 251.3274122872') >= 0);
+    push('ellipsoid-solver', 'sphere', TOOLS['ellipsoid-solver'].handler('ellipsoid 5 5 5').indexOf('Type: sphere') >= 0);
+    push('ellipsoid-solver', 'junk throws', mustThrow(() => TOOLS['ellipsoid-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

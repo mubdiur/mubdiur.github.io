@@ -2114,6 +2114,44 @@ T.torusSolve = function (s) {
   var sur = 4 * p2 * mj * mn;
   return 'Solid: torus, R = ' + ttrim(mj) + ', r = ' + ttrim(mn) + '\nVolume: ' + ttrim(vol) + '\nSurface: ' + ttrim(sur) + '\nType: ' + (mj > mn ? 'ring' : 'spindle (self-intersecting)');
 };
+/* Ellipsoid solver: volume plus Knud-Thomsen surface from three semi-axes. */
+T.ellipsoidSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter an ellipsoid \u2014 e.g. ellipsoid 3 4 5');
+  function enum_(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function etrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(ellipsoid|ellips)\b/.exec(low);
+  if (!m0) throw new Error('Unknown solid \u2014 use ellipsoid, e.g. ellipsoid 3 4 5');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'a' || tk === 'b' || tk === 'c') continue;
+    nums.push(enum_(tk, 'Bad semi-axis'));
+  }
+  if (nums.length !== 3) throw new Error('Ellipsoid wants three semi-axes \u2014 e.g. ellipsoid 3 4 5');
+  var ea = nums[0];
+  var eb = nums[1];
+  var ec = nums[2];
+  var p = 1.6075;
+  function pw(x) { return Math.pow(x, p); }
+  var sur = 4 * Math.PI * Math.pow((pw(ea) * pw(eb) + pw(ea) * pw(ec) + pw(eb) * pw(ec)) / 3, 1 / p);
+  var type = (ea === eb && eb === ec) ? 'sphere' : ((ea === eb || ea === ec || eb === ec) ? 'spheroid' : 'scalene');
+  return 'Solid: ellipsoid, a = ' + etrim(ea) + ', b = ' + etrim(eb) + ', c = ' + etrim(ec) + '\nVolume: ' + etrim(4 / 3 * Math.PI * ea * eb * ec) + '\nSurface: ~' + etrim(sur) + '\nType: ' + type;
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
