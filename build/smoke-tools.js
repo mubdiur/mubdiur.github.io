@@ -1318,6 +1318,15 @@ console.log('-- ratio --');
   ok(TOOLS['ratio-calculator'].handler.toString().indexOf('ratioCalc') >= 0, 'ratio delegates');
 }
 
+console.log('-- sci --');
+{
+  ok(TOOLS['scientific-notation'].handler('1234567') === 'Scientific: 1.234567 \u00d7 10^6\nEngineering: 1.234567 \u00d7 10^6\nPlain: 1234567\nSignificant digits: 7', 'sci plain');
+  ok(TOOLS['scientific-notation'].handler('0.00045') === 'Scientific: 4.5 \u00d7 10^-4\nEngineering: 450 \u00d7 10^-6\nPlain: 0.00045\nSignificant digits: 2', 'sci small');
+  ok(TOOLS['scientific-notation'].handler('1.23e6') === 'Scientific: 1.23 \u00d7 10^6\nEngineering: 1.23 \u00d7 10^6\nPlain: 1230000\nSignificant digits: 3', 'sci expand');
+  ok(TOOLS['scientific-notation'].handler('1.23e45').indexOf('Scientific: 1.23 \u00d7 10^45') === 0, 'sci huge');
+  ok(TOOLS['scientific-notation'].handler.toString().indexOf('sciNota') >= 0, 'sci delegates');
+}
+
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

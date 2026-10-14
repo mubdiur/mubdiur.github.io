@@ -577,6 +577,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('ratio-calculator', 'simplify', TOOLS['ratio-calculator'].handler('16:24') === 'Simplified: 2:3\nTotal parts: 5\nShares: 40.00% | 60.00%\nDivisor: 8');
     push('ratio-calculator', 'proportion', TOOLS['ratio-calculator'].handler('3:4 = 6:x') === 'x = 8\nCheck: 3:4 = 6:8\nDecimal: 8');
     push('ratio-calculator', 'junk throws', mustThrow(() => TOOLS['ratio-calculator'].handler('abc')));
+    push('scientific-notation', 'plain', TOOLS['scientific-notation'].handler('1234567') === 'Scientific: 1.234567 \u00d7 10^6\nEngineering: 1.234567 \u00d7 10^6\nPlain: 1234567\nSignificant digits: 7');
+    push('scientific-notation', 'expand', TOOLS['scientific-notation'].handler('1.23e6') === 'Scientific: 1.23 \u00d7 10^6\nEngineering: 1.23 \u00d7 10^6\nPlain: 1230000\nSignificant digits: 3');
+    push('scientific-notation', 'junk throws', mustThrow(() => TOOLS['scientific-notation'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

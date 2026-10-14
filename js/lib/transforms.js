@@ -1590,6 +1590,65 @@ T.ratioCalc = function (s) {
   });
   return 'Simplified: ' + simpDisp + '\nTotal parts: ' + rgrp(total) + '\nShares: ' + shares.map(function (p) { return p + '%'; }).join(' | ') + '\nDivisor: ' + rgrp(g);
 };
+/* Scientific notation converter: plain numbers to mEe and back, exact string math. */
+T.sciNota = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim().replace(/[\u00d7\u00b7]/g, 'x');
+  if (!txt) throw new Error('Enter a number \u2014 e.g. 1234567 or 1.23e6');
+  function parseExp(e) {
+    var t = e.trim();
+    if (!/^[+-]?\d+$/.test(t)) throw new Error('Bad exponent \u2014 got ' + JSON.stringify(e.trim()));
+    var digits = t.replace(/^[+-]/, '').replace(/^0+/, '');
+    if ((digits.length || 1) > 6) throw new Error('Exponent too large \u2014 max \u00b1999999');
+    return parseInt(t, 10);
+  }
+  function repeat(ch, n) { var o = ''; for (var i = 0; i < n; i++) o += ch; return o; }
+  var mant = txt;
+  var exp = 0;
+  var me = /^(.*)[eE]([+-]?\d+)$/.exec(txt);
+  var mx = /^(.+?)[xX\*]\s*10\^([+-]?\d+)$/.exec(txt);
+  if (me) { mant = me[1].trim(); exp = parseExp(me[2]); }
+  else if (mx) { mant = mx[1].trim(); exp = parseExp(mx[2]); }
+  var sign = '';
+  if (mant.charAt(0) === '+' || mant.charAt(0) === '-') { if (mant.charAt(0) === '-') sign = '-'; mant = mant.slice(1); }
+  if (!/^(\d+(\.\d*)?|\.\d+)$/.test(mant)) throw new Error('Bad number \u2014 got ' + JSON.stringify((sign + mant).slice(0, 40)));
+  var dot = mant.indexOf('.');
+  var ip = dot < 0 ? mant : mant.slice(0, dot);
+  var fp = dot < 0 ? '' : mant.slice(dot + 1);
+  var flen = fp.length;
+  var bare = (ip + fp).replace(/^0+/, '');
+  if ((bare.length || 1) > 2000) throw new Error('Number too long \u2014 max 2000 digits');
+  if (bare === '') return 'Scientific: 0\nEngineering: 0\nPlain: 0\nSignificant digits: 1';
+  var sigRaw = bare;
+  var tz = 0;
+  while (sigRaw.charAt(sigRaw.length - 1) === '0') { sigRaw = sigRaw.slice(0, -1); tz++; }
+  var sig = sigRaw;
+  var sigLen = sig.length;
+  var sciExp = exp - flen + tz + sigLen - 1;
+  var sciMant = sigLen === 1 ? sig : sig.charAt(0) + '.' + sig.slice(1);
+  var sci = (sign === '-' ? '-' : '') + sciMant + ' \u00d7 10^' + sciExp;
+  var engExp = Math.floor(sciExp / 3) * 3;
+  var lead = sciExp - engExp + 1;
+  var engMant = sigLen <= lead ? sig + repeat('0', lead - sigLen) : sig.slice(0, lead) + '.' + sig.slice(lead);
+  var eng = (sign === '-' ? '-' : '') + engMant + ' \u00d7 10^' + engExp;
+  var shift = exp - flen;
+  var D = bare;
+  var plainLen;
+  if (shift >= 0) plainLen = D.length + shift;
+  else if (D.length + shift > 0) plainLen = D.length + 1;
+  else plainLen = 2 + (-(D.length + shift)) + D.length;
+  var plain;
+  if (plainLen > 6000) plain = '(' + plainLen + ' chars \u2014 too long to expand)';
+  else if (shift >= 0) plain = D + repeat('0', shift);
+  else if (D.length + shift > 0) {
+    var pi = D.slice(0, D.length + shift);
+    var pf = D.slice(D.length + shift).replace(/0+$/, '');
+    plain = pf === '' ? pi : pi + '.' + pf;
+  } else plain = '0.' + repeat('0', -(D.length + shift)) + D;
+  if (sign === '-' && plain.charAt(0) !== '(') plain = '-' + plain;
+  return 'Scientific: ' + sci + '\nEngineering: ' + eng + '\nPlain: ' + plain + '\nSignificant digits: ' + bare.length;
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
