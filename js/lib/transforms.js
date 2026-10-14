@@ -1332,6 +1332,56 @@ T.pctCalc = function (s, opts) {
   var d = b - x;
   return "Change: " + sgn(d / x * 100) + "% (" + fmt(x) + " \u2192 " + fmt(b) + ", " + sgn(d) + ")";
 };
+/* Compound interest: integer-cent per-period ledger, yearly snapshots, APY. */
+T.ciCalc = function (s, opts) {
+  var o = opts || {};
+  var raw = String(s === undefined || s === null ? "" : s);
+  for (var ci = 0; ci < raw.length; ci++) if (raw.charCodeAt(ci) >= 0xD800 && raw.charCodeAt(ci) <= 0xDFFF) return "";
+  var txt = raw.trim();
+  if (!txt) throw new Error("Enter principal");
+  function num(t, label) {
+    var c = String(t).replace(/[,_\s]/g, "").replace(/[$%]/g, "");
+    if (!/^[+-]?(\d+(\.\d+)?|\.\d+)$/.test(c)) throw new Error("Bad " + label + " \u2014 got " + JSON.stringify(String(t).trim() === "" ? t : String(t).trim()));
+    var n = parseFloat(c);
+    if (!isFinite(n)) throw new Error(label + " out of range");
+    return n;
+  }
+  var princ = num(txt, "principal");
+  if (!(princ >= 0) || princ > 1e12) throw new Error("Principal out of range");
+  var rraw = o.rate === undefined || o.rate === null || String(o.rate).trim() === "" ? "5" : o.rate;
+  var rate = num(rraw, "rate");
+  if (!(rate >= 0) || rate > 100) throw new Error("Rate 0-100");
+  var yraw = String(o.years === undefined || o.years === null || String(o.years).trim() === "" ? "10" : o.years).trim();
+  if (!/^\d+$/.test(yraw.replace(/[,_\s]/g, ""))) throw new Error("Bad years \u2014 got " + JSON.stringify(String(o.years)));
+  var years = parseInt(yraw.replace(/[,_\s]/g, ""), 10);
+  if (!(years >= 1) || years > 100) throw new Error("Years 1-100");
+  var freq = String(o.freq || "monthly");
+  var NMAP = { annual: 1, semiannual: 2, quarterly: 4, monthly: 12, daily: 365 };
+  if (!Object.prototype.hasOwnProperty.call(NMAP, freq)) throw new Error("Bad freq \u2014 use annual, semiannual, quarterly, monthly or daily");
+  var n = NMAP[freq];
+  var craw = o.contrib === undefined || o.contrib === null || String(o.contrib).trim() === "" ? "0" : o.contrib;
+  var contrib = num(craw, "contrib");
+  if (!(contrib >= 0) || contrib > 1e9) throw new Error("Contrib out of range");
+  var bal = Math.round(princ * 100);
+  var cc = Math.round(contrib * 100);
+  var per = rate / 100 / n;
+  function money(c) { var neg = c < 0 ? "-" : ""; var a = Math.abs(c); var d = Math.floor(a / 100); var ds = String(d).replace(/\B(?=(\d{3})+(?!\d))/g, ","); var cs = String(a % 100); if (cs.length < 2) cs = "0" + cs; return neg + "$" + ds + "." + cs; }
+  var snaps = [];
+  for (var yy = 1; yy <= years; yy++) {
+    for (var k = 0; k < n; k++) {
+      bal += Math.round(bal * per) + cc;
+    }
+    if (yy <= 10 || yy === years || yy % 5 === 0) snaps.push("Year " + yy + ": " + money(bal));
+  }
+  var paid = Math.round(princ * 100) + cc * n * years;
+  var earn = bal - paid;
+  var apy = (Math.pow(1 + rate / 100 / n, n) - 1) * 100;
+  var clines = ["Final: " + money(bal) + " (" + years + (years === 1 ? " year" : " years") + ", " + rate + "% " + freq + ")",
+    "Paid in: " + money(paid) + " (" + money(Math.round(princ * 100)) + " principal + " + money(cc * n * years) + " deposits)",
+    "Interest earned: " + money(earn),
+    "APY: " + (Math.round(apy * 1000) / 1000).toFixed(3) + "%"];
+  return clines.concat(snaps).join("\n");
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

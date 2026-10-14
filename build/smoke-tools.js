@@ -1280,6 +1280,14 @@ console.log('-- pct --');
   ok(TOOLS['percentage-calculator'].handler('1', { mode: 'is', of: '3' }) === '1 is 33.3333333333% of 3', 'pct repeating');
   ok(TOOLS['percentage-calculator'].handler.toString().indexOf('pctCalc') >= 0, 'pct delegates');
 }
+console.log('-- ci --');
+{
+  ok(TOOLS['compound-interest'].handler('10000', { rate: '5', years: '10', freq: 'monthly', contrib: '0' }).split('\n').slice(0, 4).join('\n') === 'Final: $16,470.09 (10 years, 5% monthly)\nPaid in: $10,000.00 ($10,000.00 principal + $0.00 deposits)\nInterest earned: $6,470.09\nAPY: 5.116%', 'ci monthly');
+  ok(TOOLS['compound-interest'].handler('1000', { rate: '10', years: '2', freq: 'annual', contrib: '0' }).split('\n')[0] === 'Final: $1,210.00 (2 years, 10% annual)', 'ci annual');
+  ok(TOOLS['compound-interest'].handler('5000', { rate: '0', years: '3', freq: 'annual', contrib: '100' }).split('\n')[2] === 'Interest earned: $0.00', 'ci zero rate');
+  ok(TOOLS['compound-interest'].handler('10000', { rate: '5', years: '10', freq: 'monthly', contrib: '0' }).indexOf('Year 10: $16,470.09') >= 0, 'ci snapshots');
+  ok(TOOLS['compound-interest'].handler.toString().indexOf('ciCalc') >= 0, 'ci delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
