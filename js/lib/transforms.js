@@ -2447,6 +2447,35 @@ T.gronsfeldCipher = function (s, opts) {
     return String.fromCharCode(base + (((p + dir * k) % 26 + 26) % 26));
   });
 };
+/* Chaocipher cores: two evolving alphabets (left and right wheels permute differently after every letter); A-Z only, other characters stripped. */
+T.chaoWheel = function (key) {
+  var k = String(key).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!k) throw new Error('Enter a letter key \u2014 A-Z seeds the wheel');
+  var seen = {}; var w = [];
+  var full = k + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (var i = 0; i < full.length; i++) { var c = full.charAt(i); if (!seen[c]) { seen[c] = 1; w.push(c); } }
+  return w;
+};
+T.chaoRot = function (w, k) { var s = ((k % w.length) + w.length) % w.length; return w.slice(s).concat(w.slice(0, s)); };
+T.chaoEvolveL = function (w, i) { var r = T.chaoRot(w, i); var x = r.shift(); r.splice(13, 0, x); return T.chaoRot(r, 1); };
+T.chaoEvolveR = function (w, i) { var r = T.chaoRot(w, i + 1); var x = r.shift(); r.splice(13, 0, x); return r; };
+T.chaoEncode = function (s, key1, key2) {
+  var L = T.chaoWheel(key1 === undefined ? 'CHAOCIPHER' : key1);
+  var R = T.chaoWheel(key2 === undefined ? 'CIPHERTEXT' : key2);
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  var out = '';
+  for (var i = 0; i < t.length; i++) { var at = L.indexOf(t.charAt(i)); out += R[at]; L = T.chaoEvolveL(L, at); R = T.chaoEvolveR(R, at); }
+  return out;
+};
+T.chaoDecode = function (s, key1, key2) {
+  var L = T.chaoWheel(key1 === undefined ? 'CHAOCIPHER' : key1);
+  var R = T.chaoWheel(key2 === undefined ? 'CIPHERTEXT' : key2);
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  var out = '';
+  for (var i = 0; i < t.length; i++) { var at = R.indexOf(t.charAt(i)); out += L[at]; L = T.chaoEvolveL(L, at); R = T.chaoEvolveR(R, at); }
+  return out;
+};
+T.chaoCipher = function (s, opts) { var o = opts || {}; var k1 = o.key1 === undefined ? 'CHAOCIPHER' : o.key1; var k2 = o.key2 === undefined ? 'CIPHERTEXT' : o.key2; if ((o.mode || 'encode') === 'decode') return T.chaoDecode(s, k1, k2); return T.chaoEncode(s, k1, k2); };
 T.columnarCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'ZEBRAS' : o.key; if ((o.mode || 'encode') === 'decode') return T.columnarDecode(s, k); return T.columnarEncode(s, k); };
 T.base32Encode = function (s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
