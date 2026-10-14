@@ -580,7 +580,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
   if (failed.length) console.log('failed handlers:', JSON.stringify(failed, null, 2));
   expect(failed, `handler matrix failures:\n` + JSON.stringify(failed, null, 2)).toEqual([]);
   expect((result as any[]).length, 'handler matrix must cover all tools minus known wasm/custom gaps').toBeGreaterThanOrEqual(77);
-  // Full manifest is 139 (csv-checksum-column added); wasm+custom combos counted separately in other suites — handler matrix proves all transform+generator handlers
-  const manifest: any[] = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
-  expect(manifest, 'TOOLMANIFEST must be 139').toBe(139);
+  // Manifest grows every iteration, so an exact count rots on contact; floor it instead. The matrix
+  // plus the known custom/wasm gaps covered elsewhere must never shrink — accidental manifest loss fails here, additions pass freely.
+  const manifest: number = await page.evaluate(() => (window as any).TOOLMANIFEST.length);
+  expect(manifest, 'TOOLMANIFEST must not shrink below 273 tools').toBeGreaterThanOrEqual(273);
 });
