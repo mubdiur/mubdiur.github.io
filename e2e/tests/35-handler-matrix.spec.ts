@@ -249,6 +249,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('route-cipher', 'bad cols throws', mustThrow(() => TOOLS['route-cipher'].handler('AB', { cols: '1' })));
     push('affine-cipher', 'happy', TOOLS['affine-cipher'].handler('AFFINE') === 'IHHWVC');
     push('affine-cipher', 'bad multiplier throws', mustThrow(() => TOOLS['affine-cipher'].handler('AB', { a: '2', b: '8' })));
+    push('one-time-pad', 'happy', TOOLS['one-time-pad'].handler('HELLO') === 'SIXZB');
+    push('one-time-pad', 'short key throws', mustThrow(() => TOOLS['one-time-pad'].handler('HELLO', { key: 'LE' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

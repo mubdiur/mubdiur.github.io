@@ -2781,6 +2781,36 @@ T.affineDecode = function (s, a, b) {
   });
 };
 T.affineCipher = function (s, opts) { var o = opts || {}; var A = o.a === undefined ? '5' : o.a; var B = o.b === undefined ? '8' : o.b; if ((o.mode || 'encode') === 'decode') return T.affineDecode(s, A, B); return T.affineEncode(s, A, B); };
+/* One-time-pad cores: letter keystream added once and never repeated (key must cover every letter); case preserved, non-letters pass through unconsumed. */
+T.otpVals = function (key, need) {
+  var k = String(key === undefined ? 'LEMON' : key).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!k) throw new Error('Enter a letter key \u2014 one-time pad never repeats');
+  if (k.length < need) throw new Error('Key too short \u2014 ' + need + ' letters need ' + need + ' key letters, saw ' + k.length);
+  var v = [];
+  for (var i = 0; i < k.length; i++) v.push(k.charCodeAt(i) - 65);
+  return v;
+};
+T.otpEncode = function (s, key) {
+  var str = String(s);
+  var need = (str.match(/[a-zA-Z]/g) || []).length;
+  var kv = T.otpVals(key, need);
+  var ki = 0;
+  return str.replace(/[a-zA-Z]/g, function (c) {
+    var base = c.charCodeAt(0) >= 97 ? 97 : 65;
+    return String.fromCharCode(base + ((c.charCodeAt(0) - base + kv[ki++]) % 26));
+  });
+};
+T.otpDecode = function (s, key) {
+  var str = String(s);
+  var need = (str.match(/[a-zA-Z]/g) || []).length;
+  var kv = T.otpVals(key, need);
+  var ki = 0;
+  return str.replace(/[a-zA-Z]/g, function (c) {
+    var base = c.charCodeAt(0) >= 97 ? 97 : 65;
+    return String.fromCharCode(base + (((c.charCodeAt(0) - base - kv[ki++] + 26) % 26)));
+  });
+};
+T.otpCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'LEMON' : o.key; if ((o.mode || 'encode') === 'decode') return T.otpDecode(s, k); return T.otpEncode(s, k); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
