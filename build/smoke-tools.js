@@ -1336,6 +1336,14 @@ console.log('-- quad --');
   ok(TOOLS['quadratic-solver'].handler.toString().indexOf('quadSolve') >= 0, 'quad delegates');
 }
 
+console.log('-- moddiv --');
+{
+  ok(TOOLS['modulo-explorer'].handler('17 5') === 'Dividend: 17, Divisor: 5\nTruncated: q = 3, r = 2\nFloored: q = 3, r = 2\nEuclidean: q = 3, r = 2\nDivisible: no', 'moddiv pos');
+  ok(TOOLS['modulo-explorer'].handler('-17 5') === 'Dividend: -17, Divisor: 5\nTruncated: q = -3, r = -2\nFloored: q = -4, r = 3\nEuclidean: q = -4, r = 3\nDivisible: no', 'moddiv neg');
+  ok(TOOLS['modulo-explorer'].handler('10 5').indexOf('Divisible: yes') >= 0, 'moddiv exact');
+  ok(TOOLS['modulo-explorer'].handler.toString().indexOf('modDiv') >= 0, 'moddiv delegates');
+}
+
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

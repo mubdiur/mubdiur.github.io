@@ -1732,6 +1732,32 @@ T.quadSolve = function (s) {
     : 'x1 = ' + qtrim(h) + ' + ' + fmtI(qi2) + ', x2 = ' + qtrim(h) + ' - ' + fmtI(qi2);
   return 'Equation: ' + eqn() + '\nDiscriminant: ' + qtrim(D) + '\nRoots: ' + pair + tail;
 };
+/* Modulo explorer: truncated, floored and Euclidean division on exact BigInts. */
+T.modDiv = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter two integers \u2014 e.g. 17 5');
+  function mbig(p, label) {
+    var u = (p.charAt(0) === '+' || p.charAt(0) === '-') ? p.slice(1) : p;
+    if (!/^\d+$/.test(u)) throw new Error(label + ' \u2014 got ' + JSON.stringify(p));
+    if ((u.replace(/^0+/, '').length || 1) > 2000) throw new Error(label + ' too long \u2014 max 2000 digits');
+    return BigInt(p);
+  }
+  function mgrp(x) { var ng = x < BigInt(0) ? '-' : ''; var t = (x < BigInt(0) ? -x : x).toString(); return ng + t.replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  var parts = txt.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  if (parts.length !== 2) throw new Error('Enter two integers \u2014 got ' + parts.length + ', e.g. 17 5');
+  var a = mbig(parts[0], 'Bad dividend');
+  var b = mbig(parts[1], 'Bad divisor');
+  if (b === BigInt(0)) throw new Error('Division by zero \u2014 divisor cannot be 0');
+  var qt = a / b;
+  var rt = a % b;
+  var qf = qt, rf = rt;
+  if (rt !== BigInt(0) && ((a < BigInt(0)) !== (b < BigInt(0)))) { qf = qt - BigInt(1); rf = rt + b; }
+  var qe = qt, re = rt;
+  if (re < BigInt(0)) { var absb = b < BigInt(0) ? -b : b; re += absb; qe -= (b < BigInt(0) ? BigInt(-1) : BigInt(1)); }
+  return 'Dividend: ' + mgrp(a) + ', Divisor: ' + mgrp(b) + '\nTruncated: q = ' + mgrp(qt) + ', r = ' + mgrp(rt) + '\nFloored: q = ' + mgrp(qf) + ', r = ' + mgrp(rf) + '\nEuclidean: q = ' + mgrp(qe) + ', r = ' + mgrp(re) + '\nDivisible: ' + (rt === BigInt(0) ? 'yes' : 'no');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

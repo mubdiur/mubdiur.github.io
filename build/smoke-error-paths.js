@@ -885,6 +885,7 @@ mustThrow(() => T.fracSimp('   '), 'fracSimp empty');mustThrow(() => T.fracSimp(
 mustThrow(() => T.ratioCalc('   '), 'ratioCalc empty');mustThrow(() => T.ratioCalc('abc'), 'ratioCalc junk');mustThrow(() => T.ratioCalc('10'), 'ratioCalc single');mustThrow(() => T.ratioCalc('0:0'), 'ratioCalc zeros');mustThrow(() => T.ratioCalc('3:4 = 6:7'), 'ratioCalc missing x');mustNotThrow(() => T.ratioCalc(String.fromCharCode(0xD800)), 'ratioCalc lone surrogate survives');
 mustThrow(() => T.sciNota('   '), 'sciNota empty');mustThrow(() => T.sciNota('abc'), 'sciNota junk');mustThrow(() => T.sciNota('1.2e'), 'sciNota badexp');mustThrow(() => T.sciNota('1e1000000'), 'sciNota explarge');mustNotThrow(() => T.sciNota(String.fromCharCode(0xD800)), 'sciNota lone surrogate survives');
 mustThrow(() => T.quadSolve('   '), 'quadSolve empty');mustThrow(() => T.quadSolve('abc'), 'quadSolve junk');mustThrow(() => T.quadSolve('1 2'), 'quadSolve pair');mustThrow(() => T.quadSolve('1 b 3'), 'quadSolve badcoef');mustNotThrow(() => T.quadSolve(String.fromCharCode(0xD800)), 'quadSolve lone surrogate survives');
+mustThrow(() => T.modDiv('   '), 'modDiv empty');mustThrow(() => T.modDiv('42'), 'modDiv single');mustThrow(() => T.modDiv('12a 18'), 'modDiv junk');mustThrow(() => T.modDiv('10 0'), 'modDiv divzero');mustNotThrow(() => T.modDiv(String.fromCharCode(0xD800)), 'modDiv lone surrogate survives');
 console.log('-- wasm guards (proven by js/wasm.js unit, not smoke) --');
 ok(true, 'wasm guards exist (manual verify: js/wasm.js mem() bounds + ASN.1 cap)');
 

@@ -583,6 +583,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('quadratic-solver', 'two-real', TOOLS['quadratic-solver'].handler('1 -3 2') === 'Equation: x² - 3x + 2 = 0\nDiscriminant: 1\nRoots: x1 = 1, x2 = 2\nVertex: (1.5, -0.25)');
     push('quadratic-solver', 'linear', TOOLS['quadratic-solver'].handler('0 2 4') === 'Equation: 2x + 4 = 0\nLinear root: x = -2');
     push('quadratic-solver', 'junk throws', mustThrow(() => TOOLS['quadratic-solver'].handler('abc')));
+    push('modulo-explorer', 'pos', TOOLS['modulo-explorer'].handler('17 5') === 'Dividend: 17, Divisor: 5\nTruncated: q = 3, r = 2\nFloored: q = 3, r = 2\nEuclidean: q = 3, r = 2\nDivisible: no');
+    push('modulo-explorer', 'neg', TOOLS['modulo-explorer'].handler('-17 5') === 'Dividend: -17, Divisor: 5\nTruncated: q = -3, r = -2\nFloored: q = -4, r = 3\nEuclidean: q = -4, r = 3\nDivisible: no');
+    push('modulo-explorer', 'junk throws', mustThrow(() => TOOLS['modulo-explorer'].handler('12a 18')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));
