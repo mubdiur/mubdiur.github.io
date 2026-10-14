@@ -69,6 +69,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'route-cipher': { good: 'HELLOWORLD', expectInOutput: /HELLODLROW/ },
   'affine-cipher': { good: 'AFFINE', expectInOutput: /IHHWVC/ },
   'one-time-pad': { good: 'HELLO', expectInOutput: /SIXZB/ },
+  'jefferson-disk': { good: 'HELLO', expectInOutput: /WZQGB/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },

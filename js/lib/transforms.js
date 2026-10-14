@@ -2811,6 +2811,41 @@ T.otpDecode = function (s, key) {
   });
 };
 T.otpCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'LEMON' : o.key; if ((o.mode || 'encode') === 'decode') return T.otpDecode(s, k); return T.otpEncode(s, k); };
+/* Jefferson cores: stacked alphabet rings, plaintext aligned on one row and read off another (offset rows away); each ring must hold 26 unique letters, letters cycle across the rings. */
+T.jeffersonDisks = function (disks) {
+  var raw = String(disks === undefined ? 'JGRKQUZBAOXNMDTFLVIYEHWSPC,CYGPAQOMRLXWEZDIVKBFJTNSHU,BLQMAVUKGOTSXPZNRWICFEYHJD,URSATLGIKFZHDBVPMQCNOWEYXJ,ZVAFPSDJUNCQLOBWXYRKEGHIMT,GTLKZPNMYAFROIDWSQUCEHBXJV' : disks).toUpperCase().split(/[^A-Z]+/).filter(function (w) { return w; });
+  if (!raw.length) throw new Error('Enter disks \u2014 one 26-letter ring each, commas or spaces apart');
+  for (var i = 0; i < raw.length; i++) {
+    if (raw[i].length !== 26) throw new Error('Disk ' + (i + 1) + ' needs 26 letters \u2014 saw ' + raw[i].length);
+    var seen = {};
+    for (var j = 0; j < 26; j++) { if (seen[raw[i].charAt(j)]) throw new Error('Disk ' + (i + 1) + ' repeats ' + raw[i].charAt(j) + ' \u2014 26 unique letters'); seen[raw[i].charAt(j)] = 1; }
+  }
+  return raw;
+};
+T.jeffersonOffset = function (off) {
+  var n = off === undefined ? 1 : parseInt(off, 10);
+  if (isNaN(n)) throw new Error('Offset must be a number \u2014 rows away from the plain row');
+  return ((n % 26) + 26) % 26;
+};
+T.jeffersonEncode = function (s, disks, off) {
+  var rings = T.jeffersonDisks(disks);
+  var sh = T.jeffersonOffset(off);
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var out = '';
+  for (var i = 0; i < t.length; i++) { var d = rings[i % rings.length]; out += d.charAt((d.indexOf(t.charAt(i)) + sh) % 26); }
+  return out;
+};
+T.jeffersonDecode = function (s, disks, off) {
+  var rings = T.jeffersonDisks(disks);
+  var sh = T.jeffersonOffset(off);
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var out = '';
+  for (var i = 0; i < t.length; i++) { var d = rings[i % rings.length]; out += d.charAt((d.indexOf(t.charAt(i)) - sh + 26) % 26); }
+  return out;
+};
+T.jeffersonCipher = function (s, opts) { var o = opts || {}; var dd = o.disks === undefined ? 'JGRKQUZBAOXNMDTFLVIYEHWSPC,CYGPAQOMRLXWEZDIVKBFJTNSHU,BLQMAVUKGOTSXPZNRWICFEYHJD,URSATLGIKFZHDBVPMQCNOWEYXJ,ZVAFPSDJUNCQLOBWXYRKEGHIMT,GTLKZPNMYAFROIDWSQUCEHBXJV' : o.disks; var oo = o.offset === undefined ? '1' : o.offset; if ((o.mode || 'encode') === 'decode') return T.jeffersonDecode(s, dd, oo); return T.jeffersonEncode(s, dd, oo); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
