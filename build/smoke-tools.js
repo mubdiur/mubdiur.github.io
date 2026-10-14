@@ -1220,6 +1220,14 @@ console.log('-- entropy --');
   ok(e1.indexOf('Strength:') >= 0, 'entropy strength line');
   ok(TOOLS['password-entropy'].handler.toString().indexOf('passwordEntropy') >= 0, 'entropy delegates');
 }
+console.log('-- adler32 --');
+{
+  ok(TOOLS['adler32-checksum'].handler('Wikipedia') === '11e60398', 'adler canonical');
+  ok(TOOLS['adler32-checksum'].handler('123456789') === '091e01de', 'adler digits');
+  ok(TOOLS['adler32-checksum'].handler('') === '00000001', 'adler empty is one');
+  ok((function () { var s = ''; for (var ai = 0; ai < 6000; ai++) s += 'x'; var a = 1, b = 0; for (var aj = 0; aj < s.length; aj++) { a = (a + s.charCodeAt(aj)) % 65521; b = (b + a) % 65521; } return TOOLS['adler32-checksum'].handler(s) === (((b << 16) | a) >>> 0).toString(16).padStart(8, '0'); })(), 'adler chunked matches naive');
+  ok(TOOLS['adler32-checksum'].handler.toString().indexOf('adler32') >= 0, 'adler delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

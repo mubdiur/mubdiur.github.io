@@ -7826,6 +7826,19 @@ T.jsonPath = function (json, path) {
 T.jsonPathOpts = function (s, opts) {
   return T.jsonPath(s, (opts && opts.path) || String.fromCharCode(36));
 };
+/* Adler-32 checksum: zlib-style rolling sums over UTF-8 bytes, modulo deferred per NMAX chunk so long inputs stay exact and fast. */
+T.adler32 = function (s) {
+  var bytes = new TextEncoder().encode(String(s));
+  var a = 1, b = 0, i = 0, n = bytes.length;
+  while (n > 0) {
+    var k = n < 5552 ? n : 5552;
+    n -= k;
+    for (var j = 0; j < k; j++, i++) { a += bytes[i]; b += a; }
+    a %= 65521;
+    b %= 65521;
+  }
+  return (((b << 16) | a) >>> 0).toString(16).padStart(8, '0');
+};
 T.passwordEntropy = function (s) {
   var text = String(s === undefined ? '' : (s === null ? '' : s));
   var pool = 0;

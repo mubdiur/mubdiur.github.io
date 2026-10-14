@@ -362,6 +362,9 @@ window.TOOLMANIFEST = [
       { key: 'key', label: 'Secret Key', type: 'password', default: 'secret' },
       { key: 'algorithm', label: 'Algorithm', type: 'select', default: 'SHA-256', options: [{ value: 'SHA-256', label: 'SHA-256' }, { value: 'SHA-1', label: 'SHA-1' }] }
     ] },
+  { slug: 'adler32-checksum', name: 'Adler-32 Checksum', desc: 'Generate Adler-32 checksum \u2014 zlib-style rolling sums, pure-JS NMAX chunks', category: 'crypto', tags: ['adler32', 'checksum', 'zlib'], icon: 'hash', template: 'transform',
+    placeholder: 'Wikipedia',
+    handler: function (s) { return Transforms.adler32(s); } },
   { slug: 'crc32-checksum', name: 'CRC32 Checksum', desc: 'Generate CRC32 checksum — WebAssembly core', category: 'crypto', tags: ['crc32', 'checksum'], icon: 'hash', template: 'transform', wasm: true,
     fileHash: true,
     handler: function (s) { return Core.crc32Hex(s); } },

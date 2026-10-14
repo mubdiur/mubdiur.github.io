@@ -166,6 +166,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'sha512-hash': { good: 'hello', expectInOutput: /[0-9a-f]{128}/i },
   'hmac-generator': { good: 'hello', expectInOutput: /[0-9a-f]+/i },
   'crc32-checksum': { good: 'hello', expectInOutput: /[0-9a-f]+/i },
+  'adler32-checksum': { good: 'Wikipedia', expectInOutput: /11e60398/ },
   'password-entropy': { good: 'correct horse', expectInOutput: /Entropy/i },
   'csv-to-json': { good: 'name,age\nAda,30', expectInOutput: /Ada/ },
   'csv-to-xml': { good: 'name,age\nAda,30', expectInOutput: /<name>Ada/ },
