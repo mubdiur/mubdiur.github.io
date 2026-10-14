@@ -2568,6 +2568,26 @@ T.nihilistDecode = function (s, squareKey, key) {
   return out;
 };
 T.nihilistCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; var kk = o.key === undefined ? 'LEMON' : o.key; if ((o.mode || 'encode') === 'decode') return T.nihilistDecode(s, q, kk); return T.nihilistEncode(s, q, kk); };
+/* Polybius cores: keyed 5x5 square (J folds to I) read as row/col digit pairs; cipher is an even run of digits 1-5. */
+T.polybiusEncode = function (s, squareKey) {
+  var sq = T.playfairSquare(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var t = String(s).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var out = '';
+  for (var i = 0; i < t.length; i++) out += String(T.nihilistNum(t.charAt(i), sq));
+  return out;
+};
+T.polybiusDecode = function (s, squareKey) {
+  var sq = T.playfairSquare(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var c = String(s).replace(/\s/g, '');
+  if (!c) return '';
+  if (/[^1-5]/.test(c)) throw new Error('Bad Polybius input \u2014 digits 1-5 only');
+  if (c.length % 2) throw new Error('Bad Polybius input \u2014 need digit pairs');
+  var out = '';
+  for (var i = 0; i < c.length; i += 2) out += sq.seq[(c.charCodeAt(i) - 49) * 5 + (c.charCodeAt(i + 1) - 49)];
+  return out;
+};
+T.polybiusCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; if ((o.mode || 'encode') === 'decode') return T.polybiusDecode(s, q); return T.polybiusEncode(s, q); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
