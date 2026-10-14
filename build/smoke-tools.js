@@ -1395,6 +1395,14 @@ console.log('-- fact --');
   ok(TOOLS['prime-factorization'].handler.toString().indexOf('primeFactors') >= 0, 'fact delegates');
 }
 
+
+console.log('-- box --');
+{
+  ok(TOOLS['box-solver'].handler('3 4 5') === 'Dims: 3 \u00d7 4 \u00d7 5\nVolume: 60\nSurface: 94\nSpace diagonal: 7.0710678119\nCube: no', 'box basic');
+  ok(TOOLS['box-solver'].handler('cube 5') === 'Dims: 5 \u00d7 5 \u00d7 5\nVolume: 125\nSurface: 150\nSpace diagonal: 8.6602540378\nCube: yes', 'box cube');
+  ok(TOOLS['box-solver'].handler('3x4x5').indexOf('Volume: 60') >= 0, 'box compact');
+  ok(TOOLS['box-solver'].handler.toString().indexOf('boxSolve') >= 0, 'box delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

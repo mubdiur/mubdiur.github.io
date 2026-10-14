@@ -1995,6 +1995,45 @@ T.primeFactors = function (s) {
   facs.forEach(function (fe) { tc += fe[1]; });
   return 'Factors: ' + fline + '\nRemaining: ' + remLine + '\nDistinct: ' + facs.length + '\nTotal: ' + tc;
 };
+/* Box solver: volume, surface and space diagonal from three edges. */
+T.boxSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter box edges \u2014 e.g. 3 4 5 or cube 5');
+  function bnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function btrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase().replace(/\u00d7/g, ' ');
+  var shape = '';
+  var m0 = /^(box|cuboid|cube|rect|rectangular)\b/.exec(low);
+  if (m0) { shape = m0[1]; low = low.slice(m0[0].length); }
+  low = low.replace(/(\d)\s*[x*]\s*(?=\d)/g, '$1 ');
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== '' && x !== 'x' && x !== '*'; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'l' || tk === 'w' || tk === 'h') continue;
+    nums.push(bnum(tk, 'Bad edge'));
+  }
+  var l, w, h;
+  if (shape === 'cube') {
+    if (nums.length !== 1) throw new Error('Cube wants one edge \u2014 e.g. cube 5');
+    l = nums[0]; w = nums[0]; h = nums[0];
+  } else if (nums.length === 1) { l = nums[0]; w = nums[0]; h = nums[0]; shape = 'cube'; }
+  else if (nums.length === 3) { l = nums[0]; w = nums[1]; h = nums[2]; }
+  else throw new Error('Box wants three edges \u2014 e.g. 3 4 5');
+  var cube = (l === w && w === h);
+  return 'Dims: ' + btrim(l) + ' \u00d7 ' + btrim(w) + ' \u00d7 ' + btrim(h) + '\nVolume: ' + btrim(l * w * h) + '\nSurface: ' + btrim(2 * (l * w + l * h + w * h)) + '\nSpace diagonal: ' + btrim(Math.sqrt(l * l + w * w + h * h)) + '\nCube: ' + (cube ? 'yes' : 'no');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
