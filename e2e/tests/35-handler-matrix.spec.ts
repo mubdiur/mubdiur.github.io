@@ -586,7 +586,7 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('modulo-explorer', 'pos', TOOLS['modulo-explorer'].handler('17 5') === 'Dividend: 17, Divisor: 5\nTruncated: q = 3, r = 2\nFloored: q = 3, r = 2\nEuclidean: q = 3, r = 2\nDivisible: no');
     push('modulo-explorer', 'neg', TOOLS['modulo-explorer'].handler('-17 5') === 'Dividend: -17, Divisor: 5\nTruncated: q = -3, r = -2\nFloored: q = -4, r = 3\nEuclidean: q = -4, r = 3\nDivisible: no');
     push('modulo-explorer', 'junk throws', mustThrow(() => TOOLS['modulo-explorer'].handler('12a 18')));
-    push('triangle-solver', 'right', TOOLS['triangle-solver'].handler('3 4 5') === 'Sides (sorted): 3, 4, 5\nType: Scalene, Right\nPerimeter: 12\nArea: 6\nAngles: 36.869898° / 53.130102° / 90° (opposite sorted sides)');
+    push('triangle-solver', 'right', TOOLS['triangle-solver'].handler('3 4 5') === 'Sides (sorted): 3, 4, 5\nType: Scalene, Right\nPerimeter: 12\nArea: 6\nAngles: 36.869898° / 53.130102° / 90° (opposite sorted sides)\nCircumradius: 2.5\nInradius: 1\nAltitudes: 4 / 3 / 2.4 (to sorted sides)');
     push('triangle-solver', 'violation throws', mustThrow(() => TOOLS['triangle-solver'].handler('1 2 3')));
     push('triangle-solver', 'junk throws', mustThrow(() => TOOLS['triangle-solver'].handler('a b c')));
     push('circle-solver', 'radius', TOOLS['circle-solver'].handler('5') === 'Given: radius = 5\nRadius: 5\nDiameter: 10\nCircumference: 31.4159265359\nArea: 78.5398163397');

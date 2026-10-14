@@ -925,7 +925,7 @@ window.TOOLMANIFEST = [
   { slug: 'modulo-explorer', name: 'Modulo & Division Explorer', desc: 'Truncated vs floored vs Euclidean division — exact BigInt quotients plus remainders', category: 'math', tags: ['modulo', 'division', 'remainder', 'quotient', 'bigint'], icon: 'calculator', template: 'transform',
     placeholder: '17 5',
     handler: function (s) { return Transforms.modDiv(s); } },
-  { slug: 'triangle-solver', name: 'Triangle Solver', desc: 'Sides to area, angles and type — Heron plus law of cosines, inequality guards', category: 'math', tags: ['triangle', 'geometry', 'area', 'angles', 'heron'], icon: 'calculator', template: 'transform',
+  { slug: 'triangle-solver', name: 'Triangle Solver', desc: 'Sides to area, angles, type, radii and altitudes — Heron plus law of cosines, inequality guards', category: 'math', tags: ['triangle', 'geometry', 'area', 'angles', 'heron'], icon: 'calculator', template: 'transform',
     placeholder: '3 4 5',
     handler: function (s) { return Transforms.triSolve(s); } },
   { slug: 'circle-solver', name: 'Circle Solver', desc: 'Radius, diameter, circumference, area — solve from any one, trimmed to 10 decimals', category: 'math', tags: ['circle', 'geometry', 'radius', 'area', 'circumference'], icon: 'calculator', template: 'transform',

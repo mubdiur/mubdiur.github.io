@@ -1789,7 +1789,9 @@ T.triSolve = function (s) {
   var angType = (Math.abs(lhs - rhs) <= 1e-9 * rhs) ? 'Right' : ((lhs < rhs) ? 'Obtuse' : 'Acute');
   function ang(op, a1, a2) { var q = (a1 * a1 + a2 * a2 - op * op) / (2 * a1 * a2); if (q > 1) q = 1; if (q < -1) q = -1; return tdeg(Math.acos(q) * 180 / Math.PI); }
   var A = ang(x, y, z), B = ang(y, x, z), C = ang(z, x, y);
-  return 'Sides (sorted): ' + ttrim(x) + ', ' + ttrim(y) + ', ' + ttrim(z) + '\nType: ' + sideType + ', ' + angType + '\nPerimeter: ' + ttrim(per) + '\nArea: ' + ttrim(area) + '\nAngles: ' + A + '\u00b0 / ' + B + '\u00b0 / ' + C + '\u00b0 (opposite sorted sides)';
+  var ccR = x * y * z / (4 * area);
+  var inR = area / sp;
+  return 'Sides (sorted): ' + ttrim(x) + ', ' + ttrim(y) + ', ' + ttrim(z) + '\nType: ' + sideType + ', ' + angType + '\nPerimeter: ' + ttrim(per) + '\nArea: ' + ttrim(area) + '\nAngles: ' + A + '\u00b0 / ' + B + '\u00b0 / ' + C + '\u00b0 (opposite sorted sides)' + '\nCircumradius: ' + ttrim(ccR) + '\nInradius: ' + ttrim(inR) + '\nAltitudes: ' + ttrim(2 * area / x) + ' / ' + ttrim(2 * area / y) + ' / ' + ttrim(2 * area / z) + ' (to sorted sides)';
 };
 /* Circle solver: radius, diameter, circumference and area from any one value. */
 T.circleSolve = function (s) {

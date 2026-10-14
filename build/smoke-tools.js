@@ -1346,7 +1346,8 @@ console.log('-- moddiv --');
 
 console.log('-- tri --');
 {
-  ok(TOOLS['triangle-solver'].handler('3 4 5') === 'Sides (sorted): 3, 4, 5\nType: Scalene, Right\nPerimeter: 12\nArea: 6\nAngles: 36.869898° / 53.130102° / 90° (opposite sorted sides)', 'tri right');
+  ok(TOOLS['triangle-solver'].handler('3 4 5') === 'Sides (sorted): 3, 4, 5\nType: Scalene, Right\nPerimeter: 12\nArea: 6\nAngles: 36.869898° / 53.130102° / 90° (opposite sorted sides)\nCircumradius: 2.5\nInradius: 1\nAltitudes: 4 / 3 / 2.4 (to sorted sides)', 'tri right');
+  ok(TOOLS['triangle-solver'].handler('2 2 2').indexOf('Inradius: 0.5773502692') >= 0, 'tri inradius');
   ok(TOOLS['triangle-solver'].handler('2 2 2').indexOf('Type: Equilateral, Acute') >= 0, 'tri equi');
   ok(TOOLS['triangle-solver'].handler.toString().indexOf('triSolve') >= 0, 'tri delegates');
 }
