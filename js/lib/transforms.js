@@ -2515,6 +2515,39 @@ T.conicSolve = function (s) {
   var hc = Math.sqrt(ha * ha + hb * hb);
   return 'Hyperbola: a = ' + ktrim(ha) + ', b = ' + ktrim(hb) + '\nFoci: (\u00b1' + ktrim(hc) + ', 0)\nEccentricity: ' + ktrim(hc / ha) + '\nAsymptotes: y = \u00b1' + ktrim(hb / ha) + 'x\nLatus rectum: ' + ktrim(2 * hb * hb / ha);
 };
+/* Reuleaux-triangle solver: area, perimeter plus inner and outer circles. */
+T.reuleauxSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a width \u2014 e.g. reuleaux 10');
+  function rnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function rtrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(reuleaux|reul)\b/.exec(low);
+  if (!m0) throw new Error('Unknown curve \u2014 use reuleaux 10');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'w' || tk === 'width') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 1) throw new Error('Reuleaux wants one width \u2014 e.g. reuleaux 10');
+  var w = rnum(nums[0], 'Bad width');
+  var q3 = Math.sqrt(3);
+  return 'Reuleaux: width = ' + rtrim(w) + '\nArea: ' + rtrim(w * w * (Math.PI - q3) / 2) + '\nPerimeter: ' + rtrim(Math.PI * w) + '\nInradius: ' + rtrim(w * (1 - q3 / 3)) + '\nCircumradius: ' + rtrim(w * q3 / 3);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

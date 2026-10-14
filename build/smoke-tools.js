@@ -1491,6 +1491,13 @@ console.log('-- conic --');
   ok(TOOLS['conic-solver'].handler('hyperbola 5 3') === 'Hyperbola: a = 5, b = 3\nFoci: (\u00b15.8309518948, 0)\nEccentricity: 1.166190379\nAsymptotes: y = \u00b10.6x\nLatus rectum: 3.6', 'conic hyperbola');
   ok(TOOLS['conic-solver'].handler.toString().indexOf('conicSolve') >= 0, 'conic delegates');
 }
+
+console.log('-- reuleaux --');
+{
+  ok(TOOLS['reuleaux-solver'].handler('reuleaux 10') === 'Reuleaux: width = 10\nArea: 70.477092301\nPerimeter: 31.4159265359\nInradius: 4.2264973081\nCircumradius: 5.7735026919', 'reuleaux exact');
+  ok(TOOLS['reuleaux-solver'].handler('reuleaux 10').indexOf('Perimeter: 31.4159265359') >= 0 && TOOLS['circle-solver'].handler('d=10').indexOf('Circumference: 31.4159265359') >= 0, 'reuleaux matches circle');
+  ok(TOOLS['reuleaux-solver'].handler.toString().indexOf('reuleauxSolve') >= 0, 'reuleaux delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
