@@ -681,6 +681,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('cam-solver', 'mid-rise', TOOLS['cam-solver'].handler('cam 20 10 90 45').indexOf('At 45 deg: s = 5, v = 10/rad, a = 0/rad2') >= 0);
     push('cam-solver', 'peaks', TOOLS['cam-solver'].handler('cam 20 10 90').indexOf('Max vel: 10/rad') >= 0);
     push('cam-solver', 'junk throws', mustThrow(() => TOOLS['cam-solver'].handler('abc')));
+    push('bolt-solver', 'holes', TOOLS['bolt-solver'].handler('bolt 4 100').indexOf('H1: (50, 0)') >= 0);
+    push('bolt-solver', 'pair', TOOLS['bolt-solver'].handler('bolt 2 100').indexOf('Spacing: 100') >= 0);
+    push('bolt-solver', 'junk throws', mustThrow(() => TOOLS['bolt-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

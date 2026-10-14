@@ -289,6 +289,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'sprocket-solver': { good: 'sprocket 12.7 17 38 450', bad: 'abc', expectInOutput: /Pitch dia:/, expectError: /Unknown drive/ },
   'spring-solver': { good: 'spring 2 20 8', bad: 'abc', expectInOutput: /Rate:/, expectError: /Unknown spring/ },
   'cam-solver': { good: 'cam 20 10 90 45', bad: 'abc', expectInOutput: /Max vel:/, expectError: /Unknown cam/ },
+  'bolt-solver': { good: 'bolt 4 100', bad: 'abc', expectInOutput: /Spacing:/, expectError: /Unknown pattern/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },

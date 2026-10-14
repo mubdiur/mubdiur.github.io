@@ -3087,6 +3087,56 @@ T.camSolve = function (s) {
   }
   return out;
 };
+/* Bolt-circle solver: hole coordinates plus chord spacing from count and circle dia. */
+T.boltSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a bolt circle \u2014 e.g. bolt 4 100');
+  function bpos(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (!(v > 0)) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function btrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(bolt|pcd|flange)\b/.exec(low);
+  if (!m0) throw new Error('Unknown pattern \u2014 use bolt 4 100');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'n' || tk === 'holes' || tk === 'd' || tk === 'dia' || tk === 'diameter' || tk === 's' || tk === 'start' || tk === 'angle' || tk === 'deg') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 2 && nums.length !== 3) throw new Error('Bolt wants hole count and circle dia \u2014 e.g. bolt 4 100');
+  var bn = bpos(nums[0], 'Bad count');
+  if (Math.floor(bn) !== bn) throw new Error('Bad count must be whole \u2014 got ' + JSON.stringify(nums[0].slice(0, 40)));
+  if (bn < 2) throw new Error('Bad count too small \u2014 min 2 holes');
+  if (bn > 360) throw new Error('Too many holes \u2014 max 360');
+  var bd = bpos(nums[1], 'Bad dia');
+  var bs = 0;
+  if (nums.length === 3) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(nums[2])) throw new Error('Bad start \u2014 got ' + JSON.stringify(nums[2].slice(0, 40)));
+    bs = parseFloat(nums[2]);
+    if (!isFinite(bs)) throw new Error('Bad start \u2014 out of range');
+  }
+  var rr = bd / 2;
+  var step = 360 / bn;
+  var lines = [];
+  for (var k = 0; k < bn; k++) {
+    var ak = (bs + k * step) * Math.PI / 180;
+    lines.push('H' + (k + 1) + ': (' + btrim(rr * Math.cos(ak)) + ', ' + btrim(rr * Math.sin(ak)) + ')');
+  }
+  var chord = bd * Math.sin(Math.PI / bn);
+  return 'Bolt circle: ' + btrim(bn) + ' holes on dia ' + btrim(bd) + ' from ' + btrim(bs) + ' deg\n' + lines.join('\n') + '\nSpacing: ' + btrim(chord);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

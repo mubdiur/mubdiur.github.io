@@ -1591,6 +1591,14 @@ console.log('-- cam --');
   ok(TOOLS['cam-solver'].handler('follower 20 10 90 90').indexOf('s = 10, v = 0/rad') >= 0, 'cam full lift');
   ok(TOOLS['cam-solver'].handler.toString().indexOf('camSolve') >= 0, 'cam delegates');
 }
+console.log('-- bolt --');
+{
+  ok(TOOLS['bolt-solver'].handler('bolt 4 100').indexOf('H1: (50, 0)') >= 0, 'bolt first hole');
+  ok(TOOLS['bolt-solver'].handler('bolt 4 100').indexOf('H3: (-50, 0)') >= 0, 'bolt opposite hole');
+  ok(TOOLS['bolt-solver'].handler('bolt 4 100').indexOf('Spacing: 70.7106781187') >= 0, 'bolt spacing');
+  ok(TOOLS['bolt-solver'].handler('bolt 2 100').indexOf('Spacing: 100') >= 0, 'bolt pair is diameter');
+  ok(TOOLS['bolt-solver'].handler.toString().indexOf('boltSolve') >= 0, 'bolt delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
