@@ -81,6 +81,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'fen-viewer': { good: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', expectInOutput: /Side to move/ },
   'luhn-validator': { good: '79927398713', expectInOutput: /Valid/ },
   'pigpen-cipher': { good: 'ABC', expectInOutput: /\u2518/ },
+  'isbn-validator': { good: '0-306-40615-2', expectInOutput: /ISBN-10/ },
   'befunge': { good: '"A",@', expectInOutput: /A/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },

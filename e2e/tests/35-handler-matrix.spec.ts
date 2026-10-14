@@ -275,6 +275,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('luhn-validator', 'bad checksum throws', mustThrow(() => TOOLS['luhn-validator'].handler('79927398714')));
     push('pigpen-cipher', 'happy', TOOLS['pigpen-cipher'].handler('ABC') === String.fromCharCode(0x2518) + ' ' + String.fromCharCode(0x2534) + ' ' + String.fromCharCode(0x2514));
     push('pigpen-cipher', 'digit throws', mustThrow(() => TOOLS['pigpen-cipher'].handler('A1')));
+    push('isbn-validator', 'happy', TOOLS['isbn-validator'].handler('0-306-40615-2').indexOf('ISBN-10') >= 0);
+    push('isbn-validator', 'bad checksum throws', mustThrow(() => TOOLS['isbn-validator'].handler('0-306-40615-3')));
     push('befunge', 'happy', TOOLS['befunge'].handler('"A",@') === 'A');
     push('befunge', 'div zero throws', mustThrow(() => TOOLS['befunge'].handler('50/.@')));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');

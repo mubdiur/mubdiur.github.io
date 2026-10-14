@@ -3653,6 +3653,74 @@ T.pigpenCipher = function (s, opts) {
   }
   return res;
 };
+/* ISBN cores: ISBN-10 mod-11 with X check plus ISBN-13 alternating 1-3 mod-10, dashes and spaces ignored */
+T.isbnCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'validate';
+  if (mode !== 'validate' && mode !== 'check-digit') throw new Error('Bad mode \u2014 use validate or check-digit');
+  var raw = String(s);
+  var clean = '';
+  for (var di = 0; di < raw.length; di++) {
+    var dc = raw.charCodeAt(di);
+    if (dc >= 0xD800 && dc <= 0xDFFF) return '';
+    var dh = raw.charAt(di);
+    if (dh >= '0' && dh <= '9') clean += dh;
+    else if (dh === 'X' || dh === 'x') clean += 'X';
+    else if (dc === 32 || dc === 9 || dc === 10 || dc === 13 || dc === 45) continue;
+    else if (mode === 'check-digit' && (dh === '?' || dh === '*' || dh === '#')) continue;
+    else throw new Error('Digits only \u2014 0-9 with dashes or spaces ignored, X only as an ISBN-10 check, got ' + JSON.stringify(dh));
+  }
+  if (!clean.length) throw new Error('Enter digits first \u2014 an ISBN-10, ISBN-13 or its leading prefix');
+  if (mode === 'validate') {
+    if (clean.length === 10) {
+      var v10 = 0;
+      for (var i10 = 0; i10 < 10; i10++) {
+        var h10 = clean.charAt(i10);
+        if (i10 < 9) {
+          if (h10 < '0' || h10 > '9') throw new Error('Bad ISBN-10 \u2014 first 9 characters are digits, got ' + JSON.stringify(h10));
+          v10 += (h10.charCodeAt(0) - 48) * (10 - i10);
+        } else {
+          if ((h10 < '0' || h10 > '9') && h10 !== 'X') throw new Error('Bad ISBN-10 check \u2014 a digit or X, got ' + JSON.stringify(h10));
+          v10 += (h10 === 'X' ? 10 : h10.charCodeAt(0) - 48);
+        }
+      }
+      if (v10 % 11 !== 0) throw new Error('Invalid ISBN-10 \u2014 checksum fails for ' + JSON.stringify(clean));
+      return 'Valid \u2014 ISBN-10 checksum passes';
+    }
+    if (clean.length === 13) {
+      var v13 = 0;
+      for (var i13 = 0; i13 < 13; i13++) {
+        var h13 = clean.charAt(i13);
+        if (h13 < '0' || h13 > '9') throw new Error('Bad ISBN-13 \u2014 all 13 characters are digits, X is ISBN-10 only');
+        v13 += (h13.charCodeAt(0) - 48) * (i13 % 2 === 0 ? 1 : 3);
+      }
+      if (v13 % 10 !== 0) throw new Error('Invalid ISBN-13 \u2014 checksum fails for ' + JSON.stringify(clean));
+      return 'Valid \u2014 ISBN-13 checksum passes';
+    }
+    throw new Error('Bad length \u2014 ISBN-10 needs 10 characters or ISBN-13 needs 13 digits, got ' + clean.length);
+  }
+  if (clean.indexOf('X') >= 0) throw new Error('No X in a prefix \u2014 pass the first 9 or 12 digits');
+  if (clean.length === 9) {
+    var p9 = 0;
+    for (var j9 = 0; j9 < 9; j9++) {
+      var g9 = clean.charAt(j9);
+      if (g9 < '0' || g9 > '9') throw new Error('Digits only \u2014 9-digit prefix has no X');
+      p9 += (g9.charCodeAt(0) - 48) * (10 - j9);
+    }
+    var c9 = (11 - (p9 % 11)) % 11;
+    return clean + (c9 === 10 ? 'X' : String(c9));
+  }
+  if (clean.length === 12) {
+    var p12 = 0;
+    for (var j12 = 0; j12 < 12; j12++) {
+      var g12 = clean.charAt(j12);
+      if (g12 < '0' || g12 > '9') throw new Error('Digits only \u2014 12-digit prefix has no X');
+      p12 += (g12.charCodeAt(0) - 48) * (j12 % 2 === 0 ? 1 : 3);
+    }
+    return clean + String((10 - (p12 % 10)) % 10);
+  }
+  throw new Error('Bad prefix \u2014 9 digits make an ISBN-10 or 12 make an ISBN-13, got ' + clean.length);
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
