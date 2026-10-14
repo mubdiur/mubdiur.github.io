@@ -1567,6 +1567,14 @@ console.log('-- superellipse --');
   ok(TOOLS['superellipse-solver'].handler('superellipse 5 5 2').indexOf('Perimeter: ~31.41592653') >= 0, 'superellipse circle perimeter');
   ok(TOOLS['superellipse-solver'].handler.toString().indexOf('superellipseSolve') >= 0, 'superellipse delegates');
 }
+console.log('-- sprocket --');
+{
+  ok(TOOLS['sprocket-solver'].handler('sprocket 12.7 17 38 450').indexOf('Pitch dia: 69.1158276272 / 153.7914829351') >= 0, 'sprocket diameters');
+  ok(TOOLS['sprocket-solver'].handler('sprocket 12.7 17 38 450').indexOf('Links: ~98.6814025952 pitches -> 100 links') >= 0, 'sprocket links');
+  ok(TOOLS['sprocket-solver'].handler('sprocket 12.7 17 38 450').indexOf('Centre fit: 458.4098197685') >= 0, 'sprocket fit');
+  ok(TOOLS['sprocket-solver'].handler('sprocket 12.7 17 38 450').indexOf('Ratio 1:2.2352941176') >= 0, 'sprocket ratio');
+  ok(TOOLS['sprocket-solver'].handler.toString().indexOf('sprocketSolve') >= 0, 'sprocket delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

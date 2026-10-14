@@ -2935,6 +2935,61 @@ T.superellipseSolve = function (s) {
   var kind = en === 2 ? 'ellipse' : (en === 4 && ea === eb ? 'squircle' : (en === 1 ? 'diamond' : 'superellipse'));
   return 'Superellipse: a = ' + etrim(ea) + ', b = ' + etrim(eb) + ', n = ' + etrim(en) + ' (' + kind + ')\nArea: ' + etrim(earea) + '\nPerimeter: ~' + etrim(eper) + '\nSize: ' + etrim(2 * ea) + ' x ' + etrim(2 * eb);
 };
+/* Sprocket solver: roller-chain pitch diameters, link count and exact centre fit. */
+T.sprocketSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a sprocket drive \u2014 e.g. sprocket 12.7 17 38 450');
+  function ppos(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (!(v > 0)) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function pteeth(tok, label) {
+    var v = ppos(tok, label);
+    if (Math.floor(v) !== v) throw new Error(label + ' must be whole \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v < 5) throw new Error(label + ' too small \u2014 min 5 teeth');
+    if (v > 1e6) throw new Error(label + ' too large \u2014 max 1000000');
+    return v;
+  }
+  function ptrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(sprocket|chain|roller)\b/.exec(low);
+  if (!m0) throw new Error('Unknown drive \u2014 use sprocket 12.7 17 38 450');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'p' || tk === 'pitch' || tk === 'n1' || tk === 'n2' || tk === 'teeth' || tk === 'c' || tk === 'centre' || tk === 'center') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 4) throw new Error('Sprocket wants pitch, teeth-1, teeth-2 and centre \u2014 e.g. sprocket 12.7 17 38 450');
+  var sp = ppos(nums[0], 'Bad pitch');
+  var sn1 = pteeth(nums[1], 'Bad teeth 1');
+  var sn2 = pteeth(nums[2], 'Bad teeth 2');
+  var sc = ppos(nums[3], 'Bad centre');
+  var pd1 = sp / Math.sin(Math.PI / sn1);
+  var pd2 = sp / Math.sin(Math.PI / sn2);
+  if (!isFinite(pd1) || !isFinite(pd2)) throw new Error('Out of range \u2014 diameters overflow');
+  var cp = sc / sp;
+  var sk = Math.pow((Math.max(sn1, sn2) - Math.min(sn1, sn2)) / (2 * Math.PI), 2);
+  var slp = 2 * cp + (sn1 + sn2) / 2 + sk / cp;
+  if (!isFinite(slp)) throw new Error('Out of range \u2014 length overflows');
+  var sl = Math.ceil(slp / 2) * 2;
+  var sx = 2 * sl - sn1 - sn2;
+  var sdisc = sx * sx - (8 / (Math.PI * Math.PI)) * Math.pow(sn2 - sn1, 2);
+  if (!(sdisc >= 0)) throw new Error('Centre too short \u2014 no exact-centre solution');
+  var scadj = sp / 8 * (sx + Math.sqrt(sdisc));
+  var sratio = Math.max(sn1, sn2) / Math.min(sn1, sn2);
+  return 'Chain: p = ' + ptrim(sp) + ', z1 = ' + ptrim(sn1) + ', z2 = ' + ptrim(sn2) + ', C = ' + ptrim(sc) + '\nPitch dia: ' + ptrim(pd1) + ' / ' + ptrim(pd2) + '\nLinks: ~' + ptrim(slp) + ' pitches -> ' + ptrim(sl) + ' links\nCentre fit: ' + ptrim(scadj) + '\nRatio 1:' + ptrim(sratio);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

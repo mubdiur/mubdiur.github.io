@@ -672,6 +672,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('superellipse-solver', 'area', TOOLS['superellipse-solver'].handler('superellipse 5 3 4').indexOf('Area: 55.622240319') >= 0);
     push('superellipse-solver', 'circle', TOOLS['superellipse-solver'].handler('superellipse 5 5 2').indexOf('Area: 78.5398163397') >= 0);
     push('superellipse-solver', 'junk throws', mustThrow(() => TOOLS['superellipse-solver'].handler('abc')));
+    push('sprocket-solver', 'diameters', TOOLS['sprocket-solver'].handler('sprocket 12.7 17 38 450').indexOf('Pitch dia: 69.1158276272 / 153.7914829351') >= 0);
+    push('sprocket-solver', 'links', TOOLS['sprocket-solver'].handler('sprocket 12.7 17 38 450').indexOf('100 links') >= 0);
+    push('sprocket-solver', 'junk throws', mustThrow(() => TOOLS['sprocket-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

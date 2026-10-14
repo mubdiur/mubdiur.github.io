@@ -286,6 +286,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'cycloid-solver': { good: 'cycloid 5', bad: 'abc', expectInOutput: /Arch area:/, expectError: /Unknown curve/ },
   'belt-solver': { good: 'belt 10 20 30', bad: 'abc', expectInOutput: /Wrap small:/, expectError: /Unknown drive/ },
   'superellipse-solver': { good: 'superellipse 5 3 4', bad: 'abc', expectInOutput: /Perimeter:/, expectError: /Unknown shape/ },
+  'sprocket-solver': { good: 'sprocket 12.7 17 38 450', bad: 'abc', expectInOutput: /Pitch dia:/, expectError: /Unknown drive/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },
