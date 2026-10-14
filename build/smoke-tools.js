@@ -1623,6 +1623,15 @@ console.log('-- oring --');
   ok(TOOLS['oring-solver'].handler('gland 1.78').indexOf('Squeeze: 25.8%') >= 0, 'oring squeeze');
   ok(TOOLS['oring-solver'].handler.toString().indexOf('oringSolve') >= 0, 'oring delegates');
 }
+console.log('-- circlip --');
+{
+  ok(TOOLS['circlip-solver'].handler('circlip 30').indexOf('Groove dia: 28.6') >= 0, 'circlip shaft groove');
+  ok(TOOLS['circlip-solver'].handler('circlip 30 bore').indexOf('Groove dia: 31.4') >= 0, 'circlip bore groove');
+  ok(TOOLS['circlip-solver'].handler('circlip bore 30').indexOf('DIN 472') >= 0, 'circlip bore order');
+  ok(TOOLS['circlip-solver'].handler('din471 30').indexOf('DIN 471') >= 0, 'circlip din471');
+  ok(TOOLS['circlip-solver'].handler('din472 30').indexOf('DIN 472') >= 0, 'circlip din472');
+  ok(TOOLS['circlip-solver'].handler.toString().indexOf('circlipSolve') >= 0, 'circlip delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

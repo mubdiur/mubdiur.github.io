@@ -3265,6 +3265,61 @@ T.oringSolve = function (s) {
   out.push('Groove fill: ' + fill.toFixed(1) + '%');
   return out.join('\n');
 };
+/* Circlip groove solver: retaining-ring groove dims per DIN 471 (shaft) and DIN 472 (bore). */
+T.circlipSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a circlip size \u2014 e.g. circlip 30');
+  var low = txt.toLowerCase();
+  var m0 = /^(circlip|snap|retaining|din\s*471|din\s*472)\b/.exec(low);
+  if (!m0) throw new Error('Unknown circlip \u2014 use circlip 30');
+  var forced = null;
+  if (m0[0].indexOf('471') >= 0) forced = 'shaft';
+  else if (m0[0].indexOf('472') >= 0) forced = 'bore';
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;x\u00d7]+/).filter(function (x) { return x !== ''; });
+  if (parts.length < 1 || parts.length > 2) throw new Error('Circlip wants a size plus optional type \u2014 e.g. circlip 30 bore');
+  var type = forced;
+  var num = null;
+  for (var pi = 0; pi < parts.length; pi++) {
+    var p = parts[pi];
+    if (p === 'shaft' || p === 'external' || p === 'ext' || p === 'outer' || p === '471' || p === 'din471') {
+      if (type !== null && type !== 'shaft') throw new Error('Conflicting type \u2014 DIN 471 is shaft, DIN 472 is bore');
+      type = 'shaft';
+    } else if (p === 'bore' || p === 'internal' || p === 'int' || p === 'inner' || p === '472' || p === 'din472') {
+      if (type !== null && type !== 'bore') throw new Error('Conflicting type \u2014 DIN 471 is shaft, DIN 472 is bore');
+      type = 'bore';
+    } else if (num === null) num = p;
+    else throw new Error('Circlip wants a size plus optional type \u2014 e.g. circlip 30 bore');
+  }
+  if (num === null) throw new Error('Circlip wants a size plus optional type \u2014 e.g. circlip 30 bore');
+  if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(num)) throw new Error('Bad size \u2014 got ' + JSON.stringify(num.slice(0, 40)));
+  var d = parseFloat(num);
+  if (!isFinite(d)) throw new Error('Size \u2014 out of range');
+  if (!(d > 0)) throw new Error('Size must be positive \u2014 got ' + JSON.stringify(num.slice(0, 40)));
+  if (d > 1e15) throw new Error('Value too large \u2014 max 1e15');
+  if (type === null) type = 'shaft';
+  var SHAFT = [[8,7.6,0.9,0.8],[9,8.6,1.1,1],[10,9.6,1.1,1],[11,10.5,1.1,1],[12,11.5,1.1,1],[13,12.4,1.1,1],[14,13.4,1.1,1],[15,14.3,1.1,1],[16,15.2,1.1,1],[17,16.2,1.1,1],[18,17,1.3,1.2],[19,18,1.3,1.2],[20,19,1.3,1.2],[21,20,1.3,1.2],[22,21,1.3,1.2],[24,22.9,1.3,1.2],[25,23.9,1.3,1.2],[26,24.9,1.3,1.2],[28,26.6,1.6,1.5],[29,27.6,1.6,1.5],[30,28.6,1.6,1.5],[32,30.3,1.6,1.5],[34,32.3,1.6,1.5],[35,33,1.6,1.5],[36,34,1.85,1.75],[38,36,1.85,1.75],[40,37.5,1.85,1.75],[42,39.5,1.85,1.75],[45,42.5,1.85,1.75],[47,44.5,1.85,1.75],[50,47,2.15,2]];
+  var BORE = [[8,8.4,0.9,0.8],[9,9.4,0.9,0.8],[10,10.4,1.1,1],[11,11.4,1.1,1],[12,12.5,1.1,1],[13,13.6,1.1,1],[14,14.6,1.1,1],[15,15.7,1.1,1],[16,16.8,1.1,1],[17,17.8,1.1,1],[18,19,1.1,1],[19,20,1.1,1],[20,21,1.1,1],[21,22,1.1,1],[22,23,1.1,1],[24,25.2,1.3,1.2],[25,26.2,1.3,1.2],[26,27.2,1.3,1.2],[28,29.4,1.3,1.2],[30,31.4,1.3,1.2],[31,32.7,1.3,1.2],[32,33.7,1.3,1.2],[34,35.7,1.6,1.5],[35,37,1.6,1.5],[36,38,1.6,1.5],[37,39,1.6,1.5],[38,40,1.6,1.5],[40,42.5,1.85,1.75],[42,44.5,1.85,1.75],[45,47.5,1.85,1.75],[47,49.5,1.85,1.75],[48,50.5,1.85,1.75],[50,53,2.15,2]];
+  var ROWS = type === 'shaft' ? SHAFT : BORE;
+  var row = null;
+  for (var ri = 0; ri < ROWS.length; ri++) { if (Math.abs(d - ROWS[ri][0]) <= 0.0100001) { row = ROWS[ri]; break; } }
+  if (!row) {
+    if (type === 'shaft') throw new Error('Unknown shaft size \u2014 DIN 471 covers 8\u201347 plus 50');
+    throw new Error('Unknown bore size \u2014 DIN 472 covers 8\u201350');
+  }
+  function ctrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var depth = Math.abs(row[0] - row[1]) / 2;
+  var out = [];
+  if (type === 'shaft') out.push('Circlip shaft ' + ctrim(row[0]) + ' (DIN 471)');
+  else out.push('Circlip bore ' + ctrim(row[0]) + ' (DIN 472)');
+  out.push('Ring: ' + ctrim(row[3]) + ' thick');
+  out.push('Groove dia: ' + ctrim(row[1]));
+  out.push('Groove width: ' + ctrim(row[2]));
+  out.push('Groove depth: ' + ctrim(depth) + '/side');
+  return out.join('\n');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

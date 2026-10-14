@@ -292,6 +292,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'bolt-solver': { good: 'bolt 4 100', bad: 'abc', expectInOutput: /Spacing:/, expectError: /Unknown pattern/ },
   'thread-solver': { good: 'M10 1.5', bad: 'abc', expectInOutput: /Tap drill:/, expectError: /Unknown thread/ },
   'keyway-solver': { good: 'keyway 40', bad: 'abc', expectInOutput: /Shaft check:/, expectError: /Unknown keyway/ },
+  'circlip-solver': { good: 'circlip 30', bad: 'abc', expectInOutput: /Groove dia:/, expectError: /Unknown circlip/ },
   'oring-solver': { good: 'oring 2.62', bad: 'abc', expectInOutput: /Groove depth:/, expectError: /Unknown o-ring/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
