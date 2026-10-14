@@ -1351,6 +1351,13 @@ console.log('-- tri --');
   ok(TOOLS['triangle-solver'].handler.toString().indexOf('triSolve') >= 0, 'tri delegates');
 }
 
+console.log('-- circ --');
+{
+  ok(TOOLS['circle-solver'].handler('5') === 'Given: radius = 5\nRadius: 5\nDiameter: 10\nCircumference: 31.4159265359\nArea: 78.5398163397', 'circ radius');
+  ok(TOOLS['circle-solver'].handler('d=10').indexOf('Radius: 5') >= 0, 'circ diameter');
+  ok(TOOLS['circle-solver'].handler.toString().indexOf('circleSolve') >= 0, 'circ delegates');
+}
+
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

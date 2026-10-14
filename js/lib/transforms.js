@@ -1791,6 +1791,42 @@ T.triSolve = function (s) {
   var A = ang(x, y, z), B = ang(y, x, z), C = ang(z, x, y);
   return 'Sides (sorted): ' + ttrim(x) + ', ' + ttrim(y) + ', ' + ttrim(z) + '\nType: ' + sideType + ', ' + angType + '\nPerimeter: ' + ttrim(per) + '\nArea: ' + ttrim(area) + '\nAngles: ' + A + '\u00b0 / ' + B + '\u00b0 / ' + C + '\u00b0 (opposite sorted sides)';
 };
+/* Circle solver: radius, diameter, circumference and area from any one value. */
+T.circleSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a radius \u2014 e.g. 5 or d=10');
+  function cnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function ctrim(v) { var rr = Math.round(v * 1e10) / 1e10; return String(rr === 0 ? 0 : rr); }
+  var mode = 'radius';
+  var numTok = txt;
+  var eqm = /^([a-zA-Z]+)\s*=\s*(.+)$/.exec(txt);
+  if (eqm) {
+    var kk = eqm[1].toLowerCase();
+    if (kk === 'r' || kk === 'radius') mode = 'radius';
+    else if (kk === 'd' || kk === 'diameter') mode = 'diameter';
+    else if (kk === 'c' || kk === 'circumference') mode = 'circumference';
+    else if (kk === 'a' || kk === 'area') mode = 'area';
+    else throw new Error('Bad input \u2014 use r=, d=, c= or a=, e.g. d=10');
+    numTok = eqm[2].trim();
+  } else if (/[=a-zA-Z]/.test(txt)) throw new Error('Bad input \u2014 enter a number like 5 or d=10');
+  var val = cnum(numTok, 'Bad number');
+  var r;
+  if (mode === 'radius') r = val;
+  else if (mode === 'diameter') r = val / 2;
+  else if (mode === 'circumference') r = val / (2 * Math.PI);
+  else r = Math.sqrt(val / Math.PI);
+  if (!isFinite(r) || r <= 0) throw new Error('No circle \u2014 result out of range');
+  return 'Given: ' + mode + ' = ' + ctrim(val) + '\nRadius: ' + ctrim(r) + '\nDiameter: ' + ctrim(2 * r) + '\nCircumference: ' + ctrim(2 * Math.PI * r) + '\nArea: ' + ctrim(Math.PI * r * r);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

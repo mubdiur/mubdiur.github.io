@@ -589,6 +589,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('triangle-solver', 'right', TOOLS['triangle-solver'].handler('3 4 5') === 'Sides (sorted): 3, 4, 5\nType: Scalene, Right\nPerimeter: 12\nArea: 6\nAngles: 36.869898° / 53.130102° / 90° (opposite sorted sides)');
     push('triangle-solver', 'violation throws', mustThrow(() => TOOLS['triangle-solver'].handler('1 2 3')));
     push('triangle-solver', 'junk throws', mustThrow(() => TOOLS['triangle-solver'].handler('a b c')));
+    push('circle-solver', 'radius', TOOLS['circle-solver'].handler('5') === 'Given: radius = 5\nRadius: 5\nDiameter: 10\nCircumference: 31.4159265359\nArea: 78.5398163397');
+    push('circle-solver', 'area', TOOLS['circle-solver'].handler('a=78.5398163397').indexOf('Radius: 5') >= 0);
+    push('circle-solver', 'junk throws', mustThrow(() => TOOLS['circle-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

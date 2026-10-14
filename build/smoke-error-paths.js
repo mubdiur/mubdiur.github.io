@@ -887,6 +887,7 @@ mustThrow(() => T.sciNota('   '), 'sciNota empty');mustThrow(() => T.sciNota('ab
 mustThrow(() => T.quadSolve('   '), 'quadSolve empty');mustThrow(() => T.quadSolve('abc'), 'quadSolve junk');mustThrow(() => T.quadSolve('1 2'), 'quadSolve pair');mustThrow(() => T.quadSolve('1 b 3'), 'quadSolve badcoef');mustNotThrow(() => T.quadSolve(String.fromCharCode(0xD800)), 'quadSolve lone surrogate survives');
 mustThrow(() => T.modDiv('   '), 'modDiv empty');mustThrow(() => T.modDiv('42'), 'modDiv single');mustThrow(() => T.modDiv('12a 18'), 'modDiv junk');mustThrow(() => T.modDiv('10 0'), 'modDiv divzero');mustNotThrow(() => T.modDiv(String.fromCharCode(0xD800)), 'modDiv lone surrogate survives');
 mustThrow(() => T.triSolve('   '), 'triSolve empty');mustThrow(() => T.triSolve('3 4'), 'triSolve pair');mustThrow(() => T.triSolve('a b c'), 'triSolve junk');mustThrow(() => T.triSolve('1 2 3'), 'triSolve violation');mustNotThrow(() => T.triSolve(String.fromCharCode(0xD800)), 'triSolve lone surrogate survives');
+mustThrow(() => T.circleSolve('   '), 'circleSolve empty');mustThrow(() => T.circleSolve('abc'), 'circleSolve junk');mustThrow(() => T.circleSolve('-5'), 'circleSolve neg');mustThrow(() => T.circleSolve('x=5'), 'circleSolve badkey');mustNotThrow(() => T.circleSolve(String.fromCharCode(0xD800)), 'circleSolve lone surrogate survives');
 console.log('-- wasm guards (proven by js/wasm.js unit, not smoke) --');
 ok(true, 'wasm guards exist (manual verify: js/wasm.js mem() bounds + ASN.1 cap)');
 
