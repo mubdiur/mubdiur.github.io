@@ -2750,6 +2750,37 @@ T.routeDecode = function (s, cols, route) {
   return grid.join('');
 };
 T.routeCipher = function (s, opts) { var o = opts || {}; var cc = o.cols === undefined ? '5' : o.cols; var rt = o.route === undefined ? 'spiral' : o.route; if ((o.mode || 'encode') === 'decode') return T.routeDecode(s, cc, rt); return T.routeEncode(s, cc, rt); };
+/* Affine cores: multiply-add over the alphabet (multiplier needs a reciprocal mod 26); case preserved, non-letters pass through. */
+T.affineCoprime = [1, 3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25];
+T.affineVals = function (a, b) {
+  var A = a === undefined ? 5 : parseInt(a, 10);
+  var B = b === undefined ? 8 : parseInt(b, 10);
+  if (isNaN(A)) throw new Error('Multiplier must be a number \u2014 one of 1,3,5,7,9,11,15,17,19,21,23,25');
+  var Ar = ((A % 26) + 26) % 26;
+  if (T.affineCoprime.indexOf(Ar) < 0) throw new Error('Multiplier shares a factor with 26 \u2014 one of 1,3,5,7,9,11,15,17,19,21,23,25');
+  if (isNaN(B)) throw new Error('Shift must be a number \u2014 added after multiplying');
+  return { a: Ar, b: ((B % 26) + 26) % 26 };
+};
+T.affineInverse = function (a) {
+  for (var i = 1; i < 26; i += 2) if ((a * i) % 26 === 1) return i;
+  throw new Error('Multiplier shares a factor with 26 \u2014 one of 1,3,5,7,9,11,15,17,19,21,23,25');
+};
+T.affineEncode = function (s, a, b) {
+  var v = T.affineVals(a, b);
+  return String(s).replace(/[a-zA-Z]/g, function (c) {
+    var base = c.charCodeAt(0) >= 97 ? 97 : 65;
+    return String.fromCharCode(base + ((v.a * (c.charCodeAt(0) - base) + v.b) % 26));
+  });
+};
+T.affineDecode = function (s, a, b) {
+  var v = T.affineVals(a, b);
+  var inv = T.affineInverse(v.a);
+  return String(s).replace(/[a-zA-Z]/g, function (c) {
+    var base = c.charCodeAt(0) >= 97 ? 97 : 65;
+    return String.fromCharCode(base + ((inv * ((c.charCodeAt(0) - base - v.b + 26) % 26)) % 26));
+  });
+};
+T.affineCipher = function (s, opts) { var o = opts || {}; var A = o.a === undefined ? '5' : o.a; var B = o.b === undefined ? '8' : o.b; if ((o.mode || 'encode') === 'decode') return T.affineDecode(s, A, B); return T.affineEncode(s, A, B); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
