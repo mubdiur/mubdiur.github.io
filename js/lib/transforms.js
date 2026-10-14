@@ -4095,6 +4095,49 @@ T.isinCheck = function (s, opts) {
   var psum = isinSum(pds, true);
   return clean + String((10 - (psum % 10)) % 10);
 };
+/* ISSN cores: 8-character serials with mod-11 X check, dashes and spaces ignored. */
+T.issnCheck = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || "validate";
+  if (mode !== "validate" && mode !== "check-digit") throw new Error("Bad mode \u2014 use validate or check-digit");
+  var raw = String(s);
+  var clean = "";
+  for (var ci = 0; ci < raw.length; ci++) {
+    var cc = raw.charCodeAt(ci);
+    if (cc >= 0xD800 && cc <= 0xDFFF) return "";
+    var ch = raw.charAt(ci);
+    if (ch >= "0" && ch <= "9") clean += ch;
+    else if (ch === "X" || ch === "x") clean += "X";
+    else if (cc === 32 || cc === 9 || cc === 10 || cc === 13 || cc === 45) continue;
+    else if (mode === "check-digit" && (ch === "?" || ch === "*" || ch === "#")) continue;
+    else throw new Error("Digits only \u2014 0-9 with dashes or spaces ignored, X only as an ISSN check, got " + JSON.stringify(ch));
+  }
+  if (!clean.length) throw new Error("Enter digits first \u2014 an ISSN or its leading prefix");
+  if (mode === "validate") {
+    if (clean.length !== 8) throw new Error("Bad length \u2014 ISSNs run 8 characters, got " + clean.length);
+    var vsum = 0;
+    for (var vi = 0; vi < 7; vi++) {
+      var vh = clean.charAt(vi);
+      if (vh < "0" || vh > "9") throw new Error("Bad ISSN \u2014 first 7 characters are digits, got " + JSON.stringify(vh));
+      vsum += (vh.charCodeAt(0) - 48) * (8 - vi);
+    }
+    var vc = clean.charAt(7);
+    if ((vc < "0" || vc > "9") && vc !== "X") throw new Error("Bad ISSN check \u2014 a digit or X, got " + JSON.stringify(vc));
+    vsum += (vc === "X" ? 10 : vc.charCodeAt(0) - 48);
+    if (vsum % 11 !== 0) throw new Error("Invalid ISSN \u2014 checksum fails for " + JSON.stringify(clean));
+    return "Valid \u2014 ISSN checksum passes";
+  }
+  if (clean.indexOf("X") >= 0) throw new Error("No X in a prefix \u2014 pass the first 7 digits");
+  if (clean.length !== 7) throw new Error("Bad prefix \u2014 7 digits make an ISSN, got " + clean.length);
+  var psum = 0;
+  for (var pi = 0; pi < 7; pi++) {
+    var ph = clean.charAt(pi);
+    if (ph < "0" || ph > "9") throw new Error("Digits only \u2014 7-digit prefix has no X");
+    psum += (ph.charCodeAt(0) - 48) * (8 - pi);
+  }
+  var cd = (11 - (psum % 11)) % 11;
+  return clean + (cd === 10 ? "X" : String(cd));
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
