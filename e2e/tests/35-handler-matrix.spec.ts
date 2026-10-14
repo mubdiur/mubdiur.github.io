@@ -265,6 +265,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('brainfuck', 'unbalanced throws', mustThrow(() => TOOLS['brainfuck'].handler('[')));
     push('whitespace', 'happy', TOOLS['whitespace'].handler('   \t  \t   \n\t\n  \n\n') === 'H');
     push('whitespace', 'div zero throws', mustThrow(() => TOOLS['whitespace'].handler('   \t \t\n   \n\t \t \n\n')));
+    push('braille', 'happy', TOOLS['braille'].handler('abc') === String.fromCharCode(0x2801) + String.fromCharCode(0x2803) + String.fromCharCode(0x2809));
+    push('braille', 'ascii decode throws', mustThrow(() => TOOLS['braille'].handler('abc', { mode: 'decode' })));
     push('befunge', 'happy', TOOLS['befunge'].handler('"A",@') === 'A');
     push('befunge', 'div zero throws', mustThrow(() => TOOLS['befunge'].handler('50/.@')));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');

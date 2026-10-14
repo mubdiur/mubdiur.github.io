@@ -3330,6 +3330,90 @@ T.befunge = function (code, input) {
     if (gch === '#') bstep();
   }
 };
+/* Braille cores: Grade-1 uncontracted tables as code points, capital and number prefixes, blank for space, newlines pass through, lone surrogates pass through untouched. */
+T.brailleCipher = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'encode';
+  var LET = {
+    a: 0x2801, b: 0x2803, c: 0x2809, d: 0x2819, e: 0x2811,
+    f: 0x280b, g: 0x281b, h: 0x2813, i: 0x280a, j: 0x281a,
+    k: 0x2805, l: 0x2807, m: 0x280d, n: 0x281d, o: 0x2815,
+    p: 0x280f, q: 0x281f, r: 0x2817, s: 0x280e, t: 0x281e,
+    u: 0x2825, v: 0x2827, w: 0x283a, x: 0x282d, y: 0x283d, z: 0x2835
+  };
+  var PUN = { ',': 0x2802, ';': 0x2806, ':': 0x2812, '.': 0x2832, '?': 0x2826, '!': 0x2816, '-': 0x2824 };
+  PUN[String.fromCharCode(39)] = 0x2804;
+  var CAP = 0x2820, NUM = 0x283c, BLANK = 0x2800;
+  var REV = {}, PREV = {};
+  for (var lk in LET) { if (Object.prototype.hasOwnProperty.call(LET, lk)) REV[LET[lk]] = lk; }
+  for (var pk in PUN) { if (Object.prototype.hasOwnProperty.call(PUN, pk)) PREV[PUN[pk]] = pk; }
+  function isSurrogate(cc) { return cc >= 0xD800 && cc <= 0xDFFF; }
+  if (mode === 'encode') {
+    var src = String(s);
+    var out = '';
+    var numRun = false;
+    for (var e = 0; e < src.length; e++) {
+      var ch = src.charAt(e);
+      var cd = src.charCodeAt(e);
+      if (isSurrogate(cd)) { out += ch; numRun = false; continue; }
+      if (ch === ' ') { out += String.fromCharCode(BLANK); numRun = false; continue; }
+      if (cd === 9 || cd === 10 || cd === 13) { out += ch; numRun = false; continue; }
+      if (ch >= '0' && ch <= '9') {
+        if (!numRun) { out += String.fromCharCode(NUM); numRun = true; }
+        var dl = ch === '0' ? 'j' : String.fromCharCode(cd - 48 + 96);
+        out += String.fromCharCode(LET[dl]);
+        continue;
+      }
+      numRun = false;
+      var lo = ch.toLowerCase();
+      if (lo >= 'a' && lo <= 'z' && LET[lo] !== undefined) {
+        if (ch >= 'A' && ch <= 'Z') out += String.fromCharCode(CAP);
+        out += String.fromCharCode(LET[lo]);
+        continue;
+      }
+      if (PUN[ch] !== undefined) { out += String.fromCharCode(PUN[ch]); continue; }
+      throw new Error('No Braille sign \u2014 cannot encode ' + JSON.stringify(ch));
+    }
+    return out;
+  }
+  if (mode === 'decode') {
+    var dsrc = String(s);
+    var dout = '';
+    var wantNum = false, wantCap = false, wantCaps = false;
+    for (var dd = 0; dd < dsrc.length; dd++) {
+      var dch = dsrc.charAt(dd);
+      var dcc = dsrc.charCodeAt(dd);
+      if (isSurrogate(dcc)) { dout += dch; wantNum = false; wantCap = false; wantCaps = false; continue; }
+      if (dcc === 32 || dcc === 9 || dcc === 10 || dcc === 13) { dout += dch; wantNum = false; wantCap = false; wantCaps = false; continue; }
+      if (dcc === BLANK) { dout += ' '; wantNum = false; wantCap = false; wantCaps = false; continue; }
+      if (dcc === CAP) {
+        if (wantCap) { wantCap = false; wantCaps = true; }
+        else wantCap = true;
+        wantNum = false;
+        continue;
+      }
+      if (dcc === NUM) { wantNum = true; wantCap = false; wantCaps = false; continue; }
+      var lc = REV[dcc];
+      if (lc !== undefined) {
+        if (wantNum) {
+          if (lc < 'a' || lc > 'j') throw new Error('Number sign before non-digit \u2014 Braille digits are a through j');
+          dout += lc === 'j' ? '0' : String(lc.charCodeAt(0) - 96);
+          continue;
+        }
+        var up = wantCap || wantCaps;
+        wantCap = false;
+        dout += up ? lc.toUpperCase() : lc;
+        continue;
+      }
+      var pc = PREV[dcc];
+      if (pc !== undefined) { dout += pc; wantNum = false; wantCap = false; wantCaps = false; continue; }
+      if (dcc >= 0x2800 && dcc <= 0x28FF) throw new Error('Unknown Braille pattern \u2014 no Grade-1 sign at U+' + dcc.toString(16).toUpperCase());
+      throw new Error('Not Braille input \u2014 switch Mode to encode');
+    }
+    return dout;
+  }
+  throw new Error('Bad mode \u2014 use encode or decode');
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
