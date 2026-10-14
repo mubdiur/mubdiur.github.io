@@ -2588,6 +2588,47 @@ T.polybiusDecode = function (s, squareKey) {
   return out;
 };
 T.polybiusCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; if ((o.mode || 'encode') === 'decode') return T.polybiusDecode(s, q); return T.polybiusEncode(s, q); };
+/* Cadenus cores: columnar transposition where each column also takes a Caesar shift from its key letter (A=0); grid written row-wise, read in key order, uneven tails handled. */
+T.cadenusEncode = function (s, key) {
+  var o = T.columnarOrder(key === undefined ? 'ZEBRAS' : key);
+  var k = o.k, cols = k.length;
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var rows = Math.ceil(t.length / cols);
+  var out = [];
+  for (var oi = 0; oi < o.order.length; oi++) {
+    var c = o.order[oi];
+    var sh = k.charCodeAt(c) - 65;
+    for (var r = 0; r < rows; r++) { var ix = r * cols + c; if (ix < t.length) out.push(String.fromCharCode(65 + ((t.charCodeAt(ix) - 65 + sh) % 26))); }
+  }
+  return out.join('');
+};
+T.cadenusDecode = function (s, key) {
+  var o = T.columnarOrder(key === undefined ? 'ZEBRAS' : key);
+  var k = o.k, cols = k.length;
+  var t = String(s).toUpperCase().replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var n = t.length;
+  var rows = Math.ceil(n / cols);
+  var full = Math.floor(n / cols), rem = n % cols;
+  var data = [];
+  for (var i = 0; i < cols; i++) data.push('');
+  var off = 0;
+  for (var oi2 = 0; oi2 < o.order.length; oi2++) {
+    var cc = o.order[oi2];
+    var hh = full + (cc < rem ? 1 : 0);
+    var part = t.slice(off, off + hh);
+    off += hh;
+    var sh2 = k.charCodeAt(cc) - 65;
+    var dec = '';
+    for (var q = 0; q < part.length; q++) dec += String.fromCharCode(65 + (((part.charCodeAt(q) - 65 - sh2) % 26 + 26) % 26));
+    data[cc] = dec;
+  }
+  var out = [];
+  for (var r2 = 0; r2 < rows; r2++) for (var c2 = 0; c2 < cols; c2++) if (r2 < data[c2].length) out.push(data[c2].charAt(r2));
+  return out.join('');
+};
+T.cadenusCipher = function (s, opts) { var o = opts || {}; var k = o.key === undefined ? 'ZEBRAS' : o.key; if ((o.mode || 'encode') === 'decode') return T.cadenusDecode(s, k); return T.cadenusEncode(s, k); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');

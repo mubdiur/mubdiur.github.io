@@ -239,6 +239,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('nihilist-cipher', 'bad alpha throws', mustThrow(() => TOOLS['nihilist-cipher'].handler('AB', { mode: 'decode' })));
     push('polybius-cipher', 'happy', TOOLS['polybius-cipher'].handler('HELLO') === '3312353515');
     push('polybius-cipher', 'bad digit throws', mustThrow(() => TOOLS['polybius-cipher'].handler('6', { mode: 'decode' })));
+    push('cadenus-cipher', 'happy', TOOLS['cadenus-cipher'].handler('HELLO') === 'OMICG');
+    push('cadenus-cipher', 'bad key throws', mustThrow(() => TOOLS['cadenus-cipher'].handler('AB', { key: '' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);
