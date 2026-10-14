@@ -572,6 +572,8 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('compound-interest', 'junk throws', mustThrow(() => TOOLS['compound-interest'].handler('abc')));
     push('gcd-lcm-calculator', 'pair', TOOLS['gcd-lcm-calculator'].handler('12 18') === 'GCD: 6\nLCM: 36\nCoprime: no');
     push('gcd-lcm-calculator', 'junk throws', mustThrow(() => TOOLS['gcd-lcm-calculator'].handler('12a 18')));
+    push('fraction-simplifier', 'reduce', TOOLS['fraction-simplifier'].handler('6/8') === 'Fraction: 3/4\nMixed: 3/4\nDecimal: 0.75\nGCD: 2');
+    push('fraction-simplifier', 'junk throws', mustThrow(() => TOOLS['fraction-simplifier'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

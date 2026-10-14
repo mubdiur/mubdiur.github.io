@@ -1383,6 +1383,8 @@ T.ciCalc = function (s, opts) {
   return clines.concat(snaps).join("\n");
 };
 /* GCD and LCM over integer lists: Euclid on absolute BigInts, exact at any width. */
+/* BigInt Euclid GCD over absolute values: shared by gcd/lcm and fraction tools. */
+T.bgcd = function (a, b) { while (b !== BigInt(0)) { var br = a % b; a = b; b = br; } return a; };
 T.gcdLcm = function (s) {
   var raw = String(s === undefined || s === null ? "" : s);
   for (var gi = 0; gi < raw.length; gi++) if (raw.charCodeAt(gi) >= 0xD800 && raw.charCodeAt(gi) <= 0xDFFF) return "";
@@ -1397,7 +1399,7 @@ T.gcdLcm = function (s) {
     if ((c.replace(/^0+/, "").length || 1) > 2000) throw new Error("Integer #" + (ix + 1) + " too long \u2014 max 2000 digits");
     return BigInt(c);
   });
-  function gcd(a, b) { while (b !== BigInt(0)) { var r = a % b; a = b; b = r; } return a; }
+  function gcd(a, b) { return T.bgcd(a, b); }
   var g = nums[0], l = nums[0];
   for (var j = 1; j < nums.length; j++) {
     g = gcd(g, nums[j]);
@@ -1405,6 +1407,69 @@ T.gcdLcm = function (s) {
   }
   function grp(x) { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
   return "GCD: " + grp(g) + "\nLCM: " + grp(l) + "\nCoprime: " + (g === BigInt(1) ? "yes" : "no");
+};
+/* Fraction simplifier: a/b, mixed w n/d, decimals and integers via exact BigInts. */
+T.fracSimp = function (s) {
+  var raw = String(s === undefined || s === null ? "" : s);
+  for (var fi = 0; fi < raw.length; fi++) if (raw.charCodeAt(fi) >= 0xD800 && raw.charCodeAt(fi) <= 0xDFFF) return "";
+  var txt = raw.trim().replace(/\s*\/\s*/g, "/");
+  if (!txt) throw new Error("Enter a fraction \u2014 e.g. 6/8");
+  function big(c, label) {
+    if (!/^\d+$/.test(c)) throw new Error("Bad " + label);
+    if ((c.replace(/^0+/, "").length || 1) > 2000) throw new Error(label + " too long \u2014 max 2000 digits");
+    return BigInt(c);
+  }
+  var num, den;
+  if (txt.indexOf("/") >= 0) {
+    var segs = txt.split(/\s+/).filter(function (x) { return x !== ""; });
+    var w = BigInt(0), neg = false, fpart;
+    if (segs.length === 1) { fpart = segs[0]; }
+    else if (segs.length === 2) {
+      if (!/^[+-]?\d+$/.test(segs[0])) throw new Error("Bad whole number \u2014 got " + JSON.stringify(segs[0]));
+      neg = segs[0].charAt(0) === "-";
+      w = BigInt(segs[0].replace(/^[+-]/, ""));
+      fpart = segs[1];
+      if (/[+-]/.test(fpart.replace("/", ""))) throw new Error("Bad fraction \u2014 sign goes before the whole number");
+    } else throw new Error("Bad fraction \u2014 e.g. 6/8 or 1 1/2");
+    var fp = fpart.split("/");
+    if (fp.length !== 2) throw new Error("Bad fraction \u2014 e.g. 6/8");
+    var ns = fp[0], ds = fp[1];
+    var nneg = ns.charAt(0) === "-" || ns.charAt(0) === "+";
+    var nsign = ns.charAt(0) === "-" ? -1 : 1;
+    if (nneg) ns = ns.slice(1);
+    if (!/^\d+$/.test(ds)) throw new Error("Bad denominator \u2014 got " + JSON.stringify(fp[1]));
+    var n = big(ns, "numerator"), d = big(ds, "denominator");
+    num = (w * d + n) * BigInt(neg || nsign < 0 ? -1 : 1);
+    den = d;
+  } else if (/^[+-]?\d+$/.test(txt)) {
+    num = BigInt(txt); den = BigInt(1);
+  } else if (/^[+-]?(\d*)\.(\d+)$/.test(txt)) {
+    var m = /^([+-]?)(\d*)\.(\d+)$/.exec(txt);
+    var ip = m[2] === "" ? "0" : m[2], fr = m[3];
+    if (fr.length > 2000) throw new Error("Decimal too long \u2014 max 2000 places");
+    var pw = BigInt(10) ** BigInt(fr.length);
+    num = BigInt(ip) * pw + BigInt(fr);
+    if (m[1] === "-") num = -num;
+    den = pw;
+  } else throw new Error("Bad fraction \u2014 e.g. 6/8, 1 1/2 or 0.75");
+  if (den === BigInt(0)) throw new Error("Denominator cannot be zero");
+  var an = num < BigInt(0) ? -num : num;
+  var g = T.bgcd(an, den);
+  var rn = num / g, rd = den / g;
+  function grp(x) { var ng = x < BigInt(0) ? "-" : ""; var t = (x < BigInt(0) ? -x : x).toString(); return ng + t.replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+  function decExp(n, d) {
+    var qp = n / d, rem = n % d;
+    if (rem === BigInt(0)) return qp.toString();
+    var digs = "";
+    for (var i = 0; i < 12 && rem !== BigInt(0); i++) { rem *= BigInt(10); digs += (rem / d).toString(); rem %= d; }
+    return qp.toString() + "." + digs;
+  }
+  var arn = rn < BigInt(0) ? -rn : rn;
+  var fracLine = rd === BigInt(1) ? grp(rn) : grp(rn) + "/" + grp(rd);
+  var whole = arn / rd, rem2 = arn % rd;
+  var mixLine = (rn < BigInt(0) ? "-" : "") + (rem2 === BigInt(0) ? grp(whole) : (whole === BigInt(0) ? grp(arn) + "/" + grp(rd) : grp(whole) + " " + grp(rem2) + "/" + grp(rd)));
+  var decLine = (rn < BigInt(0) && arn !== BigInt(0) ? "-" : "") + decExp(arn, rd);
+  return "Fraction: " + fracLine + "\nMixed: " + mixLine + "\nDecimal: " + decLine + "\nGCD: " + grp(g);
 };
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');

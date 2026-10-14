@@ -1297,6 +1297,17 @@ console.log('-- gcd --');
   ok(TOOLS['gcd-lcm-calculator'].handler('123456789012345678901234567890 10').indexOf('GCD: 10') === 0, 'gcd bigint');
   ok(TOOLS['gcd-lcm-calculator'].handler.toString().indexOf('gcdLcm') >= 0, 'gcd delegates');
 }
+console.log('-- frac --');
+{
+  ok(TOOLS['fraction-simplifier'].handler('6/8') === 'Fraction: 3/4\nMixed: 3/4\nDecimal: 0.75\nGCD: 2', 'frac basic');
+  ok(TOOLS['fraction-simplifier'].handler('7/3') === 'Fraction: 7/3\nMixed: 2 1/3\nDecimal: 2.333333333333\nGCD: 1', 'frac improper');
+  ok(TOOLS['fraction-simplifier'].handler('1 1/2') === 'Fraction: 3/2\nMixed: 1 1/2\nDecimal: 1.5\nGCD: 1', 'frac mixed');
+  ok(TOOLS['fraction-simplifier'].handler('-6/8').indexOf('Fraction: -3/4') === 0, 'frac negative');
+  ok(TOOLS['fraction-simplifier'].handler('0.75').indexOf('GCD: 25') >= 0, 'frac decimal');
+  ok(TOOLS['fraction-simplifier'].handler.toString().indexOf('fracSimp') >= 0, 'frac delegates');
+  ok(T.bgcd(BigInt(12), BigInt(18)) === BigInt(6), 'bgcd shared');
+  ok(TOOLS['gcd-lcm-calculator'].handler('12 18') === 'GCD: 6\nLCM: 36\nCoprime: no', 'gcd still exact');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
