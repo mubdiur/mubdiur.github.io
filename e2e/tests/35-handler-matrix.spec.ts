@@ -613,6 +613,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('cone-pyramid-solver', 'pyramid', TOOLS['cone-pyramid-solver'].handler('pyramid 4 6') === 'Solid: square pyramid, base = 4, height = 6\nVolume: 32\nSurface: 66.5964425627\nLateral: 50.5964425627\nSlant: 6.3245553203');
     push('cone-pyramid-solver', 'cone', TOOLS['cone-pyramid-solver'].handler('cone 3 7').indexOf('Volume: 65.9734457254') >= 0);
     push('cone-pyramid-solver', 'junk throws', mustThrow(() => TOOLS['cone-pyramid-solver'].handler('abc')));
+    push('torus-solver', 'exact', TOOLS['torus-solver'].handler('torus 7 3') === 'Solid: torus, R = 7, r = 3\nVolume: 1243.5701545373\nSurface: 829.0467696915\nType: ring');
+    push('torus-solver', 'spindle', TOOLS['torus-solver'].handler('torus 3 5').indexOf('Type: spindle') >= 0);
+    push('torus-solver', 'junk throws', mustThrow(() => TOOLS['torus-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

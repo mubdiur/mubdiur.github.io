@@ -1411,6 +1411,14 @@ console.log('-- cone --');
   ok(TOOLS['cone-pyramid-solver'].handler('cone 3 7').indexOf('Slant: 7.6157731059') >= 0, 'cone slant');
   ok(TOOLS['cone-pyramid-solver'].handler.toString().indexOf('conePyramid') >= 0, 'cone delegates');
 }
+
+console.log('-- torus --');
+{
+  ok(TOOLS['torus-solver'].handler('torus 7 3') === 'Solid: torus, R = 7, r = 3\nVolume: 1243.5701545373\nSurface: 829.0467696915\nType: ring', 'torus exact');
+  ok(TOOLS['torus-solver'].handler('donut 7 3').indexOf('Volume: 1243.5701545373') >= 0, 'torus alias');
+  ok(TOOLS['torus-solver'].handler('torus 3 5').indexOf('Type: spindle') >= 0, 'torus spindle');
+  ok(TOOLS['torus-solver'].handler.toString().indexOf('torusSolve') >= 0, 'torus delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

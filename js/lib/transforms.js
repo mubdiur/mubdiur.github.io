@@ -2078,6 +2078,42 @@ T.conePyramid = function (s) {
   var clat = Math.PI * cr * cs;
   return 'Solid: cone, radius = ' + ptrim(cr) + ', height = ' + ptrim(ch) + '\nVolume: ' + ptrim(Math.PI * cr * cr * ch / 3) + '\nSurface: ' + ptrim(clat + Math.PI * cr * cr) + '\nLateral: ' + ptrim(clat) + '\nSlant: ' + ptrim(cs);
 };
+/* Torus solver: volume plus surface from major and minor radii. */
+T.torusSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a torus \u2014 e.g. torus 7 3');
+  function tnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    if (v > 1e15) throw new Error('Value too large \u2014 max 1e15');
+    return v;
+  }
+  function ttrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(torus|donut|doughnut|ring)\b/.exec(low);
+  if (!m0) throw new Error('Unknown solid \u2014 use torus, e.g. torus 7 3');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 'r') continue;
+    nums.push(tnum(tk, 'Bad radius'));
+  }
+  if (nums.length !== 2) throw new Error('Torus wants major and minor radii \u2014 e.g. torus 7 3');
+  var mj = nums[0];
+  var mn = nums[1];
+  var p2 = Math.PI * Math.PI;
+  var vol = 2 * p2 * mj * mn * mn;
+  var sur = 4 * p2 * mj * mn;
+  return 'Solid: torus, R = ' + ttrim(mj) + ', r = ' + ttrim(mn) + '\nVolume: ' + ttrim(vol) + '\nSurface: ' + ttrim(sur) + '\nType: ' + (mj > mn ? 'ring' : 'spindle (self-intersecting)');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

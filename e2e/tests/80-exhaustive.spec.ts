@@ -267,6 +267,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'prime-factorization': { good: '12', bad: 'abc', expectInOutput: /2\^2/, expectError: /Bad integer/ },
   'box-solver': { good: '3 4 5', bad: 'abc', expectInOutput: /Volume: 60/, expectError: /Bad edge/ },
   'cone-pyramid-solver': { good: 'pyramid 4 6', bad: 'abc', expectInOutput: /Slant: 6/, expectError: /Unknown solid/ },
+  'torus-solver': { good: 'torus 7 3', bad: 'abc', expectInOutput: /Volume: 1243/, expectError: /Unknown solid/ },
   'cron-explainer': { good: '*/5 * * * *', expectInOutput: /Next runs/ },
   'jwt-generator': { good: '{"sub":"123"}', expectInOutput: /\./ },
   'jwt-verifier': { good: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.jROrizwXV3Yj14Ofaz1zAq07YgNrxjQNyL-0slLq5Tw', expectInOutput: /Signature: VALID/ },
