@@ -1889,6 +1889,29 @@ T.paceCalc = function (s) {
   var distLine = dUnit === 'km' ? fmtN(km, 5) + ' km (' + fmtN(mi, 5) + ' mi)' : (dUnit === 'mi' ? fmtN(mi, 5) + ' mi (' + fmtN(km, 5) + ' km)' : fmtN(dVal, 5) + ' m (' + fmtN(km, 5) + ' km)');
   return 'Distance: ' + distLine + '\nTime: ' + fmtT(sec) + '\nPace: ' + fmtMS(sec / km) + ' min/km (' + fmtMS(sec / mi) + ' min/mi)\nSpeed: ' + fmtN(km / (sec / 3600), 2) + ' km/h (' + fmtN(mi / (sec / 3600), 2) + ' mph)';
 };
+/* Integer square root: Newton iteration on BigInts, perfect-square verdict. */
+T.isqrtCheck = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a whole number \u2014 e.g. 144');
+  if (txt.charAt(0) === '-') throw new Error('Negative has no integer root \u2014 got ' + JSON.stringify(txt.slice(0, 40)));
+  var u = txt.charAt(0) === '+' ? txt.slice(1) : txt;
+  if (!/^\d+$/.test(u)) throw new Error('Bad integer \u2014 got ' + JSON.stringify(txt.slice(0, 40)));
+  if ((u.replace(/^0+/, '').length || 1) > 2000) throw new Error('Integer too long \u2014 max 2000 digits');
+  var n = BigInt(txt);
+  function igrp(x) { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  var r;
+  if (n < BigInt(2)) r = n;
+  else {
+    var x = BigInt(1) << BigInt((n.toString(2).length + 1) >> 1);
+    var y = (x + n / x) >> BigInt(1);
+    while (y < x) { x = y; y = (x + n / x) >> BigInt(1); }
+    r = x;
+  }
+  var sq = r * r;
+  return 'Root (floor): ' + igrp(r) + '\nSquare: ' + igrp(sq) + '\nRemainder: ' + igrp(n - sq) + '\nPerfect square: ' + (n === sq ? 'yes' : 'no');
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

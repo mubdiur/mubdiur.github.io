@@ -1365,6 +1365,14 @@ console.log('-- pace --');
   ok(TOOLS['pace-calculator'].handler.toString().indexOf('paceCalc') >= 0, 'pace delegates');
 }
 
+console.log('-- isqrt --');
+{
+  ok(TOOLS['integer-sqrt'].handler('144') === 'Root (floor): 12\nSquare: 144\nRemainder: 0\nPerfect square: yes', 'isqrt perfect');
+  ok(TOOLS['integer-sqrt'].handler('150') === 'Root (floor): 12\nSquare: 144\nRemainder: 6\nPerfect square: no', 'isqrt nonperfect');
+  ok(TOOLS['integer-sqrt'].handler('15241578750190521').indexOf('Perfect square: yes') >= 0, 'isqrt big');
+  ok(TOOLS['integer-sqrt'].handler.toString().indexOf('isqrtCheck') >= 0, 'isqrt delegates');
+}
+
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
