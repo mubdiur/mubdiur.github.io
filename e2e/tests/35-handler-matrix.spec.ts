@@ -557,6 +557,8 @@ push('fletcher-checksum', 'f16 canonical', TOOLS['fletcher-checksum'].handler('a
     push('chmod-converter', 'symbolic', TOOLS['chmod-converter'].handler('rwxr-xr-x').includes('755'));
 push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-10-16', { mode: 'add', days: '1' }).indexOf('2026-10-19 (Monday)') === 0);
     push('business-days', 'one date diff throws', mustThrow(() => TOOLS['business-days'].handler('2026-10-13', { mode: 'diff' })));
+    push('sleep-cycles', 'bedtime trio', TOOLS['sleep-cycles'].handler('06:30', { mode: 'bedtime' }).split('\n').length === 5);
+    push('sleep-cycles', 'junk throws', mustThrow(() => TOOLS['sleep-cycles'].handler('midnight')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

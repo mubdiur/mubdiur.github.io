@@ -9375,6 +9375,63 @@ T.parseDateValue = function (t, ln) {
   return new Date(ms);
 };
 /* Business-day math: add, subtract or diff weekdays with configurable weekends plus holiday lines, NETWORKDAYS-inclusive diffs. */
+/* Sleep cycles: 90-minute cycles back from a must-wake time or forward from bedtime, fall-asleep buffer plus AM/PM input. */
+T.sleepCycles = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'bedtime';
+  if (mode !== 'bedtime' && mode !== 'wake') throw new Error('Bad mode \u2014 use bedtime or wake');
+  var braw = (o.buffer === undefined || o.buffer === null || o.buffer === '') ? '15' : o.buffer;
+  var buf = parseInt(braw, 10);
+  if (!(buf >= 0) || buf > 120) throw new Error('Buffer \u2014 0 to 120 minutes to fall asleep, got ' + JSON.stringify(braw));
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var si = 0; si < raw.length; si++) if (raw.charCodeAt(si) >= 0xD800 && raw.charCodeAt(si) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  var mins = null;
+  if (!txt) {
+    if (mode !== 'wake') throw new Error('Enter a wake time \u2014 HH:MM on line one');
+    var now = new Date();
+    mins = now.getHours() * 60 + now.getMinutes();
+  } else {
+    var m = /^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$/i.exec(txt) || /^(\d{1,2}):(\d{2})$/.exec(txt);
+    if (!m) throw new Error('Bad time \u2014 HH:MM or h:MM AM/PM, got ' + JSON.stringify(txt));
+    var h, mm;
+    if (m[3] !== undefined) {
+      h = parseInt(m[1], 10);
+      mm = m[2] === undefined ? 0 : parseInt(m[2], 10);
+      if (!(h >= 1 && h <= 12)) throw new Error('Hour \u2014 1 to 12 with AM/PM, got ' + JSON.stringify(m[1]));
+      if (!(mm >= 0 && mm <= 59)) throw new Error('Minutes \u2014 00 to 59, got ' + JSON.stringify(m[2] === undefined ? '' : m[2]));
+      if (/p/i.test(m[3])) { if (h !== 12) h += 12; } else if (h === 12) h = 0;
+    } else {
+      h = parseInt(m[1], 10);
+      mm = parseInt(m[2], 10);
+      if (!(h >= 0 && h <= 23)) throw new Error('Hour \u2014 00 to 23, got ' + JSON.stringify(m[1]));
+      if (!(mm >= 0 && mm <= 59)) throw new Error('Minutes \u2014 00 to 59, got ' + JSON.stringify(m[2]));
+    }
+    mins = h * 60 + mm;
+  }
+  function fmtT(abs) {
+    var day = Math.floor(abs / 1440);
+    var tt = ((abs % 1440) + 1440) % 1440;
+    var hh = Math.floor(tt / 60), m2 = tt % 60;
+    var s = (hh < 10 ? '0' + hh : '' + hh) + ':' + (m2 < 10 ? '0' + m2 : '' + m2);
+    if (day > 0) s += ' (+' + day + 'd)';
+    if (day < 0) s += ' (' + day + 'd)';
+    return s;
+  }
+  function cycDur(c) { var m3 = c * 90; return Math.floor(m3 / 60) + 'h' + String(m3 % 60).padStart(2, '0'); }
+  var lines = [];
+  var cyc = [6, 5, 4];
+  if (mode === 'bedtime') {
+    lines.push('To wake at ' + fmtT(mins) + ', fall asleep at:');
+    for (var i = 0; i < cyc.length; i++) lines.push(fmtT(mins - cyc[i] * 90) + ' \u2014 ' + cyc[i] + ' cycles (' + cycDur(cyc[i]) + ')');
+    lines.push('Be in bed ~' + buf + ' min earlier to fall asleep.');
+  } else {
+    var onset = mins + buf;
+    lines.push('If asleep by ' + fmtT(onset) + ', wake at:');
+    for (var j = 0; j < cyc.length; j++) lines.push(fmtT(onset + cyc[j] * 90) + ' \u2014 ' + cyc[j] + ' cycles (' + cycDur(cyc[j]) + ')');
+  }
+  return lines.join('\n');
+};
 T.bizDays = function (s, opts) {
   var o = opts || {};
   var mode = o.mode || 'add';
