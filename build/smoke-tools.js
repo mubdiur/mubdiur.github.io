@@ -1501,6 +1501,14 @@ console.log('-- reuleaux --');
   ok(TOOLS['reuleaux-solver'].handler('reuleaux 10').indexOf('Perimeter: 31.4159265359') >= 0 && TOOLS['circle-solver'].handler('d=10').indexOf('Circumference: 31.4159265359') >= 0, 'reuleaux matches circle');
   ok(TOOLS['reuleaux-solver'].handler.toString().indexOf('reuleauxSolve') >= 0, 'reuleaux delegates');
 }
+
+console.log('-- spiral --');
+{
+  ok(TOOLS['spiral-solver'].handler('spiral 3 2').indexOf('Endpoint: (6, 0)') >= 0, 'spiral endpoint');
+  ok(TOOLS['spiral-solver'].handler('spiral 3 2').indexOf('Outer radius: 6') >= 0, 'spiral outer');
+  ok(TOOLS['spiral-solver'].handler('spiral 3 2').indexOf('Length: ~57.2') >= 0, 'spiral length');
+  ok(TOOLS['spiral-solver'].handler.toString().indexOf('spiralSolve') >= 0, 'spiral delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');

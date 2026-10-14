@@ -2568,6 +2568,44 @@ T.reuleauxSolve = function (s) {
   var q3 = Math.sqrt(3);
   return 'Reuleaux: width = ' + rtrim(w) + '\nArea: ' + rtrim(w * w * (Math.PI - q3) / 2) + '\nPerimeter: ' + rtrim(Math.PI * w) + '\nInradius: ' + rtrim(w * (1 - q3 / 3)) + '\nCircumradius: ' + rtrim(w * q3 / 3);
 };
+/* Archimedean-spiral solver: curve length plus endpoint from turns and spacing. */
+T.spiralSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a spiral \u2014 e.g. spiral 3 2');
+  function pnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    if (v <= 0) throw new Error(label + ' must be positive \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    return v;
+  }
+  function ptrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase();
+  var m0 = /^(spiral|archimedean)\b/.exec(low);
+  if (!m0) throw new Error('Unknown spiral \u2014 use spiral 3 2');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  var nums = [];
+  for (var bi = 0; bi < parts.length; bi++) {
+    var pp = parts[bi];
+    var ei = pp.lastIndexOf('=');
+    var tk = ei >= 0 ? pp.slice(ei + 1) : pp;
+    if (tk === '' || tk === 't' || tk === 'turns' || tk === 's' || tk === 'spacing') continue;
+    nums.push(tk);
+  }
+  if (nums.length !== 2) throw new Error('Spiral wants turns and spacing \u2014 e.g. spiral 3 2');
+  var tn = pnum(nums[0], 'Bad turns');
+  var sp = pnum(nums[1], 'Bad spacing');
+  if (tn > 1e6) throw new Error('Too many turns \u2014 max 1000000');
+  if (sp > 1e15) throw new Error('Value too large \u2014 max 1e15');
+  var b = sp / (2 * Math.PI);
+  var th = 2 * Math.PI * tn;
+  var len = (b / 2) * (th * Math.sqrt(1 + th * th) + Math.log(th + Math.sqrt(1 + th * th)));
+  var rr = b * th;
+  return 'Spiral: ' + ptrim(tn) + ' turns, spacing ' + ptrim(sp) + '\nOuter radius: ' + ptrim(rr) + '\nEndpoint: (' + ptrim(rr * Math.cos(th)) + ', ' + ptrim(rr * Math.sin(th)) + ')\nLength: ~' + ptrim(len);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };
