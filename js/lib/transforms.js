@@ -3027,6 +3027,45 @@ T.dnaToolkit = function (s, opts) {
   if (job === 'gc-content') return T.dnaGC(s);
   throw new Error('Bad DNA job \u2014 complement, reverse-complement, transcribe, untranscribe or gc-content');
 };
+/* Brainfuck cores: 8-bit wrapping cells on an unbounded tape, EOF reads zero, comments ignored; brackets pre-paired with positions, one million steps max. */
+T.brainfuck = function (code, input) {
+  var src = String(code);
+  var prog = [];
+  var pairs = {};
+  var stack = [];
+  for (var i = 0; i < src.length; i++) {
+    var ch = src.charAt(i);
+    if ('><+-.,[]'.indexOf(ch) < 0) continue;
+    if (ch === '[') { stack.push(prog.length); prog.push('['); }
+    else if (ch === ']') {
+      if (!stack.length) throw new Error('Unbalanced ] at code position ' + i);
+      var o = stack.pop();
+      pairs[o] = prog.length; pairs[prog.length] = o;
+      prog.push(']');
+    } else prog.push(ch);
+  }
+  if (stack.length) throw new Error('Unbalanced [ \u2014 ' + stack.length + ' never closed');
+  var inp = String(input === undefined ? '' : input);
+  var ii = 0;
+  var tape = {};
+  var ptr = 0;
+  function get(p) { return tape[p] || 0; }
+  var out = '';
+  var steps = 0;
+  for (var pc = 0; pc < prog.length; pc++) {
+    if (++steps > 1000000) throw new Error('Step limit 1000000 hit \u2014 infinite loop?');
+    var op = prog[pc];
+    if (op === '>') ptr++;
+    else if (op === '<') ptr--;
+    else if (op === '+') tape[ptr] = (get(ptr) + 1) % 256;
+    else if (op === '-') tape[ptr] = (get(ptr) + 255) % 256;
+    else if (op === '.') out += String.fromCharCode(get(ptr));
+    else if (op === ',') { tape[ptr] = ii < inp.length ? inp.charCodeAt(ii++) % 256 : 0; }
+    else if (op === '[') { if (get(ptr) === 0) pc = pairs[pc]; }
+    else if (op === ']') { if (get(ptr) !== 0) pc = pairs[pc]; }
+  }
+  return out;
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
