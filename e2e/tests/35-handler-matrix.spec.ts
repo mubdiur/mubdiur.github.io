@@ -625,6 +625,9 @@ push('business-days', 'add skips weekend', TOOLS['business-days'].handler('2026-
     push('polygon-solver', 'exact', TOOLS['polygon-solver'].handler('polygon 6 10').indexOf('Area: 259.8076211353') >= 0);
     push('polygon-solver', 'named', TOOLS['polygon-solver'].handler('hexagon 10').indexOf('Perimeter: 60') >= 0);
     push('polygon-solver', 'junk throws', mustThrow(() => TOOLS['polygon-solver'].handler('abc')));
+    push('circle-segment-solver', 'exact', TOOLS['circle-segment-solver'].handler('segment 5 90').indexOf('Segment area: 7.1349540849') >= 0);
+    push('circle-segment-solver', 'height', TOOLS['circle-segment-solver'].handler('segment 5 h=2').indexOf('Height: 2') >= 0);
+    push('circle-segment-solver', 'junk throws', mustThrow(() => TOOLS['circle-segment-solver'].handler('abc')));
         push('cron-explainer', 'happy', TOOLS['cron-explainer'].handler('*/5 * * * *').includes('Next runs'));
 
     push('cron-builder', 'daily preset', T.cronBuild({ preset: 'daily' }).includes('Next runs'));

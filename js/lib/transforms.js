@@ -2248,6 +2248,54 @@ T.polygonSolve = function (s) {
   var apothem = sd / (2 * Math.tan(Math.PI / n));
   return 'Polygon: ' + name + ' (' + n + ' sides), edge = ' + ytrim(sd) + '\nPerimeter: ' + ytrim(per) + '\nInterior: ' + ytrim(interior) + '\u00b0\nExterior: ' + ytrim(exterior) + '\u00b0\nArea: ' + ytrim(area) + '\nApothem: ' + ytrim(apothem);
 };
+/* Circle-segment solver: chord, arc, sector plus segment area. */
+T.segmentSolve = function (s) {
+  var raw = String(s === undefined || s === null ? '' : s);
+  for (var qi = 0; qi < raw.length; qi++) if (raw.charCodeAt(qi) >= 0xD800 && raw.charCodeAt(qi) <= 0xDFFF) return '';
+  var txt = raw.trim();
+  if (!txt) throw new Error('Enter a segment \u2014 e.g. segment 5 90 or segment 5 h=2');
+  function gnum(tok, label) {
+    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(tok)) throw new Error(label + ' \u2014 got ' + JSON.stringify(tok.slice(0, 40)));
+    var v = parseFloat(tok);
+    if (!isFinite(v)) throw new Error(label + ' \u2014 out of range');
+    return v;
+  }
+  function gtrim(v) { var r = Math.round(v * 1e10) / 1e10; return String(r === 0 ? 0 : r); }
+  var low = txt.toLowerCase().replace(/\u00b0/g, 'deg');
+  var m0 = /^(segment|seg|circular)\b/.exec(low);
+  if (!m0) throw new Error('Unknown segment \u2014 use segment 5 90 or segment 5 h=2');
+  low = low.slice(m0[0].length);
+  var parts = low.split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+  if (parts.length < 1 || parts.length > 2) throw new Error('Segment wants radius plus angle or height \u2014 e.g. segment 5 90');
+  function tokNum(p, label) {
+    var ei = p.lastIndexOf('=');
+    var tk = ei >= 0 ? p.slice(ei + 1) : p;
+    var tag = ei >= 0 ? p.slice(0, ei) : '';
+    return { tag: tag, val: gnum(tk.replace(/deg$/, ''), label) };
+  }
+  var r = tokNum(parts[0], 'Bad radius').val;
+  if (r <= 0) throw new Error('Radius must be positive \u2014 got ' + JSON.stringify(parts[0].slice(0, 40)));
+  if (r > 1e15) throw new Error('Value too large \u2014 max 1e15');
+  var theta;
+  if (parts.length === 1) throw new Error('Segment wants radius plus angle or height \u2014 e.g. segment 5 90');
+  var second = tokNum(parts[1], 'Bad angle or height');
+  if (second.tag === 'h' || second.tag === 'height') {
+    var h = second.val;
+    if (!(h > 0 && h <= 2 * r)) throw new Error('Height must be within (0, 2R] \u2014 got ' + JSON.stringify(parts[1].slice(0, 40)));
+    theta = 2 * Math.acos((r - h) / r);
+  } else {
+    var deg = second.val;
+    if (!(deg > 0 && deg <= 360)) throw new Error('Angle must be within (0, 360] degrees \u2014 got ' + JSON.stringify(parts[1].slice(0, 40)));
+    theta = deg * Math.PI / 180;
+  }
+  var half = theta / 2;
+  var chord = 2 * r * Math.sin(half);
+  var arc = r * theta;
+  var sector = r * r * theta / 2;
+  var segArea = (r * r * (theta - Math.sin(theta))) / 2;
+  var height = r * (1 - Math.cos(half));
+  return 'Segment: R = ' + gtrim(r) + '\nAngle: ' + gtrim(theta * 180 / Math.PI) + '\u00b0\nChord: ' + gtrim(chord) + '\nArc: ' + gtrim(arc) + '\nSector: ' + gtrim(sector) + '\nSegment area: ' + gtrim(segArea) + '\nHeight: ' + gtrim(height);
+};
 T.matrixCalcOpts = function (s, opts) {
   return T.matrixCalc(s, (opts && opts.matrixB) || '', (opts && opts.operation) || 'determinant');
 };

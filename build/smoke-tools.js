@@ -1444,6 +1444,14 @@ console.log('-- polygon --');
   ok(TOOLS['polygon-solver'].handler('square 5').indexOf('Area: 25') >= 0, 'polygon square');
   ok(TOOLS['polygon-solver'].handler.toString().indexOf('polygonSolve') >= 0, 'polygon delegates');
 }
+
+console.log('-- segment --');
+{
+  ok(TOOLS['circle-segment-solver'].handler('segment 5 90') === 'Segment: R = 5\nAngle: 90\u00b0\nChord: 7.0710678119\nArc: 7.853981634\nSector: 19.6349540849\nSegment area: 7.1349540849\nHeight: 1.4644660941', 'segment exact');
+  ok(TOOLS['circle-segment-solver'].handler('segment 5 h=2').indexOf('Height: 2') >= 0, 'segment height');
+  ok(TOOLS['circle-segment-solver'].handler('segment 5 h=2').indexOf('Angle: 106.2602047083') >= 0, 'segment angle');
+  ok(TOOLS['circle-segment-solver'].handler.toString().indexOf('segmentSolve') >= 0, 'segment delegates');
+}
 console.log('-- rot --');
 {
   ok(TOOLS['rot13'].handler('Hello') === 'Uryyb', 'rot13 vector');
