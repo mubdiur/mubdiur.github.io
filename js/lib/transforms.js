@@ -2536,6 +2536,38 @@ T.polluxDecode = function (s) {
   return out;
 };
 T.polluxCipher = function (s, opts) { var o = opts || {}; if ((o.mode || 'encode') === 'decode') return T.polluxDecode(s); return T.polluxEncode(s); };
+/* Nihilist cores: Polybius numbers (row/col 1-5, J folds to I) added to the repeating key numbers; cipher is space-separated sums, decode subtracts. */
+T.nihilistNum = function (ch, sq) { var q = sq.pos[ch]; return ((q / 5) | 0) * 10 + (q % 5) + 11; };
+T.nihilistKey = function (key) {
+  var k = String(key === undefined ? 'LEMON' : key).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  if (!k) throw new Error('Enter a letter key \u2014 Nihilist adds the key numbers');
+  return k;
+};
+T.nihilistEncode = function (s, squareKey, key) {
+  var sq = T.playfairSquare(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var k = T.nihilistKey(key);
+  var t = String(s).toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  if (!t) return '';
+  var out = [];
+  for (var i = 0; i < t.length; i++) out.push(String(T.nihilistNum(t.charAt(i), sq) + T.nihilistNum(k.charAt(i % k.length), sq)));
+  return out.join(' ');
+};
+T.nihilistDecode = function (s, squareKey, key) {
+  var sq = T.playfairSquare(squareKey === undefined ? 'KEYWORD' : squareKey);
+  var k = T.nihilistKey(key);
+  var toks = String(s).trim().split(/\s+/);
+  if (toks.length === 1 && !toks[0]) return '';
+  var out = '';
+  for (var i = 0; i < toks.length; i++) {
+    if (!/^\d+$/.test(toks[i])) throw new Error('Bad Nihilist input \u2014 numbers separated by spaces');
+    var d = parseInt(toks[i], 10) - T.nihilistNum(k.charAt(i % k.length), sq);
+    var r = (d / 10) | 0, c = d % 10;
+    if (!(r >= 1 && r <= 5 && c >= 1 && c <= 5)) throw new Error('Bad Nihilist number ' + toks[i] + ' \u2014 out of square after subtracting the key');
+    out += sq.seq[(r - 1) * 5 + (c - 1)];
+  }
+  return out;
+};
+T.nihilistCipher = function (s, opts) { var o = opts || {}; var q = o.square === undefined ? 'KEYWORD' : o.square; var kk = o.key === undefined ? 'LEMON' : o.key; if ((o.mode || 'encode') === 'decode') return T.nihilistDecode(s, q, kk); return T.nihilistEncode(s, q, kk); };
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');

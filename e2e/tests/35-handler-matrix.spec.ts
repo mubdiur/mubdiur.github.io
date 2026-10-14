@@ -235,6 +235,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('morbit-cipher', 'bad digit throws', mustThrow(() => TOOLS['morbit-cipher'].handler('0', { mode: 'decode' })));
     push('pollux-cipher', 'happy', TOOLS['pollux-cipher'].handler('E') === 'I');
     push('pollux-cipher', 'bad digit throws', mustThrow(() => TOOLS['pollux-cipher'].handler('1', { mode: 'decode' })));
+    push('nihilist-cipher', 'happy', TOOLS['nihilist-cipher'].handler('HELLO') === '68 24 76 50 57');
+    push('nihilist-cipher', 'bad alpha throws', mustThrow(() => TOOLS['nihilist-cipher'].handler('AB', { mode: 'decode' })));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');
     push('punycode-decode', 'bad throws', mustThrow(() => TOOLS['punycode-decode'].handler('xn--a_b')));
     push('json-to-jsonl', 'happy', TOOLS['json-to-jsonl'].handler('[{\u0022a\u0022:1}]').split('\n').length === 1);

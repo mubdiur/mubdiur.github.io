@@ -61,6 +61,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'chaocipher': { good: 'HELLOWORLD', expectInOutput: /^[A-Z]{10}$/ },
   'morbit-cipher': { good: 'HELLO', expectInOutput: /11774321859/ },
   'pollux-cipher': { good: 'HELLO', expectInOutput: /AGTCDHO/ },
+  'nihilist-cipher': { good: 'HELLO', expectInOutput: /68 24 76 50 57/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },
   'json-to-schema': { good: '{"a":1}', expectInOutput: /integer/ },
