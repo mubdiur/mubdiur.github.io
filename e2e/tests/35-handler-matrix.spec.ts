@@ -289,6 +289,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('xor-cipher', 'bad hex throws', mustThrow(() => TOOLS['xor-cipher'].handler('zz', { key: 'k', input: 'hex' })));
     push('pig-latin', 'happy', TOOLS['pig-latin'].handler('hello') === 'ellohay');
     push('pig-latin', 'bad suffix throws', mustThrow(() => TOOLS['pig-latin'].handler('hi', { suffix: 'oy' })));
+    push('leet-speak', 'happy', TOOLS['leet-speak'].handler('leet') === '1337');
+    push('leet-speak', 'bad level throws', mustThrow(() => TOOLS['leet-speak'].handler('hi', { level: 'ultra' })));
     push('befunge', 'happy', TOOLS['befunge'].handler('"A",@') === 'A');
     push('befunge', 'div zero throws', mustThrow(() => TOOLS['befunge'].handler('50/.@')));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');

@@ -88,6 +88,7 @@ const TRANSFORM_FIXTURES: Record<string, { good: string; bad?: string; expectInO
   'damm-validator': { good: '5724', expectInOutput: /Valid/ },
   'xor-cipher': { good: 'hello', expectInOutput: /030015070a/ },
   'pig-latin': { good: 'hello', expectInOutput: /ellohay/ },
+  'leet-speak': { good: 'leet', expectInOutput: /1337/ },
   'befunge': { good: '"A",@', expectInOutput: /A/ },
   'punycode-decode': { good: 'xn--bcher-kva', expectInOutput: /cher/ },
   'json-to-jsonl': { good: '[{\u0022a\u0022:1}]', expectInOutput: /a/ },

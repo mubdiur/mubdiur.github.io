@@ -3944,6 +3944,26 @@ T.pigLatin = function (s, opts) {
   }
   return out;
 };
+/* Leet cores: opinionated ASCII-safe glyph tables, basic covers the famous six, full adds eleven more, everything else rides through untouched. */
+T.leetSpeak = function (s, opts) {
+  var o = opts || {};
+  var level = o.level || 'basic';
+  if (level !== 'basic' && level !== 'full') throw new Error('Bad level \u2014 use basic or full');
+  var BASIC = { A: '4', E: '3', L: '1', O: '0', S: '5', T: '7' };
+  var FULL = { B: '8', C: '(', D: '|)', G: '9', I: '!', K: '|<', P: '|*', R: '|2', U: '|_|', X: '><', Z: '2' };
+  var raw = String(s === undefined || s === null ? '' : s);
+  var out = '';
+  for (var i = 0; i < raw.length; i++) {
+    var cc = raw.charCodeAt(i);
+    if (cc >= 0xD800 && cc <= 0xDFFF) { out += raw.charAt(i); continue; }
+    var ch = raw.charAt(i);
+    var up = ch.toUpperCase();
+    if (BASIC[up] !== undefined) out += BASIC[up];
+    else if (level === 'full' && FULL[up] !== undefined) out += FULL[up];
+    else out += ch;
+  }
+  return out;
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
