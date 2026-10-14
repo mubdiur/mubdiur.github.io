@@ -273,6 +273,8 @@ test('handler matrix via page.evaluate — every option, success + error', async
     push('fen-viewer', 'bad side throws', mustThrow(() => TOOLS['fen-viewer'].handler('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR q KQkq - 0 1')));
     push('luhn-validator', 'happy', TOOLS['luhn-validator'].handler('79927398713').indexOf('Valid') === 0);
     push('luhn-validator', 'bad checksum throws', mustThrow(() => TOOLS['luhn-validator'].handler('79927398714')));
+    push('pigpen-cipher', 'happy', TOOLS['pigpen-cipher'].handler('ABC') === String.fromCharCode(0x2518) + ' ' + String.fromCharCode(0x2534) + ' ' + String.fromCharCode(0x2514));
+    push('pigpen-cipher', 'digit throws', mustThrow(() => TOOLS['pigpen-cipher'].handler('A1')));
     push('befunge', 'happy', TOOLS['befunge'].handler('"A",@') === 'A');
     push('befunge', 'div zero throws', mustThrow(() => TOOLS['befunge'].handler('50/.@')));
     push('punycode-decode', 'happy', TOOLS['punycode-decode'].handler('xn--bcher-kva') === 'b' + String.fromCharCode(252) + 'cher');

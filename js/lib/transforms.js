@@ -3592,6 +3592,67 @@ T.luhnCheck = function (s, opts) {
   var d = (10 - (sum % 10)) % 10;
   return digits + d;
 };
+/* Pigpen cores: Freemason grids as Unicode line fragments, dotted second grid and second X, slash word gaps, trailing dot-or-period accepted on decode. */
+T.pigpenCipher = function (s, opts) {
+  var o = opts || {};
+  var mode = o.mode || 'encode';
+  if (mode !== 'encode' && mode !== 'decode') throw new Error('Bad mode \u2014 use encode or decode');
+  var FRAG = { A: '\u2518', B: '\u2534', C: '\u2514', D: '\u2524', E: '\u253C', F: '\u251C', G: '\u2510', H: '\u252C', I: '\u250C', J: '\u2518', K: '\u2534', L: '\u2514', M: '\u2524', N: '\u253C', O: '\u251C', P: '\u2510', Q: '\u252C', R: '\u250C', S: '\u2228', T: '>', U: '<', V: '\u2227', W: '\u2228', X: '>', Y: '<', Z: '\u2227' };
+  var DOT = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').filter(function (c) { return 'JKLMNOPQRWXYZ'.indexOf(c) >= 0; });
+  var DSET = {};
+  for (var di = 0; di < DOT.length; di++) DSET[DOT[di]] = 1;
+  var DD = String.fromCharCode(0xB7);
+  function isSurrogate(cc) { return cc >= 0xD800 && cc <= 0xDFFF; }
+  if (mode === 'encode') {
+    var src = String(s).toUpperCase();
+    var out = [];
+    for (var e = 0; e < src.length; e++) {
+      var ch = src.charAt(e);
+      var cd = src.charCodeAt(e);
+      if (isSurrogate(cd)) { out.push(ch); continue; }
+      if (ch === ' ' || cd === 9 || cd === 10 || cd === 13) { out.push('/'); continue; }
+      if (FRAG[ch] !== undefined) { out.push(FRAG[ch] + (DSET[ch] ? DD : '')); continue; }
+      throw new Error('No Pigpen sign \u2014 cannot draw ' + JSON.stringify(ch));
+    }
+    return out.join(' ');
+  }
+  var dsrc = String(s);
+  var toks = [];
+  var cur = '';
+  for (var dd = 0; dd < dsrc.length; dd++) {
+    var dch = dsrc.charAt(dd);
+    var dcc = dsrc.charCodeAt(dd);
+    if (isSurrogate(dcc)) { if (cur) { toks.push(cur); cur = ''; } toks.push(dch); continue; }
+    if (dcc === 32 || dcc === 9 || dcc === 10 || dcc === 13) { if (cur) { toks.push(cur); cur = ''; } continue; }
+    if (dcc === 47) { if (cur) { toks.push(cur); cur = ''; } toks.push('/'); continue; }
+    cur += dch;
+  }
+  if (cur) toks.push(cur);
+  var REV = {};
+  for (var rk in FRAG) { if (Object.prototype.hasOwnProperty.call(FRAG, rk)) REV[FRAG[rk] + (DSET[rk] ? DD : '')] = rk; }
+  var dout = '';
+  for (var tt = 0; tt < toks.length; tt++) {
+    var tk = toks[tt];
+    if (tk === '/') { dout += ' '; continue; }
+    if (tk.length === 1 && isSurrogate(tk.charCodeAt(0))) { dout += tk; continue; }
+    var base = tk;
+    var dotted = false;
+    var last = tk.charAt(tk.length - 1);
+    if (last === DD || last === '.') { base = tk.slice(0, -1); dotted = true; }
+    var hit = REV[base + (dotted ? DD : '')];
+    if (hit === undefined && !dotted) hit = REV[base];
+    if (hit === undefined) throw new Error('Unknown Pigpen sign \u2014 no such fragment as ' + JSON.stringify(tk));
+    dout += hit;
+  }
+  var res = '';
+  var prevSp = true;
+  for (var rr = 0; rr < dout.length; rr++) {
+    var rc = dout.charAt(rr);
+    if (rc === ' ') { if (!prevSp) { res += ' '; prevSp = true; } }
+    else { res += rc; prevSp = false; }
+  }
+  return res;
+};
 function base32ToBytes(s) {
   var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
   var clean = unquote(s).toUpperCase().replace(/[\s=]/g, '');
