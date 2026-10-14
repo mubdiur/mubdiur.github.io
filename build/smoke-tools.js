@@ -1473,6 +1473,11 @@ ok(TOOLS['xor-cipher'].handler('hello', { key: 'key' }) === '030015070a', 'xor h
   ok(TOOLS['xor-cipher'].handler('030015070a', { key: 'key', input: 'hex', output: 'text' }) === 'hello', 'xor roundtrip');
   ok(TOOLS['xor-cipher'].handler(TOOLS['xor-cipher'].handler('hi there', { key: 's3cr3t', output: 'base64' }), { key: 's3cr3t', input: 'base64', output: 'text' }) === 'hi there', 'xor base64 roundtrip');
   ok(TOOLS['xor-cipher'].handler('hello', { key: 'key' }) === T.xorCipher('hello', { key: 'key' }), 'xor dispatch equals core');
+  ok(TOOLS['sedol-validator'].handler('0798059').indexOf('SEDOL checksum') >= 0, 'sedol bp');
+  ok(TOOLS['sedol-validator'].handler('B16GWD5').indexOf('Valid') === 0, 'sedol vodafone');
+  ok(TOOLS['sedol-validator'].handler('079805', { mode: 'check-digit' }) === '0798059', 'sedol check digit');
+  ok(TOOLS['sedol-validator'].handler(TOOLS['sedol-validator'].handler('B16GWD', { mode: 'check-digit' })).indexOf('Valid') === 0, 'sedol roundtrip');
+  ok(TOOLS['sedol-validator'].handler.toString().indexOf('sedolCheck') >= 0, 'sedol delegates');
   ok(TOOLS['xor-cipher'].handler.toString().indexOf('xorCipher') >= 0, 'xor delegates');
   ok(TOOLS['pig-latin'].handler('hello') === 'ellohay', 'piglatin hello');
   ok(TOOLS['pig-latin'].handler('apple', { suffix: 'yay' }) === 'appleyay', 'piglatin yay');
