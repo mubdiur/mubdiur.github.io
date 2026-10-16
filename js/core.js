@@ -277,15 +277,15 @@ var App = {
     /* Per-route title: bookmarks, history and screen readers get the
        real page name instead of one static title for the whole SPA. */
     try {
-      var baseTitle = 'Mubdiur Rahman — AI Platform & Reliability Engineer';
+      var baseTitle = 'Mub\'s Local WebApps — Dev Tools and IDE';
       var pageTitle = baseTitle;
-      if (path === '/tools' || path.indexOf('/tools?') === 0) pageTitle = 'Developer Tools — ' + baseTitle;
+      if (path === '/tools' || path.indexOf('/tools?') === 0) pageTitle = 'Browse 200+ Free Developer Tools | Mub\'s Local WebApps';
       else if (path.indexOf('/tools/') === 0) {
         var tSlug = path.replace(/^\/tools\//, '').replace(/[?#].*$/, '');
         var tDef = (window.TOOLS_BY_SLUG || {})[tSlug];
-        pageTitle = (tDef ? tDef.name : 'Developer Tool') + ' — Developer Tools';
+        pageTitle = (tDef ? tDef.name : 'Developer Tool') + ' — Free Online Tool | Mub\'s Local WebApps';
       }
-      else if (path === '/ide' || path.indexOf('/ide') === 0) pageTitle = 'In-Browser IDE — ' + baseTitle;
+      else if (path === '/ide' || path.indexOf('/ide') === 0) pageTitle = 'Online IDE & Compiler (8 Languages) | Mub\'s Local WebApps';
       if (document.title !== pageTitle) document.title = pageTitle;
     } catch {}
     main.innerHTML = '';
@@ -357,9 +357,9 @@ var App = {
     nav.innerHTML = '';
     nav.appendChild(App.el('div', { class: 'site-navbar' },
       App.el('a', { class: 'nav-brand', href: '#/' },
-        App.el('span', { class: 'brand-box', text: 'MR' }),
-        App.el('span', { class: 'brand-name', text: 'mubdiur' }),
-        App.el('span', { class: 'brand-sub', text: 'dev arsenal' })),
+        App.el('span', { class: 'brand-box', text: 'M' }),
+        App.el('span', { class: 'brand-name', text: 'Mub\'s' }),
+        App.el('span', { class: 'brand-sub', text: 'local webapps' })),
       App.el('nav', { class: 'nav-links-desktop' }, linkEls[0], App.el('span', { class: 'nav-divider' }), linkEls[1], App.el('span', { class: 'nav-divider' }), linkEls[2], App.el('span', { class: 'nav-divider' }), searchBtn),
       mobile
     ));
@@ -369,7 +369,7 @@ var App = {
     footer.innerHTML = '';
     footer.appendChild(App.el('footer', { class: 'site-footer' },
       App.el('div', { class: 'footer-inner' },
-        App.el('p', { class: 'footer-line', html: '<span class="prompt">$</span> echo &quot;© ' + new Date().getFullYear() + ' <span style="font-weight:600;color:rgba(227,227,227,0.9)">Mubdiur Rahman</span>&quot;' }),
+        App.el('p', { class: 'footer-line', html: '<span class="prompt">$</span> echo &quot;© ' + new Date().getFullYear() + ' <span style="font-weight:600;color:rgba(227,227,227,0.9)">Md. Mubdiur Rahman</span>&quot;' }),
         App.el('div', { class: 'footer-links' },
           App.el('a', { class: 'footer-link', href: 'mailto:mubdiur@gmail.com' }, App.icon('mail', '', 14), App.el('span', { text: 'Contact' })),
           App.el('a', { class: 'footer-link', href: 'https://github.com/mubdiur', target: '_blank', rel: 'noopener noreferrer' }, App.icon('github', '', 14), App.el('span', { text: 'GitHub' })),

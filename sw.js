@@ -5,7 +5,7 @@
    ────────
    • STATIC_CACHE (versioned, purged on activate): the app shell —
      index.html + CSS + all first-party JS + editor + every custom
-     tool script + preloaded fonts. ~1.3 MB. Makes all 127 tools and
+     tool script + preloaded fonts. ~1.3 MB. Makes 200+ tools and
      the IDE shell work offline after the first visit.
    • RUNTIME_CACHE (version-stable, NEVER purged on shell updates):
      IDE engine payloads (up to ~43 MB per language), wasm/core.wasm
@@ -22,7 +22,7 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-var SW_VERSION = 'v402';
+var SW_VERSION = 'v404';
 var STATIC_CACHE = 'mub-static-' + SW_VERSION;
 var RUNTIME_CACHE = 'mub-runtime-v1';
 
@@ -30,7 +30,7 @@ var SHELL = [
   './',
   'index.html',
   'favicon.ico',
-  'css/app.css?v=36',
+  'css/app.css?v=37',
   'js/icons.js?v=26',
   'js/lib/random.js?v=27',
   'js/lib/diff.js?v=27',
@@ -40,8 +40,8 @@ var SHELL = [
   'js/lib/transforms.js?v=346',
   'js/lib/crypto.js?v=7',
   'js/wasm.js?v=28',
-  'js/core.js?v=71',
-  'js/pages/home.js?v=30',
+  'js/core.js?v=73',
+  'js/pages/home.js?v=33',
   'js/pages/tools.js?v=31',
   'js/pages/tool.js?v=27',
   'js/ide/ide.js?v=25',

@@ -1,6 +1,6 @@
 # mubdiur.github.io
 
-The Mubdiur Times — personal site, developer toolshed, and an in-browser IDE.
+Mub's Local WebApps — free in-browser tools and an IDE.
 
 **Fully static.** No server, no build step, no dependencies, no Node.js. Everything
 runs in your browser, with a **WebAssembly core** doing the heavy lifting.

@@ -3,25 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mubdiur Rahman — AI Platform &amp; Reliability Engineer</title>
-  <meta name="description" content="Mubdiur Rahman — AI Platform &amp; Reliability Engineer. I build automation that runs itself: production infrastructure on Docker + Traefik, instrumented dashboards, and safe, maintainable AI.">
+  <title>Md. Mubdiur Rahman — Software Engineer</title>
+  <meta name="description" content="Md. Mubdiur Rahman — Software Engineer in Dhaka. Maintains free in-browser tools and an 8-language IDE. Static, private, offline-ready.">
+  <meta name="author" content="Md. Mubdiur Rahman">
+  <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="theme-color" content="#131010">
   <link rel="preload" href="fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin>
-  <meta property="og:title" content="Mubdiur Rahman — AI Platform &amp; Reliability Engineer">
-  <meta property="og:description" content="Automation that runs itself. Docker + Traefik infrastructure, instrumented dashboards, safe &amp; maintainable AI.">
+  <meta property="og:title" content="Md. Mubdiur Rahman — Software Engineer">
+  <meta property="og:description" content="Free in-browser tools and an 8-language IDE. Static, private, offline-ready.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://mubdiur.github.io/portfolio.html">
-  <meta property="og:site_name" content="mubdiur.github.io">
+  <meta property="og:site_name" content="Mub's Local WebApps">
   <meta property="og:image" content="https://mubdiur.github.io/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Mub's Local WebApps — free in-browser tools and IDE">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Mubdiur Rahman — AI Platform &amp; Reliability Engineer">
-  <meta name="twitter:description" content="Automation that runs itself. Docker + Traefik infrastructure, instrumented dashboards, safe &amp; maintainable AI.">
+  <meta name="twitter:title" content="Md. Mubdiur Rahman — Software Engineer">
+  <meta name="twitter:description" content="Free in-browser tools and an 8-language IDE. Static, private, offline-ready.">
   <meta name="twitter:image" content="https://mubdiur.github.io/og.png">
   <link rel="canonical" href="https://mubdiur.github.io/portfolio.html">
-  <style>
+  <link rel="icon" href="favicon.ico">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Md. Mubdiur Rahman","url":"https://mubdiur.github.io/","image":"https://mubdiur.github.io/og.png","jobTitle":"Software Engineer","address":{"@type":"PostalAddress","addressLocality":"Dhaka","addressCountry":"BD"},"sameAs":["https://github.com/mubdiur","https://www.linkedin.com/in/mubdiur"]}</script>
+<style>
             @font-face {
       font-family:'JetBrains Mono';
       font-style:normal;
@@ -286,137 +291,57 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
-
   <div class="wrap">
     <header>
-      <p class="termline" aria-hidden="true">[mubdiur@mubdiur ~]$ cat about.txt<span class="cursor"></span></p>
-
-      <h1>MUBDIUR RAHMAN</h1>
-      <p class="role">AI Platform &amp; Reliability Engineer</p>
-
-      <p class="status">Dhaka, Bangladesh · BST</p>
-
+      <p class="tag">About</p>
+      <h1>Md. Mubdiur Rahman</h1>
+      <p class="role">Software Engineer · Dhaka, Bangladesh</p>
       <nav aria-label="Page sections">
-        <a href="#competencies">competencies</a>
-        <a href="#capstone">featured system</a>
-        <a href="#experience">work</a>
+        <a href="#stack">stack</a>
+        <a href="#site">this site</a>
         <a href="#contact">contact</a>
       </nav>
-
       <div class="links">
+        <a href="https://mubdiur.github.io/">tools → mubdiur.github.io</a>
         <a href="https://github.com/mubdiur" target="_blank" rel="noopener noreferrer">github → github.com/mubdiur</a>
         <a href="mailto:mubdiur@gmail.com">email → mubdiur@gmail.com</a>
       </div>
-
-      <p class="summary">I build automation that runs itself — platforms that learn structure once, run near-realtime checks, and alert on what matters. I use AI as a force multiplier in everything I ship, but I engineer for safety, maintainability, and reliability — not demos.</p>
+      <p class="summary">I maintain a small collection of local web apps: developer tools and an in-browser IDE, free and offline-ready. This site is fully static — no server, no tracking, no sign-up.</p>
     </header>
-
     <main id="main">
-      <!-- ============ CORE COMPETENCIES ============ -->
-      <section aria-labelledby="competencies">
-        <h2 id="competencies"><span class="tag">01 / Core Competencies</span>Everything below is shipped, running, and mine</h2>
-
-        <h3>Browser Automation at Scale</h3>
+      <section aria-labelledby="stack">
+        <h2 id="stack"><span class="tag">01 / Stack</span>What this site runs</h2>
+        <h3>Static site</h3>
         <ul>
-          <li><strong>Playwright</strong>, <strong>Cypress</strong>, and <strong>Appium</strong> E2E automation at scale</li>
-          <li>Structured data extraction from live production UIs</li>
-          <li>Shared browser instances — deterministic resource usage, no leaks</li>
-          <li>CI/CD integration: headless runs, artifacts, reliable retries</li>
+          <li><strong>No server, no build, no framework</strong> — open index.html directly, deploy from GitHub Pages</li>
+          <li><strong>Vanilla JS + one stylesheet</strong>, self-hosted JetBrains Mono, zero CDN requests</li>
+          <li><strong>Offline shell</strong> via service worker precache; tool and IDE engines join the runtime cache on use</li>
         </ul>
-
-        <h3>Monitoring &amp; Observability</h3>
+        <h3>WebAssembly core</h3>
         <ul>
-          <li>Instrumented telemetry across <strong>Dynatrace</strong>, <strong>Kibana</strong>, <strong>Datadog</strong>, and the <strong>LGTM</strong> stack (Loki · Grafana · Tempo · Mimir)</li>
-          <li><strong>Near-realtime pipelines</strong>: back-to-back checks with no polling gaps; append-only results</li>
-          <li>Structured logging with <strong>pino</strong> — dual-stream, plus live <strong>Express + WebSocket</strong> log viewers</li>
-          <li>Alerting with intent — page on user impact, silence the noise</li>
+          <li><strong>Rust no_std core</strong>: MD5, SHA-1/256/384/512, HMAC, CRC32, QR encoder, DER parser</li>
+          <li><strong>Lazy-loaded</strong> — only hash/QR tools fetch the 645 KB core</li>
         </ul>
-
-        <h3>Reliability &amp; Infrastructure</h3>
+        <h3>In-browser IDE</h3>
         <ul>
-          <li><strong>Docker + Traefik</strong> with Let&rsquo;s Encrypt; zero-downtime rebuild &amp; deploy pipelines</li>
-          <li>Next.js standalone production deployments on VPS infrastructure</li>
-          <li>Server backends with rate limiting, timeouts, and SSRF guardrails</li>
-          <li>Linux hardening: least-privilege access, containerized isolation, configuration as code</li>
-        </ul>
-
-        <h3>Safe &amp; Maintainable AI</h3>
-        <ul>
-          <li><strong>Guardrails</strong>: prompt-injection defense, PII redaction, output validation, allow-listed tools</li>
-          <li><strong>Maintainable architecture</strong>: agents as state machines, versioned prompts, typed tool contracts</li>
-          <li><strong>Eval-driven shipping</strong>: regression gates, shadow traffic, canary deploys, automated rollback</li>
-          <li><strong>MCP</strong> tooling in production — AI as a force multiplier, never a demo</li>
-        </ul>
-
-        <h3>Backend &amp; Tooling</h3>
-        <ul>
-          <li><strong>Node.js / TypeScript</strong> — zero-dependency daemons and services</li>
-          <li><strong>Git</strong> / CI-CD workflows, Linux administration, terminal-first operations</li>
-          <li>Rapid prototyping with production discipline — surgical diffs, minimal deps, no magic</li>
+          <li><strong>8 languages</strong>: JavaScript, Python, C, C++, C#, Java, Go, Rust — vendored engines, nothing from a CDN</li>
+          <li><strong>Engines persist</strong> in Cache Storage after first run; editor state in localStorage</li>
+          <li><strong>stdin</strong>: live for JavaScript, type-ahead for Python/C/C++/Rust; unsupported for Go/C#/Java</li>
         </ul>
       </section>
-
-      <!-- ============ CAPSTONE ============ -->
-      <section aria-labelledby="capstone">
-        <h2 id="capstone"><span class="tag">02 / Featured System</span>mubdiur.github.io — the production platform behind this page</h2>
-
-        <p>This portfolio is not a template — it&rsquo;s a live production system I own end to end. A Next.js 16 standalone application behind Traefik with automatic Let&rsquo;s Encrypt TLS, deployed as a single hardened Docker image with zero-downtime recreates. Eighty-plus developer utilities and an instrumented observability dashboard ship from the same repository.</p>
-
-        <h3>The reliability layer — what actually ships</h3>
-        <ul>
-          <li><strong>Next.js 16 standalone</strong> — static pages, zero cold starts, sub-second TTFB</li>
-          <li><strong>Traefik edge</strong> with automatic Let&rsquo;s Encrypt TLS — no cert rotation chores, ever</li>
-          <li><strong>Server-tool API</strong> guarded by rate limiting, timeouts, and SSRF checks</li>
-          <li><span class="metric">80+ client-side utilities</span>, code-split so first paint stays fast</li>
-          <li><strong>Instrumented dashboard</strong> — ApexCharts telemetry shaped like production: SLOs, error rates, latency percentiles, cost per request, GPU utilization</li>
-          <li>Live dateline and clock — no hydration mismatch, no stale content</li>
-        </ul>
-      </section>
-
-      <!-- ============ WORK ============ -->
-      <section aria-labelledby="experience">
-        <h2 id="experience"><span class="tag">03 / Selected Work &amp; Systems</span>What I actually run</h2>
-
-        <div class="work-head">
-          <span class="work-title">mubdiur.github.io — Production Platform</span>
-          <span class="work-meta">ongoing</span>
-        </div>
-        <ul>
-          <li>Next.js 16 standalone behind <strong>Traefik</strong> with <strong>Let&rsquo;s Encrypt</strong>; Docker-based rebuild &amp; deploy pipeline</li>
-          <li>Server-side tool backend with rate limiting, timeouts, and network guardrails</li>
-          <li>Newspaper-style front page with a live ApexCharts observability desk — LGTM, Dynatrace, Datadog, ELK/Kibana shapes</li>
-        </ul>
-
-        <div class="work-head">
-          <span class="work-title">CodeAlign VPS — Infrastructure Spine</span>
-          <span class="work-meta">ongoing</span>
-        </div>
-        <ul>
-          <li>Operates a multi-project Docker host — the backbone for everything I build</li>
-          <li>Hardened hosting: least-privilege access, containerized isolation, Let&rsquo;s Encrypt TLS</li>
-        </ul>
-
-        <div class="work-head">
-          <span class="work-title">Automation Daemons — Messenger-Based Ops</span>
-          <span class="work-meta">2026</span>
-        </div>
-        <ul>
-          <li>Long-running Node.js daemons that run unattended — no babysitting required</li>
-          <li>Self-confirming delivery loops, structured logging, and recovery built in</li>
-          <li>Set-and-forget systems that report back instead of silently dying</li>
-        </ul>
+      <section aria-labelledby="site">
+        <h2 id="site"><span class="tag">02 / This site</span>mubdiur.github.io in brief</h2>
+        <p>200+ single-purpose tools (JSON, text, encoding, crypto, converters) behind a hash router with a Ctrl+K palette — plus the IDE above. MIT licensed.</p>
       </section>
     </main>
-
-    <!-- ============ FOOTER / CTA ============ -->
     <footer id="contact">
-      <p class="tag">04 / End of page — let&rsquo;s talk</p>
-      <p class="cta">Want someone who ships automation that runs itself — not demos that need a babysitter? I build platforms: infrastructure that deploys itself, AI that&rsquo;s safe and maintainable, and reliability as the default. <strong>Hiring for platform, automation, or reliability engineering? I&rsquo;m your candidate.</strong></p>
+      <p class="tag">03 / Contact</p>
+      <p class="cta">Questions, bug reports, or corrections — email works best.</p>
       <div class="cta-links">
-        <a href="mailto:mubdiur@gmail.com?subject=Technical%20Screen%20Request">→ schedule a technical screen</a>
         <a href="mailto:mubdiur@gmail.com">→ email me directly</a>
+        <a href="https://github.com/mubdiur" target="_blank" rel="noopener noreferrer">→ github.com/mubdiur</a>
       </div>
-      <p class="copyright">© 2026 Mubdiur Rahman — hand-written HTML, zero JavaScript, ships fast.</p>
+      <p class="copyright">© 2026 Md. Mubdiur Rahman — hand-written HTML, zero frameworks, ships fast.</p>
     </footer>
   </div>
 </body>
