@@ -13,13 +13,13 @@ var tickerTools = ['JSON Validator', 'Password Generator', 'QR Code Generator', 
 var focusAreas = [
   { icon: 'shield-check', title: 'Private by design', body: 'Inputs stay in the tab. Nothing uploads, nothing tracks — close the tab and it is gone.' },
   { icon: 'download', title: 'Works offline', body: 'App shell precached by a service worker. Tools and IDE shell open with no network.' },
-  { icon: 'zap', title: 'No sign-up, ever', body: 'No accounts, no paywalls, no gates. Open a page and it works.' },
+  { icon: 'zap', title: 'No sign-up, ever', body: 'No accounts, no paywalls, no tracking. Open a page and it works.' },
   { icon: 'cpu', title: 'WebAssembly core', body: 'Hashing, crypto and QR encoding run in a vendored WASM core — fast and dependency-free.' },
   { icon: 'command', title: 'Keyboard-first', body: 'Ctrl+K palette and full tool index. Search by name, tag or category.' },
   { icon: 'terminal', title: '8-language IDE', body: 'JavaScript, Python, C, C++, C#, Java, Go and Rust compile and run locally in the tab.' },
   { icon: 'check', title: 'Static and fast', body: 'No server, no framework, no build step. Copy the files anywhere and they run.' },
   { icon: 'box', title: 'Local-first apps', body: 'Tools and IDE today, offline-ready apps tomorrow — everything runs on your device.' },
-  { icon: 'eye', title: 'Accessible output', body: 'Copy and download buttons, clear errors with positions, screen-reader labels throughout.' }
+  { icon: 'eye', title: 'Accessible output', body: 'Copy and Download buttons, clear errors with positions, screen-reader labels throughout.' }
 ];
 
 var IDE_LANGS = ['JavaScript', 'Python', 'C', 'C++', 'C#', 'Java', 'Go', 'Rust'];
@@ -71,7 +71,7 @@ function renderHome() {
                 App.el('dd', { class: 'home-stat-l', text: 'IDE languages' })),
               App.el('div', { class: 'home-stat' },
                 App.el('dt', { class: 'home-stat-n', text: '0' }),
-                App.el('dd', { class: 'home-stat-l', text: 'tracking · sign-up' })),
+                App.el('dd', { class: 'home-stat-l', text: 'trackers, sign-ups' })),
               App.el('div', { class: 'home-stat' },
                 App.el('dt', { class: 'home-stat-n', text: '100%' }),
                 App.el('dd', { class: 'home-stat-l', text: 'on-device' })))),
@@ -123,7 +123,7 @@ function renderHome() {
       App.el('section', { class: 'home-sec', 'aria-label': 'In-browser IDE' },
         App.el('div', { class: 'home-ide-split' },
           App.el('div', { class: 'home-ide-copy' },
-            section('In-browser IDE', 'Real compilers in a tab — code runs locally, stdin supported. Free, no account.'),
+            section('In-browser IDE', 'Real compilers in a tab — code runs locally with stdin. Free, no account.'),
             App.el('div', { class: 'home-langs' }, IDE_LANGS.map(function (l) {
               return App.el('span', { class: 'home-lang', text: l });
             })),

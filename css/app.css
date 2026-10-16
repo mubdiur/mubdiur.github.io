@@ -714,3 +714,13 @@ section[aria-label=Featured tools] .tool-grid{grid-template-columns:repeat(3,min
 .home a:focus-visible,.home button:focus-visible{outline:2px solid rgba(253,255,204,0.7);outline-offset:3px;border-radius:8px;}
 .home-contact{border-color:rgba(253,255,204,0.12);background:linear-gradient(180deg, rgba(253,255,204,0.04), transparent 55%),rgba(27,24,24,0.9);}
 @media(max-width:639px){.home-stats{gap:1rem 0;}.home-stat{min-width:44%;}}
+.home-lede{max-width:62ch;}
+.home-sec-row{margin-bottom:1.1rem;}
+.term-body{font-size:13px;}
+@keyframes home-rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.home-hero-copy{animation:home-rise .55s cubic-bezier(.2,.8,.2,1) both;}
+.home-visual{animation:home-rise .55s cubic-bezier(.2,.8,.2,1) .08s both;}
+@media (prefers-reduced-motion: reduce){.home-hero-copy,.home-visual{animation:none;}}
+.home-bento .home-card{padding:1.1rem 1.2rem;}
+.home-bento .home-card p{line-height:1.65;}
+.home .tool-card .tc-desc{line-height:1.6;}

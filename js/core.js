@@ -277,9 +277,9 @@ var App = {
     /* Per-route title: bookmarks, history and screen readers get the
        real page name instead of one static title for the whole SPA. */
     try {
-      var baseTitle = 'Mub\'s Local WebApps — Dev Tools and IDE';
+      var baseTitle = 'Mub\'s Local WebApps — Tools, IDE & Games';
       var pageTitle = baseTitle;
-      if (path === '/tools' || path.indexOf('/tools?') === 0) pageTitle = 'Browse 200+ Free Developer Tools | Mub\'s Local WebApps';
+      if (path === '/tools' || path.indexOf('/tools?') === 0) pageTitle = 'Browse ' + TOOLMANIFEST.length + '+ Free Developer Tools | Mub\'s Local WebApps';
       else if (path.indexOf('/tools/') === 0) {
         var tSlug = path.replace(/^\/tools\//, '').replace(/[?#].*$/, '');
         var tDef = (window.TOOLS_BY_SLUG || {})[tSlug];
