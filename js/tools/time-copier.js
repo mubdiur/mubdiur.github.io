@@ -135,7 +135,7 @@ var CUSTOM_TZ_OPTIONS = [
 App.registerTool('time-copier', {
   css: '' +
     '.t-time-copier{display:flex;flex-direction:column;gap:1rem;}\n' +
-    '.t-time-copier .tc-input{width:100%;border-radius:8px;border:1px solid rgba(51,53,56,0.5);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-family:var(--font-mono);font-size:15.5px;color:rgba(227,227,227,0.9);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-time-copier .tc-input{width:100%;border-radius:8px;border:1px solid rgba(51,53,56,0.5);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-family:var(--font-mono);font-size:16px;color:rgba(227,227,227,0.9);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
     '.t-time-copier .tc-input::placeholder{color:rgba(141,148,158,0.3);}\n' +
     '.t-time-copier .tc-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
     '.t-time-copier .tc-active{background:rgba(83,163,249,0.15);border:1px solid rgba(83,163,249,0.3);color:var(--ctp-teal);}\n' +

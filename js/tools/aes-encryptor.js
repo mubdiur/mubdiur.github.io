@@ -82,10 +82,10 @@ function doDecrypt(envelope, pass) {
 }
 var CSS = '' +
 '.t-aes-encryptor .aes-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}\n' +
-'.t-aes-encryptor textarea{width:100%;min-height:9rem;resize:vertical;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0.6rem;font-family:var(--font-mono);font-size:13.5px;line-height:1.55;color:rgba(227,227,227,0.92);outline:none;}\n' +
+'.t-aes-encryptor textarea{width:100%;min-height:9rem;resize:vertical;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0.6rem;font-family:var(--font-mono);font-size:14px;line-height:1.55;color:rgba(227,227,227,0.92);outline:none;}\n' +
 '.t-aes-encryptor textarea:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
 '.t-aes-encryptor textarea[readonly]{background:rgba(0,0,0,0.2);}\n' +
-'.t-aes-encryptor .aes-pass{width:100%;height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 10px;font-family:var(--font-mono);font-size:13.5px;color:rgba(227,227,227,0.9);outline:none;}\n' +
+'.t-aes-encryptor .aes-pass{width:100%;height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 10px;font-family:var(--font-mono);font-size:14px;color:rgba(227,227,227,0.9);outline:none;}\n' +
 '.t-aes-encryptor .aes-pass:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
 '.t-aes-encryptor .aes-label{font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.75);display:block;margin:0.6rem 0 0.3rem;}\n' +
 '.t-aes-encryptor .aes-row{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;margin-top:0.6rem;}\n' +
@@ -96,9 +96,9 @@ var CSS = '' +
 '.t-aes-encryptor .seg{display:inline-flex;border:1px solid rgba(51,53,56,0.4);border-radius:6px;overflow:hidden;}\n' +
 '.t-aes-encryptor .seg button{background:transparent;border:0;color:rgba(227,227,227,0.65);font-family:var(--font-mono);font-size:13px;padding:0.4rem 0.9rem;cursor:pointer;}\n' +
 '.t-aes-encryptor .seg button.on{background:rgba(83,163,249,0.22);color:#fff;}\n' +
-'.t-aes-encryptor .btn-run{background:rgba(83,163,249,0.2);border:1px solid rgba(83,163,249,0.45);color:#fff;border-radius:6px;font-family:var(--font-mono);font-size:13.5px;padding:0.45rem 1.1rem;cursor:pointer;}\n' +
+'.t-aes-encryptor .btn-run{background:rgba(83,163,249,0.2);border:1px solid rgba(83,163,249,0.45);color:#fff;border-radius:6px;font-family:var(--font-mono);font-size:14px;padding:0.45rem 1.1rem;cursor:pointer;}\n' +
 '.t-aes-encryptor .btn-run:disabled{opacity:0.5;cursor:wait;}\n' +
-'.t-aes-encryptor .chk{display:inline-flex;align-items:center;gap:0.35rem;font-family:var(--font-mono);font-size:12.5px;color:rgba(141,148,158,0.8);cursor:pointer;}\n' +
+'.t-aes-encryptor .chk{display:inline-flex;align-items:center;gap:0.35rem;font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.8);cursor:pointer;}\n' +
 'XMEDIA_PLACEHOLDERX\n';
 CSS = CSS.replace('XMEDIA_PLACEHOLDERX', '@media(max-width:640px){.t-aes-encryptor .aes-grid{grid-template-columns:1fr;}}');
 App.registerTool('aes-encryptor', {

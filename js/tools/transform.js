@@ -21,7 +21,7 @@ function TransformToolUI(tool) {
   var fileInput = null;
   var fileNote = null;
   if (tool.fileHash) {
-    fileInput = App.el('input', { type: 'file', class: 'input-text', 'aria-label': 'Hash a file', style: 'font-size:13.5px' });
+    fileInput = App.el('input', { type: 'file', class: 'input-text', 'aria-label': 'Hash a file', style: 'font-size:14px' });
     fileNote = App.el('div', { class: 'text-xs font-mono', style: { color: 'rgba(141,148,158,0.7)' } });
     fileInput.addEventListener('change', function () {
       var f = fileInput.files && fileInput.files[0];
@@ -116,7 +116,7 @@ function TransformToolUI(tool) {
       control.value = state.opts[p.key] || '';
       control.addEventListener('change', function () { update(control.value); });
     } else if (p.type === 'number') {
-      control = App.el('input', { type: 'number', min: p.min, max: p.max, class: 'input-text', style: 'width:4.5rem;padding:0.25rem 0.5rem;font-size:13.5px;height:28px', 'aria-label': p.label });
+      control = App.el('input', { type: 'number', min: p.min, max: p.max, class: 'input-text', style: 'width:4.5rem;padding:0.25rem 0.5rem;font-size:14px;height:28px', 'aria-label': p.label });
       control.value = state.opts[p.key] || p.default || '';
       control.addEventListener('input', function () { update(control.value); });
     } else if (p.type === 'boolean' || p.type === 'checkbox') {
@@ -125,14 +125,14 @@ function TransformToolUI(tool) {
       control.addEventListener('change', function () { update(control.checked ? 'true' : 'false'); });
     } else if (p.type === 'password') {
       control = App.el('div', { class: 'flex items-center gap-1.5' });
-      var pw = App.el('input', { type: 'password', class: 'input-text', style: 'width:12rem;padding:0.25rem 0.5rem;font-size:13.5px;height:28px', 'aria-label': p.label, autocomplete: 'new-password', spellcheck: 'false' });
+      var pw = App.el('input', { type: 'password', class: 'input-text', style: 'width:12rem;padding:0.25rem 0.5rem;font-size:14px;height:28px', 'aria-label': p.label, autocomplete: 'new-password', spellcheck: 'false' });
       pw.value = state.opts[p.key] || '';
       pw.addEventListener('input', function () { update(pw.value); run(); });
       var tog = App.el('button', { class: 'btn-copy', type: 'button', 'aria-label': 'Show secret', text: 'Show' });
       tog.addEventListener('click', function () { var show = pw.type === 'password'; pw.type = show ? 'text' : 'password'; tog.textContent = show ? 'Hide' : 'Show'; });
       control.appendChild(pw); control.appendChild(tog);
     } else {
-      control = App.el('input', { type: 'text', class: 'input-text', style: 'width:12rem;padding:0.25rem 0.5rem;font-size:13.5px;height:28px', 'aria-label': p.label });
+      control = App.el('input', { type: 'text', class: 'input-text', style: 'width:12rem;padding:0.25rem 0.5rem;font-size:14px;height:28px', 'aria-label': p.label });
       control.value = state.opts[p.key] || '';
       control.addEventListener('input', function () { update(control.value); });
     }

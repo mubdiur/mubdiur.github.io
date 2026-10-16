@@ -27,34 +27,34 @@ if (!window.ICONS.mic) {
 var VD_CSS = '' +
   '.t-voice-dictation{display:flex;flex-direction:column;gap:0.75rem;flex:1;min-height:0;}\n' +
   '.t-voice-dictation .vd-top{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem 0.75rem;}\n' +
-  '.t-voice-dictation .vd-status{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;font-family:var(--font-mono);font-size:13.5px;color:rgba(141,148,158,0.8);min-width:0;}\n' +
+  '.t-voice-dictation .vd-status{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;font-family:var(--font-mono);font-size:14px;color:rgba(141,148,158,0.8);min-width:0;}\n' +
   '.t-voice-dictation .vd-dot{width:10px;height:10px;border-radius:50%;background:rgba(141,148,158,0.5);flex-shrink:0;}\n' +
   '.t-voice-dictation .vd-dot.live{background:#fb565b;animation:vd-pulse 1.2s ease-in-out infinite;}\n' +
   '.t-voice-dictation .vd-dot.hearing{background:#4ade80;animation:vd-pulse 0.6s ease-in-out infinite;}\n' +
   '@keyframes vd-pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(251,86,91,0.5);}50%{opacity:0.55;box-shadow:0 0 0 6px rgba(251,86,91,0);}}\n' +
-  '.t-voice-dictation .vd-lang{font-family:var(--font-mono);font-size:12.5px;color:rgba(83,163,249,0.9);background:rgba(83,163,249,0.12);border:1px solid rgba(83,163,249,0.25);border-radius:6px;padding:0.15rem 0.5rem;}\n' +
-  '.t-voice-dictation .vd-timer{font-family:var(--font-mono);font-size:12.5px;color:rgba(141,148,158,0.6);}\n' +
-  '.t-voice-dictation .vd-start{display:flex;align-items:center;gap:0.5rem;padding:0.6rem 1.25rem;border-radius:8px;font-family:var(--font-mono);font-size:14.5px;font-weight:600;border:1px solid;cursor:pointer;transition:background-color .2s,color .2s;}\n' +
+  '.t-voice-dictation .vd-lang{font-family:var(--font-mono);font-size:12px;color:rgba(83,163,249,0.9);background:rgba(83,163,249,0.12);border:1px solid rgba(83,163,249,0.25);border-radius:6px;padding:0.15rem 0.5rem;}\n' +
+  '.t-voice-dictation .vd-timer{font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.6);}\n' +
+  '.t-voice-dictation .vd-start{display:flex;align-items:center;gap:0.5rem;padding:0.6rem 1.25rem;border-radius:8px;font-family:var(--font-mono);font-size:14px;font-weight:600;border:1px solid;cursor:pointer;transition:background-color .2s,color .2s;}\n' +
   '.t-voice-dictation .vd-start.idle{background:rgba(38,178,38,0.12);border-color:rgba(38,178,38,0.4);color:#4ade80;}\n' +
   '.t-voice-dictation .vd-start.idle:hover{background:rgba(38,178,38,0.22);}\n' +
   '.t-voice-dictation .vd-start.live{background:rgba(251,86,91,0.12);border-color:rgba(251,86,91,0.4);color:#fb565b;}\n' +
   '.t-voice-dictation .vd-start.live:hover{background:rgba(251,86,91,0.22);}\n' +
   '.t-voice-dictation .vd-start:disabled{opacity:0.45;cursor:not-allowed;}\n' +
-  '.t-voice-dictation .vd-btn{display:flex;align-items:center;gap:0.375rem;padding:0.45rem 0.75rem;border-radius:8px;font-family:var(--font-mono);font-size:13.5px;background:rgba(51,53,56,0.4);border:1px solid rgba(51,53,56,0.5);color:rgba(227,227,227,0.85);cursor:pointer;transition:background-color .2s;}\n' +
+  '.t-voice-dictation .vd-btn{display:flex;align-items:center;gap:0.375rem;padding:0.45rem 0.75rem;border-radius:8px;font-family:var(--font-mono);font-size:14px;background:rgba(51,53,56,0.4);border:1px solid rgba(51,53,56,0.5);color:rgba(227,227,227,0.85);cursor:pointer;transition:background-color .2s;}\n' +
   '.t-voice-dictation .vd-btn:hover{background:rgba(51,53,56,0.7);}\n' +
   '.t-voice-dictation .vd-btn:disabled{opacity:0.45;cursor:not-allowed;}\n' +
-  '.t-voice-dictation .vd-input{width:100%;flex:1;min-height:44vh;resize:vertical;border-radius:8px;border:1px solid rgba(51,53,56,0.5);background:rgba(0,0,0,0.3);padding:0.75rem;font-family:var(--font-mono);font-size:15.5px;line-height:1.6;color:rgba(227,227,227,0.92);outline:none;box-sizing:border-box;}\n' +
+  '.t-voice-dictation .vd-input{width:100%;flex:1;min-height:44vh;resize:vertical;border-radius:8px;border:1px solid rgba(51,53,56,0.5);background:rgba(0,0,0,0.3);padding:0.75rem;font-family:var(--font-mono);font-size:16px;line-height:1.6;color:rgba(227,227,227,0.92);outline:none;box-sizing:border-box;}\n' +
   '.t-voice-dictation .vd-input::placeholder{color:rgba(141,148,158,0.3);}\n' +
   '.t-voice-dictation .vd-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
   '.t-voice-dictation .vd-input::selection{background:rgba(83,163,249,0.35);}\n' +
-  '.t-voice-dictation .vd-interim{min-height:1.5rem;font-family:var(--font-mono);font-size:14.5px;font-style:italic;color:rgba(141,148,158,0.75);white-space:pre-wrap;word-break:break-word;}\n' +
-  '.t-voice-dictation .vd-sel{font-family:var(--font-mono);font-size:12.5px;color:rgba(83,163,249,0.9);background:rgba(83,163,249,0.08);border:1px solid rgba(83,163,249,0.25);border-radius:8px;padding:0.4rem 0.6rem;}\n' +
-  '.t-voice-dictation .vd-meta{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem 0.75rem;font-family:var(--font-mono);font-size:12.5px;color:rgba(141,148,158,0.65);}\n' +
-  '.t-voice-dictation .vd-opts{display:flex;flex-wrap:wrap;gap:0.5rem 1rem;font-family:var(--font-mono);font-size:13.5px;color:rgba(141,148,158,0.8);}\n' +
+  '.t-voice-dictation .vd-interim{min-height:1.5rem;font-family:var(--font-mono);font-size:14px;font-style:italic;color:rgba(141,148,158,0.75);white-space:pre-wrap;word-break:break-word;}\n' +
+  '.t-voice-dictation .vd-sel{font-family:var(--font-mono);font-size:12px;color:rgba(83,163,249,0.9);background:rgba(83,163,249,0.08);border:1px solid rgba(83,163,249,0.25);border-radius:8px;padding:0.4rem 0.6rem;}\n' +
+  '.t-voice-dictation .vd-meta{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem 0.75rem;font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.65);}\n' +
+  '.t-voice-dictation .vd-opts{display:flex;flex-wrap:wrap;gap:0.5rem 1rem;font-family:var(--font-mono);font-size:14px;color:rgba(141,148,158,0.8);}\n' +
   '.t-voice-dictation .vd-opts label{display:flex;align-items:center;gap:0.4rem;cursor:pointer;}\n' +
   '.t-voice-dictation .vd-opts input{accent-color:rgba(83,163,249,0.9);}\n' +
-  '.t-voice-dictation .vd-err{font-family:var(--font-mono);font-size:13.5px;color:#fb565b;background:rgba(251,86,91,0.08);border:1px solid rgba(251,86,91,0.3);border-radius:8px;padding:0.5rem 0.75rem;line-height:1.5;}\n' +
-  '.t-voice-dictation .vd-note{font-family:var(--font-mono);font-size:12.5px;line-height:1.6;color:rgba(141,148,158,0.55);}\n' +
+  '.t-voice-dictation .vd-err{font-family:var(--font-mono);font-size:14px;color:#fb565b;background:rgba(251,86,91,0.08);border:1px solid rgba(251,86,91,0.3);border-radius:8px;padding:0.5rem 0.75rem;line-height:1.5;}\n' +
+  '.t-voice-dictation .vd-note{font-family:var(--font-mono);font-size:12px;line-height:1.6;color:rgba(141,148,158,0.55);}\n' +
   '.t-voice-dictation .vd-kbd{font-family:var(--font-mono);font-size:11px;background:rgba(51,53,56,0.6);border:1px solid rgba(51,53,56,0.8);border-bottom-width:2px;border-radius:4px;padding:0.05rem 0.35rem;color:rgba(227,227,227,0.8);}\n';
 
 /* PiP window has no app.css — no --font-mono / body theme. Plain literals only. */
@@ -64,7 +64,7 @@ var VD_PIP_EXTRA = '' +
   '.pip-wrap{height:100vh;box-sizing:border-box;padding:0.75rem;}\n' +
   '.pip-wrap,.pip-wrap *{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace !important;}\n' +
   '.pip-wrap .vd-input{min-height:0;}\n' +
-  '.pip-title{font-size:13.5px;font-weight:700;color:rgba(227,227,227,0.9);display:flex;align-items:center;gap:0.5rem;}\n';
+  '.pip-title{font-size:14px;font-weight:700;color:rgba(227,227,227,0.9);display:flex;align-items:center;gap:0.5rem;}\n';
 
 App.registerTool('voice-dictation', {
   css: VD_CSS,
@@ -154,7 +154,7 @@ App.registerTool('voice-dictation', {
     var optRestart = App.el('input', { type: 'checkbox', checked: 'checked', 'aria-label': 'Auto-restart on pause' });
     var optCommands = App.el('input', { type: 'checkbox', checked: 'checked', 'aria-label': 'Voice commands for punctuation and editing' });
     var optSmart = App.el('input', { type: 'checkbox', checked: 'checked', 'aria-label': 'Smart capitalization and spacing' });
-    var goalInput = App.el('input', { type: 'number', min: '1', 'aria-label': 'Word count goal', title: 'Word count goal', style: 'width:4rem;padding:0.1rem 0.4rem;font-size:13.5px;background:rgba(255,255,255,0.04);color:inherit;border:1px solid rgba(255,255,255,0.12);border-radius:6px' });
+    var goalInput = App.el('input', { type: 'number', min: '1', 'aria-label': 'Word count goal', title: 'Word count goal', style: 'width:4rem;padding:0.1rem 0.4rem;font-size:14px;background:rgba(255,255,255,0.04);color:inherit;border:1px solid rgba(255,255,255,0.12);border-radius:6px' });
 
     function paintStartButton(btn, live) {
       btn.className = 'vd-start ' + (live ? 'live' : 'idle');

@@ -1,16 +1,16 @@
 (function () {
 "use strict";
 var CSS = "" +
-".t-totp-generator .totp-secret{width:100%;height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 10px;font-family:var(--font-mono);font-size:13.5px;color:rgba(227,227,227,0.9);outline:none;}\n" +
+".t-totp-generator .totp-secret{width:100%;height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 10px;font-family:var(--font-mono);font-size:14px;color:rgba(227,227,227,0.9);outline:none;}\n" +
 ".t-totp-generator .totp-secret:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n" +
-".t-totp-generator .totp-code{font-family:var(--font-mono);font-size:49.5px;font-weight:600;letter-spacing:0.12em;text-align:center;color:var(--lime);padding:0.75rem 0 0.25rem;}\n" +
-".t-totp-generator .totp-meta{text-align:center;font-family:var(--font-mono);font-size:12.5px;color:rgba(141,148,158,0.75);padding-bottom:0.5rem;}\n" +
+".t-totp-generator .totp-code{font-family:var(--font-mono);font-size:48px;font-weight:600;letter-spacing:0.12em;text-align:center;color:var(--lime);padding:0.75rem 0 0.25rem;}\n" +
+".t-totp-generator .totp-meta{text-align:center;font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.75);padding-bottom:0.5rem;}\n" +
 ".t-totp-generator .totp-bar{height:4px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;}\n" +
 ".t-totp-generator .totp-bar i{display:block;height:100%;background:var(--lime);transition:width .25s linear;}\n" +
 ".t-totp-generator .totp-bar.low i{background:var(--ctp-red);}\n" +
 ".t-totp-generator .totp-row{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;}\n" +
-".t-totp-generator .totp-error{color:var(--ctp-red);font-family:var(--font-mono);font-size:13.5px;text-align:center;padding:0.75rem 0;}\n" +
-".t-totp-generator select{height:30px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 6px;font-family:var(--font-mono);font-size:12.5px;color:rgba(227,227,227,0.8);}\n" +
+".t-totp-generator .totp-error{color:var(--ctp-red);font-family:var(--font-mono);font-size:14px;text-align:center;padding:0.75rem 0;}\n" +
+".t-totp-generator select{height:30px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 6px;font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.8);}\n" +
 ".t-totp-generator label{font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.7);}\n";
 App.registerTool("totp-generator", {
 css: CSS,

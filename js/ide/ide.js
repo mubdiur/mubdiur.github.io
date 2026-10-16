@@ -366,17 +366,17 @@ function renderIde() {
     '.ide-head-left{display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap;min-width:0;}' +
     '.ide-head-right{display:flex;align-items:center;gap:0.625rem;flex-wrap:wrap;}' +
     '.ide-title{font-family:var(--font-mono);font-size:15px;font-weight:700;color:#f5f3f5;letter-spacing:-0.035em;margin:0;}' +
-    '.ide-sub{font-family:var(--font-mono);font-size:12.5px;color:#9a999e;letter-spacing:-0.01em;display:none;}' +
+    '.ide-sub{font-family:var(--font-mono);font-size:12px;color:#9a999e;letter-spacing:-0.01em;display:none;}' +
     '@media(min-width:1400px){.ide-sub{display:inline;}}' +
     '.ide-badge{font-family:var(--font-mono);font-size:11px;letter-spacing:0.02em;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,216,102,0.22);color:#ffd866;background:rgba(255,216,102,0.10);white-space:nowrap;backdrop-filter:blur(6px);}' +
     '.ide-tabs{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}' +
-    '.ide-tab{font-family:var(--font-mono);font-size:12.5px;padding:5px 10px;border-radius:999px;border:1px solid #3a373c;background:rgba(45,42,46,0.9);color:#a8a7ad;cursor:pointer;transition:all .18s cubic-bezier(.2,.8,.2,1);letter-spacing:-0.015em;}' +
+    '.ide-tab{font-family:var(--font-mono);font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid #3a373c;background:rgba(45,42,46,0.9);color:#a8a7ad;cursor:pointer;transition:all .18s cubic-bezier(.2,.8,.2,1);letter-spacing:-0.015em;}' +
     '.ide-tab:hover:not(:disabled){color:#f5f3f5;border-color:#4a474d;background:#34323a;transform:translateY(-0.5px);}' +
     '.ide-tab.active{background:#ffd866;color:#1e1c1e;border-color:#ffd866;font-weight:700;box-shadow:0 2px 10px rgba(255,216,102,0.22);}' +
     '.ide-tab:disabled{opacity:0.45;cursor:not-allowed;}' +
     '.ide-tab .ide-tabdot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:6px;background:#6e6d73;vertical-align:middle;opacity:0.9;}' +
     '.ide-tab.active .ide-tabdot{background:#1e1c1e;opacity:1;}' +
-    '.ide-run-btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:13.5px;font-weight:750;letter-spacing:-0.02em;padding:7px 18px;border-radius:999px;border:1px solid #ffd866;background:linear-gradient(180deg, #ffeea6 0%, #ffd866 100%);color:#1e1c1e;cursor:pointer;transition:transform .15s, box-shadow .15s, opacity .15s;box-shadow:0 6px 18px rgba(255,216,102,0.18), 0 1px 0 rgba(255,255,255,0.6) inset;}' +
+    '.ide-run-btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:14px;font-weight:750;letter-spacing:-0.02em;padding:7px 18px;border-radius:999px;border:1px solid #ffd866;background:linear-gradient(180deg, #ffeea6 0%, #ffd866 100%);color:#1e1c1e;cursor:pointer;transition:transform .15s, box-shadow .15s, opacity .15s;box-shadow:0 6px 18px rgba(255,216,102,0.18), 0 1px 0 rgba(255,255,255,0.6) inset;}' +
     '.ide-run-btn:hover:not(:disabled){transform:translateY(-0.5px);box-shadow:0 8px 22px rgba(255,216,102,0.24), 0 1px 0 rgba(255,255,255,0.7) inset;}' +
     '.ide-run-btn:active:not(:disabled){transform:translateY(0px);}' +
     '.ide-run-btn:disabled{opacity:0.55;cursor:wait;box-shadow:none;}' +
@@ -392,7 +392,7 @@ function renderIde() {
     '.ide-status{font-family:var(--font-mono);font-size:12px;color:#9a999e;letter-spacing:-0.01em;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}' +
     '.ide-clear{font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:#9a999e;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:999px;padding:4px 9px;cursor:pointer;flex:none;transition:all .15s;}' +
     '.ide-clear:hover{color:#f5f3f5;background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.10);}' +
-    '.ide-output{flex:1;min-height:0;overflow-y:auto;padding:14px 14px 16px;font-family:var(--font-mono);font-size:13.5px;line-height:1.72;letter-spacing:-0.01em;background:transparent;scrollbar-width:thin;scrollbar-color:#4a474d transparent;}' +
+    '.ide-output{flex:1;min-height:0;overflow-y:auto;padding:14px 14px 16px;font-family:var(--font-mono);font-size:14px;line-height:1.72;letter-spacing:-0.01em;background:transparent;scrollbar-width:thin;scrollbar-color:#4a474d transparent;}' +
     '.ide-line{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;color:#ece9e9;}' +
     '.ide-line.err{color:#ff7a96;background:rgba(255,97,136,0.08);border:1px solid rgba(255,97,136,0.14);border-radius:8px;padding:6px 8px;margin:4px 0;}' +
     '.ide-stdin{display:flex;flex-direction:column;gap:0.4rem;padding:10px 12px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);flex-shrink:0;}' +
@@ -405,8 +405,8 @@ function renderIde() {
     '.ide-stdin-input:focus{border-color:rgba(255,216,102,0.42);box-shadow:0 0 0 3px rgba(255,216,102,0.14);background:rgba(26,24,28,1);}' +
     '.ide-stdin-input::selection{background:rgba(255,216,102,0.28);color:#1a181c;}' +
     '.ide-stdin-bottom{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;}' +
-    '.ide-stdin-hint{font-family:var(--font-mono);font-size:10.5px;color:#6a696e;letter-spacing:-0.01em;}' +
-    '.ide-stdin-send{font-family:var(--font-mono);font-size:12.5px;font-weight:750;letter-spacing:-0.01em;padding:7px 14px;border-radius:999px;border:1px solid #ffd866;background:#ffd866;color:#1e1c1e;cursor:pointer;flex:none;transition:transform .12s, opacity .12s;}' +
+    '.ide-stdin-hint{font-family:var(--font-mono);font-size:11px;color:#6a696e;letter-spacing:-0.01em;}' +
+    '.ide-stdin-send{font-family:var(--font-mono);font-size:12px;font-weight:750;letter-spacing:-0.01em;padding:7px 14px;border-radius:999px;border:1px solid #ffd866;background:#ffd866;color:#1e1c1e;cursor:pointer;flex:none;transition:transform .12s, opacity .12s;}' +
     '.ide-stdin-send:hover{opacity:0.92;transform:translateY(-0.5px);}' +
     '.ide-stdin-send:active{transform:translateY(0);}' +
     '@media(max-width:900px){.ide-main{flex-direction:column;}.ide-panel{width:auto;height:42%;min-height:200px;}}' +
@@ -419,7 +419,7 @@ function renderIde() {
     '.ide-tabs{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding-bottom:2px;scrollbar-width:none;flex:1;min-width:0;}' +
     '.ide-tabs::-webkit-scrollbar{display:none;}' +
     '.ide-tab{flex:none;}' +
-    '.ide-run-btn{padding:6px 14px;font-size:12.5px;}' +
+    '.ide-run-btn{padding:6px 14px;font-size:12px;}' +
     '.ide-editor-wrap{min-height:220px;}' +
     '.ide-panel{min-height:210px;}' +
     '.ide-stdin{padding:8px 10px;gap:0.3rem;}' +
@@ -500,7 +500,7 @@ function renderIde() {
   root.appendChild(App.el('div', { class: 'ide-main' }, editorWrap, panel));
 
   // Robust import: try relative first (works for file:// and sub-paths), fall back to absolute
-  var editorUrls = ['js/ide/vendor/editor.js?v=21', '/js/ide/vendor/editor.js?v=21'];
+  var editorUrls = ['js/ide/vendor/editor.js?v=22', '/js/ide/vendor/editor.js?v=22'];
   function tryImportEditor(i) {
     if (i >= editorUrls.length) throw new Error('Editor failed to load: all import paths failed');
     return import(editorUrls[i]).catch(function (e) {
