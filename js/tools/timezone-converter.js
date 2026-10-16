@@ -22,22 +22,22 @@ function localZone() {
 }
 var CSS = '' +
 '.t-timezone-converter .tz-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0.6rem;}\n' +
-'.t-timezone-converter .tz-flabel{font-family:var(--font-mono);font-size:10.5px;color:rgba(141,148,158,0.75);display:block;margin-bottom:0.3rem;}\n' +
-'.t-timezone-converter .tz-in{width:100%;height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 10px;font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.9);outline:none;color-scheme:dark;}\n' +
+'.t-timezone-converter .tz-flabel{font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.75);display:block;margin-bottom:0.3rem;}\n' +
+'.t-timezone-converter .tz-in{width:100%;height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 10px;font-family:var(--font-mono);font-size:13.5px;color:rgba(227,227,227,0.9);outline:none;color-scheme:dark;}\n' +
 '.t-timezone-converter .tz-in:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
 '.t-timezone-converter .tz-row{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;margin-top:0.65rem;}\n' +
-'.t-timezone-converter .btn-run{background:rgba(83,163,249,0.2);border:1px solid rgba(83,163,249,0.45);color:#fff;border-radius:6px;font-family:var(--font-mono);font-size:12px;padding:0.45rem 1.1rem;cursor:pointer;}\n' +
-'.t-timezone-converter .tz-status{font-family:var(--font-mono);font-size:11.5px;min-height:1.4em;margin-top:0.55rem;color:rgba(141,148,158,0.85);}\n' +
+'.t-timezone-converter .btn-run{background:rgba(83,163,249,0.2);border:1px solid rgba(83,163,249,0.45);color:#fff;border-radius:6px;font-family:var(--font-mono);font-size:13.5px;padding:0.45rem 1.1rem;cursor:pointer;}\n' +
+'.t-timezone-converter .tz-status{font-family:var(--font-mono);font-size:13px;min-height:1.4em;margin-top:0.55rem;color:rgba(141,148,158,0.85);}\n' +
 '.t-timezone-converter .tz-status.ok{color:var(--lime);}\n' +
 '.t-timezone-converter .tz-status.err{color:var(--ctp-red);}\n' +
 '.t-timezone-converter .tz-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0.6rem;margin-top:0.7rem;}\n' +
 '.t-timezone-converter .tz-card{border:1px solid rgba(51,53,56,0.4);border-radius:6px;background:rgba(0,0,0,0.25);padding:0.6rem 0.75rem;}\n' +
-'.t-timezone-converter .tz-card .k{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.7);text-transform:uppercase;letter-spacing:0.06em;}\n' +
-'.t-timezone-converter .tz-card .v{font-family:var(--font-mono);font-size:15px;color:#fff;margin-top:0.2rem;}\n' +
-'.t-timezone-converter .tz-card .z{font-family:var(--font-mono);font-size:10.5px;color:rgba(141,148,158,0.75);margin-top:0.15rem;}\n' +
+'.t-timezone-converter .tz-card .k{font-family:var(--font-mono);font-size:11px;color:rgba(141,148,158,0.7);text-transform:uppercase;letter-spacing:0.06em;}\n' +
+'.t-timezone-converter .tz-card .v{font-family:var(--font-mono);font-size:17px;color:#fff;margin-top:0.2rem;}\n' +
+'.t-timezone-converter .tz-card .z{font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.75);margin-top:0.15rem;}\n' +
 '.t-timezone-converter .tz-card.hero{border-color:rgba(83,163,249,0.45);}\n' +
 '.t-timezone-converter .tz-card.hero .v{color:var(--lime);}\n' +
-'.t-timezone-converter .tz-hint{font-family:var(--font-mono);font-size:10.5px;color:rgba(141,148,158,0.6);margin-top:0.5rem;line-height:1.6;}\n';
+'.t-timezone-converter .tz-hint{font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.6);margin-top:0.5rem;line-height:1.6;}\n';
 function zoneCard(k, v, z, hero) {
   return App.el('div', { class: 'tz-card' + (hero ? ' hero' : '') },
     App.el('div', { class: 'k', text: k }),

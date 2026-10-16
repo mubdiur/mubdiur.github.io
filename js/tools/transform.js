@@ -21,7 +21,7 @@ function TransformToolUI(tool) {
   var fileInput = null;
   var fileNote = null;
   if (tool.fileHash) {
-    fileInput = App.el('input', { type: 'file', class: 'input-text', 'aria-label': 'Hash a file', style: 'font-size:12px' });
+    fileInput = App.el('input', { type: 'file', class: 'input-text', 'aria-label': 'Hash a file', style: 'font-size:13.5px' });
     fileNote = App.el('div', { class: 'text-xs font-mono', style: { color: 'rgba(141,148,158,0.7)' } });
     fileInput.addEventListener('change', function () {
       var f = fileInput.files && fileInput.files[0];
@@ -116,7 +116,7 @@ function TransformToolUI(tool) {
       control.value = state.opts[p.key] || '';
       control.addEventListener('change', function () { update(control.value); });
     } else if (p.type === 'number') {
-      control = App.el('input', { type: 'number', min: p.min, max: p.max, class: 'input-text', style: 'width:4.5rem;padding:0.25rem 0.5rem;font-size:12px;height:28px', 'aria-label': p.label });
+      control = App.el('input', { type: 'number', min: p.min, max: p.max, class: 'input-text', style: 'width:4.5rem;padding:0.25rem 0.5rem;font-size:13.5px;height:28px', 'aria-label': p.label });
       control.value = state.opts[p.key] || p.default || '';
       control.addEventListener('input', function () { update(control.value); });
     } else if (p.type === 'boolean' || p.type === 'checkbox') {
@@ -125,14 +125,14 @@ function TransformToolUI(tool) {
       control.addEventListener('change', function () { update(control.checked ? 'true' : 'false'); });
     } else if (p.type === 'password') {
       control = App.el('div', { class: 'flex items-center gap-1.5' });
-      var pw = App.el('input', { type: 'password', class: 'input-text', style: 'width:12rem;padding:0.25rem 0.5rem;font-size:12px;height:28px', 'aria-label': p.label, autocomplete: 'new-password', spellcheck: 'false' });
+      var pw = App.el('input', { type: 'password', class: 'input-text', style: 'width:12rem;padding:0.25rem 0.5rem;font-size:13.5px;height:28px', 'aria-label': p.label, autocomplete: 'new-password', spellcheck: 'false' });
       pw.value = state.opts[p.key] || '';
       pw.addEventListener('input', function () { update(pw.value); run(); });
       var tog = App.el('button', { class: 'btn-copy', type: 'button', 'aria-label': 'Show secret', text: 'Show' });
       tog.addEventListener('click', function () { var show = pw.type === 'password'; pw.type = show ? 'text' : 'password'; tog.textContent = show ? 'Hide' : 'Show'; });
       control.appendChild(pw); control.appendChild(tog);
     } else {
-      control = App.el('input', { type: 'text', class: 'input-text', style: 'width:12rem;padding:0.25rem 0.5rem;font-size:12px;height:28px', 'aria-label': p.label });
+      control = App.el('input', { type: 'text', class: 'input-text', style: 'width:12rem;padding:0.25rem 0.5rem;font-size:13.5px;height:28px', 'aria-label': p.label });
       control.value = state.opts[p.key] || '';
       control.addEventListener('input', function () { update(control.value); });
     }
@@ -144,7 +144,7 @@ function TransformToolUI(tool) {
   var fileCard = null;
   if (tool.fileHash) {
     fileCard = App.el('div', {},
-      App.el('div', { class: 'text-xs font-mono mb-1', style: { color: 'rgba(184,178,178,0.72)', letterSpacing: '0.04em', textTransform: 'uppercase', fontWeight: '600', fontSize: '10.5px' }, text: 'Or hash a file' }),
+      App.el('div', { class: 'text-xs font-mono mb-1', style: { color: 'rgba(184,178,178,0.72)', letterSpacing: '0.04em', textTransform: 'uppercase', fontWeight: '600', fontSize: '12px' }, text: 'Or hash a file' }),
       fileInput,
       fileNote,
       App.el('div', { class: 'text-xs font-mono', style: { color: 'rgba(141,148,158,0.55)' }, text: '32 MB max \u00b7 hashed locally, never uploaded' }));
@@ -152,7 +152,7 @@ function TransformToolUI(tool) {
   var root = App.el('div', { class: 'flex flex-col', style: { gap: '1.1rem' } },
     paramsRow.childNodes.length ? App.el('div', { style: { background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'10px', padding:'0.6rem 0.75rem' } }, paramsRow) : paramsRow,
     App.el('div', {},
-      App.el('div', { class: 'text-xs font-mono mb-1', style: { color: 'rgba(184,178,178,0.72)', letterSpacing:'0.04em', textTransform:'uppercase', fontWeight:'600', fontSize:'10.5px' }, text: 'Input' }),
+      App.el('div', { class: 'text-xs font-mono mb-1', style: { color: 'rgba(184,178,178,0.72)', letterSpacing:'0.04em', textTransform:'uppercase', fontWeight:'600', fontSize:'12px' }, text: 'Input' }),
       inputTa),
     fileCard,
     outputArea);

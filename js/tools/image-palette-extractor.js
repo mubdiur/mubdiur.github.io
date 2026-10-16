@@ -3,18 +3,18 @@
 var CSS = "" +
 ".t-image-palette-extractor .pal-drop{border:1.5px dashed rgba(141,148,158,0.35);border-radius:10px;padding:1.75rem 1rem;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;}\n" +
 ".t-image-palette-extractor .pal-drop:hover,.t-image-palette-extractor .pal-drop.over{border-color:rgba(83,163,249,0.6);background:rgba(83,163,249,0.06);}\n" +
-".t-image-palette-extractor .pal-drop p{margin:0.35rem 0 0;font-family:var(--font-mono);font-size:11px;color:rgba(141,148,158,0.7);}\n" +
+".t-image-palette-extractor .pal-drop p{margin:0.35rem 0 0;font-family:var(--font-mono);font-size:12.5px;color:rgba(141,148,158,0.7);}\n" +
 ".t-image-palette-extractor .pal-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}\n" +
 ".t-image-palette-extractor .pal-preview{max-width:220px;max-height:160px;border-radius:8px;margin:0.75rem auto 0;display:block;}\n" +
-".t-image-palette-extractor .pal-status{font-family:var(--font-mono);font-size:11px;color:rgba(141,148,158,0.7);text-align:center;padding:0.75rem 0;}\n" +
-".t-image-palette-extractor .pal-hint{font-family:var(--font-mono);font-size:11px;color:rgba(141,148,158,0.55);text-align:center;padding:0 0 0.25rem;}\n" +
+".t-image-palette-extractor .pal-status{font-family:var(--font-mono);font-size:12.5px;color:rgba(141,148,158,0.7);text-align:center;padding:0.75rem 0;}\n" +
+".t-image-palette-extractor .pal-hint{font-family:var(--font-mono);font-size:12.5px;color:rgba(141,148,158,0.55);text-align:center;padding:0 0 0.25rem;}\n" +
 ".t-image-palette-extractor .pal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:0.5rem;margin-top:0.5rem;}\n" +
 ".t-image-palette-extractor .pal-cell{border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);}\n" +
 ".t-image-palette-extractor .pal-chip{height:56px;}\n" +
-".t-image-palette-extractor .pal-meta{display:flex;align-items:center;justify-content:space-between;gap:0.25rem;padding:0.3rem 0.4rem;background:rgba(0,0,0,0.35);font-family:var(--font-mono);font-size:11px;}\n" +
-".t-image-palette-extractor .pal-pct{color:rgba(141,148,158,0.7);font-size:10px;}\n" +
-".t-image-palette-extractor select{height:30px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 6px;font-family:var(--font-mono);font-size:11px;color:rgba(227,227,227,0.8);}\n" +
-".t-image-palette-extractor label{font-family:var(--font-mono);font-size:10.5px;color:rgba(141,148,158,0.7);}\n";
+".t-image-palette-extractor .pal-meta{display:flex;align-items:center;justify-content:space-between;gap:0.25rem;padding:0.3rem 0.4rem;background:rgba(0,0,0,0.35);font-family:var(--font-mono);font-size:12.5px;}\n" +
+".t-image-palette-extractor .pal-pct{color:rgba(141,148,158,0.7);font-size:11px;}\n" +
+".t-image-palette-extractor select{height:30px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 6px;font-family:var(--font-mono);font-size:12.5px;color:rgba(227,227,227,0.8);}\n" +
+".t-image-palette-extractor label{font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.7);}\n";
 App.registerTool("image-palette-extractor", {
 css: CSS,
 mount: function (root) {

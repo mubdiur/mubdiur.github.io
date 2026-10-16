@@ -3,11 +3,11 @@
 var CSS = "" +
 ".t-qr-code-decoder .qr-drop{border:1.5px dashed rgba(141,148,158,0.35);border-radius:10px;padding:1.75rem 1rem;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;}\n" +
 ".t-qr-code-decoder .qr-drop:hover,.t-qr-code-decoder .qr-drop.over{border-color:rgba(83,163,249,0.6);background:rgba(83,163,249,0.06);}\n" +
-".t-qr-code-decoder .qr-drop p{margin:0.35rem 0 0;font-family:var(--font-mono);font-size:11px;color:rgba(141,148,158,0.7);}\n" +
+".t-qr-code-decoder .qr-drop p{margin:0.35rem 0 0;font-family:var(--font-mono);font-size:12.5px;color:rgba(141,148,158,0.7);}\n" +
 ".t-qr-code-decoder .qr-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}\n" +
 ".t-qr-code-decoder .qr-preview{max-width:220px;max-height:220px;border-radius:8px;background:#fff;padding:8px;margin:0.75rem auto 0;display:block;}\n" +
-".t-qr-code-decoder .qr-status{font-family:var(--font-mono);font-size:11px;color:rgba(141,148,158,0.7);text-align:center;padding:0.75rem 0;}\n" +
-".t-qr-code-decoder .qr-hint{font-family:var(--font-mono);font-size:11px;color:rgba(141,148,158,0.55);text-align:center;padding:0 0 0.25rem;}\n";
+".t-qr-code-decoder .qr-status{font-family:var(--font-mono);font-size:12.5px;color:rgba(141,148,158,0.7);text-align:center;padding:0.75rem 0;}\n" +
+".t-qr-code-decoder .qr-hint{font-family:var(--font-mono);font-size:12.5px;color:rgba(141,148,158,0.55);text-align:center;padding:0 0 0.25rem;}\n";
 App.registerTool("qr-code-decoder", {
 css: CSS,
 mount: function (root) {

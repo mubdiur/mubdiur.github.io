@@ -9,7 +9,7 @@ runs in your browser, with a **WebAssembly core** doing the heavy lifting.
 
 - `index.html` — single-page app shell (hash routing: `#/`, `#/ide`, `#/tools`, `#/tools/<slug>`)
 - `css/app.css` — the whole design system (graphite & signal-blue dark theme tuned to the [DeepSeek docs](https://api-docs.deepseek.com/) palette, plus the newspaper front page) 
-- `fonts/` — **Geist Mono** (variable 100-900, normal + italic) plus **Nanum Gothic Coding** (400/700), self-hosted as six woff2 files; they are the site's typefaces. No font CDN anywhere.
+- `fonts/` — **JetBrains Mono** (static 400/500/600/700/800 + italics, OFL) self-hosted as seven woff2 files; the single typeface everywhere. No font CDN anywhere.
 - `js/` — vanilla JavaScript: app core (router, palette with fuzzy matching), tool manifest, pages, tools
   - `js/lib/random.js` — unbiased CSPRNG helpers (rejection sampling; every generator uses it)
   - `js/lib/diff.js` — Myers O((N+M)D) shortest-edit line diff powering Text Diff

@@ -6,8 +6,8 @@
   <title>Mubdiur Rahman — AI Platform &amp; Reliability Engineer</title>
   <meta name="description" content="Mubdiur Rahman — AI Platform &amp; Reliability Engineer. I build automation that runs itself: production infrastructure on Docker + Traefik, instrumented dashboards, and safe, maintainable AI.">
   <meta name="theme-color" content="#131010">
-  <link rel="preload" href="fonts/geist-mono-latin-variable.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/nanum-gothic-coding-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin>
   <meta property="og:title" content="Mubdiur Rahman — AI Platform &amp; Reliability Engineer">
   <meta property="og:description" content="Automation that runs itself. Docker + Traefik infrastructure, instrumented dashboards, safe &amp; maintainable AI.">
   <meta property="og:type" content="website">
@@ -22,38 +22,35 @@
   <meta name="twitter:image" content="https://mubdiur.github.io/og.png">
   <link rel="canonical" href="https://mubdiur.github.io/portfolio.html">
   <style>
-        @font-face {
-      font-family:'Geist Mono';
-      font-style:normal;
-      font-weight:100 900;
-      font-display:swap;
-      src:url('fonts/geist-mono-latin-variable.woff2') format('woff2');
-      unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
-    }
-    @font-face {
-      font-family:'Geist Mono';
-      font-style:normal;
-      font-weight:100 900;
-      font-display:swap;
-      src:url('fonts/geist-mono-latin-ext-variable.woff2') format('woff2');
-      unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF;
-    }
-    @font-face {
-      font-family:'Nanum Gothic Coding';
+            @font-face {
+      font-family:'JetBrains Mono';
       font-style:normal;
       font-weight:400;
       font-display:swap;
-      src:url('fonts/nanum-gothic-coding-latin-400.woff2') format('woff2');
-      unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+      src:url('fonts/jetbrains-mono-400.woff2') format('woff2');
     }
     @font-face {
-      font-family:'Nanum Gothic Coding';
+      font-family:'JetBrains Mono';
       font-style:normal;
       font-weight:700;
       font-display:swap;
-      src:url('fonts/nanum-gothic-coding-latin-700.woff2') format('woff2');
-      unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+      src:url('fonts/jetbrains-mono-700.woff2') format('woff2');
     }
+    @font-face {
+      font-family:'JetBrains Mono';
+      font-style:italic;
+      font-weight:400;
+      font-display:swap;
+      src:url('fonts/jetbrains-mono-italic-400.woff2') format('woff2');
+    }
+    @font-face {
+      font-family:'JetBrains Mono';
+      font-style:italic;
+      font-weight:700;
+      font-display:swap;
+      src:url('fonts/jetbrains-mono-italic-700.woff2') format('woff2');
+    }
+
 
 
     :root {
@@ -74,8 +71,8 @@
     body {
       background: var(--bg);
       color: var(--fg);
-      font-family: "Geist Mono", "Nanum Gothic Coding", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-      font-size: 0.875rem;
+      font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.98rem;
       line-height: 1.65;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
@@ -112,7 +109,7 @@
 
     /* ---------- type ---------- */
     h1 {
-      font-size: clamp(1.35rem, 2.6vw, 1.75rem);
+      font-size: clamp(1.51rem, 2.91vw, 1.96rem);
       font-weight: 700;
       letter-spacing: 0.02em;
       line-height: 1.15;
@@ -121,7 +118,7 @@
     }
 
     h2 {
-      font-size: clamp(1rem, 1.8vw, 1.15rem);
+      font-size: clamp(1.12rem, 2.02vw, 1.29rem);
       font-weight: 700;
       color: #fff;
       border-top: 1px solid var(--line);
@@ -130,7 +127,7 @@
     }
 
     h3 {
-      font-size: 0.875rem;
+      font-size: 0.98rem;
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -140,7 +137,7 @@
 
     .tag {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.84rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--accent-dim);
@@ -168,7 +165,7 @@
 
     /* ---------- hero ---------- */
     .termline {
-      font-size: 0.75rem;
+      font-size: 0.84rem;
       color: var(--faint);
       margin-bottom: 1.5rem;
     }
@@ -182,7 +179,7 @@
     }
 
     .role {
-      font-size: 1rem;
+      font-size: 1.12rem;
       font-weight: 500;
       color: var(--dim);
       margin-top: 0.25rem;
@@ -195,7 +192,7 @@
       margin: 1.5rem 0;
       padding: 0.35rem 0.9rem;
       border: 1px solid var(--line);
-      font-size: 0.75rem;
+      font-size: 0.84rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--fg);
@@ -214,7 +211,7 @@
       flex-wrap: wrap;
       gap: 0.25rem 1.75rem;
       margin: 1rem 0 2rem;
-      font-size: 1rem;
+      font-size: 1.12rem;
     }
     .links a { border-bottom: none; }
     .links a:hover { border-bottom-color: var(--accent); }
@@ -230,7 +227,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 0.25rem 1.5rem;
-      font-size: 0.875rem;
+      font-size: 0.98rem;
     }
     nav a { color: var(--dim); }
     nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
@@ -251,7 +248,7 @@
     }
     .work-title { font-weight: 700; color: #fff; }
     .work-meta {
-      font-size: 0.75rem;
+      font-size: 0.84rem;
       color: var(--faint);
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -264,7 +261,7 @@
       padding-top: 2rem;
     }
     .cta {
-      font-size: 1rem;
+      font-size: 1.12rem;
       color: var(--fg);
       margin-bottom: 1.25rem;
     }
@@ -276,7 +273,7 @@
       margin-bottom: 2rem;
     }
     .copyright {
-      font-size: 0.75rem;
+      font-size: 0.84rem;
       color: var(--faint);
       letter-spacing: 0.05em;
     }

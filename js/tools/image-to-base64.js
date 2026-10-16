@@ -23,7 +23,7 @@ App.registerTool('image-to-base64', {
     '.t-image-to-base64 .hover\\:border-cyan-glow\\/30:hover{border-color:rgba(83,163,249,0.3);}\n' +
     '.t-image-to-base64 .hover\\:bg-cyan-glow\\/5:hover{background:rgba(83,163,249,0.05);}\n' +
     '.t-image-to-base64 .dropzone.dragging{border-color:rgba(83,163,249,0.6);background:rgba(83,163,249,0.05);}\n' +
-    '.t-image-to-base64 .b64-out{width:100%;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-size:10px;font-family:var(--font-mono);color:rgba(227,227,227,0.7);resize:vertical;min-height:60px;border-radius:var(--radius);}\n',
+    '.t-image-to-base64 .b64-out{width:100%;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-size:11px;font-family:var(--font-mono);color:rgba(227,227,227,0.7);resize:vertical;min-height:60px;border-radius:var(--radius);}\n',
 
   mount: function (root) {
     var b64 = '';

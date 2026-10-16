@@ -34,7 +34,7 @@ function contrastRatio(c1, c2) {
 App.registerTool('contrast-checker', {
   css: '' +
     '.t-contrast-checker .color-input{display:block;width:100%;height:2.5rem;border:1px solid rgba(51,53,56,0.4);border-radius:var(--radius);margin-top:0.25rem;cursor:pointer;}\n' +
-    '.t-contrast-checker .hex-input{width:100%;height:1.75rem;margin-top:0.25rem;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0 0.5rem;font-size:10px;font-family:var(--font-mono);color:rgba(227,227,227,0.8);border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-contrast-checker .hex-input{width:100%;height:1.75rem;margin-top:0.25rem;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0 0.5rem;font-size:11px;font-family:var(--font-mono);color:rgba(227,227,227,0.8);border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
     '.t-contrast-checker .hex-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
     '.t-contrast-checker .text-muted-foreground\\/60{color:rgba(141,148,158,0.6);}\n' +
     '.t-contrast-checker .text-muted-foreground\\/70{color:rgba(141,148,158,0.7);}\n' +
