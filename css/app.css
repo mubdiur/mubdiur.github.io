@@ -724,3 +724,5 @@ section[aria-label=Featured tools] .tool-grid{grid-template-columns:repeat(3,min
 .home-bento .home-card{padding:1.1rem 1.2rem;}
 .home-bento .home-card p{line-height:1.65;}
 .home .tool-card .tc-desc{line-height:1.6;}
+.home-more-inline{display:inline-flex;align-items:center;gap:0.4rem;border:1px solid rgba(253,255,204,0.22);border-radius:999px;padding:0.45rem 1rem;font-size:13px;}
+.home-more-inline:hover{border-color:rgba(253,255,204,0.45);background:rgba(253,255,204,0.06);}
