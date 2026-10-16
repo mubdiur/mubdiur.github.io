@@ -1,126 +1,66 @@
 /* ═══════════════════════════════════════════════════════════
    mubdiur.github.io — static design system
-   Opencode / Starlight — warm charcoal + IBM Plex Mono.
+   Opencode / Starlight — warm charcoal + Geist Mono / Nanum Gothic Coding.
    Every surface lifted from opencode.ai dark (hsl 0/9/7
    neutrals with 62° lime interactive). Fully vendored:
-   10 woff2 files, zero CDN. Newspaper layout retained.
+   6 woff2 files, zero CDN. Newspaper layout retained.
    Futuristic editorial: tight tracking, hairlines, lime
    on black. No frameworks, no build step.
    ═══════════════════════════════════════════════════════════ */
 
-/* ── fonts: IBM Plex Mono — vendored from opencode.ai ──
-   latin + latin-ext for 400/500/600/700 + 400 italic.
-   Preloaded via <link rel=preload> in index.html; inline
-   fallback @font-face for html.fonts-loading guard below. */
+/* ── fonts: Geist Mono + Nanum Gothic Coding — self-hosted ──
+   Vendored woff2 in fonts/ (both SIL OFL), zero Google Fonts requests.
+   Geist Mono is variable 100–900, so one file covers every weight the
+   site uses; latin + latin-ext, normal + italic. Nanum Gothic Coding
+   (static 400/700 latin) rides second in the stack.
+   Preloaded via <link rel=preload> in index.html. */
 @font-face {
-  font-family:'IBM Plex Mono';
+  font-family:'Geist Mono';
   font-style:normal;
-  font-weight:400;
+  font-weight:100 900;
   font-display:swap;
-  src:url('../fonts/ibm-plex-mono-latin-400.woff2') format('woff2');
+  src:url('../fonts/geist-mono-latin-variable.woff2') format('woff2');
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
-  size-adjust:100%;
-  ascent-override:102%;
-  descent-override:24%;
 }
 @font-face {
-  font-family:'IBM Plex Mono';
+  font-family:'Geist Mono';
   font-style:normal;
-  font-weight:400;
+  font-weight:100 900;
   font-display:swap;
-  src:url('../fonts/ibm-plex-mono-latin-ext-400.woff2') format('woff2');
-  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
-  size-adjust:100%;
-  ascent-override:102%;
-  descent-override:24%;
+  src:url('../fonts/geist-mono-latin-ext-variable.woff2') format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF;
 }
 @font-face {
-  font-family:'IBM Plex Mono';
+  font-family:'Geist Mono';
   font-style:italic;
-  font-weight:400;
+  font-weight:100 900;
   font-display:swap;
-  src:url('../fonts/ibm-plex-mono-latin-400-italic.woff2') format('woff2');
+  src:url('../fonts/geist-mono-latin-italic-variable.woff2') format('woff2');
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
-  size-adjust:100%;
-  ascent-override:102%;
-  descent-override:24%;
 }
 @font-face {
-  font-family:'IBM Plex Mono';
+  font-family:'Geist Mono';
   font-style:italic;
+  font-weight:100 900;
+  font-display:swap;
+  src:url('../fonts/geist-mono-latin-ext-italic-variable.woff2') format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family:'Nanum Gothic Coding';
+  font-style:normal;
   font-weight:400;
   font-display:swap;
-  src:url('../fonts/ibm-plex-mono-latin-ext-400-italic.woff2') format('woff2');
-  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
-  size-adjust:100%;
-  ascent-override:102%;
-  descent-override:24%;
-}
-@font-face {
-  font-family:'IBM Plex Mono';
-  font-style:normal;
-  font-weight:500;
-  font-display:swap;
-  src:url('../fonts/ibm-plex-mono-latin-500.woff2') format('woff2');
+  src:url('../fonts/nanum-gothic-coding-latin-400.woff2') format('woff2');
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
-  size-adjust:100%;
-  ascent-override:102%;
-  descent-override:24%;
 }
 @font-face {
-  font-family:'IBM Plex Mono';
-  font-style:normal;
-  font-weight:500;
-  font-display:swap;
-  src:url('../fonts/ibm-plex-mono-latin-ext-500.woff2') format('woff2');
-  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
-  size-adjust:100%;
-  ascent-override:102%;
-  descent-override:24%;
-}
-@font-face {
-  font-family:'IBM Plex Mono';
-  font-style:normal;
-  font-weight:600;
-  font-display:swap;
-  src:url('../fonts/ibm-plex-mono-latin-600.woff2') format('woff2');
-  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
-  size-adjust:100%;
-  ascent-override:102%;
-  descent-override:24%;
-}
-@font-face {
-  font-family:'IBM Plex Mono';
-  font-style:normal;
-  font-weight:600;
-  font-display:swap;
-  src:url('../fonts/ibm-plex-mono-latin-ext-600.woff2') format('woff2');
-  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
-  size-adjust:100%;
-  ascent-override:102%;
-  descent-override:24%;
-}
-@font-face {
-  font-family:'IBM Plex Mono';
+  font-family:'Nanum Gothic Coding';
   font-style:normal;
   font-weight:700;
   font-display:swap;
-  src:url('../fonts/ibm-plex-mono-latin-700.woff2') format('woff2');
+  src:url('../fonts/nanum-gothic-coding-latin-700.woff2') format('woff2');
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
-  size-adjust:100%;
-  ascent-override:102%;
-  descent-override:24%;
-}
-@font-face {
-  font-family:'IBM Plex Mono';
-  font-style:normal;
-  font-weight:700;
-  font-display:swap;
-  src:url('../fonts/ibm-plex-mono-latin-ext-700.woff2') format('woff2');
-  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
-  size-adjust:100%;
-  ascent-override:102%;
-  descent-override:24%;
 }
 
 /* ── tokens ──
@@ -185,11 +125,11 @@
   --news-red:#fdffcc;
   --news-red-soft:#e8e6a8;
   --paper-hard:#0d0b0b;
-  --font-display:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
-  --font-serif:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
-  --font-franklin:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
-  --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
-  --font-sans:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+  --font-display:'Geist Mono','Nanum Gothic Coding',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+  --font-serif:'Geist Mono','Nanum Gothic Coding',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+  --font-franklin:'Geist Mono','Nanum Gothic Coding',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+  --font-mono:'Geist Mono','Nanum Gothic Coding',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
+  --font-sans:'Geist Mono','Nanum Gothic Coding',ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace;
 }
 
 /* ── base ── */

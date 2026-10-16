@@ -22,7 +22,7 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-var SW_VERSION = 'v398';
+var SW_VERSION = 'v399';
 var STATIC_CACHE = 'mub-static-' + SW_VERSION;
 var RUNTIME_CACHE = 'mub-runtime-v1';
 
@@ -30,7 +30,7 @@ var SHELL = [
   './',
   'index.html',
   'favicon.ico',
-  'css/app.css?v=33',
+  'css/app.css?v=34',
   'js/icons.js?v=26',
   'js/lib/random.js?v=27',
   'js/lib/diff.js?v=27',
@@ -44,10 +44,10 @@ var SHELL = [
   'js/pages/home.js?v=30',
   'js/pages/tools.js?v=31',
   'js/pages/tool.js?v=27',
-  'js/ide/ide.js?v=22',
+  'js/ide/ide.js?v=23',
   'js/tools/transform.js?v=37',
   'js/tools/generator.js?v=32',
-  'js/ide/vendor/editor.js?v=19',
+  'js/ide/vendor/editor.js?v=20',
   'js/tools/json-validator.js?v=56',
   'js/tools/email-extractor.js?v=56',
   'js/tools/voice-dictation.js?v=56',
@@ -70,8 +70,8 @@ var SHELL = [
   'js/tools/contrast-checker.js?v=56',
   'js/tools/http-status-codes.js?v=56',
   'js/tools/dns-lookup.js?v=56',
-  'fonts/ibm-plex-mono-latin-400.woff2',
-  'fonts/ibm-plex-mono-latin-600.woff2'
+  'fonts/geist-mono-latin-variable.woff2',
+  'fonts/nanum-gothic-coding-latin-400.woff2'
 ];
 
 self.addEventListener('install', function (event) {
