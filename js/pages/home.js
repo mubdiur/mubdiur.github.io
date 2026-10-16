@@ -88,6 +88,8 @@ function renderHome() {
                 termLine('✓', 'valid · 42 lines formatted', 'ok'),
                 termLine('$', 'hash sha-256 “hello”', ''),
                 termLine('→', '2cf24dba…eff9', 'dim'),
+                termLine('$', 'uuid v7', ''),
+                termLine('→', '0193…c21d', 'dim'),
                 App.el('div', { class: 'term-chips' },
                   App.el('span', { class: 'term-chip', text: 'JSON' }),
                   App.el('span', { class: 'term-chip', text: 'QR' }),
@@ -149,7 +151,12 @@ function renderHome() {
                 App.el('span', { class: 'code-str', text: '"world"' }),
                 App.el('span', { class: 'code-pl', text: '))' })),
               App.el('div', { class: 'code-line' },
-                App.el('span', { class: 'code-cm', text: '# output → hello, world' }))),
+                App.el('span', { class: 'code-fn', text: 'print' }),
+                App.el('span', { class: 'code-pl', text: '(greet(' }),
+                App.el('span', { class: 'code-str', text: '"ada"' }),
+                App.el('span', { class: 'code-pl', text: '))' })),
+              App.el('div', { class: 'code-line' },
+                App.el('span', { class: 'code-cm', text: '# output → hello, world · hello, ada' }))),
             App.el('div', { class: 'term-foot' },
               App.icon('play', '', 12),
               App.el('span', { text: 'Run · 0.4s · engine cached' }))))),
@@ -158,7 +165,7 @@ function renderHome() {
       App.el('section', { class: 'home-sec', 'aria-label': 'Why this site' },
         section('Why it stays fast and private', 'No accounts, no uploads, no tracking — just pages that work.'),
         App.el('div', { class: 'home-grid home-bento' }, focusAreas.map(function (a, i) {
-          return App.el('div', { class: 'home-card' + (i === 0 ? ' home-card-wide' : '') },
+          return App.el('div', { class: 'home-card' },
             App.el('div', { class: 'home-card-top' },
               App.el('span', { class: 'home-card-ic' }, App.icon(a.icon, '', 15)),
               App.el('h3', { text: a.title })),
@@ -169,14 +176,12 @@ function renderHome() {
       App.el('section', { class: 'home-sec', 'aria-label': 'Contact' },
         App.el('div', { class: 'home-contact' },
           App.el('div', { class: 'home-contact-copy' },
-            section('Contact', 'Questions, bugs, ideas — email works best.')),
+            section('Contact', 'Questions, bugs, ideas — mubdiur@gmail.com works best.')),
           App.el('div', { class: 'home-actions home-contact-links' },
             App.el('a', { class: 'btn-ghost-sm home-btn', href: 'mailto:mubdiur@gmail.com', text: 'Email' }),
             App.el('a', { class: 'btn-ghost-sm home-btn', href: 'https://github.com/mubdiur', target: '_blank', rel: 'noopener noreferrer', text: 'GitHub' }),
-            App.el('a', { class: 'btn-ghost-sm home-btn', href: 'https://linkedin.com/in/mubdiur', target: '_blank', rel: 'noopener noreferrer', text: 'LinkedIn' }))),),
-
-      /* ── footer: single subtle credit ── */
-      App.el('div', { class: 'home-foot', text: '\u00A9 2026 Md. Mubdiur Rahman \u00B7 Free forever \u2014 no tracking, no server.' })));
+            App.el('a', { class: 'btn-ghost-sm home-btn', href: 'https://linkedin.com/in/mubdiur', target: '_blank', rel: 'noopener noreferrer', text: 'LinkedIn' }))),)
+));
 
   return root;
 }
