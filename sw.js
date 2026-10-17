@@ -22,7 +22,7 @@
    ═══════════════════════════════════════════════════════════ */
 'use strict';
 
-var SW_VERSION = 'v417';
+var SW_VERSION = 'v418';
 var STATIC_CACHE = 'mub-static-' + SW_VERSION;
 var RUNTIME_CACHE = 'mub-runtime-v1';
 
@@ -30,7 +30,7 @@ var SHELL = [
   './',
   'index.html',
   'favicon.ico',
-  'css/app.css?v=47',
+  'css/app.css?v=48',
   'js/icons.js?v=26',
   'js/lib/random.js?v=27',
   'js/lib/diff.js?v=27',

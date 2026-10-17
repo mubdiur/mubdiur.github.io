@@ -586,7 +586,7 @@ textarea.tool-textarea::selection{ background:rgba(253,255,204,0.28); color:#131
 }
 .home-hero-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:2rem;align-items:center;padding:2rem 1rem;max-width:none;margin:0 auto;}
 @media(min-width:640px){ .home-hero-grid{padding-left:1.5rem;padding-right:1.5rem;} }
-@media(min-width:1024px){ .home-hero-grid{grid-template-columns:1.05fr 0.95fr;gap:2.5rem;padding:2.5rem 0 2.75rem;max-width:none;margin:0 auto;} }
+@media(min-width:1024px){ .home-hero-grid{grid-template-columns:1.15fr 0.85fr;gap:2.5rem;padding:2.5rem 0 2.75rem;max-width:none;margin:0 auto;} }
 .home-hero-copy{min-width:0;}
 .home-eyebrow{
   display:inline-flex;align-items:center;gap:0.5rem;
@@ -600,13 +600,13 @@ textarea.tool-textarea::selection{ background:rgba(253,255,204,0.28); color:#131
 .home-stat{display:flex;flex-direction:column;gap:0.15rem;min-width:5.5rem;}
 .home-stat-n{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--foreground);letter-spacing:-0.03em;}
 .home-stat-l{font-family:var(--font-mono);font-size:12px;color:rgba(184,178,178,0.75);margin:0;}
-.home-visual{min-width:0;align-self:stretch;display:flex;flex-direction:column;}
+.home-visual{min-width:0;}
 .term-window{
   border:1px solid rgba(255,255,255,0.08);border-radius:14px;background:rgba(19,16,16,0.94);
   box-shadow:0 24px 50px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.05) inset;
   overflow:hidden;max-width:none;
 }
-@media(min-width:1024px){ .term-window{margin:0;width:100%;flex:1;display:flex;flex-direction:column;} }
+@media(min-width:1024px){ .term-window{margin:0 0 0 auto;width:100%;display:flex;flex-direction:column;} }
 .term-bar{display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);}
 .term-dots{display:flex;gap:0.375rem;}
 .term-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.08);}
@@ -687,7 +687,7 @@ textarea.tool-textarea::selection{ background:rgba(253,255,204,0.28); color:#131
 
 
 @media(min-width:1536px){.home-wrap{max-width:96rem;}}
-@media(min-width:1024px){.home-hero-grid{padding-top:1.75rem;padding-bottom:2.5rem;max-width:96rem;}}
+@media(min-width:1024px){.home-hero-grid{padding-top:1.75rem;padding-bottom:2.5rem;max-width:96rem;padding-left:2rem;padding-right:2rem;}}
 .home-title{max-width:16ch;text-wrap:balance;letter-spacing:-0.02em;}
 .home-actions .home-btn{font-size:15px;padding:0.7rem 1.4rem;}
 .term-window{box-shadow:0 24px 60px rgba(0,0,0,0.55),0 0 0 1px rgba(253,255,204,0.06),0 0 44px rgba(253,255,204,0.05);}
