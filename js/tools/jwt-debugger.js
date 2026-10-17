@@ -11,28 +11,28 @@
 App.registerTool('jwt-debugger', {
   css: '' +
     '.t-jwt-debugger .jwt-sec{margin-top:0.75rem;}\n' +
-    '.t-jwt-debugger .jwt-label{display:flex;align-items:center;flex-wrap:wrap;gap:0.375rem;font-family:var(--font-mono);font-size:11px;margin-bottom:0.25rem;}\n' +
-    '.t-jwt-debugger .jwt-label .btn-copy{margin-left:auto;padding:0.125rem 0.375rem;font-size:11px;}\n' +
+    '.t-jwt-debugger .jwt-label{display:flex;align-items:center;flex-wrap:wrap;gap:0.375rem;font-family:var(--font-mono);font-size:10px;margin-bottom:0.25rem;}\n' +
+    '.t-jwt-debugger .jwt-label .btn-copy{margin-left:auto;padding:0.125rem 0.375rem;font-size:10px;}\n' +
     '.t-jwt-debugger .lbl-header{color:var(--ctp-blue);}\n' +
     '.t-jwt-debugger .lbl-payload{color:var(--ctp-blue);}\n' +
     '.t-jwt-debugger .lbl-signature{color:var(--ctp-yellow);}\n' +
-    '.t-jwt-debugger .jwt-pre{border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0.5rem;font-family:var(--font-mono);font-size:11px;color:rgba(227,227,227,0.8);border-radius:6px;overflow:auto;white-space:pre-wrap;word-break:break-all;}\n' +
+    '.t-jwt-debugger .jwt-pre{border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0.5rem;font-family:var(--font-mono);font-size:10px;color:rgba(227,227,227,0.8);border-radius:6px;overflow:auto;white-space:pre-wrap;word-break:break-all;}\n' +
     '.t-jwt-debugger .jwt-hdr{max-height:128px;}\n' +
     '.t-jwt-debugger .jwt-pay{max-height:192px;}\n' +
     '.t-jwt-debugger .jwt-sig{color:rgba(227,227,227,0.6);}\n' +
     '.t-jwt-debugger .claims{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.375rem;margin-top:0.5rem;}\n' +
     '.t-jwt-debugger .claim{border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.2);border-radius:6px;padding:0.375rem 0.5rem;font-family:var(--font-mono);}\n' +
-    '.t-jwt-debugger .claim .ck{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:rgba(141,148,158,0.9);}\n' +
-    '.t-jwt-debugger .claim .cv{font-size:12px;color:rgba(227,227,227,0.9);word-break:break-all;margin-top:0.125rem;}\n' +
-    '.t-jwt-debugger .claim .cs{font-size:10px;margin-top:0.25rem;}\n' +
+    '.t-jwt-debugger .claim .ck{font-size:8px;text-transform:uppercase;letter-spacing:0.08em;color:rgba(141,148,158,0.9);}\n' +
+    '.t-jwt-debugger .claim .cv{font-size:10px;color:rgba(227,227,227,0.9);word-break:break-all;margin-top:0.125rem;}\n' +
+    '.t-jwt-debugger .claim .cs{font-size:8px;margin-top:0.25rem;}\n' +
     '.t-jwt-debugger .cs.ok{color:var(--ctp-green);}\n' +
     '.t-jwt-debugger .cs.bad{color:var(--ctp-red);}\n' +
     '.t-jwt-debugger .verify-row{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;margin-top:0.75rem;}\n' +
-    '.t-jwt-debugger .secret-input{flex:1;min-width:10rem;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);color:rgba(227,227,227,0.9);font-family:var(--font-mono);font-size:14px;padding:0.375rem 0.625rem;border-radius:6px;outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-jwt-debugger .secret-input{flex:1;min-width:10rem;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);color:rgba(227,227,227,0.9);font-family:var(--font-mono);font-size:12px;padding:0.375rem 0.625rem;border-radius:6px;outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
     '.t-jwt-debugger .secret-input:focus{border-color:rgba(83,163,249,0.45);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
-    '.t-jwt-debugger .btn-verify{display:flex;align-items:center;gap:0.375rem;padding:0.375rem 0.75rem;border-radius:6px;background:rgba(83,163,249,0.12);border:1px solid rgba(83,163,249,0.3);color:var(--ctp-teal);font-family:var(--font-mono);font-size:14px;cursor:pointer;transition:background-color .2s;}\n' +
+    '.t-jwt-debugger .btn-verify{display:flex;align-items:center;gap:0.375rem;padding:0.375rem 0.75rem;border-radius:6px;background:rgba(83,163,249,0.12);border:1px solid rgba(83,163,249,0.3);color:var(--ctp-teal);font-family:var(--font-mono);font-size:12px;cursor:pointer;transition:background-color .2s;}\n' +
     '.t-jwt-debugger .btn-verify:hover{background:rgba(83,163,249,0.2);}\n' +
-    '.t-jwt-debugger .verdict{font-family:var(--font-mono);font-size:14px;margin-top:0.5rem;}\n',
+    '.t-jwt-debugger .verdict{font-family:var(--font-mono);font-size:12px;margin-top:0.5rem;}\n',
 
   mount: function (root) {
     var token = '';

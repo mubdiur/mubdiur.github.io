@@ -9,7 +9,7 @@
 
 App.registerTool('base64-image-decoder', {
   css: '' +
-    '.t-base64-image-decoder .b64-input{width:100%;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-size:14px;font-family:var(--font-mono);color:rgba(227,227,227,0.9);resize:vertical;min-height:60px;border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-base64-image-decoder .b64-input{width:100%;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-size:12px;font-family:var(--font-mono);color:rgba(227,227,227,0.9);resize:vertical;min-height:60px;border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
     '.t-base64-image-decoder .b64-input::placeholder{color:rgba(141,148,158,0.3);}\n' +
     '.t-base64-image-decoder .b64-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
     '.t-base64-image-decoder .space-y-2 > * + *{margin-top:0.5rem;}\n' +

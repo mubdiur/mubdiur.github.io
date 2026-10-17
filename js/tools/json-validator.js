@@ -11,12 +11,12 @@
 App.registerTool('json-validator', {
   css: '' +
     '.t-json-validator .seg{display:flex;border:1px solid rgba(51,53,56,0.4);border-radius:6px;overflow:hidden;}\n' +
-    '.t-json-validator .seg button{padding:0.25rem 0.625rem;font-family:var(--font-mono);font-size:11px;background:rgba(0,0,0,0.2);color:rgba(141,148,158,0.6);border:none;cursor:pointer;border-right:1px solid rgba(51,53,56,0.4);transition:all .15s;}\n' +
+    '.t-json-validator .seg button{padding:0.25rem 0.625rem;font-family:var(--font-mono);font-size:10px;background:rgba(0,0,0,0.2);color:rgba(141,148,158,0.6);border:none;cursor:pointer;border-right:1px solid rgba(51,53,56,0.4);transition:all .15s;}\n' +
     '.t-json-validator .seg button:last-child{border-right:none;}\n' +
     '.t-json-validator .seg button:hover{color:rgba(227,227,227,0.9);}\n' +
     '.t-json-validator .seg button.active{background:rgba(83,163,249,0.15);color:var(--cyan-glow);}\n' +
     '.t-json-validator .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;margin-bottom:0.75rem;}\n' +
-    '.t-json-validator .badge{margin-left:auto;font-family:var(--font-mono);font-size:12px;padding:0.2rem 0.6rem;border-radius:999px;border:1px solid;}\n' +
+    '.t-json-validator .badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;padding:0.2rem 0.6rem;border-radius:999px;border:1px solid;}\n' +
     '.t-json-validator .badge.ok{color:var(--green-glow);border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.08);}\n' +
     '.t-json-validator .badge.bad{color:var(--destructive);border-color:rgba(255,100,103,0.4);background:rgba(255,100,103,0.08);}\n',
 

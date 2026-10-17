@@ -8,14 +8,14 @@
 
 App.registerTool('binary-tree-visualizer', {
   css: '' +
-    '.t-binary-tree-visualizer .t-input{width:5rem;height:1.75rem;padding:0 0.5rem;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);color:rgba(227,227,227,0.8);font-family:var(--font-mono);font-size:12px;border-radius:6px;outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
+    '.t-binary-tree-visualizer .t-input{width:5rem;height:1.75rem;padding:0 0.5rem;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);color:rgba(227,227,227,0.8);font-family:var(--font-mono);font-size:10px;border-radius:6px;outline:none;transition:border-color .2s,box-shadow .2s;}\n' +
     '.t-binary-tree-visualizer .t-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
     '.t-binary-tree-visualizer .t-input::placeholder{color:rgba(141,148,158,0.3);}\n' +
-    '.t-binary-tree-visualizer .t-btn-primary{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.625rem;border-radius:6px;background:rgba(83,163,249,0.1);border:1px solid rgba(83,163,249,0.2);color:rgba(83,163,249,0.8);font-family:var(--font-mono);font-size:10px;cursor:pointer;transition:background-color .2s,border-color .2s;}\n' +
+    '.t-binary-tree-visualizer .t-btn-primary{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.625rem;border-radius:6px;background:rgba(83,163,249,0.1);border:1px solid rgba(83,163,249,0.2);color:rgba(83,163,249,0.8);font-family:var(--font-mono);font-size:8px;cursor:pointer;transition:background-color .2s,border-color .2s;}\n' +
     '.t-binary-tree-visualizer .t-btn-primary:hover{background:rgba(83,163,249,0.2);}\n' +
-    '.t-binary-tree-visualizer .t-btn-ghost{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:6px;background:rgba(51,53,56,0.3);border:1px solid rgba(51,53,56,0.3);color:rgba(141,148,158,0.6);font-family:var(--font-mono);font-size:10px;cursor:pointer;transition:color .2s,background-color .2s;}\n' +
+    '.t-binary-tree-visualizer .t-btn-ghost{display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:6px;background:rgba(51,53,56,0.3);border:1px solid rgba(51,53,56,0.3);color:rgba(141,148,158,0.6);font-family:var(--font-mono);font-size:8px;cursor:pointer;transition:color .2s,background-color .2s;}\n' +
     '.t-binary-tree-visualizer .t-btn-ghost:hover{color:rgba(227,227,227,0.8);}\n' +
-    '.t-binary-tree-visualizer .t-nodes{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.5);margin-left:auto;}\n',
+    '.t-binary-tree-visualizer .t-nodes{font-family:var(--font-mono);font-size:8px;color:rgba(141,148,158,0.5);margin-left:auto;}\n',
 
   mount: function (root) {
     var SVG_NS = 'http://www.w3.org/2000/svg';

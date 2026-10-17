@@ -17,26 +17,26 @@ function fileSafe(s) {
 }
 var CSS = '' +
 '.t-loan-calculator .loan-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.6rem;}\n' +
-'.t-loan-calculator .loan-flabel{font-family:var(--font-mono);font-size:10.5px;color:rgba(141,148,158,0.75);display:block;margin-bottom:0.3rem;}\n' +
-'.t-loan-calculator .loan-in{width:100%;height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 10px;font-family:var(--font-mono);font-size:12.5px;color:rgba(227,227,227,0.9);outline:none;}\n' +
+'.t-loan-calculator .loan-flabel{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.75);display:block;margin-bottom:0.3rem;}\n' +
+'.t-loan-calculator .loan-in{width:100%;height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 10px;font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.9);outline:none;}\n' +
 '.t-loan-calculator .loan-in:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
 '.t-loan-calculator .loan-row{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;margin-top:0.65rem;}\n' +
-'.t-loan-calculator .btn-run{background:rgba(83,163,249,0.2);border:1px solid rgba(83,163,249,0.45);color:#fff;border-radius:6px;font-family:var(--font-mono);font-size:12px;padding:0.45rem 1.1rem;cursor:pointer;}\n' +
-'.t-loan-calculator .loan-status{font-family:var(--font-mono);font-size:11.5px;min-height:1.4em;margin-top:0.55rem;color:rgba(141,148,158,0.85);}\n' +
+'.t-loan-calculator .btn-run{background:rgba(83,163,249,0.2);border:1px solid rgba(83,163,249,0.45);color:#fff;border-radius:6px;font-family:var(--font-mono);font-size:10px;padding:0.45rem 1.1rem;cursor:pointer;}\n' +
+'.t-loan-calculator .loan-status{font-family:var(--font-mono);font-size:10px;min-height:1.4em;margin-top:0.55rem;color:rgba(141,148,158,0.85);}\n' +
 '.t-loan-calculator .loan-status.ok{color:var(--lime);}\n' +
 '.t-loan-calculator .loan-status.err{color:var(--ctp-red);}\n' +
 '.t-loan-calculator .loan-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.6rem;margin-top:0.7rem;}\n' +
 '.t-loan-calculator .loan-card{border:1px solid rgba(51,53,56,0.4);border-radius:6px;background:rgba(0,0,0,0.25);padding:0.6rem 0.75rem;}\n' +
-'.t-loan-calculator .loan-card .k{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.7);text-transform:uppercase;letter-spacing:0.06em;}\n' +
-'.t-loan-calculator .loan-card .v{font-family:var(--font-mono);font-size:17px;color:#fff;margin-top:0.2rem;}\n' +
+'.t-loan-calculator .loan-card .k{font-family:var(--font-mono);font-size:8px;color:rgba(141,148,158,0.7);text-transform:uppercase;letter-spacing:0.06em;}\n' +
+'.t-loan-calculator .loan-card .v{font-family:var(--font-mono);font-size:16px;color:#fff;margin-top:0.2rem;}\n' +
 '.t-loan-calculator .loan-card.hero{border-color:rgba(83,163,249,0.45);}\n' +
-'.t-loan-calculator .loan-card.hero .v{color:var(--lime);font-size:21px;}\n' +
-'.t-loan-calculator table.loan-table{width:100%;border-collapse:collapse;margin-top:0.7rem;font-family:var(--font-mono);font-size:11.5px;}\n' +
-'.t-loan-calculator table.loan-table th{text-align:right;font-weight:600;color:rgba(141,148,158,0.75);font-size:10px;text-transform:uppercase;letter-spacing:0.05em;padding:0.4rem 0.5rem;border-bottom:1px solid rgba(51,53,56,0.5);}\n' +
+'.t-loan-calculator .loan-card.hero .v{color:var(--lime);font-size:20px;}\n' +
+'.t-loan-calculator table.loan-table{width:100%;border-collapse:collapse;margin-top:0.7rem;font-family:var(--font-mono);font-size:10px;}\n' +
+'.t-loan-calculator table.loan-table th{text-align:right;font-weight:600;color:rgba(141,148,158,0.75);font-size:8px;text-transform:uppercase;letter-spacing:0.05em;padding:0.4rem 0.5rem;border-bottom:1px solid rgba(51,53,56,0.5);}\n' +
 '.t-loan-calculator table.loan-table th:first-child,.t-loan-calculator table.loan-table td:first-child{text-align:left;}\n' +
 '.t-loan-calculator table.loan-table td{text-align:right;padding:0.35rem 0.5rem;border-bottom:1px solid rgba(51,53,56,0.25);color:rgba(227,227,227,0.88);}\n' +
 '.t-loan-calculator table.loan-table tr:last-child td{border-bottom:0;}\n' +
-'.t-loan-calculator .loan-hint{font-family:var(--font-mono);font-size:10.5px;color:rgba(141,148,158,0.6);margin-top:0.5rem;line-height:1.6;}\n';
+'.t-loan-calculator .loan-hint{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.6);margin-top:0.5rem;line-height:1.6;}\n';
 function card(k, v, hero) {
   return App.el('div', { class: 'loan-card' + (hero ? ' hero' : '') },
     App.el('div', { class: 'k', text: k }),

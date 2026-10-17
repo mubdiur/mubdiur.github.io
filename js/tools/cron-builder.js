@@ -30,22 +30,22 @@ App.registerTool('cron-builder', {
   css: '' +
     '.t-cron-builder .cb-row{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:flex-end;}\n' +
     '.t-cron-builder .cb-field{display:flex;flex-direction:column;gap:0.2rem;min-width:0;}\n' +
-    '.t-cron-builder .cb-field label{font-family:var(--font-mono);font-size:11px;color:rgba(227,227,227,0.55);}\n' +
-    '.t-cron-builder .cb-input{width:5.5rem;height:30px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0 0.5rem;font-family:var(--font-mono);font-size:14px;color:rgba(227,227,227,0.9);outline:none;}\n' +
+    '.t-cron-builder .cb-field label{font-family:var(--font-mono);font-size:10px;color:rgba(227,227,227,0.55);}\n' +
+    '.t-cron-builder .cb-input{width:5.5rem;height:30px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);padding:0 0.5rem;font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.9);outline:none;}\n' +
     '.t-cron-builder .cb-input:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
-    '.t-cron-builder .cb-sel{height:30px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);font-family:var(--font-mono);font-size:14px;color:rgba(227,227,227,0.8);outline:none;}\n' +
-    '.t-cron-builder .cb-expr{font-family:var(--font-mono);font-size:16px;color:rgba(83,163,249,0.9);}\n' +
-    '.t-cron-builder .cb-summary{font-size:14px;color:rgba(227,227,227,0.9);}\n' +
-    '.t-cron-builder .cb-list{font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.75);line-height:1.6;}\n' +
-    '.t-cron-builder .cb-error{font-family:var(--font-mono);font-size:14px;color:rgba(255,107,107,0.95);}\n' +
-    '.t-cron-builder .cb-sec{font-family:var(--font-mono);font-size:11px;color:rgba(227,227,227,0.5);text-transform:uppercase;letter-spacing:0.08em;}\n' +
-    '.t-cron-builder .cb-grid{border-collapse:collapse;font-family:var(--font-mono);font-size:10px;}\n' +
+    '.t-cron-builder .cb-sel{height:30px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.8);outline:none;}\n' +
+    '.t-cron-builder .cb-expr{font-family:var(--font-mono);font-size:14px;color:rgba(83,163,249,0.9);}\n' +
+    '.t-cron-builder .cb-summary{font-size:12px;color:rgba(227,227,227,0.9);}\n' +
+    '.t-cron-builder .cb-list{font-family:var(--font-mono);font-size:10px;color:rgba(227,227,227,0.75);line-height:1.6;}\n' +
+    '.t-cron-builder .cb-error{font-family:var(--font-mono);font-size:12px;color:rgba(255,107,107,0.95);}\n' +
+    '.t-cron-builder .cb-sec{font-family:var(--font-mono);font-size:10px;color:rgba(227,227,227,0.5);text-transform:uppercase;letter-spacing:0.08em;}\n' +
+    '.t-cron-builder .cb-grid{border-collapse:collapse;font-family:var(--font-mono);font-size:8px;}\n' +
     '.t-cron-builder .cb-grid th{font-weight:normal;color:rgba(227,227,227,0.45);padding:1px 2px;}\n' +
     '.t-cron-builder .cb-grid td{width:14px;height:14px;text-align:center;color:rgba(227,227,227,0.35);}\n' +
     '.t-cron-builder .cb-grid td.cb-on{color:rgba(83,163,249,1);}\n' +
     '.t-cron-builder .cb-grid tr.cb-today th{color:rgba(83,163,249,0.95);font-weight:bold;}\n' +
     '.t-cron-builder .cb-run{display:flex;align-items:center;gap:0.5rem;}\n' +
-    '.t-cron-builder .cb-run .btn-copy{padding:0 0.4rem;font-size:11px;}\n',
+    '.t-cron-builder .cb-run .btn-copy{padding:0 0.4rem;font-size:10px;}\n',
 
   mount: function (root) {
     var T = window.Transforms;

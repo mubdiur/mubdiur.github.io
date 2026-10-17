@@ -7,7 +7,7 @@
 
 var App = {
   icons: {},
-  TOOL_VERSION: '59',
+  TOOL_VERSION: '60',
 
   /* ── DOM helpers ── */
   SVG_TAGS: ['svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'text', 'g', 'defs', 'marker', 'pattern', 'use', 'ellipse', 'tspan'],
@@ -682,7 +682,7 @@ window.addEventListener('error', function (e) {
   var d = document.getElementById('page-main');
   if (!d) return;
   if (!d.querySelector('.boot-error')) {
-    d.appendChild(App.el('div', { class: 'boot-error', style: 'color:#fb565b;font-family:var(--font-mono);font-size:12px;padding:1rem;white-space:pre-wrap;word-break:break-all',
+    d.appendChild(App.el('div', { class: 'boot-error', style: 'color:#fb565b;font-family:var(--font-mono);font-size:10px;padding:1rem;white-space:pre-wrap;word-break:break-all',
       text: 'JS error: ' + (e.message || e) + '\n' + ((e.filename || '') + ':' + (e.lineno || '')) }));
   }
 });

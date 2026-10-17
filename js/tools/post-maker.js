@@ -40,11 +40,11 @@ App.registerTool('post-maker', {
     '.t-post-maker .pm-cell{height:28px;width:28px;color:rgba(141,148,158,0.8);}\n' +
     '.t-post-maker .pm-cell:hover{color:rgba(227,227,227,0.9);}\n' +
     '.t-post-maker .pm-cell.danger:hover{color:var(--ctp-red);}\n' +
-    '.t-post-maker .pm-ta{width:100%;resize:vertical;border-radius:calc(var(--radius)*0.8);border:1px solid rgba(51,53,56,0.5);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-family:var(--font-mono);font-size:14px;color:rgba(227,227,227,0.9);outline:none;}\n' +
+    '.t-post-maker .pm-ta{width:100%;resize:vertical;border-radius:calc(var(--radius)*0.8);border:1px solid rgba(51,53,56,0.5);background:rgba(0,0,0,0.3);padding:0.5rem 0.75rem;font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.9);outline:none;}\n' +
     '.t-post-maker .pm-ta::placeholder{color:rgba(141,148,158,0.3);}\n' +
     '.t-post-maker .pm-ta:focus{box-shadow:0 0 0 1px rgba(83,163,249,0.4);}\n' +
     '.t-post-maker .pm-img{max-height:16rem;width:auto;}\n' +
-    '.t-post-maker .pm-pre{max-height:16rem;overflow:auto;white-space:pre-wrap;word-break:break-all;font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.85);}\n',
+    '.t-post-maker .pm-pre{max-height:16rem;overflow:auto;white-space:pre-wrap;word-break:break-all;font-family:var(--font-mono);font-size:10px;color:rgba(227,227,227,0.85);}\n',
 
   mount: function (root) {
     var items = [{ id: nextId++, type: 'text', text: '', src: '' }];

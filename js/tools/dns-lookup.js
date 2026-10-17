@@ -60,22 +60,22 @@ function fetchJson(url, token, getToken) {
 App.registerTool('dns-lookup', {
   css: '' +
     '.t-dns-lookup .dns-row{display:flex;gap:0.5rem;flex-wrap:wrap;}\n' +
-    '.t-dns-lookup .dns-domain{flex:1 1 180px;height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 10px;font-family:var(--font-mono);font-size:14px;color:rgba(227,227,227,0.9);outline:none;min-width:0;}\n' +
+    '.t-dns-lookup .dns-domain{flex:1 1 180px;height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 10px;font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.9);outline:none;min-width:0;}\n' +
     '.t-dns-lookup .dns-domain:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
-    '.t-dns-lookup select{height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 6px;font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.8);}\n' +
-    '.t-dns-lookup .lookup-btn{height:34px;padding:0 16px;border:none;border-radius:6px;background:rgba(83,163,249,0.2);color:rgba(180,210,250,0.95);font-family:var(--font-mono);font-size:14px;cursor:pointer;}\n' +
+    '.t-dns-lookup select{height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 6px;font-family:var(--font-mono);font-size:10px;color:rgba(227,227,227,0.8);}\n' +
+    '.t-dns-lookup .lookup-btn{height:34px;padding:0 16px;border:none;border-radius:6px;background:rgba(83,163,249,0.2);color:rgba(180,210,250,0.95);font-family:var(--font-mono);font-size:12px;cursor:pointer;}\n' +
     '.t-dns-lookup .lookup-btn:hover{background:rgba(83,163,249,0.32);}\n' +
     '.t-dns-lookup .lookup-btn:disabled{opacity:0.45;cursor:default;}\n' +
-    '.t-dns-lookup .clear-btn{height:34px;padding:0 12px;border:1px solid rgba(51,53,56,0.4);border-radius:6px;background:transparent;color:rgba(141,148,158,0.7);font-family:var(--font-mono);font-size:12px;cursor:pointer;}\n' +
+    '.t-dns-lookup .clear-btn{height:34px;padding:0 12px;border:1px solid rgba(51,53,56,0.4);border-radius:6px;background:transparent;color:rgba(141,148,158,0.7);font-family:var(--font-mono);font-size:10px;cursor:pointer;}\n' +
     '.t-dns-lookup .clear-btn:hover:not(:disabled){color:rgba(227,227,227,0.9);border-color:rgba(255,100,103,0.4);}\n' +
     '.t-dns-lookup .clear-btn:disabled{opacity:0.4;cursor:default;}\n' +
-    '.t-dns-lookup .dns-status{font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.7);text-align:center;padding:0.75rem 0;}\n' +
-    '.t-dns-lookup .dns-hint{font-family:var(--font-mono);font-size:12px;color:rgba(141,148,158,0.55);text-align:center;padding:0 0 0.25rem;}\n' +
+    '.t-dns-lookup .dns-status{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.7);text-align:center;padding:0.75rem 0;}\n' +
+    '.t-dns-lookup .dns-hint{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.55);text-align:center;padding:0 0 0.25rem;}\n' +
     '.t-dns-lookup .dns-list{display:flex;flex-direction:column;gap:0.25rem;}\n' +
     '.t-dns-lookup .row{display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0.6rem;border-radius:8px;border:1px solid rgba(51,53,56,0.2);background:rgba(0,0,0,0.1);cursor:pointer;}\n' +
     '.t-dns-lookup .row:hover{background:rgba(0,0,0,0.2);}\n' +
-    '.t-dns-lookup .data{font-size:14px;font-family:var(--font-mono);color:rgba(227,227,227,0.85);word-break:break-all;flex:1;}\n' +
-    '.t-dns-lookup .ttl{font-size:11px;font-family:var(--font-mono);color:rgba(141,148,158,0.6);flex-shrink:0;}\n',
+    '.t-dns-lookup .data{font-size:12px;font-family:var(--font-mono);color:rgba(227,227,227,0.85);word-break:break-all;flex:1;}\n' +
+    '.t-dns-lookup .ttl{font-size:10px;font-family:var(--font-mono);color:rgba(141,148,158,0.6);flex-shrink:0;}\n',
 
   mount: function (root) {
     var runToken = 0;

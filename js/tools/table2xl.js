@@ -170,14 +170,14 @@ function generateAscii(table) {
 
 App.registerTool('table2xl', {
   css: '' +
-    '.t-table2xl textarea.tool-textarea{min-height:140px;font-size:16px;}\n' +
+    '.t-table2xl textarea.tool-textarea{min-height:140px;font-size:14px;}\n' +
     '.t-table2xl .fg-90{color:rgba(227,227,227,0.9);}\n' +
     '.t-table2xl .muted-80{color:rgba(141,148,158,0.8);}\n' +
     '.t-table2xl .muted-70{color:rgba(141,148,158,0.7);}\n' +
     '.t-table2xl .muted-60{color:rgba(141,148,158,0.6);}\n' +
     '.t-table2xl .hover-fg-90:hover{color:rgba(227,227,227,0.9);}\n' +
     '.t-table2xl .seg{display:flex;gap:0.25rem;border:1px solid rgba(51,53,56,0.5);border-radius:0.5rem;background:var(--mantle);padding:0.25rem;}\n' +
-    '.t-table2xl .seg button{flex:1;padding:0.375rem 0.75rem;border-radius:0.375rem;font-family:var(--font-mono);font-size:14px;border:1px solid transparent;background:none;color:rgba(141,148,158,0.7);cursor:pointer;transition:color .2s,background-color .2s,border-color .2s;}\n' +
+    '.t-table2xl .seg button{flex:1;padding:0.375rem 0.75rem;border-radius:0.375rem;font-family:var(--font-mono);font-size:12px;border:1px solid transparent;background:none;color:rgba(141,148,158,0.7);cursor:pointer;transition:color .2s,background-color .2s,border-color .2s;}\n' +
     '.t-table2xl .seg button:hover{color:rgba(227,227,227,0.9);}\n' +
     '.t-table2xl .seg button.active{background:rgba(83,163,249,0.2);color:var(--ctp-teal);border-color:rgba(83,163,249,0.3);}\n' +
     '.t-table2xl .preview{max-height:24rem;overflow:auto;}\n',
@@ -208,7 +208,7 @@ App.registerTool('table2xl', {
       }
 
       var out = document.createElement('table');
-      out.style.cssText = 'width:100%;border-collapse:collapse;font-size:14px;font-family:monospace';
+      out.style.cssText = 'width:100%;border-collapse:collapse;font-size:12px;font-family:monospace';
       var keepIndices = null;
 
       if (gridContainer && !originalTable) {

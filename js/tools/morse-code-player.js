@@ -3,17 +3,17 @@
 var MAX_TOTAL = 60;
 App.registerTool("morse-code-player", {
 css: "" +
-".t-morse-code-player .morse-text{width:100%;min-height:70px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:8px 10px;font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.9);outline:none;resize:vertical;}\n" +
+".t-morse-code-player .morse-text{width:100%;min-height:70px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:8px 10px;font-family:var(--font-mono);font-size:10px;color:rgba(227,227,227,0.9);outline:none;resize:vertical;}\n" +
 ".t-morse-code-player .morse-text:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n" +
 ".t-morse-code-player .morse-row{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;margin-top:0.5rem;}\n" +
-".t-morse-code-player select{height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 6px;font-family:var(--font-mono);font-size:11px;color:rgba(227,227,227,0.8);}\n" +
-".t-morse-code-player label{font-family:var(--font-mono);font-size:10.5px;color:rgba(141,148,158,0.7);}\n" +
-".t-morse-code-player .play-btn{height:34px;padding:0 18px;border:none;border-radius:6px;background:rgba(83,163,249,0.2);color:rgba(180,210,250,0.95);font-family:var(--font-mono);font-size:12px;cursor:pointer;}\n" +
+".t-morse-code-player select{height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 6px;font-family:var(--font-mono);font-size:10px;color:rgba(227,227,227,0.8);}\n" +
+".t-morse-code-player label{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.7);}\n" +
+".t-morse-code-player .play-btn{height:34px;padding:0 18px;border:none;border-radius:6px;background:rgba(83,163,249,0.2);color:rgba(180,210,250,0.95);font-family:var(--font-mono);font-size:10px;cursor:pointer;}\n" +
 ".t-morse-code-player .play-btn:hover{background:rgba(83,163,249,0.32);}\n" +
 ".t-morse-code-player .play-btn:disabled{opacity:0.45;cursor:default;}\n" +
-".t-morse-code-player .morse-status{font-family:var(--font-mono);font-size:11px;color:rgba(141,148,158,0.7);text-align:center;padding:0.75rem 0 0.25rem;}\n" +
-".t-morse-code-player .morse-hint{font-family:var(--font-mono);font-size:11px;color:rgba(141,148,158,0.55);text-align:center;padding:0 0 0.25rem;}\n" +
-".t-morse-code-player .morse-out{font-family:var(--font-mono);font-size:14px;line-height:2;text-align:center;letter-spacing:0.08em;}\n" +
+".t-morse-code-player .morse-status{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.7);text-align:center;padding:0.75rem 0 0.25rem;}\n" +
+".t-morse-code-player .morse-hint{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.55);text-align:center;padding:0 0 0.25rem;}\n" +
+".t-morse-code-player .morse-out{font-family:var(--font-mono);font-size:12px;line-height:2;text-align:center;letter-spacing:0.08em;}\n" +
 ".t-morse-code-player .morse-out .sym{padding:2px 5px;border-radius:5px;color:rgba(227,227,227,0.75);}\n" +
 ".t-morse-code-player .morse-out .sym.on{background:rgba(83,163,249,0.3);color:#fff;}\n" +
 ".t-morse-code-player .morse-out .sym.dim{color:rgba(141,148,158,0.4);}\n",

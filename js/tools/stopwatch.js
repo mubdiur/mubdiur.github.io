@@ -58,27 +58,27 @@ function saveCountdown(h, m, s) {
 }
 var CSS = '' +
 '.t-stopwatch .sw-seg{display:inline-flex;border:1px solid rgba(51,53,56,0.4);border-radius:6px;overflow:hidden;}\n' +
-'.t-stopwatch .sw-seg button{background:transparent;border:0;color:rgba(227,227,227,0.65);font-family:var(--font-mono);font-size:11.5px;padding:0.4rem 0.9rem;cursor:pointer;}\n' +
+'.t-stopwatch .sw-seg button{background:transparent;border:0;color:rgba(227,227,227,0.65);font-family:var(--font-mono);font-size:10px;padding:0.4rem 0.9rem;cursor:pointer;}\n' +
 '.t-stopwatch .sw-seg button.on{background:rgba(83,163,249,0.22);color:#fff;}\n' +
-'.t-stopwatch .sw-face{font-family:var(--font-mono);font-size:52px;font-weight:600;letter-spacing:0.04em;text-align:center;color:#fff;padding:0.9rem 0 0.3rem;font-variant-numeric:tabular-nums;}\n' +
+'.t-stopwatch .sw-face{font-family:var(--font-mono);font-size:50px;font-weight:600;letter-spacing:0.04em;text-align:center;color:#fff;padding:0.9rem 0 0.3rem;font-variant-numeric:tabular-nums;}\n' +
 '.t-stopwatch .sw-face.done{color:var(--lime);}\n' +
-'.t-stopwatch .sw-sub{text-align:center;font-family:var(--font-mono);font-size:11px;color:rgba(141,148,158,0.75);padding-bottom:0.4rem;min-height:1.4em;}\n' +
+'.t-stopwatch .sw-sub{text-align:center;font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.75);padding-bottom:0.4rem;min-height:1.4em;}\n' +
 '.t-stopwatch .sw-row{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:0.5rem;}\n' +
-'.t-stopwatch .btn-run{background:rgba(83,163,249,0.2);border:1px solid rgba(83,163,249,0.45);color:#fff;border-radius:6px;font-family:var(--font-mono);font-size:12px;padding:0.45rem 1.1rem;cursor:pointer;min-width:7rem;}\n' +
-'.t-stopwatch .sw-in{width:4.2rem;height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 8px;font-family:var(--font-mono);font-size:12.5px;color:rgba(227,227,227,0.9);outline:none;text-align:center;}\n' +
+'.t-stopwatch .btn-run{background:rgba(83,163,249,0.2);border:1px solid rgba(83,163,249,0.45);color:#fff;border-radius:6px;font-family:var(--font-mono);font-size:10px;padding:0.45rem 1.1rem;cursor:pointer;min-width:7rem;}\n' +
+'.t-stopwatch .sw-in{width:4.2rem;height:34px;border:1px solid rgba(51,53,56,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:0 8px;font-family:var(--font-mono);font-size:12px;color:rgba(227,227,227,0.9);outline:none;text-align:center;}\n' +
 '.t-stopwatch .sw-in:focus{border-color:rgba(83,163,249,0.4);box-shadow:0 0 0 1px rgba(83,163,249,0.3);}\n' +
 '.t-stopwatch .sw-in:disabled{opacity:0.45;}\n' +
-'.t-stopwatch .sw-flabel{font-family:var(--font-mono);font-size:10.5px;color:rgba(141,148,158,0.75);}\n' +
-'.t-stopwatch table.sw-laps{width:100%;border-collapse:collapse;margin-top:0.7rem;font-family:var(--font-mono);font-size:11.5px;}\n' +
-'.t-stopwatch table.sw-laps th{text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:rgba(141,148,158,0.75);padding:0.4rem 0.5rem;border-bottom:1px solid rgba(51,53,56,0.5);}\n' +
+'.t-stopwatch .sw-flabel{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.75);}\n' +
+'.t-stopwatch table.sw-laps{width:100%;border-collapse:collapse;margin-top:0.7rem;font-family:var(--font-mono);font-size:10px;}\n' +
+'.t-stopwatch table.sw-laps th{text-align:right;font-size:8px;text-transform:uppercase;letter-spacing:0.05em;color:rgba(141,148,158,0.75);padding:0.4rem 0.5rem;border-bottom:1px solid rgba(51,53,56,0.5);}\n' +
 '.t-stopwatch table.sw-laps th:first-child,.t-stopwatch table.sw-laps td:first-child{text-align:left;}\n' +
 '.t-stopwatch table.sw-laps td{text-align:right;padding:0.3rem 0.5rem;border-bottom:1px solid rgba(51,53,56,0.25);color:rgba(227,227,227,0.88);font-variant-numeric:tabular-nums;}\n' +
 '.t-stopwatch table.sw-laps tr.best td{color:var(--lime);}\n' +
 '.t-stopwatch table.sw-laps tr.worst td{color:var(--ctp-red);}\n' +
-'.t-stopwatch .sw-status{font-family:var(--font-mono);font-size:11.5px;min-height:1.4em;margin-top:0.55rem;text-align:center;color:rgba(141,148,158,0.85);}\n' +
+'.t-stopwatch .sw-status{font-family:var(--font-mono);font-size:10px;min-height:1.4em;margin-top:0.55rem;text-align:center;color:rgba(141,148,158,0.85);}\n' +
 '.t-stopwatch .sw-status.ok{color:var(--lime);}\n' +
 '.t-stopwatch .sw-status.err{color:var(--ctp-red);}\n' +
-'.t-stopwatch .sw-hint{font-family:var(--font-mono);font-size:10.5px;color:rgba(141,148,158,0.6);margin-top:0.5rem;line-height:1.6;text-align:center;}\n';
+'.t-stopwatch .sw-hint{font-family:var(--font-mono);font-size:10px;color:rgba(141,148,158,0.6);margin-top:0.5rem;line-height:1.6;text-align:center;}\n';
 App.registerTool('stopwatch', {
   css: CSS,
   mount: function (root) {
