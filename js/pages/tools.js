@@ -50,7 +50,7 @@ function ToolCard(tool, favs, onFav) {
       App.el('div', { class: 'tc-name', text: tool.name }),
       App.el('div', { class: 'tc-desc', text: tool.desc }),
       App.el('div', { class: 'tc-tags' },
-        tool.tags.slice(0, 3).map(function (tag) {
+        tool.tags.slice(0, 2).map(function (tag) {
           return App.el('span', { class: 'tc-tag', text: tag });
         }))),
     star);
