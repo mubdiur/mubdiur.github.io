@@ -41,7 +41,7 @@ function ToolCard(tool, favs, onFav) {
     onclick: function (e) { e.stopPropagation(); onFav(tool.slug); }
   }, App.el('span', { 'aria-hidden': 'true', text: isFav ? '★' : '☆' }));
   var card = App.el('div', {
-    class: 'tool-card', role: 'link', tabindex: '0',
+    class: 'tool-card', role: 'link', tabindex: '0', title: tool.name,
     'aria-label': tool.name + ' — open tool',
     onclick: function () { App.navigate('/tools/' + tool.slug); }
   },
