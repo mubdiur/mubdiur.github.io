@@ -595,7 +595,7 @@ textarea.tool-textarea::selection{ background:rgba(253,255,204,0.28); color:#131
   padding:0.35rem 0.8rem;border-radius:999px;margin-bottom:1.25rem;
 }
 .home-dot{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime);animation:blink 2s ease-in-out infinite;}
-.home-title{font-size:clamp(2.5rem, 4.6vw, 3.9rem);line-height:1.03;}
+.home-title{font-size:clamp(2.5rem, 4.6vw, 3rem);line-height:1.03;}
 .home-stats{display:flex;flex-wrap:wrap;gap:1.25rem 2rem;margin-top:1.75rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.06);}
 .home-stat{display:flex;flex-direction:column;gap:0.15rem;min-width:5.5rem;}
 .home-stat-n{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--foreground);letter-spacing:-0.03em;}
