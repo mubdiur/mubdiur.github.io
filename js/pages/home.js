@@ -178,9 +178,7 @@ function renderHome() {
           App.el('div', { class: 'home-contact-copy' },
             section('Contact', 'Questions, bugs, ideas — mubdiur@gmail.com works best.')),
           App.el('div', { class: 'home-actions home-contact-links' },
-            App.el('a', { class: 'btn-ghost-sm home-btn', href: 'mailto:mubdiur@gmail.com', text: 'Email' }),
-            App.el('a', { class: 'btn-ghost-sm home-btn', href: 'https://github.com/mubdiur', target: '_blank', rel: 'noopener noreferrer', text: 'GitHub' }),
-            App.el('a', { class: 'btn-ghost-sm home-btn', href: 'https://linkedin.com/in/mubdiur', target: '_blank', rel: 'noopener noreferrer', text: 'LinkedIn' }))),)
+            App.el('a', { class: 'btn-primary-sm home-btn', href: 'mailto:mubdiur@gmail.com', text: 'mubdiur@gmail.com' }))),)
 ));
 
   return root;
