@@ -20,6 +20,8 @@ function favSave(list) {
   try { localStorage.setItem('mub.favtools.v1', JSON.stringify(list)); } catch {}
 }
 function favHas(list, slug) { return list.indexOf(slug) >= 0; }
+function viewLoad() { try { var v = JSON.parse(localStorage.getItem("mub.toolsview.v1") || "{}"); return { showDesc: v.showDesc !== false, showTags: v.showTags !== false }; } catch { return { showDesc: true, showTags: true }; } }
+function viewSave(v) { try { localStorage.setItem("mub.toolsview.v1", JSON.stringify(v)); } catch {} }
 function favToggle(list, slug) {
   var i = list.indexOf(slug);
   if (i >= 0) list.splice(i, 1);
@@ -61,7 +63,7 @@ function ToolCard(tool, favs, onFav) {
 function renderTools() {
   var serverCount = TOOLMANIFEST.filter(function (t) { return t.server; }).length;
   var clientCount = TOOLMANIFEST.length - serverCount;
-  var state = { search: '', cat: null };
+  var state = { search: "", cat: null, view: viewLoad() };
 
   var searchInput = App.el('input', {
     class: 'tools-search', type: 'text', placeholder: 'Search ' + TOOLMANIFEST.length + ' tools...',
@@ -109,6 +111,42 @@ function renderTools() {
     ioStatus);
   var catTabs = App.el('div', { class: 'cat-tabs' });
   var results = App.el('div', { class: 'tools-results' });
+var descBtn = App.el("button", {
+class: "cat-tab toggle-pill",
+type: "button",
+title: "Toggle tool descriptions",
+"aria-label": "Toggle tool descriptions",
+"aria-pressed": state.view.showDesc ? "true" : "false",
+onclick: function () {
+state.view.showDesc = !state.view.showDesc;
+viewSave(state.view);
+applyView();
+}
+}, App.el("span", { text: "Descriptions" }));
+var tagsBtn = App.el("button", {
+class: "cat-tab toggle-pill",
+type: "button",
+title: "Toggle tag chips",
+"aria-label": "Toggle tag chips",
+"aria-pressed": state.view.showTags ? "true" : "false",
+onclick: function () {
+state.view.showTags = !state.view.showTags;
+viewSave(state.view);
+applyView();
+}
+}, App.el("span", { text: "Tags" }));
+var viewBox = App.el("div", { class: "view-toggles" },
+App.el("span", { class: "toggle-label", text: "View:" }),
+descBtn, tagsBtn);
+function applyView() {
+var showD = state.view.showDesc;
+var showT = state.view.showTags;
+results.classList.toggle("hide-desc", !showD);
+results.classList.toggle("hide-tags", !showT);
+descBtn.setAttribute("aria-pressed", showD ? "true" : "false");
+tagsBtn.setAttribute("aria-pressed", showT ? "true" : "false");
+}
+applyView();
 
   function clearFilters() {
     state.search = '';
@@ -226,7 +264,7 @@ function renderTools() {
   var root = App.el('div', { class: 'w-full' },
     App.el('div', { class: 'tools-hero' },
       App.el('div', { class: 'tools-hero-inner' },
-        App.el('div', { class: 'flex items-center gap-3 mb-3' },
+        App.el('div', { class: 'flex flex-wrap items-center gap-3 mb-3' },
           App.el('span', { class: 'badge-pill teal' }, App.icon('zap', '', 14), App.el('span', { text: 'IN-BROWSER · ' + clientCount })),
           App.el('span', { class: 'badge-pill blue' }, App.icon('server', '', 14), App.el('span', { text: 'WASM CORE · ' + (TOOLMANIFEST.filter(function (t) { return t.wasm; }).length) })),
           App.el('span', { class: 'text-xs font-mono', style: { color: 'rgba(141,148,158,0.7)' }, text: TOOLMANIFEST.length + ' Tools · all client-side, zero server' })),
@@ -241,7 +279,7 @@ function renderTools() {
         App.el('div', { class: 'flex items-center gap-1.5 text-xs font-mono', style: { color: 'rgba(141,148,158,0.6)' } },
           App.icon('command', '', 14),
           App.el('kbd', { text: 'K' })),
-        ioBox, fileInput),
+        viewBox, ioBox, fileInput),
       catTabs,
       results));
 
