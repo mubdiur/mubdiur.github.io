@@ -42,7 +42,7 @@ function TransformToolUI(tool) {
   function run() {
     var cancelToken = {};
     run._token = cancelToken;
-    if (!state.input.trim()) { state.output = ''; state.error = null; state.pending = false; renderOutput(); return; }
+    if (!state.input.trim() && !tool.allowBlank) { state.output = ''; state.error = null; state.pending = false; renderOutput(); return; }
     var handler = tool.handler;
     if (!handler) return;
     var result;

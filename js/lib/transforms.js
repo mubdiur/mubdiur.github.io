@@ -4632,7 +4632,7 @@ T.straddleEncode = function (s, key) {
 };
 T.straddleDecode = function (s, key) {
   var b = T.straddleBoard(key);
-  var t = String(s).replace(/[^0-9]/g, '');
+  var t = String(s).replace(/[^0-9]/g, ''); if (!t) throw new Error('Enter checkerboard digits \u2014 decode reads 0-9');
   var out = ''; var i = 0;
   while (i < t.length) {
     var c = t.charAt(i);
@@ -4900,7 +4900,7 @@ T.morbitEncode = function (s) {
 };
 T.morbitDecode = function (s) {
   var c = String(s).replace(/[^0-9]/g, '');
-  if (!c) return '';
+  if (!c) throw new Error('Enter Morbit digits \u2014 decode reads 1-9');
   if (!/^[1-9]*$/.test(c)) throw new Error('Bad Morbit input \u2014 digits 1-9 only');
   var stream = '';
   for (var i = 0; i < c.length; i++) stream += T.morbitPairs[c.charAt(i) - 1];
@@ -11446,7 +11446,7 @@ T.csvToYAML = function (s, opts) { return T.jsonToYAML(T.csvToJSON(s, opts)); };
 /* XML to CSV: parse once with the shared XML parser, unwrap the first repeating group to rows (single records stay one row), emit with the canonical JSON-to-CSV core. */
 /* XML to Schema: parse once with the shared dependency-free XML parser, infer with the canonical JSON-to-Schema core (attributes as @-keys, repeats as arrays, leaf values stay strings since XML carries no scalar types). */
 T.xmlToSchema = function (s, opts) { return T.jsonToSchema(T.xmlToJsonDoc(s), opts); };
-T.xmlToCSV = function (s, opts) { var v = T.xmlToJsonValue(s); var ks = Object.keys(v); var root = v[ks[0]]; var rows; if (Array.isArray(root)) rows = root; else if (root !== null && typeof root === 'object') { var found = null; Object.keys(root).forEach(function (k) { if (!found && Array.isArray(root[k])) found = root[k]; }); rows = found || [root]; } else throw new Error('XML has no tabular rows \u2014 need repeating elements'); return T.jsonToCSV(JSON.stringify(rows), opts); };
+T.xmlToCSV = function (s, opts) { var v = T.xmlToJsonValue(s); var ks = Object.keys(v); var root = v[ks[0]]; var rows; if (Array.isArray(root)) rows = root; else if (root !== null && typeof root === 'object') { var found = null; Object.keys(root).forEach(function (k) { if (!found && Array.isArray(root[k])) found = root[k]; }); rows = found || [root]; if (!found) { var u = root; while (u !== null && typeof u === "object" && !Array.isArray(u)) { var uk = Object.keys(u); if (uk.length !== 1 || u[uk[0]] === null || typeof u[uk[0]] !== "object" || Array.isArray(u[uk[0]])) break; u = u[uk[0]]; } rows = [u]; } } else throw new Error('XML has no tabular rows \u2014 need repeating elements'); return T.jsonToCSV(JSON.stringify(rows), opts); };
 /* INI to XML: parse once with the INI core (sections as objects, line-numbered errors), emit with the canonical JSON-to-XML emitter. */
 T.iniToXML = function (s) { return T.jsonToXML(T.iniToJSON(s)); };
 /* ENV to XML: parse once with the dotenv core (export prefixes, line-numbered key errors), emit with the canonical JSON-to-XML emitter. */
@@ -11474,7 +11474,7 @@ T.markdownToYAML = function (s, opts) { return T.jsonToYAML(T.csvToJSON(T.markdo
 /* XML to Markdown: parse once with the shared XML parser, unwrap the first repeating group to rows (single records stay one row), emit pipe tables with the canonical JSONL-to-Markdown core. */
 /* XML to JSONL: unwrap repeats to CSV rows with the shared XML core, emit one compact object per line with the CSV-to-JSONL core (delimiter shared, single records stay one line). */
 T.xmlToJSONL = function (s, opts) { return T.csvToJSONL(T.xmlToCSV(s, opts), opts); };
-T.xmlToMarkdown = function (s, opts) { var v = T.xmlToJsonValue(s); var ks = Object.keys(v); var root = v[ks[0]]; var rows; if (Array.isArray(root)) rows = root; else if (root !== null && typeof root === 'object') { var found = null; Object.keys(root).forEach(function (k) { if (!found && Array.isArray(root[k])) found = root[k]; }); rows = found || [root]; } else throw new Error('XML has no tabular rows \u2014 need repeating elements'); return T.jsonlToMarkdown(rows.map(function (r) { return JSON.stringify(r); }).join('\n'), opts); };
+T.xmlToMarkdown = function (s, opts) { var v = T.xmlToJsonValue(s); var ks = Object.keys(v); var root = v[ks[0]]; var rows; if (Array.isArray(root)) rows = root; else if (root !== null && typeof root === 'object') { var found = null; Object.keys(root).forEach(function (k) { if (!found && Array.isArray(root[k])) found = root[k]; }); rows = found || [root]; if (!found) { var u = root; while (u !== null && typeof u === "object" && !Array.isArray(u)) { var uk = Object.keys(u); if (uk.length !== 1 || u[uk[0]] === null || typeof u[uk[0]] !== "object" || Array.isArray(u[uk[0]])) break; u = u[uk[0]]; } rows = [u]; } } else throw new Error('XML has no tabular rows \u2014 need repeating elements'); return T.jsonlToMarkdown(rows.map(function (r) { return JSON.stringify(r); }).join('\n'), opts); };
 
 /* INI to Markdown: parse sections to a single object, bridge through one compact JSON line, emit pipe tables with the canonical JSONL-to-Markdown core (nested sections flatten to dotted columns). */
 /* INI to JSONL: sections to CSV rows with the shared INI core, one compact object per line with the CSV-to-JSONL core (line-numbered errors, delimiter shared). */

@@ -7,7 +7,7 @@
 
 var App = {
   icons: {},
-  TOOL_VERSION: '58',
+  TOOL_VERSION: '59',
 
   /* ── DOM helpers ── */
   SVG_TAGS: ['svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'text', 'g', 'defs', 'marker', 'pattern', 'use', 'ellipse', 'tspan'],
@@ -107,6 +107,13 @@ var App = {
     var bestSwap = -1;
     for (var si = 0; si + 1 < q.length; si++) {
       var alt = q.slice(0, si) + q.charAt(si + 1) + q.charAt(si) + q.slice(si + 2);
+      var at = t.indexOf(alt);
+      if (at >= 0) {
+        var atB = at === 0 || /[\s\-_.//]/.test(t.charAt(at - 1));
+        var asScore = 1000 - at * 2 - (atB ? 0 : 10) - Math.floor(t.length / 16) - 25;
+        if (asScore > bestSwap) bestSwap = asScore;
+        continue;
+      }
       var r = sub(alt);
       if (r > bestSwap) bestSwap = r;
     }

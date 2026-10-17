@@ -96,7 +96,8 @@ window.TOOLMANIFEST = [
     params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'full', options: [{ value: 'full', label: 'Full text' }, { value: 'lines', label: 'Each line' }] }] },
   { slug: 'text-deduplicator', name: 'Line Deduplicator', desc: 'Remove duplicate lines from text', category: 'text', tags: ['deduplicate', 'clean'], icon: 'combine', template: 'transform',
     handler: function (s) { return Transforms.deduplicate(s); } },
-  
+  { slug: 'palindrome-checker', name: 'Palindrome Checker', desc: 'Check if text reads the same forwards and backwards', category: 'text', tags: ['palindrome', 'check'], icon: 'casesensitive', template: 'transform',
+    handler: function (s) { return Transforms.palindromeReport(s); } },
   { slug: 'line-tools', name: 'Line Tools', desc: 'Number, trim or clean lines — prefix/suffix every line, drop empties', category: 'text', tags: ['lines', 'number', 'trim', 'prefix', 'clean'], icon: 'textsearch', template: 'transform',
     handler: function (s, opts) { return Transforms.lineTools(s, opts); },
     params: [
@@ -118,7 +119,9 @@ window.TOOLMANIFEST = [
         { value: 'numeric', label: 'Digits only' }, { value: 'hex', label: 'Hexadecimal' }, { value: 'all', label: 'All characters' }
       ] }
     ] },
-  
+  { slug: 'dice-roller', name: 'Dice Roller', desc: 'Roll NdS+M dice notation \u2014 rejection-sampled, zero modulo bias, per-die detail', category: 'generators', tags: ['dice', 'random', 'd20', 'rpg'], icon: 'shuffle', template: 'generator',
+    genHandler: function (opts) { return Transforms.rollDiceOpts(opts); },
+    params: [{ key: 'notation', label: 'Notation', type: 'text', default: '2d6' }, { key: 'detail', label: 'Show dice', type: 'boolean', default: 'true' }] },
   { slug: 'uuid-generator', name: 'UUID v4 Generator', desc: 'RFC 4122 UUID v4 from the Web Crypto CSPRNG — 122 secure random bits, bulk mode available', category: 'generators', tags: ['uuid', 'identifier'], icon: 'key', template: 'generator',
     genHandler: function (opts) { return Transforms.uuidV4BatchOpts(opts); },
     params: [{ key: 'count', label: 'Count', type: 'number', default: '1', min: 1, max: 1000 }] },
@@ -164,52 +167,178 @@ window.TOOLMANIFEST = [
     handler: function (s) { return Transforms.base32Encode(s); } },
   { slug: 'base32-decode', name: 'Base32 Decode', desc: 'Decode Base32 back to text', category: 'encoding', tags: ['base32', 'decode'], icon: 'binary', template: 'transform',
     handler: function (s) { return Transforms.base32Decode(s); } },
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  { slug: 'rot13', name: 'ROT13', desc: 'Rotate letters by 13 positions (Caesar cipher)', category: 'encoding', tags: ['rot13', 'cipher'], icon: 'shuffle', template: 'transform',
+    handler: function (s) { return Transforms.rot13(s); } },
+  { slug: 'rot47', name: 'ROT47', desc: 'Rotate all printable ASCII by 47 positions', category: 'encoding', tags: ['rot47', 'cipher'], icon: 'shuffle', template: 'transform',
+    handler: function (s) { return Transforms.rot47(s); } },
+  { slug: 'caesar-cipher', name: 'Caesar Cipher', desc: 'Shift letters by any amount \u2014 encode or decode, case preserved, non-letters pass through', category: 'encoding', tags: ['caesar', 'cipher', 'rot', 'shift'], icon: 'shuffle', template: 'transform',
+    handler: function (s, opts) { return Transforms.caesarCipher(s, opts); },
+    params: [{ key: 'shift', label: 'Shift', type: 'number', default: '3', min: 1, max: 25 }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'vigenere-cipher', name: 'Vigen\u00e8re Cipher', desc: 'Polyalphabetic keyword cipher \u2014 repeating key, case preserved, non-letters pass through unshifted', category: 'encoding', tags: ['vigenere', 'cipher', 'keyword', 'polyalphabetic'], icon: 'shuffle', template: 'transform',
+    handler: function (s, opts) { return Transforms.vigenereCipher(s, opts); },
+    params: [{ key: 'key', label: 'Key', type: 'text', default: 'LEMON' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'atbash-cipher', name: 'Atbash Cipher', desc: 'Mirror the alphabet A-Z and back \u2014 self-inverse like ROT13, case preserved, non-letters pass through', category: 'encoding', tags: ['atbash', 'cipher', 'mirror'], icon: 'shuffle', template: 'transform',
+    handler: function (s) { return Transforms.atbashCipher(s); } },
+  { slug: 'bacon-cipher', name: 'Bacon Cipher', desc: 'Biliteral A/B groups for each letter \u2014 26-code variant, words split on /, other text passes through', category: 'encoding', tags: ['bacon', 'cipher', 'biliteral'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.baconCipher(s, opts); },
+    params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'rail-fence-cipher', name: 'Rail Fence Cipher', desc: 'Zigzag transposition across rails \u2014 encode reads rows, decode restores order', category: 'encoding', tags: ['rail', 'fence', 'cipher', 'transposition'], icon: 'shuffle', template: 'transform',
+    placeholder: 'WEAREDISCOVEREDFLEEATONCE',
+    handler: function (s, opts) { return Transforms.railFenceCipher(s, opts); },
+    params: [{ key: 'rails', label: 'Rails', type: 'number', default: '3', min: 2, max: 20 }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'playfair-cipher', name: 'Playfair Cipher', desc: 'Digraph substitution in a 5x5 square \u2014 I/J merged, filler X breaks doubles, non-letters stripped', category: 'encoding', tags: ['playfair', 'cipher', 'digraph', 'square'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HIDETHEGOLDINTHETREESTUMP',
+    handler: function (s, opts) { return Transforms.playfairCipher(s, opts); },
+    params: [{ key: 'key', label: 'Key', type: 'text', default: 'PLAYFAIR EXAMPLE' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'columnar-transposition', name: 'Columnar Transposition Cipher', desc: 'Keyword-ordered columns read top to bottom \u2014 no padding, uneven columns handled, all characters kept', category: 'encoding', tags: ['columnar', 'transposition', 'cipher', 'columns'], icon: 'shuffle', template: 'transform',
+    placeholder: 'ABCDEF',
+    handler: function (s, opts) { return Transforms.columnarCipher(s, opts); },
+    params: [{ key: 'key', label: 'Key', type: 'text', default: 'ZEBRAS' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'four-square-cipher', name: 'Four-Square Cipher', desc: 'Digraph cipher with two keyed squares \u2014 I/J merged, doubles allowed, odd tails padded, non-letters stripped', category: 'encoding', tags: ['four-square', 'cipher', 'digraph', 'square'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLOWORLD',
+    handler: function (s, opts) { return Transforms.fourSquareCipher(s, opts); },
+    params: [{ key: 'key1', label: 'Key 1', type: 'text', default: 'EXAMPLE' }, { key: 'key2', label: 'Key 2', type: 'text', default: 'KEYWORD' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'adfgx-cipher', name: 'ADFGX Cipher', desc: 'Polybius fractionation to A/D/F/G/X plus columnar transposition \u2014 I/J merged, non-letters stripped', category: 'encoding', tags: ['adfgx', 'cipher', 'polybius', 'fractionation'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLOWORLD',
+    handler: function (s, opts) { return Transforms.adfgxCipher(s, opts); },
+    params: [{ key: 'square', label: 'Square key', type: 'text', default: 'KEYWORD' }, { key: 'trans', label: 'Column key', type: 'text', default: 'ZEBRAS' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'adfgvx-cipher', name: 'ADFGVX Cipher', desc: 'Fractionation in a 6x6 square plus columnar transposition \u2014 A-Z0-9 supported, output is A/D/F/G/V/X', category: 'encoding', tags: ['adfgvx', 'cipher', 'polybius', 'fractionation'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO123',
+    handler: function (s, opts) { return Transforms.adfgvxCipher(s, opts); },
+    params: [{ key: 'square', label: 'Square key', type: 'text', default: 'KEYWORD' }, { key: 'trans', label: 'Column key', type: 'text', default: 'ZEBRAS' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'two-square-cipher', name: 'Two-Square Cipher', desc: 'Horizontal digraph across two keyed squares \u2014 I/J merged, doubles allowed, odd tails padded, non-letters stripped', category: 'encoding', tags: ['two-square', 'cipher', 'digraph', 'square'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLOWORLD',
+    handler: function (s, opts) { return Transforms.twoSquareCipher(s, opts); },
+    params: [{ key: 'key1', label: 'Key 1', type: 'text', default: 'EXAMPLE' }, { key: 'key2', label: 'Key 2', type: 'text', default: 'KEYWORD' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'hill-cipher', name: 'Hill Cipher', desc: '2x2 matrix multiply mod 26 \u2014 key must be invertible, full A-Z kept, odd tails padded', category: 'encoding', tags: ['hill', 'cipher', 'matrix', 'linear'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELP',
+    handler: function (s, opts) { return Transforms.hillCipher(s, opts); },
+    params: [{ key: 'ka', label: 'A', type: 'number', default: '3', min: 0, max: 25 }, { key: 'kb', label: 'B', type: 'number', default: '3', min: 0, max: 25 }, { key: 'kc', label: 'C', type: 'number', default: '2', min: 0, max: 25 }, { key: 'kd', label: 'D', type: 'number', default: '5', min: 0, max: 25 }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'straddling-checkerboard', name: 'Straddling Checkerboard', desc: 'Variable-length 1-2 digit codes \u2014 frequent letters take one digit, the rest take row plus column', category: 'encoding', tags: ['checkerboard', 'cipher', 'polybius', 'digits'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLOWORLD',
+    handler: function (s, opts) { return Transforms.straddleCipher(s, opts); },
+    params: [{ key: 'key', label: 'Key', type: 'text', default: 'KEYWORD' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'porta-cipher', name: 'Porta Cipher', desc: 'Reciprocal polyalphabetic with 13 alphabets \u2014 key A alone is ROT13, case preserved, encode and decode match', category: 'encoding', tags: ['porta', 'cipher', 'reciprocal', 'polyalphabetic'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.portaCipher(s, opts); },
+    params: [{ key: 'key', label: 'Key', type: 'text', default: 'LEMON' }] },
+  { slug: 'bifid-cipher', name: 'Bifid Cipher', desc: 'Fractionated coordinates diffused in blocks \u2014 period controls diffusion, length preserved, doubles allowed', category: 'encoding', tags: ['bifid', 'cipher', 'fractionation', 'polybius'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLOWORLD',
+    handler: function (s, opts) { return Transforms.bifidCipher(s, opts); },
+    params: [{ key: 'square', label: 'Square key', type: 'text', default: 'KEYWORD' }, { key: 'period', label: 'Period', type: 'number', default: '5', min: 2, max: 20 }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'autokey-cipher', name: 'Autokey Cipher', desc: 'Vigenere keystream extended with the text itself \u2014 plain or cipher feedback, case preserved', category: 'encoding', tags: ['autokey', 'cipher', 'polyalphabetic', 'keystream'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.autokeyCipher(s, opts); },
+    params: [{ key: 'key', label: 'Key', type: 'text', default: 'LEMON' }, { key: 'variant', label: 'Keystream', type: 'select', default: 'plain', options: [{ value: 'plain', label: 'Plaintext feedback' }, { value: 'cipher', label: 'Ciphertext feedback' }] }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'trifid-cipher', name: 'Trifid Cipher', desc: '3D fractionation in a 3x3x3 cube \u2014 A-Z plus dot, period controls diffusion, length preserved', category: 'encoding', tags: ['trifid', 'cipher', 'fractionation', 'cube'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO WORLD.',
+    handler: function (s, opts) { return Transforms.trifidCipher(s, opts); },
+    params: [{ key: 'square', label: 'Square key', type: 'text', default: 'KEYWORD' }, { key: 'period', label: 'Period', type: 'number', default: '5', min: 2, max: 20 }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'beaufort-cipher', name: 'Beaufort Cipher', desc: 'Reciprocal Vigenere variant with key minus plaintext \u2014 A maps B to Z, case preserved, encode and decode match', category: 'encoding', tags: ['beaufort', 'cipher', 'reciprocal', 'vigenere'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.beaufortCipher(s, opts); },
+    params: [{ key: 'key', label: 'Key', type: 'text', default: 'LEMON' }] },
+  { slug: 'running-key-cipher', name: 'Running Key Cipher', desc: 'Book keystream never repeated \u2014 key must cover every letter, case preserved, repeats rejected', category: 'encoding', tags: ['running-key', 'cipher', 'book', 'keystream'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.runningKeyCipher(s, opts); },
+    params: [{ key: 'key', label: 'Book key', type: 'text', default: 'THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'gronsfeld-cipher', name: 'Gronsfeld Cipher', desc: 'Numeric-key Vigenere with digits 0-9 \u2014 key repeats, case preserved, letters in key ignored', category: 'encoding', tags: ['gronsfeld', 'cipher', 'numeric', 'vigenere'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.gronsfeldCipher(s, opts); },
+    params: [{ key: 'key', label: 'Digit key', type: 'text', default: '31415' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'chaocipher', name: 'Chaocipher', desc: 'Dynamic substitution through two evolving alphabets \u2014 wheels permute after every letter, A-Z only', category: 'encoding', tags: ['chaocipher', 'cipher', 'dynamic', 'wheels'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLOWORLD',
+    handler: function (s, opts) { return Transforms.chaoCipher(s, opts); },
+    params: [{ key: 'key1', label: 'Left wheel', type: 'text', default: 'CHAOCIPHER' }, { key: 'key2', label: 'Right wheel', type: 'text', default: 'CIPHERTEXT' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'morbit-cipher', name: 'Morbit Cipher', desc: 'Morse symbols grouped in pairs become digits 1-9 \u2014 A-Z0-9 only, groups and spaces ignored on decode', category: 'encoding', tags: ['morbit', 'cipher', 'morse', 'fractionation'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.morbitCipher(s, opts); },
+    params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'pollux-cipher', name: 'Pollux Cipher', desc: 'Morse symbols grouped in triplets become letters A-Z plus dot \u2014 A-Z0-9 only, spaces ignored on decode', category: 'encoding', tags: ['pollux', 'cipher', 'morse', 'fractionation'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.polluxCipher(s, opts); },
+    params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'nihilist-cipher', name: 'Nihilist Cipher', desc: 'Polybius numbers added to a repeating key \u2014 J folds to I, cipher is space-separated sums', category: 'encoding', tags: ['nihilist', 'cipher', 'polybius', 'keyed'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.nihilistCipher(s, opts); },
+    params: [{ key: 'square', label: 'Square key', type: 'text', default: 'KEYWORD' }, { key: 'key', label: 'Key', type: 'text', default: 'LEMON' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'polybius-cipher', name: 'Polybius Square', desc: 'Keyed 5x5 square read as row/col digit pairs \u2014 J folds to I, digits 1-5 only on decode', category: 'encoding', tags: ['polybius', 'cipher', 'square', 'keyed'], icon: 'grid', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.polybiusCipher(s, opts); },
+    params: [{ key: 'square', label: 'Square key', type: 'text', default: 'KEYWORD' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'cadenus-cipher', name: 'Cadenus Cipher', desc: 'Columnar transposition with a per-column Caesar shift from the key letter \u2014 A-Z only, non-letters stripped', category: 'encoding', tags: ['cadenus', 'cipher', 'columnar', 'caesar'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.cadenusCipher(s, opts); },
+    params: [{ key: 'key', label: 'Key', type: 'text', default: 'ZEBRAS' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'redefence-cipher', name: 'Redefence Cipher', desc: 'Rail-fence zigzag with rails read in key order \u2014 all characters kept, short keys pass through', category: 'encoding', tags: ['redefence', 'cipher', 'rail', 'transposition'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLOWORLD',
+    handler: function (s, opts) { return Transforms.redefenceCipher(s, opts); },
+    params: [{ key: 'key', label: 'Key', type: 'text', default: 'ZEBRAS' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'tap-code', name: 'Tap Code', desc: 'Knock-code dot groups from a keyed 5x5 square \u2014 J folds to I, words split on /', category: 'encoding', tags: ['tap', 'knock', 'cipher', 'polybius'], icon: 'grid', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.tapCipher(s, opts); },
+    params: [{ key: 'square', label: 'Square key', type: 'text', default: 'KEYWORD' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'route-cipher', name: 'Route Cipher', desc: 'Grid written row-wise, read by spiral, snake or column-coil routes \u2014 all characters kept', category: 'encoding', tags: ['route', 'cipher', 'transposition', 'grid'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLOWORLD',
+    handler: function (s, opts) { return Transforms.routeCipher(s, opts); },
+    params: [{ key: 'cols', label: 'Columns', type: 'text', default: '5' }, { key: 'route', label: 'Route', type: 'select', default: 'spiral', options: [{ value: 'spiral', label: 'Spiral' }, { value: 'snake', label: 'Snake' }, { value: 'coil', label: 'Coil' }] }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'affine-cipher', name: 'Affine Cipher', desc: 'Multiply-add over the alphabet, multiplier needs a reciprocal mod 26 \u2014 case kept, non-letters pass through', category: 'encoding', tags: ['affine', 'cipher', 'substitution', 'caesar'], icon: 'shuffle', template: 'transform',
+    placeholder: 'AFFINE',
+    handler: function (s, opts) { return Transforms.affineCipher(s, opts); },
+    params: [{ key: 'a', label: 'Multiplier', type: 'text', default: '5' }, { key: 'b', label: 'Shift', type: 'text', default: '8' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'one-time-pad', name: 'One-Time Pad', desc: 'Unbreakable letter stream added once and never repeated \u2014 key must cover every letter', category: 'encoding', tags: ['otp', 'one-time', 'cipher', 'stream'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.otpCipher(s, opts); },
+    params: [{ key: 'key', label: 'Key', type: 'text', default: 'LEMON' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'jefferson-disk', name: 'Jefferson Disk', desc: 'Stacked alphabet rings read off a shifted row \u2014 each ring 26 unique letters, text cycles the stack', category: 'encoding', tags: ['jefferson', 'disk', 'cipher', 'rings'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.jeffersonCipher(s, opts); },
+    params: [{ key: 'disks', label: 'Disks', type: 'text', default: 'JGRKQUZBAOXNMDTFLVIYEHWSPC,CYGPAQOMRLXWEZDIVKBFJTNSHU,BLQMAVUKGOTSXPZNRWICFEYHJD,URSATLGIKFZHDBVPMQCNOWEYXJ,ZVAFPSDJUNCQLOBWXYRKEGHIMT,GTLKZPNMYAFROIDWSQUCEHBXJV' }, { key: 'offset', label: 'Offset', type: 'text', default: '1' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'solitaire-cipher', name: 'Solitaire Cipher', desc: 'Schneier\u2019s 54-card keystream added to the text \u2014 A-Z only, output grouped in fives', category: 'encoding', tags: ['solitaire', 'pontifex', 'cipher', 'cards'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.solitaireCipher(s, opts); },
+    params: [{ key: 'key', label: 'Key', type: 'text', default: 'SOLITAIRE' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'keyword-cipher', name: 'Keyword Cipher', desc: 'Mixed alphabet headed by a key word \u2014 case kept, non-letters pass through', category: 'encoding', tags: ['keyword', 'cipher', 'substitution', 'alphabet'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.keywordCipher(s, opts); },
+    params: [{ key: 'key', label: 'Key', type: 'text', default: 'KEYWORD' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'book-cipher', name: 'Book Cipher', desc: 'Ottendorf word.char pointers into shared text \u2014 decode yields uppercase, missing letters throw', category: 'encoding', tags: ['book', 'ottendorf', 'cipher'], icon: 'shuffle', template: 'transform',
+    placeholder: 'HELLO',
+    handler: function (s, opts) { return Transforms.bookCipher(s, opts); },
+    params: [{ key: 'book', label: 'Book text', type: 'text', default: 'The quick brown fox jumps over the lazy dog while five dozen jackdaws gaze at the calm river bank' }, { key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'dna-toolkit', name: 'DNA Toolkit', desc: 'Complement, reverse-complement, transcription and GC content \u2014 strict ACGT/ACGU bases, letters only', category: 'text', tags: ['dna', 'rna', 'genetics', 'complement'], icon: 'sigma', template: 'transform',
+    placeholder: 'ATGC',
+    handler: function (s, opts) { return Transforms.dnaToolkit(s, opts); },
+    params: [{ key: 'job', label: 'Job', type: 'select', default: 'complement', options: [{ value: 'complement', label: 'Complement' }, { value: 'reverse-complement', label: 'Reverse complement' }, { value: 'transcribe', label: 'Transcribe DNA to RNA' }, { value: 'untranscribe', label: 'Reverse-transcribe RNA to DNA' }, { value: 'gc-content', label: 'GC content' }] }] },
+  { slug: 'brainfuck', name: 'Brainfuck Runner', desc: 'Unbounded tape, 8-bit cells, EOF reads zero \u2014 one million steps max, brackets must balance', category: 'code', tags: ['brainfuck', 'esolang', 'interpreter'], icon: 'terminal', template: 'transform',
+    placeholder: ',[.,]',
+    handler: function (s, opts) { return Transforms.brainfuck(s, opts && opts.stdin); },
+    params: [{ key: 'stdin', label: 'Input', type: 'text', default: 'Hi' }] },
+  { slug: 'whitespace', name: 'Whitespace Runner', desc: 'Only spaces, tabs and newlines run, everything else is a comment \u2014 stack, heap, labels and stdin, one million steps max', category: 'code', tags: ['whitespace', 'esolang', 'interpreter'], icon: 'binary', template: 'transform', allowBlank: true,
+    placeholder: 'Spaces, tabs and newlines only - other characters are comments',
+    handler: function (s, opts) { return Transforms.whitespace(s, opts && opts.stdin); },
+    params: [{ key: 'stdin', label: 'Input', type: 'text', default: 'Hi' }] },
+  { slug: 'befunge', name: 'Befunge Runner', desc: '2D toroidal playfield with stack, string mode and self-modifying put and get \u2014 stdin for input ops, one million steps max', category: 'code', tags: ['befunge', 'esolang', 'interpreter'], icon: 'grid', template: 'transform',
+    placeholder: '"A",@',
+    handler: function (s, opts) { return Transforms.befunge(s, opts && opts.stdin); },
+    params: [{ key: 'stdin', label: 'Input', type: 'text', default: 'Hi' }] },
+  { slug: 'braille', name: 'Braille Translator', desc: 'Grade-1 uncontracted Braille with capital and number signs \u2014 unknown characters throw, lone surrogates pass through', category: 'encoding', tags: ['braille', 'accessibility', 'dots'], icon: 'eye', template: 'transform',
+    placeholder: 'Hello, World 123',
+    handler: function (s, opts) { return Transforms.brailleCipher(s, opts); },
+    params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'nato-phonetic', name: 'NATO Phonetic Alphabet', desc: 'Spell callsigns with Alfa-to-Zulu words and ITU digits \u2014 decode forgives alpha, tree, oh and xray aliases', category: 'encoding', tags: ['nato', 'phonetic', 'alphabet', 'radio'], icon: 'mic', template: 'transform',
+    placeholder: 'Hello World 123',
+    handler: function (s, opts) { return Transforms.natoPhonetic(s, opts); },
+    params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'pigpen-cipher', name: 'Pigpen Cipher', desc: 'Freemason grid cipher as Unicode line fragments \u2014 dotted grids, X wedges, slash word gaps', category: 'encoding', tags: ['pigpen', 'freemason', 'cipher', 'grid'], icon: 'key', template: 'transform',
+    placeholder: 'Hello World',
+    handler: function (s, opts) { return Transforms.pigpenCipher(s, opts); },
+    params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
+  { slug: 'morse-encode', name: 'Morse Code Encoder', desc: 'Encode text to Morse code', category: 'encoding', tags: ['morse', 'encode'], icon: 'code2', template: 'transform',
+    handler: function (s) { return Transforms.morseEncode(s); } },
+  { slug: 'morse-decode', name: 'Morse Code Decoder', desc: 'Decode Morse code back to text', category: 'encoding', tags: ['morse', 'decode'], icon: 'code2', template: 'transform',
+    handler: function (s) { return Transforms.morseDecode(s); } },
 
   // ── Crypto / Hash (WASM-backed) ─────────────────────────
   { slug: 'md5-hash', name: 'MD5 Hash', desc: 'Generate MD5 hash of input text — WebAssembly core', category: 'crypto', tags: ['md5', 'hash'], icon: 'hash', template: 'transform', wasm: true,
@@ -390,7 +519,9 @@ window.TOOLMANIFEST = [
     handler: function (s, opts) { return Transforms.xmlToMarkdown(s, opts); },
     params: [{ key: 'align', label: 'Align', type: 'select', default: 'left', options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }] }, { key: 'nested', label: 'Nested objects', type: 'select', default: 'flatten', options: [{ value: 'flatten', label: 'Flatten (a.b)' }, { value: 'stringify', label: 'Stringify JSON' }] }] },
 
-  
+  { slug: 'fen-viewer', name: 'FEN Chessboard Viewer', desc: 'Render a Forsyth-Edwards position \u2014 Unicode board, side, castling, en-passant and clocks', category: 'converters', tags: ['fen', 'chess', 'board', 'position'], icon: 'table-2', template: 'transform',
+    placeholder: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    handler: function (s) { return Transforms.fenView(s); } },
   { slug: 'luhn-validator', name: 'Luhn Validator', desc: 'Validate card and IMEI numbers or compute the missing check digit \u2014 spaces and dashes ignored', category: 'converters', tags: ['luhn', 'checksum', 'card', 'imei', 'check-digit'], icon: 'shield-check', template: 'transform',
     placeholder: '79927398713',
     handler: function (s, opts) { return Transforms.luhnCheck(s, opts); },
@@ -418,9 +549,18 @@ window.TOOLMANIFEST = [
     placeholder: 'hello',
     handler: function (s, opts) { return Transforms.xorCipher(s, opts); },
     params: [{ key: 'key', label: 'Key', type: 'text', default: 'key' }, { key: 'input', label: 'Input format', type: 'select', default: 'text', options: [{ value: 'text', label: 'Text' }, { value: 'hex', label: 'Hex' }, { value: 'base64', label: 'Base64' }] }, { key: 'output', label: 'Output format', type: 'select', default: 'hex', options: [{ value: 'hex', label: 'Hex' }, { value: 'base64', label: 'Base64' }, { value: 'text', label: 'Text' }] }] },
-  
-  
-  
+  { slug: 'pig-latin', name: 'Pig Latin Translator', desc: 'English to Pig Latin \u2014 consonant clusters, glued qu, y-as-vowel, case kept', category: 'text', tags: ['pig-latin', 'piglatin', 'fun', 'translator'], icon: 'lightbulb', template: 'transform',
+    placeholder: 'Hello world',
+    handler: function (s, opts) { return Transforms.pigLatin(s, opts); },
+    params: [{ key: 'suffix', label: 'Vowel suffix', type: 'select', default: 'way', options: [{ value: 'way', label: '-way' }, { value: 'yay', label: '-yay' }, { value: 'ay', label: '-ay' }] }] },
+  { slug: 'leet-speak', name: 'Leet Speak', desc: 'English to 1337 hacker glyphs \u2014 basic six or the full eleven, the rest rides through', category: 'text', tags: ['leet', '1337', 'hacker', 'fun'], icon: 'terminal', template: 'transform',
+    placeholder: 'leet speak',
+    handler: function (s, opts) { return Transforms.leetSpeak(s, opts); },
+    params: [{ key: 'level', label: 'Level', type: 'select', default: 'basic', options: [{ value: 'basic', label: 'Basic' }, { value: 'full', label: 'Full' }] }] },
+  { slug: 'dancing-men', name: 'Dancing Men Cipher', desc: 'Sherlock-style stick poses as limb codes \u2014 A to M plain, N to Z flagged, slash gaps', category: 'encoding', tags: ['dancing-men', 'sherlock', 'cipher', 'poses'], icon: 'key', template: 'transform',
+    placeholder: 'HELLO WORLD',
+    handler: function (s, opts) { return Transforms.dancingMen(s, opts); },
+    params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'encode', options: [{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }] }] },
   { slug: 'isin-validator', name: 'ISIN Validator', desc: 'Validate ISIN securities identifiers or compute the missing check digit \u2014 letters to digits plus Luhn, spaces ignored', category: 'converters', tags: ['isin', 'securities', 'checksum', 'check-digit'], icon: 'briefcase', template: 'transform',
     placeholder: 'US0378331005',
     handler: function (s, opts) { return Transforms.isinCheck(s, opts); },
@@ -481,14 +621,18 @@ window.TOOLMANIFEST = [
     placeholder: '2026-10-13',
     handler: function (s, opts) { return Transforms.bizDays(s, opts); },
     params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'add', options: [{ value: 'add', label: 'Add days' }, { value: 'subtract', label: 'Subtract days' }, { value: 'diff', label: 'Diff two dates' }] }, { key: 'days', label: 'Days', type: 'number', default: '5', min: 0, max: 36500 }, { key: 'weekend', label: 'Weekend', type: 'select', default: 'sat-sun', options: [{ value: 'sat-sun', label: 'Sat-Sun' }, { value: 'fri-sat', label: 'Fri-Sat' }, { value: 'sun', label: 'Sunday only' }] }, { key: 'holidays', label: 'Holidays', type: 'textarea', default: '' }] },
-  
+  { slug: 'sleep-cycles', name: 'Sleep Cycle Calculator', desc: 'Time bedtimes or wake-ups on 90-minute cycles \u2014 AM/PM input, fall-asleep buffer', category: 'formatters', tags: ['sleep', 'bedtime', 'alarm', 'time'], icon: 'clock', template: 'transform',
+    placeholder: '06:30',
+    handler: function (s, opts) { return Transforms.sleepCycles(s, opts); },
+    params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'bedtime', options: [{ value: 'bedtime', label: 'Bedtime for wake-up' }, { value: 'wake', label: 'Wake-up from bedtime' }] }, { key: 'buffer', label: 'Fall-asleep min', type: 'number', default: '15', min: 0, max: 120 }] },
     { slug: 'cron-explainer', name: 'Cron Expression Explainer', desc: 'Explain cron schedules in plain words — per-field breakdown, summary, next 5 runs', category: 'formatters', tags: ['cron', 'schedule', 'time', 'trigger'], icon: 'clock', template: 'transform',
     placeholder: '*/5 * * * *',
     handler: function (s) { return Transforms.cronExplain(s); } },
   { slug: 'timezone-converter', name: 'Timezone Converter', desc: 'Convert wall-clock time across IANA zones — exact UTC instant plus per-zone offsets, DST correct', category: 'formatters', tags: ['timezone', 'time', 'convert', 'dst', 'utc'], icon: 'clock', template: 'custom' },
-  
+  { slug: 'stopwatch', name: 'Stopwatch / Countdown', desc: 'Count-up stopwatch with lap splits plus a countdown with a synthesized finish beep — pause-safe, centisecond display', category: 'formatters', tags: ['stopwatch', 'timer', 'countdown', 'laps'], icon: 'clock', template: 'custom' },
   { slug: 'cron-builder', name: 'Cron Builder', desc: 'Plan cron schedules visually — presets plus per-field inputs, plain-words breakdown, next 5 runs, 7x24 fire grid', category: 'formatters', tags: ['cron', 'schedule', 'builder', 'time'], icon: 'clock', template: 'custom' },
-  
+  { slug: 'readability-analyzer', name: 'Readability Analyzer', desc: 'Flesch Reading Ease and grade level — sentence stats, hardest words flagged', category: 'text', tags: ['readability', 'flesch', 'text'], icon: 'textsearch', template: 'transform',
+    handler: function (s) { return Transforms.readability(s); } },
   { slug: 'unicode-inspector', name: 'Unicode Inspector', desc: 'Code points, UTF-8 bytes and lone-surrogate flags for any text', category: 'text', tags: ['unicode', 'utf8', 'codepoint'], icon: 'code2', template: 'transform',
     handler: function (s, opts) { return Transforms.unicodeInspector(s); } },
   { slug: 'json-path-extractor', name: 'JSONPath Extractor', desc: 'Query JSON with JSONPath — nested keys, indices, wildcards, root', category: 'json', tags: ['jsonpath', 'json', 'query'], icon: 'braces', template: 'transform',
@@ -654,7 +798,12 @@ window.TOOLMANIFEST = [
   { slug: 'semver-compare', name: 'SemVer Compare', desc: 'Compare semantic versions — ordering, bump kind, prerelease precedence', category: 'code', tags: ['semver', 'version', 'compare'], icon: 'code2', template: 'transform',
     handler: function (s, opts) { return Transforms.semverCompareOpts(s, opts); },
     params: [{ key: 'compareTo', label: 'Compare with', type: 'text', default: '' }] },
-  
+  { slug: 'tool-scaffold', name: 'Tool Scaffold', desc: 'Stamp out a new tool entry — transform, generator or custom stub wired to the shared UIs', category: 'code', tags: ['scaffold', 'generator', 'tool'], icon: 'terminal', template: 'generator',
+    genHandler: function (opts) { return Transforms.toolScaffold(opts); },
+    params: [
+      { key: 'slug', label: 'Slug', type: 'text', default: 'my-tool' },
+      { key: 'kind', label: 'Kind', type: 'select', default: 'transform', options: [{ value: 'transform', label: 'Transform' }, { value: 'generator', label: 'Generator' }, { value: 'custom', label: 'Custom' }] }
+    ] },
   { slug: 'chmod-converter', name: 'Chmod Converter', desc: 'Convert between octal (755) and symbolic (rwxr-xr-x) Unix permissions', category: 'code', tags: ['chmod', 'permissions', 'unix'], icon: 'terminal', template: 'transform',
     placeholder: '755',
     handler: function (s) { return Transforms.chmodConvert(s); } },
@@ -680,7 +829,7 @@ window.TOOLMANIFEST = [
     handler: function (s) { return Transforms.base58Encode(s); } },
   { slug: 'base58-decode', name: 'Base58 Decode', desc: 'Decode Base58 back to text', category: 'encoding', tags: ['base58', 'decode'], icon: 'binary', template: 'transform',
     handler: function (s) { return Transforms.base58Decode(s); } },
-  
+  { slug: 'morse-code-player', name: 'Morse Code Player', desc: 'Hear Morse code — WPM timing, dit/dah timeline, prosigns', category: 'encoding', tags: ['morse', 'audio', 'player'], icon: 'code2', template: 'custom' },
   { slug: 'jwt-generator', name: 'JWT Generator', desc: 'Sign HS256 JSON Web Tokens — payload object, masked secret, configurable expiry', category: 'crypto', tags: ['jwt', 'token', 'auth'], icon: 'key', template: 'transform', wasm: true,
     placeholder: '{"sub":"123","name":"Ada"}',
     handler: function (s, opts) { return Transforms.jwtSignOpts(s, opts); },
@@ -723,77 +872,180 @@ window.TOOLMANIFEST = [
       { key: 'fromBase', label: 'From Base', type: 'select', default: '10', options: [{ value: '2', label: 'Binary' }, { value: '8', label: 'Octal' }, { value: '10', label: 'Decimal' }, { value: '16', label: 'Hex' }] },
       { key: 'toBase', label: 'To Base', type: 'select', default: '16', options: [{ value: '2', label: 'Binary' }, { value: '8', label: 'Octal' }, { value: '10', label: 'Decimal' }, { value: '16', label: 'Hex' }] }
     ] },
-  
+  { slug: 'timeline-taker', name: 'Timeline Taker', desc: 'Incident logbook — date/time/summary entries, CSV import/export, keyboard shortcuts, auto-saved locally', category: 'formatters', tags: ['timeline', 'logbook', 'csv', 'incident'], icon: 'clock', template: 'custom' },
   { slug: 'color-converter', name: 'Color Converter', desc: 'Convert between HEX, RGB, HSL color formats', category: 'formatters', tags: ['color', 'hex', 'rgb', 'hsl'], icon: 'palette', template: 'custom' },
   { slug: 'byte-size-formatter', name: 'Byte Size Formatter', desc: 'Format raw byte counts as human sizes — binary IEC (KiB) or decimal SI (KB), exact count kept', category: 'formatters', tags: ['bytes', 'size', 'format', 'humanize'], icon: 'save', template: 'transform',
     handler: function (s, opts) { return Transforms.formatBytes(s, opts); },
     params: [{ key: 'mode', label: 'Units', type: 'select', default: 'binary', options: [{ value: 'binary', label: 'Binary (1024)' }, { value: 'decimal', label: 'Decimal (1000)' }] }] },
 
   // ── Math ────────────────────────────────────────────────
-  
-  
+  { slug: 'prime-checker', name: 'Prime Number Checker', desc: 'Primality via deterministic Miller–Rabin (exact for any input < 3.3 × 10²⁴) — hundreds of digits welcome, smallest factor reported for composites', category: 'math', tags: ['prime', 'math'], icon: 'calculator', template: 'transform',
+    handler: function (s) { return Transforms.primeCheck(s); } },
+  { slug: 'fibonacci-generator', name: 'Fibonacci Generator', desc: 'Generate Fibonacci sequence up to N terms — arbitrary-precision BigInt, exact past term 78 where floats silently corrupt', category: 'math', tags: ['fibonacci', 'sequence'], icon: 'sigma', template: 'generator',
+    genHandler: function (opts) { return Transforms.fibonacciOpts(opts); },
+    params: [{ key: 'terms', label: 'Terms', type: 'number', default: '10', min: 1, max: 100 }] },
   { slug: 'statistics-calculator', name: 'Statistics Calculator', desc: 'Mean, median, mode, range — Welford one-pass variance (numerically stable), population AND sample stddev', category: 'math', tags: ['stats', 'mean', 'median', 'stddev'], icon: 'sigma', template: 'transform',
     handler: function (s) { return Transforms.describeStats(s); } },
   { slug: 'unit-converter', name: 'Unit Converter', desc: 'Convert between common units — length, mass, temperature, data', category: 'math', tags: ['units', 'convert', 'length', 'mass', 'temperature'], icon: 'ruler', template: 'custom' },
-  
-  
-  
+  { slug: 'tip-calculator', name: 'Tip Calculator', desc: 'Split restaurant bills \u2014 pre-tax tip plus tax, integer-cents math, exact or round-up shares', category: 'math', tags: ['tip', 'bill', 'split', 'tax', 'restaurant'], icon: 'calculator', template: 'transform',
+    placeholder: '84.50',
+    handler: function (s, opts) { return Transforms.tipSplit(s, opts); },
+    params: [{ key: 'tip', label: 'Tip %', type: 'number', default: '18', min: 0, max: 100 }, { key: 'tax', label: 'Tax %', type: 'number', default: '0', min: 0, max: 100 }, { key: 'people', label: 'People', type: 'number', default: '1', min: 1, max: 1000 }, { key: 'round', label: 'Split', type: 'select', default: 'exact', options: [{ value: 'exact', label: 'Exact cents' }, { value: 'up', label: 'Round up' }] }] },
+  { slug: 'bmi-calculator', name: 'BMI Calculator', desc: 'Body mass index from weight plus height \u2014 metric/imperial units, WHO bands, healthy range', category: 'math', tags: ['bmi', 'weight', 'health', 'body-mass'], icon: 'calculator', template: 'transform',
+    placeholder: '70',
+    handler: function (s, opts) { return Transforms.bmiCalc(s, opts); },
+    params: [{ key: 'weightUnit', label: 'Weight unit', type: 'select', default: 'kg', options: [{ value: 'kg', label: 'kg' }, { value: 'lb', label: 'lb' }] }, { key: 'height', label: 'Height', type: 'number', default: '175', min: 0, max: 1000 }, { key: 'heightUnit', label: 'Height unit', type: 'select', default: 'cm', options: [{ value: 'cm', label: 'cm' }, { value: 'm', label: 'm' }, { value: 'in', label: 'in' }, { value: 'ft', label: 'ft' }] }] },
+  { slug: 'age-calculator', name: 'Age Calculator', desc: 'Exact age from any birthdate \u2014 calendar years/months/days, totals, weekday born plus next birthday', category: 'formatters', tags: ['age', 'birthday', 'date', 'years'], icon: 'clock', template: 'transform',
+    placeholder: '1990-06-15',
+    handler: function (s, opts) { return Transforms.ageCalc(s, opts); },
+    params: [{ key: 'asOf', label: 'As of', type: 'text', default: '' }] },
   { slug: 'percentage-calculator', name: 'Percentage Calculator', desc: 'P% of X, X is what % of Y, change A \u2014 float-dust trimmed, grouped digits', category: 'math', tags: ['percent', 'percentage', 'change', 'math'], icon: 'calculator', template: 'transform',
     placeholder: '150',
     handler: function (s, opts) { return Transforms.pctCalc(s, opts); },
     params: [{ key: 'mode', label: 'Mode', type: 'select', default: 'of', options: [{ value: 'of', label: 'P% of X' }, { value: 'is', label: 'X is what % of Y' }, { value: 'change', label: 'Change A to B' }] }, { key: 'percent', label: 'Percent (P)', type: 'number', default: '20', min: -1000000, max: 1000000 }, { key: 'of', label: 'Of (Y)', type: 'number', default: '150', min: -1000000, max: 1000000 }, { key: 'to', label: 'To (B)', type: 'number', default: '120', min: -1000000, max: 1000000 }] },
-  
-  
-  
-  
+  { slug: 'compound-interest', name: 'Compound Interest Calculator', desc: 'Growth with compounding plus deposits \u2014 integer-cent ledger, APY, yearly snapshots', category: 'math', tags: ['interest', 'compound', 'savings', 'apy', 'finance'], icon: 'calculator', template: 'transform',
+    placeholder: '10000',
+    handler: function (s, opts) { return Transforms.ciCalc(s, opts); },
+    params: [{ key: 'rate', label: 'Rate %', type: 'number', default: '5', min: 0, max: 100 }, { key: 'years', label: 'Years', type: 'number', default: '10', min: 1, max: 100 }, { key: 'freq', label: 'Compound', type: 'select', default: 'monthly', options: [{ value: 'annual', label: 'Annual' }, { value: 'semiannual', label: 'Semiannual' }, { value: 'quarterly', label: 'Quarterly' }, { value: 'monthly', label: 'Monthly' }, { value: 'daily', label: 'Daily' }] }, { key: 'contrib', label: 'Deposit / period', type: 'number', default: '0', min: 0, max: 1000000000 }] },
+  { slug: 'gcd-lcm-calculator', name: 'GCD & LCM Calculator', desc: 'Greatest common divisor plus least common multiple \u2014 Euclid on BigInts, exact past float range', category: 'math', tags: ['gcd', 'lcm', 'divisor', 'multiple', 'euclid'], icon: 'calculator', template: 'transform',
+    placeholder: '12 18',
+    handler: function (s) { return Transforms.gcdLcm(s); } },
+  { slug: 'fraction-simplifier', name: 'Fraction Simplifier', desc: 'Reduce fractions, mixed numbers and decimals \u2014 exact BigInt math, repeating-safe decimal view', category: 'math', tags: ['fraction', 'simplify', 'mixed', 'decimal', 'gcd'], icon: 'calculator', template: 'transform',
+    placeholder: '6/8',
+    handler: function (s) { return Transforms.fracSimp(s); } },
+  { slug: 'ratio-calculator', name: 'Ratio Simplifier & Proportion Solver', desc: 'Simplify a:b:c and solve a:b = c:x \u2014 exact BigInt math, decimal-safe, shares plus check', category: 'math', tags: ['ratio', 'proportion', 'simplify', 'scale'], icon: 'calculator', template: 'transform',
+    placeholder: '16:24',
+    handler: function (s) { return Transforms.ratioCalc(s); } },
   { slug: 'scientific-notation', name: 'Scientific Notation Converter', desc: 'Plain numbers to 1.23e45 and back \u2014 exact string math, engineering form, significant digits', category: 'math', tags: ['scientific', 'notation', 'exponent', 'engineering', 'sig-figs'], icon: 'calculator', template: 'transform',
     placeholder: '1.23e45',
     handler: function (s) { return Transforms.sciNota(s); } },
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  { slug: 'quadratic-solver', name: 'Quadratic Equation Solver', desc: 'Solve ax²+bx+c=0 or a b c — discriminant, real and complex roots, vertex', category: 'math', tags: ['quadratic', 'roots', 'discriminant', 'vertex', 'equation'], icon: 'calculator', template: 'transform',
+    placeholder: '1 -3 2',
+    handler: function (s) { return Transforms.quadSolve(s); } },
+  { slug: 'modulo-explorer', name: 'Modulo & Division Explorer', desc: 'Truncated vs floored vs Euclidean division — exact BigInt quotients plus remainders', category: 'math', tags: ['modulo', 'division', 'remainder', 'quotient', 'bigint'], icon: 'calculator', template: 'transform',
+    placeholder: '17 5',
+    handler: function (s) { return Transforms.modDiv(s); } },
+  { slug: 'triangle-solver', name: 'Triangle Solver', desc: 'Sides to area, angles, type, radii and altitudes — Heron plus law of cosines, inequality guards', category: 'math', tags: ['triangle', 'geometry', 'area', 'angles', 'heron'], icon: 'calculator', template: 'transform',
+    placeholder: '3 4 5',
+    handler: function (s) { return Transforms.triSolve(s); } },
+  { slug: 'circle-solver', name: 'Circle Solver', desc: 'Radius, diameter, circumference, area — solve from any one, optional angle adds segment lines', category: 'math', tags: ['circle', 'geometry', 'radius', 'area', 'circumference'], icon: 'calculator', template: 'transform',
+    placeholder: '5',
+    handler: function (s) { return Transforms.circleSolve(s); } },
+  { slug: 'pace-calculator', name: 'Running Pace Calculator', desc: 'Distance plus time to pace and speed — km, mi and m with MM:SS, per-km and per-mile splits', category: 'math', tags: ['pace', 'running', 'speed', 'marathon', 'split'], icon: 'calculator', template: 'transform',
+    placeholder: '5km 25:00',
+    handler: function (s) { return Transforms.paceCalc(s); } },
+  { slug: 'integer-sqrt', name: 'Integer Square Root', desc: 'Floor root plus perfect-square verdict — Newton iteration on BigInts, exact at any width', category: 'math', tags: ['sqrt', 'square', 'newton', 'bigint', 'root'], icon: 'calculator', template: 'transform',
+    placeholder: '15241578750190521',
+    handler: function (s) { return Transforms.isqrtCheck(s); } },
+  { slug: 'solid-solver', name: 'Sphere & Cylinder Solver', desc: 'Volume plus surface from radius or r/h — trimmed pi math, shape aliases', category: 'math', tags: ['sphere', 'cylinder', 'volume', 'surface', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'sphere 5',
+    handler: function (s) { return Transforms.solidSolve(s); } },
+  { slug: 'fuel-converter', name: 'Fuel Efficiency Converter', desc: 'L/100km, MPG and km/L each way — US plus UK gallons, exact constants', category: 'math', tags: ['fuel', 'mpg', 'consumption', 'efficiency', 'car'], icon: 'calculator', template: 'transform',
+    placeholder: '8 l/100km',
+    handler: function (s) { return Transforms.fuelConv(s); } },
+  { slug: 'prime-factorization', name: 'Prime Factorization', desc: 'Full factor tree as powers — cached prime table to 10^6, honest remainder past it', category: 'math', tags: ['prime', 'factor', 'factorization', 'divisors'], icon: 'calculator', template: 'transform',
+    placeholder: '360',
+    handler: function (s) { return Transforms.primeFactors(s); } },
+  { slug: 'box-solver', name: 'Box Solver', desc: 'Cuboid math from three edges \u2014 volume, surface, space diagonal plus cube verdict, face diagonals and edge sum', category: 'math', tags: ['box', 'cuboid', 'volume', 'surface', 'diagonal', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: '3 4 5',
+    handler: function (s) { return Transforms.boxSolve(s); } },
+  { slug: 'cone-pyramid-solver', name: 'Cone & Pyramid Solver', desc: 'Cones plus square pyramids from two measures \u2014 volume, surface, lateral and slant', category: 'math', tags: ['cone', 'pyramid', 'volume', 'surface', 'slant', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'cone 3 7',
+    handler: function (s) { return Transforms.conePyramid(s); } },
+  { slug: 'torus-solver', name: 'Torus Solver', desc: 'Donut math from major plus minor radii \u2014 volume, surface and ring verdict', category: 'math', tags: ['torus', 'donut', 'volume', 'surface', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'torus 7 3',
+    handler: function (s) { return Transforms.torusSolve(s); } },
+  { slug: 'ellipsoid-solver', name: 'Ellipsoid Solver', desc: 'Tri-axial ellipsoid from three semi-axes \u2014 volume, Knud-Thomsen surface plus shape verdict', category: 'math', tags: ['ellipsoid', 'spheroid', 'volume', 'surface', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'ellipsoid 3 4 5',
+    handler: function (s) { return Transforms.ellipsoidSolve(s); } },
+  { slug: 'capsule-frustum-solver', name: 'Capsule & Frustum Solver', desc: 'Capsules plus cone frustums from compact measures \u2014 volume, surface, lateral and slant', category: 'math', tags: ['capsule', 'frustum', 'cone', 'volume', 'surface', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'frustum 5 3 7',
+    handler: function (s) { return Transforms.capsuleFrustum(s); } },
+  { slug: 'polygon-solver', name: 'Regular Polygon Solver', desc: 'Any regular polygon by name or side count \u2014 perimeter, angles, area plus apothem', category: 'math', tags: ['polygon', 'hexagon', 'area', 'perimeter', 'apothem', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'hexagon 10',
+    handler: function (s) { return Transforms.polygonSolve(s); } },
+  { slug: 'circle-segment-solver', name: 'Circle Segment Solver', desc: 'Chord, arc, sector plus segment area from radius and angle or height', category: 'math', tags: ['segment', 'chord', 'arc', 'sector', 'circle', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'segment 5 90',
+    handler: function (s) { return Transforms.segmentSolve(s); } },
+  { slug: 'spherical-cap-solver', name: 'Spherical Cap Solver', desc: 'Cap volume plus curved surface from sphere radius and height \u2014 full sphere at h=2R', category: 'math', tags: ['cap', 'sphere', 'dome', 'volume', 'surface', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'cap 5 2',
+    handler: function (s) { return Transforms.capSolve(s); } },
+  { slug: 'annulus-solver', name: 'Annulus Solver', desc: 'Washer math from two radii \u2014 ring area, both circumferences, width plus fill', category: 'math', tags: ['annulus', 'washer', 'ring', 'circle', 'area', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'annulus 5 3',
+    handler: function (s) { return Transforms.annulusSolve(s); } },
+  { slug: 'ellipse-solver', name: 'Ellipse Solver', desc: 'Ellipse area, Ramanujan perimeter and eccentricity from semi-axes \u2014 circle at a=b', category: 'math', tags: ['ellipse', 'oval', 'area', 'perimeter', 'eccentricity', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'ellipse 5 3',
+    handler: function (s) { return Transforms.ellipseSolve(s); } },
+  { slug: 'star-polygon-solver', name: 'Star Polygon Solver', desc: 'Star polygons by Schlafli symbol \u2014 tip angle, circumradius, perimeter plus path count', category: 'math', tags: ['star', 'pentagram', 'polygon', 'schlafli', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'star 5 2 10',
+    handler: function (s) { return Transforms.starSolve(s); } },
+  { slug: 'conic-solver', name: 'Parabola & Hyperbola Solver', desc: 'Foci, directrix and asymptotes from focal length or semi-axes \u2014 latus rectum plus eccentricity', category: 'math', tags: ['parabola', 'hyperbola', 'conic', 'foci', 'eccentricity', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'hyperbola 5 3',
+    handler: function (s) { return Transforms.conicSolve(s); } },
+  { slug: 'reuleaux-solver', name: 'Reuleaux Triangle Solver', desc: 'Constant-width curve from one width \u2014 area, perimeter plus inner and outer circles', category: 'math', tags: ['reuleaux', 'width', 'area', 'perimeter', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'reuleaux 10',
+    handler: function (s) { return Transforms.reuleauxSolve(s); } },
+  { slug: 'spiral-solver', name: 'Archimedean Spiral Solver', desc: 'Spiral length plus endpoint from turns and spacing \u2014 exact endpoint at whole turns', category: 'math', tags: ['spiral', 'archimedean', 'length', 'curve', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'spiral 3 2',
+    handler: function (s) { return Transforms.spiralSolve(s); } },
+  { slug: 'log-spiral-solver', name: 'Logarithmic Spiral Solver', desc: 'Log-spiral length, endpoint and per-turn growth \u2014 circle at zero growth', category: 'math', tags: ['spiral', 'logarithmic', 'growth', 'length', 'curve', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'logspiral 2 0.1 2',
+    handler: function (s) { return Transforms.logSpiralSolve(s); } },
+  { slug: 'helix-solver', name: 'Helix Coil Solver', desc: 'Spring and coil math from radius, height and turns \u2014 wire length, pitch plus lead angle', category: 'math', tags: ['helix', 'coil', 'spring', 'length', 'pitch', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'helix 5 10 3',
+    handler: function (s) { return Transforms.helixSolve(s); } },
+  { slug: 'catenary-solver', name: 'Catenary Cable Solver', desc: 'Hanging-cable math from span and sag \u2014 curve parameter, length plus support angle', category: 'math', tags: ['catenary', 'cable', 'chain', 'sag', 'length', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'catenary 10 2',
+    handler: function (s) { return Transforms.catenarySolve(s); } },
+  { slug: 'gear-solver', name: 'Gear Solver', desc: 'Metric spur-gear diameters from teeth and module \u2014 optional mate gives ratio plus centre distance', category: 'math', tags: ['gear', 'spur', 'teeth', 'module', 'pitch', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'gear 20 2',
+    handler: function (s) { return Transforms.gearSolve(s); } },
+  { slug: 'cycloid-solver', name: 'Cycloid Arch Solver', desc: 'Rolling-circle arch from radius \u2014 area, length plus tautochrone descent time', category: 'math', tags: ['cycloid', 'arch', 'brachistochrone', 'tautochrone', 'area', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'cycloid 5',
+    handler: function (s) { return Transforms.cycloidSolve(s); } },
+  { slug: 'belt-solver', name: 'Belt Drive Solver', desc: 'Open-belt length from pulley diameters and centre \u2014 wrap angles plus drive ratio', category: 'math', tags: ['belt', 'pulley', 'drive', 'ratio', 'length', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'belt 10 20 30',
+    handler: function (s) { return Transforms.beltSolve(s); } },
+  { slug: 'superellipse-solver', name: 'Superellipse Solver', desc: 'Squircle and ellipse family from axes and exponent \u2014 gamma area plus Simpson perimeter', category: 'math', tags: ['superellipse', 'squircle', 'ellipse', 'area', 'perimeter', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'superellipse 5 3 4',
+    handler: function (s) { return Transforms.superellipseSolve(s); } },
+  { slug: 'sprocket-solver', name: 'Sprocket Chain Solver', desc: 'Roller-chain drive from pitch, teeth and centre \u2014 diameters, link count plus exact fit', category: 'math', tags: ['sprocket', 'chain', 'roller', 'links', 'ratio', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'sprocket 12.7 17 38 450',
+    handler: function (s) { return Transforms.sprocketSolve(s); } },
+  { slug: 'spring-solver', name: 'Spring Rate Solver', desc: 'Compression-spring rate from wire, coil and coils \u2014 index, Wahl plus solid height', category: 'math', tags: ['spring', 'rate', 'stiffness', 'wahl', 'coil', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'spring 2 20 8',
+    handler: function (s) { return Transforms.springSolve(s); } },
+  { slug: 'cam-solver', name: 'Cam Follower Solver', desc: 'Simple-harmonic cam from base, lift and rise \u2014 motion at any angle plus peaks', category: 'math', tags: ['cam', 'follower', 'lift', 'harmonic', 'motion', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'cam 20 10 90 45',
+    handler: function (s) { return Transforms.camSolve(s); } },
+  { slug: 'bolt-solver', name: 'Bolt Circle Solver', desc: 'Hole coordinates from count and circle dia \u2014 start angle plus chord spacing', category: 'math', tags: ['bolt', 'pcd', 'flange', 'holes', 'cnc', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'bolt 6 80',
+    handler: function (s) { return Transforms.boltSolve(s); } },
+  { slug: 'thread-solver', name: 'Thread Solver', desc: 'Metric ISO thread from size plus optional pitch \u2014 diameters, tap drill plus TPI', category: 'math', tags: ['thread', 'metric', 'tap', 'pitch', 'tpi', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'M10 1.5',
+    handler: function (s) { return Transforms.threadSolve(s); } },
+  { slug: 'keyway-solver', name: 'Keyway Solver', desc: 'Parallel key size from shaft dia per DIN 6885-1 \u2014 key section plus shaft and hub depths', category: 'math', tags: ['keyway', 'key', 'din6885', 'shaft', 'hub', 'cnc', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'keyway 40',
+    handler: function (s) { return Transforms.keywaySolve(s); } },
+  { slug: 'circlip-solver', name: 'Circlip Groove Solver', desc: 'Retaining-ring groove from shaft or bore dia per DIN 471/472 \u2014 ring thickness plus groove dia and width', category: 'math', tags: ['circlip', 'snap', 'retaining', 'din471', 'din472', 'cnc', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'circlip 30',
+    handler: function (s) { return Transforms.circlipSolve(s); } },
+  { slug: 'oring-solver', name: 'O-Ring Groove Solver', desc: 'Static face-seal gland from O-ring CS per Parker \u2014 depth, width, squeeze plus fill', category: 'math', tags: ['oring', 'o-ring', 'gland', 'seal', 'parker', 'cnc', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'oring 2.62',
+    handler: function (s) { return Transforms.oringSolve(s); } },
+  { slug: 'tolerance-fit-solver', name: 'Tolerance Fit Solver', desc: 'ISO 286 limits from size plus zone \u2014 shaft and hole deviations plus clearance for pairs', category: 'math', tags: ['tolerance', 'fit', 'iso286', 'limits', 'clearance', 'cnc', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: '30 H7/g6',
+    handler: function (s) { return Transforms.tolfitSolve(s); } },
+  { slug: 'shim-stack-solver', name: 'Shim Stack Solver', desc: 'Fewest-piece shim stack for a target thickness \u2014 exact combo or nearest under plus over', category: 'math', tags: ['shim', 'stack', 'feeler', 'tolerance', 'cnc', 'geometry'], icon: 'calculator', template: 'transform',
+    placeholder: 'shim 2.35 from 1 0.5 0.2 0.1',
+    handler: function (s) { return Transforms.shimSolve(s); } },
 
-  
+  { slug: 'loan-calculator', name: 'Loan Calculator', desc: 'Fixed-rate loan math — monthly payment, total interest, yearly schedule plus a full monthly CSV', category: 'math', tags: ['loan', 'mortgage', 'amortization', 'interest', 'finance'], icon: 'calculator', template: 'custom' },
   { slug: 'number-to-words', name: 'Number to Words', desc: 'Convert numbers to English word representation', category: 'math', tags: ['number', 'words'], icon: 'calculator', template: 'transform',
     handler: function (s) { return Transforms.numberToWordsText(s); } },
-  
+  { slug: 'roman-converter', name: 'Roman Numeral Converter', desc: 'Convert decimal \u2194 Roman numerals \u2014 auto-detects direction, strict canonical validation, 1\u20133999', category: 'math', tags: ['roman', 'numerals', 'number', 'convert'], icon: 'calculator', template: 'transform',
+    placeholder: '2026',
+    handler: function (s) { return Transforms.romanConvert(s); } },
 
   // ── Code Formatters ─────────────────────────────────────
   { slug: 'xml-formatter', name: 'XML Formatter', desc: 'Beautify XML \u2014 comment/CDATA/doctype aware, text-only elements stay inline, mismatched tags reported', category: 'code', tags: ['xml', 'format', 'beautify'], icon: 'code2', template: 'transform',
@@ -830,7 +1082,7 @@ window.TOOLMANIFEST = [
   { slug: 'qr-code-generator', name: 'QR Code Generator', desc: 'Generate scannable QR codes from text or URLs — WebAssembly core', category: 'generators', tags: ['qr', 'barcode', 'generate'], icon: 'images', template: 'custom', wasm: true },
 
   { slug: 'qr-code-decoder', name: 'QR Code Decoder', desc: 'Scan QR codes from screenshots — drop, paste or upload, decoded in-browser', category: 'generators', tags: ['qr', 'barcode', 'decode', 'scan'], icon: 'scan-eye', template: 'custom' },
-  
+  { slug: 'post-maker', name: 'HTML Post Maker', desc: 'Compose rich HTML posts — text and image blocks, drag & drop, reorder, copy or preview as self-contained HTML', category: 'generators', tags: ['html', 'post', 'builder', 'image'], icon: 'filetype', template: 'custom' },
   { slug: 'lorem-ipsum', name: 'Lorem Ipsum Generator', desc: 'Generate Lorem Ipsum placeholder text', category: 'generators', tags: ['lorem', 'ipsum', 'placeholder'], icon: 'filetype', template: 'generator',
     genHandler: function (opts) { return Transforms.loremIpsumOpts(opts); },
     params: [{ key: 'paragraphs', label: 'Paragraphs', type: 'number', default: '1', min: 1, max: 50 }] },
@@ -878,10 +1130,10 @@ window.TOOLMANIFEST = [
     params: [{ key: 'view', label: 'View', type: 'select', default: 'table', options: [{ value: 'table', label: 'Table' }, { value: 'json', label: 'JSON' }] }, { key: 'sort', label: 'Sort', type: 'select', default: 'slowest', options: [{ value: 'slowest', label: 'Slowest first' }, { value: 'chrono', label: 'Chronological' }] }, { key: 'filter', label: 'Filter URL', type: 'text', default: '' }, { key: 'failedOnly', label: 'Failed only', type: 'checkbox', default: false }] },
 
   // ── Algorithm Visualizers ───────────────────────────────
-  
-  
-  
-  { slug: 'levenshtein-distance', name: 'Levenshtein Distance', desc: 'Edit distance between two texts — substitutions, insertions and deletions counted, similarity scored', category: 'text', tags: ['edit distance', 'diff', 'similarity', 'algorithm'], icon: 'gitbranch', template: 'transform',
+  { slug: 'sorting-visualizer', name: 'Sorting Algorithm Visualizer', desc: 'Watch bubble, quick, merge, insertion, selection sorts in action', category: 'algorithms', tags: ['sorting', 'visualizer', 'algorithm'], icon: 'gitbranch', template: 'custom' },
+  { slug: 'search-visualizer', name: 'Search Algorithm Visualizer', desc: 'Visualize linear and binary search on arrays', category: 'algorithms', tags: ['search', 'visualizer'], icon: 'workflow', template: 'custom' },
+  { slug: 'binary-tree-visualizer', name: 'Binary Tree Visualizer', desc: 'Visualize binary search tree operations', category: 'algorithms', tags: ['binary tree', 'bst', 'visualizer'], icon: 'gitbranch', template: 'custom' },
+  { slug: 'levenshtein-distance', name: 'Levenshtein Distance', desc: 'Edit distance between two texts — substitutions, insertions and deletions counted, similarity scored', category: 'algorithms', tags: ['edit distance', 'diff', 'similarity', 'algorithm'], icon: 'gitbranch', template: 'transform',
     handler: function (s, opts) { return Transforms.levenshteinReport(s, opts); },
     params: [{ key: 'compareTo', label: 'Compare with (text)', type: 'textarea', default: '' }] }
 ];
@@ -897,7 +1149,8 @@ window.TOOLCATEGORIES = [
   { id: 'math', name: 'Math', icon: 'calculator', desc: 'Base converter, stats, units' },
   { id: 'generators', name: 'Generators', icon: 'sparkles', desc: 'UUID, passwords, lorem ipsum' },
   { id: 'converters', name: 'Converters', icon: 'arrowleftright', desc: 'CSV↔JSON, YAML, XML' },
-  { id: 'formatters', name: 'Formatters', icon: 'filetype', desc: 'Dates, numbers, colors' }
+  { id: 'formatters', name: 'Formatters', icon: 'filetype', desc: 'Dates, numbers, colors' },
+  { id: 'algorithms', name: 'Visualizers', icon: 'gitbranch', desc: 'Sorting, search, data structures' }
 ];
 
 window.TOOLS_BY_SLUG = {};
