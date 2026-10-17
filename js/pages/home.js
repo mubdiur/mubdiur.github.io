@@ -90,6 +90,8 @@ function renderHome() {
                 termLine('→', '2cf24dba5fb0a30e', 'dim'),
                 termLine('$', 'uuid v7', ''),
                 termLine('→', '0193c21d74d27e31', 'dim'),
+                termLine('$', 'qr encode "hello"', ''),
+                termLine('→', '21x21 matrix - ok', 'dim'),
                 App.el('div', { class: 'term-chips' },
                   App.el('span', { class: 'term-chip', text: 'JSON' }),
                   App.el('span', { class: 'term-chip', text: 'QR' }),
